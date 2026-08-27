@@ -1,0 +1,21 @@
+[workspace]
+name = "ooxml-graph-paper"
+channels = ["conda-forge"]
+platforms = ["win-64"]
+
+[dependencies]
+python = ">=3.11,<3.13"
+pytest = ">=8,<9"
+
+[pypi-dependencies]
+meridian-docparse = { path = "../repository/packages/docparse", editable = true }
+meridian-docs-mcp = { path = "../repository/extensions/meridian-docs", editable = true }
+# PAPER-14: MIT-licensed, pure-Python Category A converter baseline (see
+# docs/converter-backend-acceptance-matrix-v0.md) for the converter bakeoff demonstration.
+# Added here (this paper's own isolated pixi env) rather than the parent monorepo's shared
+# pixi.toml/pixi.lock to avoid touching a lockfile other concurrent sessions are actively using.
+python-docx = ">=1.2,<2"
+
+[tasks]
+test = "python -m pytest"
+

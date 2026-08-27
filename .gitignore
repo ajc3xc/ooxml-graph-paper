@@ -1,0 +1,12 @@
+.pixi/
+.pytest_cache/
+__pycache__/
+*.py[cod]
+.venv/
+configs/*.local.*
+data/
+runs/
+renders/
+model-cache/
+.meridian-outputs-cache/
+*.log
