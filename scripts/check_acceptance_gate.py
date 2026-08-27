@@ -70,7 +70,7 @@ def capture_parent_snapshot() -> dict:
         )
         return proc.stdout
 
-    status_bytes = git_bytes("status", "--porcelain=v1", "-z")
+    status_bytes = git_bytes("status", "--porcelain=v1", "-z", "--untracked-files=all")
     diff_bytes = git_bytes("diff", "--binary", "HEAD")
     head = git_bytes("rev-parse", "HEAD").decode("ascii", errors="strict").strip()
     status_entries = [
@@ -97,6 +97,12 @@ def parent_snapshot_equal(before: dict, after: dict) -> bool:
     """Compare the immutable identity fields, excluding human-facing status text."""
     keys = ("head", "dirty", "status_sha256", "diff_sha256", "product_file_sha256")
     return all(before.get(key) == after.get(key) for key in keys)
+
+
+def changed_snapshot_fields(before: dict, after: dict) -> list[str]:
+    """Return the fingerprint fields that differ, for actionable receipts."""
+    keys = ("head", "dirty", "status_sha256", "diff_sha256", "product_file_sha256")
+    return [key for key in keys if before.get(key) != after.get(key)]
 
 
 def check_semantic_omml_hardening() -> list[dict]:
@@ -232,11 +238,12 @@ def check_parent_repo_worktree_clean(
     """
     current = capture_parent_snapshot()
     stable = parent_snapshot_equal(initial_snapshot, current)
+    changed = changed_snapshot_fields(initial_snapshot, current)
     if not current["dirty"]:
         passed = stable
         detail = (
             f"parent checkout is clean and stable at HEAD {current['head']}"
-            if passed else "parent checkout changed during gate execution"
+            if passed else f"parent checkout changed during gate execution: {changed}"
         )
         name = "parent_repo_worktree_clean"
     elif allow_dirty_parent:
@@ -245,7 +252,7 @@ def check_parent_repo_worktree_clean(
             f"dirty-parent snapshot explicitly allowed; {len(current['status_entries'])} "
             f"entries pinned at HEAD {current['head']} with diff_sha256="
             f"{current['diff_sha256']}"
-            if passed else "dirty parent snapshot changed during gate execution"
+            if passed else f"dirty parent snapshot changed during gate execution: {changed}"
         )
         name = "parent_repo_dirty_snapshot_stable"
     else:
@@ -269,7 +276,8 @@ def check_parent_snapshot_unchanged(initial_snapshot: dict) -> dict:
         (
             "initial and final parent checkout fingerprints match"
             if passed else
-            "parent checkout fingerprint changed during gate execution; discard run"
+            f"parent checkout fingerprint changed during gate execution: "
+            f"{changed_snapshot_fields(initial_snapshot, final)}; discard run"
         ),
     )
 
@@ -341,13 +349,34 @@ def main() -> int:
     args = _parse_args()
     initial_parent_snapshot = capture_parent_snapshot()
     checks: list[dict] = []
-    checks.extend(check_semantic_omml_hardening())
-    checks.append(check_render_capability())
-    checks.append(check_package_integrity())
-    checks.append(check_parent_repo_worktree_clean(initial_parent_snapshot, args.allow_dirty_parent))
-    checks.append(check_corpus_provenance())
-    checks.append(check_untracked_artifacts())
-    checks.append(check_word_authority_gate())
+    parent_check = check_parent_repo_worktree_clean(initial_parent_snapshot, args.allow_dirty_parent)
+    checks.append(parent_check)
+
+    # A normal gate invocation must fail before rendering or running semantic
+    # checks when the shared parent is dirty.  The explicit dirty mode is the
+    # only route that permits expensive checks against that checkout.
+    preflight_blocked = (
+        initial_parent_snapshot["dirty"] and not args.allow_dirty_parent
+    ) or not parent_check["passed"]
+    skipped_checks: list[str] = []
+    if preflight_blocked:
+        skipped_checks.extend([
+            "semantic_omml_hardening",
+            "render_backend_available",
+            "package_integrity_clean",
+            "gold_corpus_provenance_exists",
+            "no_untracked_product_code",
+            "paper8_human_authority_approved",
+        ])
+    else:
+        checks.extend(check_semantic_omml_hardening())
+        checks.append(check_render_capability())
+        checks.append(check_package_integrity())
+        checks.append(check_corpus_provenance())
+        checks.append(check_untracked_artifacts())
+        checks.append(check_word_authority_gate())
+
+    final_parent_snapshot = capture_parent_snapshot()
     checks.append(check_parent_snapshot_unchanged(initial_parent_snapshot))
 
     blocking_failures = [c for c in checks if c["blocking"] and not c["passed"]]
@@ -365,11 +394,17 @@ def main() -> int:
         "checks": checks,
         "blocking_failures": [c["name"] for c in blocking_failures],
         "non_blocking_findings": [c["name"] for c in non_blocking_findings],
+        "skipped_checks": skipped_checks,
         "execution_contract": {
             "parent_checkout_mode": (
                 "dirty_snapshot_allowed" if args.allow_dirty_parent else "clean_required"
             ),
             "parent_snapshot": initial_parent_snapshot,
+            "final_parent_snapshot": final_parent_snapshot,
+            "snapshot_changed_fields": changed_snapshot_fields(
+                initial_parent_snapshot, final_parent_snapshot,
+            ),
+            "requires_external_checkout_freeze": True,
             "product_snapshot_paths": [p.as_posix() for p in PRODUCT_SNAPSHOT_PATHS],
         },
     }

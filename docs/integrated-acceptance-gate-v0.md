@@ -27,7 +27,11 @@ pixi run python scripts/check_acceptance_gate.py --allow-dirty-parent
 This does not make the parent checkout appear clean. It records the parent
 `HEAD`, complete porcelain status, binary diff digest, and exact product-file
 hashes in the report, then fails closed if that fingerprint changes during the
-run. The default remains clean-checkout-required for a final benchmark.
+run. Untracked files are enumerated individually. The default rejects a dirty
+parent before the expensive semantic/render checks; it remains
+clean-checkout-required for a final benchmark. The operator must freeze active
+writers for the duration of a dirty-snapshot run; fingerprints detect a state
+change between captures but cannot prevent a transient edit that is reverted.
 
 It writes a timestamped JSON report to `E:\MeridianData\ooxml-graph-paper\manifests\` and
 prints a human-readable summary. Exit code is `0` only when every *blocking* check passes.
