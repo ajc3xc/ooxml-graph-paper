@@ -1,7 +1,8 @@
 # Executor reproducibility contract v0
 
-Status: investigation only. No implementation changed as part of producing this
-document. All findings below were directly observed on 2026-08-26 (commands run,
+Status: investigation plus paper-harness update. The paper harness is now a
+separate local Git repository; no parent product code was changed by this update.
+All historical findings below were directly observed on 2026-08-26 (commands run,
 outputs read, files listed) rather than inferred from prior notes; where a prior
 session's claim is repeated, it is marked as re-verified or flagged as a
 discrepancy. This document extends `runtime-capability-contract-v0.md` and
@@ -12,13 +13,19 @@ discrepancy. This document extends `runtime-capability-contract-v0.md` and
 Two separate root directories are in play:
 
 - `C:\Users\13144\Documents\Meridian\ooxml-graph-paper` — the paper subproject.
-  **Not a git repository.** `git status` run from this directory fails with
-  `fatal: not a git repository (or any of the parent directories): .git`. There
-  is no `.git` anywhere above it either — it is a plain folder living next to
-  the parent repo, tracked (if at all) only by whatever backs up `C:\`.
+  **A separate local Git repository on branch `dev`**, containing the paper
+  harness, scripts, tests, and methodology. Its data and render roots remain
+  outside Git on `E:\MeridianData\ooxml-graph-paper`.
 - `C:\Users\13144\Documents\Meridian\repository` — the parent repo. A real git
-  worktree on branch `dev`, `HEAD=c2b0d03b0c136bdf102850cb8787adac0861da98`,
-  tracking `origin/dev` and up to date with it.
+  worktree on branch `dev`; it owns the Meridian Docs implementation and may
+  remain dirty during active development.
+
+The paper does not duplicate or fork the Meridian Docs implementation. For an
+interim run, `scripts/check_acceptance_gate.py --allow-dirty-parent` pins the
+shared parent checkout's HEAD, complete Git status/diff, and exact product-file
+hashes. A change to any of those fingerprints fails the gate. For publication,
+the same implementation should be committed on a dedicated parent branch and
+benchmarked from a clean worktree at that revision.
 
 The paper subproject's `pixi.toml` declares one task, `test = "python -m
 pytest"`, with `src/` and `tests/` both present as directories but containing

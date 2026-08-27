@@ -11,7 +11,10 @@ Writes: E:\\MeridianData\\ooxml-graph-paper\\manifests\\acceptance-gate-<UTC-ISO
 from __future__ import annotations
 
 import datetime
+import argparse
+import hashlib
 import json
+import os
 import subprocess
 import sys
 import zipfile
@@ -28,11 +31,72 @@ REPO_ROOT = Path(r"C:\Users\13144\Documents\Meridian\repository")
 PAPER_ROOT = Path(r"C:\Users\13144\Documents\Meridian\ooxml-graph-paper")
 DATA_ROOT = Path(r"E:\MeridianData\ooxml-graph-paper")
 
+# The paper may execute against an intentionally dirty parent checkout while
+# Meridian Docs hardening is still being developed.  These are the product
+# files whose exact bytes must be pinned for a reproducible dirty-snapshot run.
+# The full Git status/diff is also fingerprinted, so an unrelated concurrent
+# edit still invalidates the run rather than being silently ignored.
+PRODUCT_SNAPSHOT_PATHS = (
+    Path("extensions/meridian-docs/meridian_docs/docs_intel.py"),
+    Path("extensions/meridian-docs/meridian_docs/ooxml_integrity.py"),
+    Path("extensions/meridian-docs/meridian_docs/render_gate.py"),
+    Path("extensions/meridian-docs/meridian_docs/server.py"),
+)
+
 sys.path.insert(0, str(REPO_ROOT / "extensions" / "meridian-docs"))
 
 
 def _check(name: str, category: str, passed: bool, detail: str, blocking: bool = True) -> dict:
     return {"name": name, "category": category, "passed": passed, "blocking": blocking, "detail": detail}
+
+
+def _sha256(payload: bytes) -> str:
+    return hashlib.sha256(payload).hexdigest()
+
+
+def capture_parent_snapshot() -> dict:
+    """Capture a byte-stable identity for the shared parent checkout.
+
+    This deliberately does not require a clean worktree.  A dirty run is
+    reproducible only if HEAD, the complete porcelain state, the complete
+    binary diff, and the product files used by the harness are unchanged from
+    start to finish.  The diff itself is never embedded in the report; only
+    its digest and status lines are retained.
+    """
+    def git_bytes(*args: str) -> bytes:
+        proc = subprocess.run(
+            ["git", *args], cwd=REPO_ROOT, capture_output=True,
+            timeout=60, check=True,
+        )
+        return proc.stdout
+
+    status_bytes = git_bytes("status", "--porcelain=v1", "-z")
+    diff_bytes = git_bytes("diff", "--binary", "HEAD")
+    head = git_bytes("rev-parse", "HEAD").decode("ascii", errors="strict").strip()
+    status_entries = [
+        entry.decode("utf-8", errors="replace")
+        for entry in status_bytes.split(b"\0") if entry
+    ]
+    product_hashes = {}
+    for relative in PRODUCT_SNAPSHOT_PATHS:
+        path = REPO_ROOT / relative
+        product_hashes[relative.as_posix()] = (
+            _sha256(path.read_bytes()) if path.is_file() else None
+        )
+    return {
+        "head": head,
+        "dirty": bool(status_entries),
+        "status_entries": status_entries,
+        "status_sha256": _sha256(status_bytes),
+        "diff_sha256": _sha256(diff_bytes),
+        "product_file_sha256": product_hashes,
+    }
+
+
+def parent_snapshot_equal(before: dict, after: dict) -> bool:
+    """Compare the immutable identity fields, excluding human-facing status text."""
+    keys = ("head", "dirty", "status_sha256", "diff_sha256", "product_file_sha256")
+    return all(before.get(key) == after.get(key) for key in keys)
 
 
 def check_semantic_omml_hardening() -> list[dict]:
@@ -157,17 +221,56 @@ def check_package_integrity() -> dict:
     )
 
 
-def check_parent_repo_worktree_clean() -> dict:
-    """Dirty/unclaimed worktree."""
-    proc = subprocess.run(
-        ["git", "status", "--porcelain"], cwd=REPO_ROOT,
-        capture_output=True, text=True, timeout=30,
-    )
-    lines = [ln for ln in proc.stdout.splitlines() if ln.strip()]
+def check_parent_repo_worktree_clean(
+    initial_snapshot: dict, allow_dirty_parent: bool,
+) -> dict:
+    """Require a clean root, or an explicitly enabled stable dirty snapshot.
+
+    The dirty mode is intentionally not reported as ``parent_repo_worktree_clean``
+    passing.  It records a separate non-clean execution contract and fails if
+    any parent state changes while this gate is running.
+    """
+    current = capture_parent_snapshot()
+    stable = parent_snapshot_equal(initial_snapshot, current)
+    if not current["dirty"]:
+        passed = stable
+        detail = (
+            f"parent checkout is clean and stable at HEAD {current['head']}"
+            if passed else "parent checkout changed during gate execution"
+        )
+        name = "parent_repo_worktree_clean"
+    elif allow_dirty_parent:
+        passed = stable
+        detail = (
+            f"dirty-parent snapshot explicitly allowed; {len(current['status_entries'])} "
+            f"entries pinned at HEAD {current['head']} with diff_sha256="
+            f"{current['diff_sha256']}"
+            if passed else "dirty parent snapshot changed during gate execution"
+        )
+        name = "parent_repo_dirty_snapshot_stable"
+    else:
+        passed = False
+        detail = (
+            f"{len(current['status_entries'])} porcelain entries in {REPO_ROOT}; "
+            "rerun with --allow-dirty-parent only when the shared checkout is frozen "
+            "and the resulting snapshot is recorded"
+        )
+        name = "parent_repo_worktree_clean"
+    return _check(name, "dirty_unclaimed_worktree", passed, detail)
+
+
+def check_parent_snapshot_unchanged(initial_snapshot: dict) -> dict:
+    """Final fail-closed guard against concurrent edits after the main check."""
+    final = capture_parent_snapshot()
+    passed = parent_snapshot_equal(initial_snapshot, final)
     return _check(
-        "parent_repo_worktree_clean", "dirty_unclaimed_worktree",
-        passed=len(lines) == 0,
-        detail=f"{len(lines)} porcelain entries in {REPO_ROOT} (git status --porcelain)",
+        "parent_snapshot_unchanged_throughout_gate", "reproducibility",
+        passed,
+        (
+            "initial and final parent checkout fingerprints match"
+            if passed else
+            "parent checkout fingerprint changed during gate execution; discard run"
+        ),
     )
 
 
@@ -221,15 +324,31 @@ def check_word_authority_gate() -> dict:
     )
 
 
+def _parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--allow-dirty-parent", action="store_true",
+        default=os.environ.get("MERIDIAN_ALLOW_DIRTY_PARENT") == "1",
+        help=(
+            "run against a dirty parent checkout only if its complete Git and "
+            "product-file fingerprint remains unchanged; never pretends it is clean"
+        ),
+    )
+    return parser.parse_args()
+
+
 def main() -> int:
+    args = _parse_args()
+    initial_parent_snapshot = capture_parent_snapshot()
     checks: list[dict] = []
     checks.extend(check_semantic_omml_hardening())
     checks.append(check_render_capability())
     checks.append(check_package_integrity())
-    checks.append(check_parent_repo_worktree_clean())
+    checks.append(check_parent_repo_worktree_clean(initial_parent_snapshot, args.allow_dirty_parent))
     checks.append(check_corpus_provenance())
     checks.append(check_untracked_artifacts())
     checks.append(check_word_authority_gate())
+    checks.append(check_parent_snapshot_unchanged(initial_parent_snapshot))
 
     blocking_failures = [c for c in checks if c["blocking"] and not c["passed"]]
     non_blocking_findings = [c for c in checks if not c["blocking"] and not c["passed"]]
@@ -246,6 +365,13 @@ def main() -> int:
         "checks": checks,
         "blocking_failures": [c["name"] for c in blocking_failures],
         "non_blocking_findings": [c["name"] for c in non_blocking_findings],
+        "execution_contract": {
+            "parent_checkout_mode": (
+                "dirty_snapshot_allowed" if args.allow_dirty_parent else "clean_required"
+            ),
+            "parent_snapshot": initial_parent_snapshot,
+            "product_snapshot_paths": [p.as_posix() for p in PRODUCT_SNAPSHOT_PATHS],
+        },
     }
 
     DATA_ROOT.joinpath("manifests").mkdir(parents=True, exist_ok=True)

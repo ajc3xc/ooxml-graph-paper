@@ -17,6 +17,18 @@ prose findings. Run it with:
 pixi run python scripts/check_acceptance_gate.py
 ```
 
+When the parent Meridian checkout is intentionally shared and dirty during
+development, use:
+
+```
+pixi run python scripts/check_acceptance_gate.py --allow-dirty-parent
+```
+
+This does not make the parent checkout appear clean. It records the parent
+`HEAD`, complete porcelain status, binary diff digest, and exact product-file
+hashes in the report, then fails closed if that fingerprint changes during the
+run. The default remains clean-checkout-required for a final benchmark.
+
 It writes a timestamped JSON report to `E:\MeridianData\ooxml-graph-paper\manifests\` and
 prints a human-readable summary. Exit code is `0` only when every *blocking* check passes.
 
@@ -29,7 +41,7 @@ prints a human-readable summary. Exit code is `0` only when every *blocking* che
 | Empty operands | same as semantic-OMML-loss row above (PAPER-13's central fix) | Blocking |
 | Renderer unavailable | `render_gate.check_render_capability` run for real against a fresh synthetic fixture | Blocking |
 | ID/reference/relationship errors | `ooxml_integrity.validate_docx_package` run for real against the same fixture | Blocking |
-| Dirty/unclaimed worktree | live `git status --porcelain` in the parent repo | Blocking |
+| Dirty/unclaimed worktree | clean parent by default; explicit dirty-snapshot mode records and rechecks the complete parent fingerprint | Blocking |
 | Missing corpus provenance | does `E:\MeridianData\ooxml-graph-paper\gold\` exist and hold anything | Blocking |
 | Untracked artifacts | live `git status --porcelain` scoped to `extensions/meridian-docs/meridian_docs` | Blocking |
 | Formal PAPER-8 human Word authority | **not automatable from this script** (no sprint-board query dependency by design, so the gate stays runnable offline) -- defaults to NOT satisfied; whoever runs this must confirm PAPER-8's live status and treat that field as authoritative, not this script's default | Blocking |
@@ -75,3 +87,14 @@ has not been granted. **PAPER-15 (the benchmark) must not run until all three cl
 
 This gate is re-runnable at zero cost whenever any of those three conditions changes --
 that is the point of making it a script instead of a one-time manual checklist.
+
+## Repository boundary
+
+The paper harness is its own local Git repository at
+`C:\Users\13144\Documents\Meridian\ooxml-graph-paper`, with code, tests, and
+methodology committed there. The Meridian Docs implementation remains owned by
+the parent Meridian repository. Benchmark inputs, renders, receipts, and ZIP
+archives remain on `E:\MeridianData\ooxml-graph-paper` and are not synced into
+either repository. A clean parent worktree is preferred for publication; the
+dirty-snapshot mode exists to keep development moving while preserving an
+auditable product identity.
