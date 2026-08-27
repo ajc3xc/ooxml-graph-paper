@@ -593,3 +593,39 @@ established to be safe and correctly wired (Section 2's read of the
 exit-code mapping), but actually running it end-to-end was out of scope for
 an investigation-only item and was left for whichever future session next
 needs a real pass/fail gate.
+
+## PAPER-26 update (2026-08-27T16:40Z): a pinned, isolated benchmark checkout now exists
+
+Created via `git worktree add` from the shared parent repo at
+`.claude/worktrees/3698394d` (branch `worktree/90fd7a16`), pinned to base commit
+`7278a44fa455bb4d5c51217350536095b9f07e2d`. This is purely additive -- the shared
+checkout other concurrent sessions are using was never touched, reset, or cleaned.
+
+The 4 files `scripts/check_acceptance_gate.py` already pins byte-identity for
+(`PRODUCT_SNAPSHOT_PATHS`: `docs_intel.py`, `ooxml_integrity.py`, `render_gate.py`,
+`server.py`) were then overlaid into the worktree with their current, uncommitted,
+intentionally-hardened content from the shared checkout -- confirmed via SHA-256 that
+all 4 genuinely differ from the base commit (real in-flight hardening exists). Full,
+human-readable `git diff HEAD` patches for each file are retained at
+`E:\MeridianData\ooxml-graph-paper\manifests\pinned-worktree-patches\` for provenance
+review. Everything else in the worktree is byte-identical to the base commit.
+
+**Verification, and an honest limitation found while verifying it:** importing
+`meridian_docs.docs_intel` from the isolated worktree and running the same semantic
+checks `check_acceptance_gate.py` runs against the live tree (empty-fraction rejection,
+correct-fraction acceptance, `\sum` using true `<m:nary>`, `ooxml_integrity` import)
+all pass identically -- the pinning is functionally sound for what PAPER-15 actually
+calls into. However, the full parent pytest suite does **not** pass unmodified against
+this worktree: 2 failures
+(`test_validator_rejects_malformed_fraction_and_flattened_fallback`,
+`test_validate_reports_hidden_bold_heading_like_case_drift`) occur because those
+tests' *expectations* are themselves part of other uncommitted, in-flight work in the
+shared checkout's test files, which are not in `PRODUCT_SNAPSHOT_PATHS` and were
+therefore not pinned. This does not affect PAPER-15 (which calls the pinned functions
+directly, verified above, not pytest), but this worktree is **not** a general-purpose
+substitute for the shared checkout if a future session wants to run the full test
+suite reproducibly too -- that would need the relevant test files pinned alongside
+their product files, a slightly larger scope than what `capture_parent_snapshot()`
+itself was designed to check.
+
+Full machine-readable record: `E:\MeridianData\ooxml-graph-paper\manifests\pinned-worktree-manifest.json`.

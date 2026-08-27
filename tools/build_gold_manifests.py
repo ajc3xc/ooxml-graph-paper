@@ -132,6 +132,53 @@ TIER2_CANDIDATES = [
      "Bare product-comparison template, every field an unfilled label. No PII."),
     ("officeval_088", "统帅三桶懒人洗衣机产品说明文档.docx", "tier2-omegause-088-product-spec-2",
      "Pure product spec/marketing copy; no person referenced at all."),
+    # PAPER-25 second batch (32 remaining candidates independently reviewed; 23 promoted here, 9 excluded below).
+    ("officeval_002", "城市社区微气候韧性评价与公共空间更新研究_.docx", "tier2-omegause-002-thesis",
+     "Master's thesis; author/advisor names appear only in standard thesis-title-page convention, no ID/contact attached."),
+    ("officeval_003", "部门协调会记录 (1).docx", "tier2-omegause-003-meeting-minutes",
+     "Meeting minutes with many staff names in business roles, but no phone/ID/contact number attached to any of them."),
+    ("officeval_008", "文献翻译译文.docx", "tier2-omegause-008-lit-review",
+     "Academic literature review; text explicitly states it uses fictional material/district names to avoid real project data."),
+    ("officeval_010", "技术路线图.docx", "tier2-omegause-010-roadmap-diagram",
+     "Zero text runs; body is one embedded generic flowchart image with an explicit no-real-data disclaimer."),
+    ("officeval_012", "东岳技术学院高等教育自学考试毕业论文格式.docx", "tier2-omegause-012-thesis-template",
+     "Formatting template; personal-info fields explicitly marked 'to be filled in by the candidate' and left blank."),
+    ("officeval_013", "基于Spark的园区能耗分析与可视化系统论文.docx", "tier2-omegause-013-survey-paper",
+     "Academic survey paper; explicitly states it avoids real project data via fictional names/generalized metrics; no ID/phone found."),
+    ("officeval_014", "冻结肩多模态康复研究.docx", "tier2-omegause-014-thesis-1",
+     "Master's thesis; author/advisor in standard citation convention only, patient data explicitly de-identified/coded in the text itself."),
+    ("officeval_014", "毕业论文要求_星途理工大学.docx", "tier2-omegause-014-formatting-notice",
+     "Generic institutional formatting notice; only names are illustrative citation examples."),
+    ("officeval_016", "澄禾社区生鲜服务满意度研究.docx", "tier2-omegause-016-thesis-2",
+     "Thesis with all identity fields left as blank template placeholders; body explicitly states its data is fictional/constructed."),
+    ("officeval_019", "初中化学模拟试题.docx", "tier2-omegause-019-chem-exam",
+     "Generic exam; name/class/exam-number fields are instructions to fill in, nothing actually filled."),
+    ("officeval_019", "模板.docx", "tier2-omegause-019-english-exam",
+     "Generic English exam; instructs students not to use real names/school names; none present."),
+    ("officeval_020", "《浅赏叙事古文，读懂处世道理》.docx", "tier2-omegause-020-lesson-plan",
+     "Generic lesson plan/case study; no individual named at all."),
+    ("officeval_022", "企业经营情况说明书.docx", "tier2-omegause-022-anomaly-statement",
+     "Fictional business anomaly narrative; the one contact field present is already partially masked (186****2741), not a complete number."),
+    ("officeval_024", "城市社区绿地可达性与居民步行行为研究.docx", "tier2-omegause-024-thesis",
+     "Thesis; signature fields explicitly blank, text states names/addresses were deliberately not collected during the underlying survey."),
+    ("officeval_024", "论文模版.docx", "tier2-omegause-024-thesis-template",
+     "Thesis template; every identity field is an explicit placeholder (AAA/XXX/WWO*000***), not a real filled-in value."),
+    ("officeval_025", "青岭山居旅居营造计划.docx", "tier2-omegause-025-business-plan",
+     "Student business-plan proposal; team names appear with no ID/phone/contact attached, analogous to a standard byline."),
+    ("officeval_033", "家居零售价目册.docx", "tier2-omegause-033-price-catalog",
+     "Pure product catalog; no person referenced at all."),
+    ("officeval_035", "002 毕业设计外文翻译封面及格式要求（普通班）.docx", "tier2-omegause-035-cover-template",
+     "Cover-page template; name field holds only a generic placeholder ('王大一'), ID/advisor fields left blank."),
+    ("officeval_036", "public_ready_statement.docx", "tier2-omegause-036-bank-statement-template",
+     "Fictional bank statement template; no person named, only a fictional company name."),
+    ("officeval_080", "要求.docx", "tier2-omegause-080-slide-instructions",
+     "Pure task-instruction text for editing a slide deck; no personal content."),
+    ("officeval_088", "小天鹅12KG滚筒洗衣机产品说明文档.docx", "tier2-omegause-088-product-spec-3",
+     "Pure product spec/marketing copy; no person referenced at all."),
+    ("officeval_088", "米家8KG滚筒洗衣机产品说明文档.docx", "tier2-omegause-088-product-spec-4",
+     "Pure product spec/marketing copy; no person referenced at all."),
+    ("officeval_088", "美的8KG波轮洗衣机产品说明文档.docx", "tier2-omegause-088-product-spec-5",
+     "Pure product spec/marketing copy; no person referenced at all."),
 ]
 
 TIER2_EXCLUDED = [
@@ -158,7 +205,67 @@ TIER2_EXCLUDED = [
     ("officeval_030", "V2成果说明书_A.docx",
      "Filled graduation-design cover page: student full name ('林若航') paired directly with a specific "
      "student ID number ('24A0318426'), plus a named advisor ('周雁宁')."),
+    # PAPER-25 second batch: 9 new exclusions, ALL confirmed distinct from the 顾启朝 dossier case study --
+    # a separate, very common pattern in this dataset: real-format student name + student-ID pairs filled
+    # into thesis/report cover pages (not blank template fields).
+    ("officeval_005", "综合设计指导书.docx",
+     "Embedded sample report cover page fills in 3 student names each paired 1:1 with a student ID number."),
+    ("officeval_007", "幼儿园自然探究活动课程设计.docx",
+     "Thesis cover page: filled name ('林诗'/'林诗学') paired with student ID 'B20251782'."),
+    ("officeval_007", "齐鲁启明继续教育学院论文模板.docx",
+     "Template's sample cover page filled (not blank) with name '苏启西' + student ID 'B20231399'."),
+    ("officeval_011", "课程资料.docx",
+     "Template's sample cover page filled with name '苏启西' + student ID 'B20231399' (same pair as officeval_007's template, likely a shared example)."),
+    ("officeval_012", "城市社区雨水花园参与式维护机制研究.docx",
+     "Thesis cover page: filled name '林诗' + student ID 'B20251782' (same pair as officeval_007's thesis)."),
+    ("officeval_018", "公共书房运营规划书.docx",
+     "Thesis-proposal cover page: filled name '许芷涵' + 10-digit student ID '2360140827'."),
+    ("officeval_021", "毕业设计论文.docx",
+     "Same cover page as officeval_018: filled name '许芷涵' + student ID '2360140827' (duplicate case, different filename)."),
+    ("officeval_021", "毕业设计论文开题报告 (模版).docx",
+     "Same name+ID pair again: '许芷涵' + '2360140827', in an opening-report template."),
+    ("officeval_023", "董事會數位素養對企業低碳轉型績效的影響.docx",
+     "Thesis title page: filled name '林澄韵' + student ID 'M260742018555', recurring in acknowledgments."),
 ]
+
+
+TIER2_DOCX_BENCHMARK = [
+    # (filename under raw/docx-benchmark/series-seed, doc_id, review note)
+    ("investment-agreement.docx", "tier2-docxbenchmark-investment-agreement-blank",
+     "Series Seed investment agreement, [COMPANY NAME] placeholder throughout -- pure blank legal template, CC0-1.0."),
+    ("investment-agreement-executed.docx", "tier2-docxbenchmark-investment-agreement-executed",
+     "Same template 'executed' with the standard legal-tech demo filler 'Stark Industries, Inc.' (fictional, "
+     "not a real party) -- no real signatory names found in spot-check. CC0-1.0."),
+]
+
+
+def _stage_tier2_docxcorpus() -> list[tuple[Path, str, str]]:
+    """Data-driven (not hardcoded like the two lists above -- 67 entries is too many to
+    hand-maintain as tuples): reads the real review verdicts written by the PAPER-25
+    docx-corpus review workflow and stages only the ones marked promote."""
+    review_path = Path(r"E:\MeridianData\ooxml-graph-paper\raw\docx-corpus\review_results.json")
+    if not review_path.is_file():
+        return []
+    reviews = json.loads(review_path.read_text(encoding="utf-8"))
+    src_dir = Path(r"E:\MeridianData\ooxml-graph-paper\raw\docx-corpus\files")
+    staged_dir = GOLD_ROOT / "tier2"
+    staged_dir.mkdir(parents=True, exist_ok=True)
+    out = []
+    review_by_id = {}
+    for r in reviews:
+        if r.get("verdict") != "promote":
+            continue
+        doc_id = f"tier2-docxcorpus-{r['id'][:16]}"
+        src = src_dir / f"{r['id']}.docx"
+        if not src.is_file():
+            continue
+        dst = staged_dir / f"{doc_id}.docx"
+        _shutil.copy2(src, dst)
+        out.append((dst, doc_id, "tier2"))
+        review_by_id[doc_id] = r
+    review_summary_path = GOLD_ROOT / "manifests" / "_docxcorpus_review.json"
+    review_summary_path.write_text(json.dumps(review_by_id, indent=2, ensure_ascii=False), encoding="utf-8")
+    return out
 
 
 def _stage_tier2() -> list[tuple[Path, str, str]]:
@@ -170,6 +277,12 @@ def _stage_tier2() -> list[tuple[Path, str, str]]:
         dst = staged_dir / f"{doc_id}.docx"
         _shutil.copy2(src, dst)
         out.append((dst, doc_id, "tier2"))
+    for fname, doc_id, _note in TIER2_DOCX_BENCHMARK:
+        src = Path(r"E:\MeridianData\ooxml-graph-paper\raw\docx-benchmark\series-seed") / fname
+        dst = staged_dir / f"{doc_id}.docx"
+        _shutil.copy2(src, dst)
+        out.append((dst, doc_id, "tier2"))
+    out.extend(_stage_tier2_docxcorpus())
     return out
 
 

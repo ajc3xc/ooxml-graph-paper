@@ -15,6 +15,10 @@ meridian-docs-mcp = { path = "../repository/extensions/meridian-docs", editable 
 # Added here (this paper's own isolated pixi env) rather than the parent monorepo's shared
 # pixi.toml/pixi.lock to avoid touching a lockfile other concurrent sessions are actively using.
 python-docx = ">=1.2,<2"
+# PAPER-25: read docx-corpus's HF metadata parquet (document-type/topic classification,
+# content hashes, CDN URLs) for stratified sampling. Isolated here for the same reason as
+# python-docx above.
+pyarrow = ">=17,<19"
 
 [tasks]
 test = "python -m pytest"

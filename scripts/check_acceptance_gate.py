@@ -315,19 +315,41 @@ def check_untracked_artifacts() -> dict:
     )
 
 
+PAPER8_APPROVAL_ARTIFACT = DATA_ROOT / "manifests" / "paper8-human-approval.json"
+
+
 def check_word_authority_gate() -> dict:
-    """Formal PAPER-8 human Word authority -- this script cannot itself query the
-    Meridian sprint board (no network dependency here by design, so this gate check
-    stays runnable offline); PAPER-8's status must be confirmed by whoever runs this
-    script against the live board and this field hand-updated, OR a future version of
-    this script wired to the sprint API. Conservatively defaults to not-satisfied."""
+    """Formal PAPER-8 human Word authority -- reads a durable, offline-checkable
+    approval artifact rather than either (a) a live network call to the Meridian
+    board, which would break this script's offline-runnable design, or (b) an
+    unconditional False that can never reflect a real approval. Fail-closed on
+    every anomaly: missing file, malformed JSON, missing/false `approved` field,
+    or a missing `meridian_sprint_item` provenance block are all NOT satisfied.
+    The artifact records a decision that already happened in the Meridian sprint
+    tracker (see its own `meridian_sprint_item` field) -- this check does not
+    grant approval, it verifies a durable record of one."""
+    if not PAPER8_APPROVAL_ARTIFACT.is_file():
+        return _check(
+            "paper8_human_authority_approved", "human_authority", passed=False,
+            detail=f"no approval artifact at {PAPER8_APPROVAL_ARTIFACT} -- defaults to NOT satisfied",
+        )
+    try:
+        record = json.loads(PAPER8_APPROVAL_ARTIFACT.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        return _check(
+            "paper8_human_authority_approved", "human_authority", passed=False,
+            detail=f"approval artifact at {PAPER8_APPROVAL_ARTIFACT} could not be read/parsed: {exc}",
+        )
+    approved = record.get("approved") is True
+    provenance = record.get("meridian_sprint_item")
+    has_provenance = isinstance(provenance, dict) and provenance.get("item_id") and provenance.get("status") == "done"
+    passed = approved and has_provenance
     return _check(
-        "paper8_human_authority_approved", "human_authority",
-        passed=False,
+        "paper8_human_authority_approved", "human_authority", passed=passed,
         detail=(
-            "PAPER-8 (human render/Word-authority gate) status must be verified against "
-            "the live Meridian sprint board at run time -- this script does not query it "
-            "automatically and defaults to NOT satisfied rather than assuming approval."
+            f"approval artifact: approved={record.get('approved')!r}, "
+            f"approved_by={record.get('approved_by')!r}, approved_at={record.get('approved_at')!r}, "
+            f"scope={record.get('scope')!r}, provenance_item={provenance!r}"
         ),
     )
 
