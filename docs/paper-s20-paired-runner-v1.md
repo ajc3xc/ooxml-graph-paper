@@ -1,11 +1,15 @@
 # PAPER-S20: symmetric Claude DOCX broker, fresh-process runner, isolation audit (v1)
 
-Status: **harness built and its auth/invocation corrections mechanically validated
-against the real `claude` CLI; the latest arm-boundary-corrected commissioning attempt
-is blocked and requires S22 follow-up**. A complete-looking earlier run is not valid
-pilot evidence because `--safe-mode` disabled the treatment MCP server and the initial
-`--allowedTools` use did not create a hard tool-visibility boundary. Do not cite pilot
-numbers without checking the manifest and the CLI boundary mode used.
+Status: **SUPERSEDED by `docs/paper-s22-harness-verification-v1.md` — the harness has
+since been fixed and the real 8-trial commissioning pilot has executed successfully
+(7/8 graded pass, 8/8 isolation-clean, zero timeouts, zero auth failures).** The
+remaining timeout described below (treatment forward trials hitting 300s) was
+root-caused to `insert_highlighted_note`'s anchor-resolution requirement having no
+matching read tool available to the treatment arm; the task was redesigned around the
+anchor-free `insert_bibliography_entry`/`remove_bibliography_entry` pair. Read
+`paper-s22-harness-verification-v1.md` for the current, valid pilot evidence — the
+history below (auth investigation, the `--safe-mode` finding) is retained as an accurate
+record of what was tried, not as the current state.
 
 ## What was built
 
