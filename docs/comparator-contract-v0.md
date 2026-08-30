@@ -94,6 +94,17 @@ Efficiency is secondary to correctness and must not be used to hide a failed str
 
 This contract does not authorize full-corpus download, model training, or reactivation of unrelated 2030 experiments. Those begin only after the DOCX gold-set source, Word render authority, and baseline availability gates are satisfied.
 
+### 6.1 A distinct, fourth kind of claim: agentic editing, not extraction (PAPER-S9)
+
+Everything in this contract (Tracks A-D, Claims 1-3 in §7 below) evaluates **extraction/fidelity**:
+given a `.docx`, how well does a system read or render it. `docs/paper-s9-long-horizon-benchmark-protocol-v0.md`
+specifies a different, fourth comparison this project also intends to make: **same Claude model,
+same starting document, same task, Claude editing without Meridian's MCP tools versus Claude
+editing with them** -- an agentic-writing/editing benchmark with its own paired forward/inverse-task
+design, round-trip-confound accounting, and two-tier (fast validator + milestone Word COM)
+verification pipeline. It is not folded into Claims 1-3 above and must not be pooled with their
+scores.
+
 Sources: [DocBank repository](https://github.com/doc-analysis/DocBank), [DocBank dataset card](https://huggingface.co/datasets/liminghao1630/DocBank), [DocBank paper](https://arxiv.org/abs/2006.01038).
 
 ## 7. PAPER-27: dual-track claim contract (native-OOXML vs. document-AI)
