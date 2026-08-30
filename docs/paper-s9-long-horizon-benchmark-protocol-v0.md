@@ -1,6 +1,23 @@
 # PAPER-S9: fast long-horizon DOCX writing benchmark protocol, with milestone Word validation (v0)
 
 Status: protocol design + tool-capability investigation. **No benchmark trial has been run.**
+
+**Update (2026-08-30, later same day):** the validator gap this document found in §5/§6.2 is
+now fixed in the parent repo. `validate_docx_package()` had two real blind spots: an
+`if not rel_ids: continue` guard that skipped the dangling-relationship-reference check
+entirely whenever a part's own `.rels` file was missing or declared zero relationships
+(exactly the adversarial case below), and no check at all for a ZIP containing the same part
+name twice. Both are fixed in
+`extensions/meridian-docs/meridian_docs/ooxml_integrity.py` (parent repo commit `563b9d68`),
+with new regression tests in `test_ooxml_integrity_contract.py`, and independently re-verified
+by re-running the exact two adversarial constructions below against the fixed validator via
+`tools/s9_validator_probe.py` (this repo) -- both now correctly report `ok: false` with the
+specific issue code (`dangling_relationship_reference`, `duplicate_zip_part`); the good fixture
+still reports `ok: true`. Fresh output retained at
+`E:\MeridianData\ooxml-graph-paper\manifests\paper-s9-validator-probe-postfix.json`. This closes
+the "fast gate has known blind spots" caveat for these two specific failure modes -- it does not
+claim the fast validator now catches every possible structural regression, only these two,
+previously-demonstrated ones.
 Every fact below is either (a) a design decision this document is making, (b) a pointer to an
 already-frozen decision in another doc, or (c) a probe this session ran itself today
 (2026-08-30), with its exact command, output, and file path given so it can be re-run and
