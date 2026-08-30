@@ -4,7 +4,8 @@ Meridian DOCX editing commissioning pilot.
 Isolation mechanism (this is what actually enforces the arm boundary, NOT
 the prompt wording): every trial is a fresh, non-interactive `claude -p`
 subprocess launched with:
-  --bare                skips hooks/LSP/plugin-sync/CLAUDE.md auto-discovery
+  --setting-sources     project-only settings, so user-level customizations
+                        do not enter the trial while OAuth remains usable
   --strict-mcp-config    ONLY the MCP servers named in --mcp-config are
                          visible -- no user/project-level MCP config leaks in
   --mcp-config <file>    control: a config naming ZERO servers.
@@ -13,9 +14,13 @@ subprocess launched with:
                          paper repo's own pixi env, not the parent's hosted
                          orchestration MCP, and never touching its
                          credentials).
-  --allowedTools         control: generic file/shell tools only, no mcp__*
-                         name. treatment: Read plus exactly one bounded
-                         Meridian write primitive.
+  --tools                control: generic file/shell tools only.
+  --disallowedTools      treatment: deny generic editors/shell/file-search
+                         tools while leaving the local Meridian MCP available.
+  --allowedTools         auto-approves the declared tools. The actual
+                         availability boundary is --tools/--disallowedTools
+                         plus --strict-mcp-config; --allowedTools alone is
+                         not a visibility restriction.
   --add-dir <trial_root> the ONLY directory outside its own cwd the process
                          may touch.
 Each trial runs in its own fresh directory containing only a private copy
@@ -39,9 +44,39 @@ import time
 from pathlib import Path
 from typing import Any
 
-_CLAUDE_EXECUTABLE = shutil.which("claude")
-if _CLAUDE_EXECUTABLE is None:
-    raise RuntimeError("claude CLI not found on PATH")
+def _resolve_claude_executable() -> str:
+    """Resolve Claude to its native executable when Windows exposes a wrapper.
+
+    On Windows, ``shutil.which('claude')`` can resolve the npm-generated
+    ``.cmd``/``.ps1`` launcher.  Passing a list of arguments to that launcher
+    through ``subprocess.run(..., shell=True)`` loses the ``-p`` prompt, so
+    Claude starts successfully but believes no task was supplied.  The npm
+    launcher places the native executable at a stable path relative to the
+    launcher; invoke that executable directly so argument boundaries are
+    preserved.
+    """
+    resolved = shutil.which("claude")
+    if resolved is None:
+        raise RuntimeError("claude CLI not found on PATH")
+
+    resolved_path = Path(resolved)
+    if sys.platform == "win32" and resolved_path.suffix.lower() in {".cmd", ".bat", ".ps1"}:
+        native = (
+            resolved_path.parent
+            / "node_modules"
+            / "@anthropic-ai"
+            / "claude-code"
+            / "bin"
+            / "claude.exe"
+        )
+        if native.is_file():
+            return str(native)
+        raise RuntimeError(f"native Claude executable not found beside launcher: {native}")
+
+    return resolved
+
+
+_CLAUDE_EXECUTABLE = _resolve_claude_executable()
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from docx_trial_broker import TrialSpec  # noqa: E402
@@ -54,6 +89,10 @@ _TIMEOUT_SECONDS = 300.0
 _CONTROL_ALLOWED_TOOLS = "Read,Write,Edit,Bash"
 _TREATMENT_MCP_TOOL = "mcp__meridian-docs-pilot__insert_highlighted_note"
 _TREATMENT_ALLOWED_TOOLS = f"Read,{_TREATMENT_MCP_TOOL}"
+_CONTROL_AVAILABLE_TOOLS = "Read,Write,Edit,Bash"
+_TREATMENT_DISALLOWED_TOOLS = (
+    "Edit,Write,Bash,PowerShell,Glob,Grep,NotebookEdit,WebFetch,WebSearch,Agent"
+)
 
 
 def _sha256_file(p: Path) -> str | None:
@@ -92,9 +131,16 @@ def _meridian_docs_mcp_config(trial_root: Path) -> Path:
 
 
 def _build_command(spec: TrialSpec, trial_root: Path, docx_in_trial: Path) -> list[str]:
+    if spec.arm == "control":
+        available_tools = _CONTROL_AVAILABLE_TOOLS
+    elif spec.arm == "treatment":
+        available_tools = None
+    else:
+        raise ValueError(f"unknown arm {spec.arm!r}")
+
     common = [
         _CLAUDE_EXECUTABLE, "-p", spec.prompt,
-        "--bare",
+        "--setting-sources", "project",
         "--strict-mcp-config",
         "--permission-mode", "bypassPermissions",
         "--model", _MODEL,
@@ -103,11 +149,21 @@ def _build_command(spec: TrialSpec, trial_root: Path, docx_in_trial: Path) -> li
     ]
     if spec.arm == "control":
         mcp_config = _empty_mcp_config(trial_root)
-        return [*common, "--mcp-config", str(mcp_config), "--allowedTools", _CONTROL_ALLOWED_TOOLS]
+        return [
+            *common,
+            "--tools", available_tools,
+            "--mcp-config", str(mcp_config),
+            "--allowedTools", _CONTROL_ALLOWED_TOOLS,
+        ]
     elif spec.arm == "treatment":
         mcp_config = _meridian_docs_mcp_config(trial_root)
-        return [*common, "--mcp-config", str(mcp_config), "--allowedTools", _TREATMENT_ALLOWED_TOOLS]
-    raise ValueError(f"unknown arm {spec.arm!r}")
+        return [
+            *common,
+            "--disallowedTools", _TREATMENT_DISALLOWED_TOOLS,
+            "--mcp-config", str(mcp_config),
+            "--allowedTools", _TREATMENT_ALLOWED_TOOLS,
+        ]
+    raise AssertionError("validated arm did not produce a command")
 
 
 def run_trial(spec: TrialSpec, runs_root: Path) -> dict[str, Any]:
@@ -130,17 +186,9 @@ def run_trial(spec: TrialSpec, runs_root: Path) -> dict[str, Any]:
         proc = subprocess.run(
             cmd, cwd=str(trial_root), capture_output=True, text=True,
             timeout=_TIMEOUT_SECONDS, encoding="utf-8", errors="replace",
-            # shell=True is required on Windows to invoke claude.CMD (a batch
-            # wrapper, not a native .exe) even with its fully-resolved
-            # absolute path. Safe here specifically because cmd is a LIST
-            # with the executable's path already fully resolved via
-            # shutil.which (Python's own list2cmdline quotes each argument
-            # correctly) -- this is NOT the bare-command-name-plus-shell-
-            # string pattern that caused a real PATH-ambiguity bug found
-            # elsewhere in this sprint (ambiguous `find` resolving to the
-            # wrong binary); there is no bare, unqualified command name here
-            # for cmd.exe's own PATH search to get wrong.
-            shell=True,
+            # _resolve_claude_executable() selects the native .exe on
+            # Windows, so shell=False preserves every prompt/flag argument.
+            shell=False,
         )
         timed_out = False
         stdout, stderr, returncode = proc.stdout, proc.stderr, proc.returncode
