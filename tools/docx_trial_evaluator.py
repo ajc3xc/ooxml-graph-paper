@@ -72,6 +72,19 @@ def grade_forward_trial(
 def grade_inverse_trial(
     output_docx: Path, paragraphs_before_forward: list[str], expected_marker_title: str,
 ) -> dict[str, Any]:
+    """PAPER-S7 correction (2026-08-30): a long-horizon K=4 bibliography chain
+    smoke test found this evaluator marking every inverse "pass" while a
+    "References" heading paragraph (created once by the FIRST forward call,
+    per insert_bibliography_entry's own "locate-or-create the heading" design
+    -- remove_bibliography_entry only ever removes the entry, never the
+    shared heading) was silently left behind forever after. The original
+    checks here (marker gone + no ORIGINAL paragraph lost) are both satisfied
+    even with a stray extra paragraph present, because neither checks for an
+    UNEXPECTED addition -- only for a removal. Added
+    "exact_paragraph_list_restored" as the authoritative check; the two
+    original checks are kept for their more specific failure messages, but
+    the verdict now requires all three.
+    """
     ok, err = _package_is_valid_docx(output_docx)
     if not ok:
         return {"verdict": "fail", "reason": f"invalid output package: {err}"}
@@ -79,11 +92,13 @@ def grade_inverse_trial(
     paragraphs_after = _paragraph_texts(output_docx)
     matches = _paragraphs_containing(paragraphs_after, expected_marker_title)
     missing_originals = [p for p in paragraphs_before_forward if p not in paragraphs_after]
+    unexpected_additions = [p for p in paragraphs_after if p not in paragraphs_before_forward]
 
     checks = {
         "output_is_valid_docx": True,
         "marker_entry_removed": len(matches) == 0,
         "no_pre_forward_paragraph_lost": not missing_originals,
+        "exact_paragraph_list_restored": paragraphs_after == paragraphs_before_forward,
     }
     verdict = "pass" if all(checks.values()) else "fail"
     return {
@@ -93,4 +108,129 @@ def grade_inverse_trial(
         "paragraph_count_before_forward": len(paragraphs_before_forward),
         "remaining_matching_paragraphs": matches,
         "missing_pre_forward_paragraphs": missing_originals,
+        "unexpected_added_paragraphs": unexpected_additions,
+    }
+
+
+# ---------------------------------------------------------------------------
+# inline families (citation): marker text is APPENDED to an EXISTING
+# paragraph, not a new one -- grading compares that one paragraph's text
+# before/after instead of the whole-document paragraph SET.
+# ---------------------------------------------------------------------------
+
+def grade_forward_trial_inline(
+    output_docx: Path, paragraphs_before: list[str], anchor_text_before: str, marker_text: str,
+) -> dict[str, Any]:
+    ok, err = _package_is_valid_docx(output_docx)
+    if not ok:
+        return {"verdict": "fail", "reason": f"invalid output package: {err}"}
+
+    paragraphs_after = _paragraph_texts(output_docx)
+    anchor_matches_after = [p for p in paragraphs_after if p.startswith(anchor_text_before[:40]) and marker_text in p]
+    other_before = [p for p in paragraphs_before if p != anchor_text_before]
+    missing_others = [p for p in other_before if p not in paragraphs_after]
+    unexpected_marker_elsewhere = [
+        p for p in paragraphs_after
+        if marker_text in p and not p.startswith(anchor_text_before[:40])
+    ]
+
+    checks = {
+        "output_is_valid_docx": True,
+        "anchor_paragraph_now_contains_marker_exactly_once": len(anchor_matches_after) == 1,
+        "no_other_paragraph_lost": not missing_others,
+        "marker_not_leaked_into_other_paragraphs": not unexpected_marker_elsewhere,
+        "paragraph_count_unchanged": len(paragraphs_after) == len(paragraphs_before),
+    }
+    verdict = "pass" if all(checks.values()) else "fail"
+    return {
+        "verdict": verdict,
+        "checks": checks,
+        "paragraph_count_before": len(paragraphs_before),
+        "paragraph_count_after": len(paragraphs_after),
+        "anchor_matches_after": anchor_matches_after,
+        "missing_other_paragraphs": missing_others,
+        "unexpected_marker_elsewhere": unexpected_marker_elsewhere,
+    }
+
+
+def grade_inverse_trial_inline(
+    output_docx: Path, paragraphs_before_forward: list[str], marker_text: str,
+) -> dict[str, Any]:
+    ok, err = _package_is_valid_docx(output_docx)
+    if not ok:
+        return {"verdict": "fail", "reason": f"invalid output package: {err}"}
+
+    paragraphs_after = _paragraph_texts(output_docx)
+    remaining_marker = [p for p in paragraphs_after if marker_text in p]
+    missing_originals = [p for p in paragraphs_before_forward if p not in paragraphs_after]
+
+    checks = {
+        "output_is_valid_docx": True,
+        "marker_fully_removed": not remaining_marker,
+        "exact_pre_forward_paragraph_set_restored": not missing_originals,
+        "paragraph_count_restored": len(paragraphs_after) == len(paragraphs_before_forward),
+    }
+    verdict = "pass" if all(checks.values()) else "fail"
+    return {
+        "verdict": verdict,
+        "checks": checks,
+        "paragraph_count_after": len(paragraphs_after),
+        "paragraph_count_before_forward": len(paragraphs_before_forward),
+        "remaining_marker_paragraphs": remaining_marker,
+        "missing_pre_forward_paragraphs": missing_originals,
+    }
+
+
+# ---------------------------------------------------------------------------
+# section_reorder: no paragraph is added/removed/reworded -- only ORDER
+# changes. Grading compares the paragraph LIST (order-sensitive), not a set.
+# ---------------------------------------------------------------------------
+
+def grade_forward_trial_reorder(
+    output_docx: Path, paragraphs_before: list[str], section_heading_text: str,
+) -> dict[str, Any]:
+    ok, err = _package_is_valid_docx(output_docx)
+    if not ok:
+        return {"verdict": "fail", "reason": f"invalid output package: {err}"}
+
+    paragraphs_after = _paragraph_texts(output_docx)
+    same_multiset = sorted(paragraphs_after) == sorted(paragraphs_before)
+    order_changed = paragraphs_after != paragraphs_before
+    heading_present = section_heading_text in paragraphs_after
+
+    checks = {
+        "output_is_valid_docx": True,
+        "no_paragraph_added_or_removed_or_reworded": same_multiset,
+        "order_actually_changed": order_changed,
+        "moved_heading_still_present": heading_present,
+    }
+    verdict = "pass" if all(checks.values()) else "fail"
+    return {
+        "verdict": verdict,
+        "checks": checks,
+        "paragraph_count_before": len(paragraphs_before),
+        "paragraph_count_after": len(paragraphs_after),
+    }
+
+
+def grade_inverse_trial_reorder(
+    output_docx: Path, paragraphs_before_forward: list[str],
+) -> dict[str, Any]:
+    ok, err = _package_is_valid_docx(output_docx)
+    if not ok:
+        return {"verdict": "fail", "reason": f"invalid output package: {err}"}
+
+    paragraphs_after = _paragraph_texts(output_docx)
+    exact_order_restored = paragraphs_after == paragraphs_before_forward
+
+    checks = {
+        "output_is_valid_docx": True,
+        "exact_original_order_restored": exact_order_restored,
+    }
+    verdict = "pass" if all(checks.values()) else "fail"
+    return {
+        "verdict": verdict,
+        "checks": checks,
+        "paragraph_count_after": len(paragraphs_after),
+        "paragraph_count_before_forward": len(paragraphs_before_forward),
     }

@@ -79,17 +79,20 @@ def test_runner_uses_safe_mode_so_oauth_login_remains_available(tmp_path: Path) 
         doc_label="fixture",
         arm="control",
         direction="forward",
+        family="bibliography",
         input_docx=tmp_path / "input.docx",
-        citation_key="pilot-s20-abc123",
-        marker_title="Commissioning Pilot Marker Publication abc123",
+        marker_text="Commissioning Pilot Marker Publication abc123",
+        treatment_tool="insert_bibliography_entry",
+        treatment_args={"citation_key": "pilot-s20-abc123", "csl_item": {}},
         prompt="edit the document",
     )
 
-    command = _build_command(spec, tmp_path, tmp_path / "doc.docx")
+    command = _build_command(spec, tmp_path, tmp_path / "doc.docx", "haiku")
 
     assert command[command.index("--setting-sources") + 1] == "project"
     assert "--safe-mode" not in command
     assert "--bare" not in command
+    assert command[command.index("--model") + 1] == "haiku"
 
 
 def test_runner_uses_tools_flag_for_actual_arm_boundary(tmp_path: Path) -> None:
@@ -97,25 +100,46 @@ def test_runner_uses_tools_flag_for_actual_arm_boundary(tmp_path: Path) -> None:
         trial_id="trial",
         doc_label="fixture",
         direction="forward",
+        family="bibliography",
         input_docx=tmp_path / "input.docx",
-        citation_key="pilot-s20-abc123",
-        marker_title="Commissioning Pilot Marker Publication abc123",
+        marker_text="Commissioning Pilot Marker Publication abc123",
+        treatment_tool="insert_bibliography_entry",
+        treatment_args={"citation_key": "pilot-s20-abc123", "csl_item": {}},
         prompt="edit the document",
     )
 
-    control = _build_command(TrialSpec(arm="control", **base), tmp_path, tmp_path / "doc.docx")
-    treatment = _build_command(TrialSpec(arm="treatment", **base), tmp_path, tmp_path / "doc.docx")
+    control = _build_command(TrialSpec(arm="control", **base), tmp_path, tmp_path / "doc.docx", "haiku")
+    treatment = _build_command(TrialSpec(arm="treatment", **base), tmp_path, tmp_path / "doc.docx", "haiku")
 
     assert control[control.index("--tools") + 1] == "Read,Write,Edit,Bash"
     assert "--tools" not in treatment
     assert "Edit" in treatment[treatment.index("--disallowedTools") + 1]
-    # REVISION: insert_highlighted_note/anchor_para_id needed a read/discovery
-    # tool this arm never had (see docx_trial_broker.py's module docstring for
-    # the run #1 root cause). The bibliography-entry pair is keyed purely by
-    # citation_key, so no anchor-resolution tool is needed for either direction.
+    # Generalized (PAPER-S7): each trial exposes exactly the ONE Meridian
+    # tool its own direction needs (spec.treatment_tool), tighter than S20's
+    # original design which exposed both insert+remove to every trial.
     assert treatment[treatment.index("--allowedTools") + 1] == (
-        "Read,mcp__meridian-docs-pilot__insert_bibliography_entry,"
-        "mcp__meridian-docs-pilot__remove_bibliography_entry"
+        "Read,mcp__meridian-docs-pilot__insert_bibliography_entry"
+    )
+
+
+def test_runner_exposes_only_the_inverse_tool_for_an_inverse_trial(tmp_path: Path) -> None:
+    spec = TrialSpec(
+        trial_id="trial",
+        doc_label="fixture",
+        arm="treatment",
+        direction="inverse",
+        family="bibliography",
+        input_docx=tmp_path / "input.docx",
+        marker_text="Commissioning Pilot Marker Publication abc123",
+        treatment_tool="remove_bibliography_entry",
+        treatment_args={"citation_key": "pilot-s20-abc123"},
+        prompt="edit the document",
+    )
+
+    command = _build_command(spec, tmp_path, tmp_path / "doc.docx", "haiku")
+
+    assert command[command.index("--allowedTools") + 1] == (
+        "Read,mcp__meridian-docs-pilot__remove_bibliography_entry"
     )
 
 

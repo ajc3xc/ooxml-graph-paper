@@ -1,37 +1,36 @@
-"""PAPER-S20: symmetric trial schema + task/inverse generator for the paired
+"""PAPER-S7/S20: symmetric trial schema + task/inverse generator for the paired
 Claude-without-vs-with-Meridian DOCX editing study.
 
-Both arms (control, treatment) are given the SAME logical task in plain
-English and differ only in which tools they're allowed to use to accomplish
-it -- control gets generic file-editing tools and no Meridian MCP access at
-all; treatment gets exactly Meridian's bounded bibliography-entry write pair
-(insert_bibliography_entry / remove_bibliography_entry). The prompt states
-the document-level outcome (add/remove a reference entry, identified by its
-unique title), never an implementation, so the CLI-level tool restriction is
-what actually enforces the arm difference.
+Both arms (control, treatment) are given the SAME logical task in plain English
+and differ only in which tools they're allowed to use -- control gets generic
+file-editing tools and no Meridian MCP access at all; treatment gets exactly one
+Meridian bounded write-primitive pair per family. The prompt states the
+document-level outcome, never an implementation, so the CLI-level tool
+restriction is what actually enforces the arm difference.
 
-REVISION (commissioning run #1 root cause): the original task design
-(insert a plain paragraph immediately after a named anchor paragraph, via
-insert_highlighted_note) required the treatment arm to resolve "the
-paragraph containing this text" into a Meridian anchor_para_id -- but the
-treatment arm's tool allowlist had no read/discovery tool capable of that
-(Read cannot parse a binary .docx; Grep/Glob/Bash are deliberately denied
-to keep the arm boundary bounded to Meridian's own interface). Both
-treatment forward trials in run #1 timed out with Claude repeatedly
-attempting and failing to locate the anchor. Meridian's
-insert_bibliography_entry/remove_bibliography_entry pair needs no anchor
-resolution at all -- both directions are keyed purely by an opaque
-citation_key the trial itself mints, so this redesign eliminates the
-structural gap rather than working around it with a read-tool allowance
-that would have changed what's being measured.
+FAMILIES (per PAPER-S7 recon, 2026-08-30 -- see docs/paper-s15-skill-matrix-v1.md
+for the full verdict table):
+  - bibliography: insert_bibliography_entry / remove_bibliography_entry.
+    Keyed purely by citation_key; no anchor at all. The original S20 family.
+  - citation: insert_citation / remove_citation. Keyed by the SAME
+    anchor_para_id for both directions (resolved once, harness-side, by
+    docx_anchor_prober.resolve_body_anchor -- never by either agent).
+  - caption: insert_caption / remove_caption. insert never returns the new
+    caption paragraph's own id, so the RUNNER resolves it between the forward
+    and inverse trial via docx_anchor_prober.resolve_caption_para_id (a
+    structured locate_anchor query, not a text search) and injects it into the
+    inverse trial the same way citation_key is injected for bibliography.
+  - section_reorder: move_section, called twice (there and back). Self-
+    inverting because it moves (never copies) the live elements -- every
+    paragraph/bookmark keeps its id. Requires >=3 headings
+    (docx_anchor_prober.resolve_section_reorder_plan); not every document
+    qualifies, and that is recorded as not_applicable, not forced or hidden.
 
-This module owns:
-  - TrialSpec: the symmetric per-trial descriptor both arms share.
-  - generate_task_pair(): builds a (forward, inverse) TrialSpec pair for one
-    frozen DOCX.
-  - expected/forbidden change predicates the evaluator (docx_trial_evaluator.py)
-    checks the OUTPUT docx against -- defined here so the same ground truth
-    is used regardless of which arm produced the file.
+Deliberately NOT implemented this pass: cross_reference (insert_cross_reference
+has no removal primitive as of this recon; PAPER-S7 CODE separately tracks
+adding one to the parent repo) and table/tracked-change families (no clean
+whole-table or accept/reject primitive exists at all -- see the recon findings
+folded into docs/paper-s15-skill-matrix-v1.md).
 """
 from __future__ import annotations
 
@@ -39,6 +38,7 @@ import dataclasses
 import uuid
 import zipfile
 from pathlib import Path
+from typing import Any
 
 
 @dataclasses.dataclass(frozen=True)
@@ -47,10 +47,13 @@ class TrialSpec:
     doc_label: str
     arm: str  # "control" | "treatment"
     direction: str  # "forward" | "inverse"
+    family: str  # "bibliography" | "citation" | "caption" | "section_reorder"
     input_docx: Path
-    citation_key: str
-    marker_title: str
     prompt: str
+    marker_text: str
+    treatment_tool: str
+    treatment_args: dict[str, Any]
+    pair_index: int = 0
 
 
 def _paragraph_texts(docx_path: Path) -> list[str]:
@@ -71,32 +74,33 @@ def _paragraph_texts(docx_path: Path) -> list[str]:
     return texts
 
 
-def generate_task_pair(doc_label: str, input_docx: Path) -> tuple[TrialSpec, TrialSpec]:
-    """One forward + one semantic-inverse TrialSpec for a single frozen DOCX.
+def new_marker(prefix: str) -> str:
+    return f"{prefix}-{uuid.uuid4().hex[:12]}"
 
-    Forward: add a new APA-style reference/bibliography entry (creating a
-    References section at the end if one doesn't already exist) for a work
-    with a unique, opaque marker title -- unambiguous to grade and never
-    confusable with content already in the frozen document.
-    Inverse: remove that exact entry, identified by its title (not by
-    citation_key, which is Meridian-internal and never stated in the
-    control arm's prompt -- the control arm has no concept of a
-    citation_key at all, only the visible title text).
-    """
-    marker = uuid.uuid4().hex[:12]
-    citation_key = f"pilot-s20-{marker}"
+
+# ---------------------------------------------------------------------------
+# bibliography (unchanged from S20)
+# ---------------------------------------------------------------------------
+
+def generate_bibliography_pair(doc_label: str, input_docx: Path, marker: str) -> tuple[TrialSpec, TrialSpec]:
+    citation_key = f"pilot-s7-{marker}"
     marker_title = f"Commissioning Pilot Marker Publication {marker}"
-
-    trial_base = f"{doc_label}-{marker}"
+    trial_base = f"{doc_label}-bibliography-{marker}"
 
     forward = TrialSpec(
         trial_id=f"{trial_base}-forward",
-        doc_label=doc_label,
-        arm="",  # filled in by the caller per-arm
-        direction="forward",
+        doc_label=doc_label, arm="", direction="forward", family="bibliography",
         input_docx=input_docx,
-        citation_key=citation_key,
-        marker_title=marker_title,
+        marker_text=marker_title,
+        treatment_tool="insert_bibliography_entry",
+        treatment_args={
+            "citation_key": citation_key,
+            "csl_item": {
+                "type": "article-journal", "title": marker_title,
+                "author": [{"family": "Marker", "given": "Pilot"}],
+                "issued": {"date-parts": [[2026]]},
+            },
+        },
         prompt=(
             f"You are editing a Word document at the path given to you. "
             f"Add ONE new reference/bibliography entry to the document's "
@@ -104,8 +108,7 @@ def generate_task_pair(doc_label: str, input_docx: Path) -> tuple[TrialSpec, Tri
             f"'References' section at the end of the document first if one "
             f"does not already exist). The new entry is for a journal "
             f"article with exactly these details:\n\n"
-            f"  Author: Marker, Pilot\n"
-            f"  Year: 2026\n"
+            f"  Author: Marker, Pilot\n  Year: 2026\n"
             f"  Title: {marker_title!r}\n\n"
             f"The new entry must appear as its own paragraph, and its "
             f"title text must appear verbatim somewhere in that paragraph. "
@@ -116,12 +119,11 @@ def generate_task_pair(doc_label: str, input_docx: Path) -> tuple[TrialSpec, Tri
     )
     inverse = TrialSpec(
         trial_id=f"{trial_base}-inverse",
-        doc_label=doc_label,
-        arm="",
-        direction="inverse",
-        input_docx=input_docx,  # the FORWARD arm's own output; wired up by the runner
-        citation_key=citation_key,
-        marker_title=marker_title,
+        doc_label=doc_label, arm="", direction="inverse", family="bibliography",
+        input_docx=input_docx,
+        marker_text=marker_title,
+        treatment_tool="remove_bibliography_entry",
+        treatment_args={"citation_key": citation_key},
         prompt=(
             f"You are editing a Word document at the path given to you. "
             f"It contains a reference/bibliography entry whose title is "
@@ -135,33 +137,178 @@ def generate_task_pair(doc_label: str, input_docx: Path) -> tuple[TrialSpec, Tri
     return forward, inverse
 
 
-def treatment_csl_item(spec: TrialSpec) -> dict:
-    """The CSL-JSON item a treatment-arm agent should pass to
-    insert_bibliography_entry for this trial -- exposed here (not just left
-    to the prompt) so the runner/tests can construct the identical item
-    independently for a canary check."""
-    return {
-        "type": "article-journal",
-        "title": spec.marker_title,
-        "author": [{"family": "Marker", "given": "Pilot"}],
-        "issued": {"date-parts": [[2026]]},
-    }
+# ---------------------------------------------------------------------------
+# citation (inline text appended to an existing anchor paragraph)
+# ---------------------------------------------------------------------------
+
+def generate_citation_pair(
+    doc_label: str, input_docx: Path, marker: str, anchor_para_id: str, anchor_text_snippet: str,
+) -> tuple[TrialSpec, TrialSpec]:
+    marker_text = f"[PILOT-S7-CITATION-{marker}]"
+    citation_key = f"pilot-s7-cite-{marker}"
+    trial_base = f"{doc_label}-citation-{marker}"
+
+    forward = TrialSpec(
+        trial_id=f"{trial_base}-forward",
+        doc_label=doc_label, arm="", direction="forward", family="citation",
+        input_docx=input_docx,
+        marker_text=marker_text,
+        treatment_tool="insert_citation",
+        treatment_args={
+            "anchor_para_id": anchor_para_id,
+            "citation_keys": [citation_key],
+            "formatted_text": marker_text,
+        },
+        prompt=(
+            f"You are editing a Word document at the path given to you. "
+            f"Find the paragraph that starts with the exact text: "
+            f"{anchor_text_snippet!r}\n\n"
+            f"Append this exact bracketed text to the END of that "
+            f"paragraph, as a citation marker, with a single leading space: "
+            f"{marker_text!r}\n\n"
+            f"Do not change, remove, reorder, or reformat any other part of "
+            f"that paragraph, and do not touch any other paragraph. Save "
+            f"the document in place at the same path. When finished, reply "
+            f"with a single line: DONE."
+        ),
+    )
+    inverse = TrialSpec(
+        trial_id=f"{trial_base}-inverse",
+        doc_label=doc_label, arm="", direction="inverse", family="citation",
+        input_docx=input_docx,
+        marker_text=marker_text,
+        treatment_tool="remove_citation",
+        treatment_args={"anchor_para_id": anchor_para_id},
+        prompt=(
+            f"You are editing a Word document at the path given to you. "
+            f"Find the paragraph that contains this exact bracketed text: "
+            f"{marker_text!r}\n\n"
+            f"Remove exactly that bracketed text (and the single leading "
+            f"space immediately before it) from the paragraph, restoring "
+            f"the paragraph's original text exactly. Do not change any "
+            f"other part of that paragraph or any other paragraph. Save "
+            f"the document in place at the same path. When finished, reply "
+            f"with a single line: DONE."
+        ),
+    )
+    return forward, inverse
 
 
-def expected_forward_state(paragraphs_before: list[str], spec: TrialSpec) -> dict:
-    """Ground truth for grading a forward trial's output against its input."""
-    return {
-        "expected_marker_title": spec.marker_title,
-        "expected_paragraph_count_delta": 1,
-        "forbidden_paragraphs_removed": paragraphs_before,
-    }
+# ---------------------------------------------------------------------------
+# caption (new paragraph; inverse args resolved post-forward by the runner)
+# ---------------------------------------------------------------------------
+
+def generate_caption_forward(
+    doc_label: str, input_docx: Path, marker: str, anchor_para_id: str, anchor_text_snippet: str,
+) -> TrialSpec:
+    label_text = f"Pilot S7 Caption Marker {marker}"
+    trial_base = f"{doc_label}-caption-{marker}"
+    return TrialSpec(
+        trial_id=f"{trial_base}-forward",
+        doc_label=doc_label, arm="", direction="forward", family="caption",
+        input_docx=input_docx,
+        marker_text=label_text,
+        treatment_tool="insert_caption",
+        treatment_args={
+            "anchor_para_id": anchor_para_id, "kind": "Figure",
+            "label_text": label_text, "position": "after",
+        },
+        prompt=(
+            f"You are editing a Word document at the path given to you. "
+            f"Find the paragraph that starts with the exact text: "
+            f"{anchor_text_snippet!r}\n\n"
+            f"Insert a new caption paragraph immediately AFTER that "
+            f"paragraph, in the style Word uses for figure captions "
+            f"(e.g. 'Figure 1: ...'), with this exact label text somewhere "
+            f"in it: {label_text!r}\n\n"
+            f"Do not change, remove, reorder, or reformat any other "
+            f"paragraph. Save the document in place at the same path. When "
+            f"finished, reply with a single line: DONE."
+        ),
+    )
 
 
-def expected_inverse_state(paragraphs_before_forward: list[str], spec: TrialSpec) -> dict:
-    """Ground truth for grading an inverse trial's output: it should exactly
-    reconstruct the document as it was BEFORE the forward trial ran."""
-    return {
-        "expected_marker_title_removed": spec.marker_title,
-        "expected_paragraph_count_delta": -1,
-        "expected_final_paragraphs": paragraphs_before_forward,
-    }
+def generate_caption_inverse(
+    doc_label: str, input_docx: Path, marker: str, label_text: str, caption_para_id: str,
+) -> TrialSpec:
+    trial_base = f"{doc_label}-caption-{marker}"
+    return TrialSpec(
+        trial_id=f"{trial_base}-inverse",
+        doc_label=doc_label, arm="", direction="inverse", family="caption",
+        input_docx=input_docx,
+        marker_text=label_text,
+        treatment_tool="remove_caption",
+        treatment_args={"caption_para_id": caption_para_id},
+        prompt=(
+            f"You are editing a Word document at the path given to you. "
+            f"It contains a figure caption paragraph with this exact label "
+            f"text: {label_text!r}\n\n"
+            f"Remove that entire caption paragraph from the document. Do "
+            f"not change, remove, reorder, or reformat any other "
+            f"paragraph. Save the document in place at the same path. When "
+            f"finished, reply with a single line: DONE."
+        ),
+    )
+
+
+# ---------------------------------------------------------------------------
+# section_reorder (move_section is its own inverse)
+# ---------------------------------------------------------------------------
+
+def generate_section_reorder_pair(
+    doc_label: str, input_docx: Path, marker: str, section_id: str, section_heading_text: str,
+    original_preceding_heading_para_id: str, original_preceding_heading_text: str,
+    destination_heading_para_id: str, destination_heading_text: str,
+) -> tuple[TrialSpec, TrialSpec]:
+    trial_base = f"{doc_label}-section_reorder-{marker}"
+
+    forward = TrialSpec(
+        trial_id=f"{trial_base}-forward",
+        doc_label=doc_label, arm="", direction="forward", family="section_reorder",
+        input_docx=input_docx,
+        marker_text=section_heading_text,
+        treatment_tool="move_section",
+        treatment_args={
+            "section_id": section_id,
+            "destination_anchor_para_id": destination_heading_para_id,
+            "destination_position": "after",
+        },
+        prompt=(
+            f"You are editing a Word document at the path given to you. "
+            f"It has a section heading with the exact text: "
+            f"{section_heading_text!r}\n\n"
+            f"Move that ENTIRE section (its heading and all of its body "
+            f"content, up to but not including the next heading) so it "
+            f"appears immediately AFTER the section whose heading is the "
+            f"exact text: {destination_heading_text!r}\n\n"
+            f"Do not change the text of any paragraph, and do not change "
+            f"the relative order of any OTHER section. Save the document "
+            f"in place at the same path. When finished, reply with a "
+            f"single line: DONE."
+        ),
+    )
+    inverse = TrialSpec(
+        trial_id=f"{trial_base}-inverse",
+        doc_label=doc_label, arm="", direction="inverse", family="section_reorder",
+        input_docx=input_docx,
+        marker_text=section_heading_text,
+        treatment_tool="move_section",
+        treatment_args={
+            "section_id": section_id,
+            "destination_anchor_para_id": original_preceding_heading_para_id,
+            "destination_position": "after",
+        },
+        prompt=(
+            f"You are editing a Word document at the path given to you. "
+            f"It has a section heading with the exact text: "
+            f"{section_heading_text!r}\n\n"
+            f"That section was just moved. Move it back so it appears "
+            f"immediately AFTER the section whose heading is the exact "
+            f"text: {original_preceding_heading_text!r}\n\n"
+            f"This restores the document's section order to exactly what "
+            f"it was before the earlier move. Do not change the text of "
+            f"any paragraph. Save the document in place at the same path. "
+            f"When finished, reply with a single line: DONE."
+        ),
+    )
+    return forward, inverse

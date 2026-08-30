@@ -1,5 +1,12 @@
-"""PAPER-S20: fresh-process runner for the paired Claude-without-vs-with-
-Meridian DOCX editing commissioning pilot.
+"""PAPER-S20/S7: fresh-process runner for the paired Claude-without-vs-with-
+Meridian DOCX editing study. Generalized (2026-08-30) from a single
+bibliography-only family to any family in docx_trial_broker.py -- each trial's
+treatment run exposes exactly the one Meridian tool `spec.treatment_tool`
+names (tighter than the original design, which exposed both insert+remove to
+every trial regardless of direction), and `model` is now a `run_trial`
+parameter (haiku for cheap harness-development iteration; a pinned, dated
+model for the confirmatory validation/primary-holdout runs) rather than a
+fixed module constant.
 
 Isolation mechanism (this is what actually enforces the arm boundary, NOT
 the prompt wording): every trial is a fresh, non-interactive `claude -p`
@@ -79,29 +86,30 @@ def _resolve_claude_executable() -> str:
 _CLAUDE_EXECUTABLE = _resolve_claude_executable()
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from docx_trial_broker import TrialSpec, treatment_csl_item  # noqa: E402
+from docx_trial_broker import TrialSpec  # noqa: E402
 
 _PAPER_ROOT = Path(__file__).resolve().parent.parent
 _PAPER_PYTHON = sys.executable
-_MODEL = "haiku"  # cheap/fast model for a commissioning pilot, not a final benchmark
 _TIMEOUT_SECONDS = 300.0
 
 _CONTROL_ALLOWED_TOOLS = "Read,Write,Edit,Bash"
 _CONTROL_AVAILABLE_TOOLS = "Read,Write,Edit,Bash"
-# REVISION: insert_highlighted_note/anchor_para_id required a read/discovery
-# tool this arm was never given (see docx_trial_broker.py's module docstring
-# for the run #1 root cause). insert_bibliography_entry/
-# remove_bibliography_entry need no anchor resolution at all -- both are
-# keyed purely by citation_key, so Read is no longer even necessary, but is
-# kept available in case the agent wants to confirm the write landed.
-_TREATMENT_MCP_TOOLS = (
-    "mcp__meridian-docs-pilot__insert_bibliography_entry,"
-    "mcp__meridian-docs-pilot__remove_bibliography_entry"
-)
-_TREATMENT_ALLOWED_TOOLS = f"Read,{_TREATMENT_MCP_TOOLS}"
 _TREATMENT_DISALLOWED_TOOLS = (
     "Edit,Write,Bash,PowerShell,Glob,Grep,NotebookEdit,WebFetch,WebSearch,Agent"
 )
+
+
+def _mcp_tool_name(tool: str) -> str:
+    return f"mcp__meridian-docs-pilot__{tool}"
+
+
+def _treatment_allowed_tools(spec: TrialSpec) -> str:
+    """Expose exactly the ONE Meridian tool this specific trial's direction
+    needs -- tighter than S20's original bibliography-only design, which
+    exposed both insert and remove to every trial regardless of direction.
+    Read stays available so the agent can confirm a write landed, though none
+    of today's families require it to complete the task."""
+    return f"Read,{_mcp_tool_name(spec.treatment_tool)}"
 
 
 def _sha256_file(p: Path) -> str | None:
@@ -139,7 +147,7 @@ def _meridian_docs_mcp_config(trial_root: Path) -> Path:
     return path
 
 
-def _build_command(spec: TrialSpec, trial_root: Path, docx_in_trial: Path) -> list[str]:
+def _build_command(spec: TrialSpec, trial_root: Path, docx_in_trial: Path, model: str) -> list[str]:
     if spec.arm == "control":
         available_tools = _CONTROL_AVAILABLE_TOOLS
     elif spec.arm == "treatment":
@@ -152,7 +160,7 @@ def _build_command(spec: TrialSpec, trial_root: Path, docx_in_trial: Path) -> li
         "--setting-sources", "project",
         "--strict-mcp-config",
         "--permission-mode", "bypassPermissions",
-        "--model", _MODEL,
+        "--model", model,
         "--output-format", "json",
         "--add-dir", str(trial_root),
     ]
@@ -170,12 +178,12 @@ def _build_command(spec: TrialSpec, trial_root: Path, docx_in_trial: Path) -> li
             *common,
             "--disallowedTools", _TREATMENT_DISALLOWED_TOOLS,
             "--mcp-config", str(mcp_config),
-            "--allowedTools", _TREATMENT_ALLOWED_TOOLS,
+            "--allowedTools", _treatment_allowed_tools(spec),
         ]
     raise AssertionError("validated arm did not produce a command")
 
 
-def run_trial(spec: TrialSpec, runs_root: Path) -> dict[str, Any]:
+def run_trial(spec: TrialSpec, runs_root: Path, *, model: str = "haiku") -> dict[str, Any]:
     trial_root = runs_root / spec.trial_id
     trial_root.mkdir(parents=True, exist_ok=True)
     docx_in_trial = trial_root / "doc.docx"
@@ -187,29 +195,21 @@ def run_trial(spec: TrialSpec, runs_root: Path) -> dict[str, Any]:
     # broker's own prompt text (keeps docx_trial_broker.py path-agnostic).
     prefix = f"The document's path is: {docx_in_trial}\n\n"
     if spec.arm == "treatment":
-        # Only the treatment arm has a citation_key concept at all -- the
-        # control prompt (and control's own generic edit) never mentions
-        # it, per docx_trial_broker's arm-symmetry design. Naming the exact
-        # tool + CSL item here (rather than making a fast/cheap model
-        # reconstruct the CSL-JSON shape from prose) keeps this a
-        # commissioning pilot of the HARNESS, not a test of whether Haiku
-        # can independently rediscover a tool's argument schema.
-        csl_item = treatment_csl_item(spec)
-        if spec.direction == "forward":
-            prefix += (
-                f"Use the insert_bibliography_entry tool with "
-                f"citation_key={spec.citation_key!r} and "
-                f"csl_item={json.dumps(csl_item)} to add this entry.\n\n"
-            )
-        else:
-            prefix += (
-                f"Use the remove_bibliography_entry tool with "
-                f"citation_key={spec.citation_key!r} to remove this entry.\n\n"
-            )
+        # Naming the exact tool + arguments here (rather than making the
+        # model reconstruct a Meridian tool's argument schema from prose)
+        # keeps this a test of whether Claude can use Meridian's bounded
+        # write primitives, not a test of whether it can independently
+        # rediscover a tool's argument schema from a natural-language task
+        # description alone -- matching every family's design intent, not
+        # just the original bibliography family's.
+        prefix += (
+            f"Use the {spec.treatment_tool} tool with these exact "
+            f"arguments: {json.dumps(spec.treatment_args)}\n\n"
+        )
     located_prompt = prefix + spec.prompt
     spec_with_path = dataclasses.replace(spec, prompt=located_prompt)
 
-    cmd = _build_command(spec_with_path, trial_root, docx_in_trial)
+    cmd = _build_command(spec_with_path, trial_root, docx_in_trial, model)
     started = datetime.datetime.now(datetime.timezone.utc)
     t0 = time.time()
     try:
@@ -243,6 +243,9 @@ def run_trial(spec: TrialSpec, runs_root: Path) -> dict[str, Any]:
         "doc_label": spec.doc_label,
         "arm": spec.arm,
         "direction": spec.direction,
+        "family": spec.family,
+        "pair_index": spec.pair_index,
+        "model": model,
         "started_at": started.isoformat(),
         "wall_time_seconds": wall_time,
         "timed_out": timed_out,

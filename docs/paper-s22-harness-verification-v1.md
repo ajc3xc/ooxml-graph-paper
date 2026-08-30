@@ -1,5 +1,45 @@
 # PAPER-S22: independent commissioning and audit of the S20 harness (v1)
 
+## CORRECTION (2026-08-30, later same day): the original "8/8 passed" claim below is wrong
+
+While building PAPER-S7's long-horizon (K-pair) extension, a K=4 bibliography chain smoke
+test surfaced a real evaluator gap: `docx_trial_evaluator.grade_inverse_trial` checked "the
+marker is gone" and "no ORIGINAL paragraph was lost," but never checked for an UNEXPECTED
+paragraph being left behind. `insert_bibliography_entry` locates-or-CREATES a "References"
+heading paragraph the first time it runs on a document that doesn't have one yet;
+`remove_bibliography_entry` only ever removes the entry it added, never that shared heading
+-- a reasonable design (you would not want the whole References section auto-deleted just
+because its last entry was removed), but it means the forward+inverse pair, as this task
+was originally worded, is NOT a true document-level round trip on a virgin document: a
+"References" heading is left behind permanently after the first cycle.
+
+The evaluator was fixed (added an `exact_paragraph_list_restored` check) and used to
+RE-GRADE the actual saved output `.docx` files from both real pilot runs below (no new API
+calls -- these are the same bytes already on disk, re-evaluated):
+
+| Run | Old reported pass | Corrected pass | What changed |
+|---|---|---|---|
+| `20260830T205231Z` (control-arm corruption run) | 7/8 | **4/8** | All 4 forwards still pass. `control/inverse` still fails (real package corruption, unaffected by this fix). The other 3 inverses (`treatment/inverse` fixture-01, `control/inverse` and `treatment/inverse` fixture-02) flip pass->fail: each left a `References` heading behind. |
+| `20260830T213803Z` (Word-COM-receipts run) | 8/8 | **4/8** | All 4 forwards still pass. All 4 inverses flip pass->fail, all for the identical `References`-heading reason. |
+
+**This affects both arms equally** -- control and treatment both leave the same heading
+behind, because it is a property of the TASK WORDING (the inverse instruction says "remove
+that entire reference entry... paragraph," never "remove the References section"), not of
+which tool implementation performed it. It therefore does not change the control-vs-treatment
+comparison or invalidate the earlier, separately-diagnosed OOXML-corruption finding (a
+different failure mode entirely, in a different check that runs before the paragraph-list
+comparison). It does mean every "8/8"-style claim below and in this session's chat history
+overstated how many trials achieved an exact document-level round trip -- the true number,
+under a complete evaluator, was 4/8 both times. Corrected pass rate, root cause, and
+re-grading method are retained here rather than silently edited into the numbers below, per
+this project's own standing rule against quietly adjusting a reported result.
+
+The fixed evaluator (`tools/docx_trial_evaluator.py`, PAPER-S7) is now the one used for all
+new S7 trials; the historical numbers below are left as originally written, with this
+correction as the authoritative amendment.
+
+---
+
 Status: **the S20 harness is now genuinely runnable and verified end-to-end.** A real
 root-cause was found and fixed for the prior timeout; the actual 8-trial commissioning
 pilot has now executed for real, with isolation canaries confirming the arm boundary

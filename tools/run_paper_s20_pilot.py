@@ -25,9 +25,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from docx_trial_broker import (  # noqa: E402
     TrialSpec,
     _paragraph_texts,
-    expected_forward_state,
-    expected_inverse_state,
-    generate_task_pair,
+    generate_bibliography_pair,
+    new_marker,
 )
 from docx_trial_evaluator import grade_forward_trial, grade_inverse_trial  # noqa: E402
 from claude_pair_runner import audit_isolation, run_trial  # noqa: E402
@@ -182,7 +181,9 @@ def main() -> int:
             print(f"SKIP {doc_label}: frozen fixture not found at {docx_path}", file=sys.stderr)
             continue
         paragraphs_before = _paragraph_texts(docx_path)
-        forward_spec, inverse_spec_template = generate_task_pair(doc_label, docx_path)
+        forward_spec, inverse_spec_template = generate_bibliography_pair(
+            doc_label, docx_path, new_marker("pilot-s20"),
+        )
 
         doc_receipts: dict[str, Any] = {}
         word_receipts_by_doc[doc_label] = doc_receipts
@@ -199,7 +200,7 @@ def main() -> int:
             fwd_status = _annotate_trial(fwd_result, grade_forward_trial(
                 Path(fwd_result["output_docx_path"]),
                 paragraphs_before,
-                forward_spec.marker_title,
+                forward_spec.marker_text,
             ))
             if word_receipts_enabled:
                 if fwd_status == "completed":
@@ -235,7 +236,7 @@ def main() -> int:
                 inv_status = _annotate_trial(inv_result, grade_inverse_trial(
                     Path(inv_result["output_docx_path"]),
                     paragraphs_before,
-                    forward_spec.marker_title,
+                    forward_spec.marker_text,
                 ))
                 if word_receipts_enabled:
                     if inv_status == "completed":
