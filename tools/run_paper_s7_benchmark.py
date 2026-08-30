@@ -296,3 +296,36 @@ def run_corpus_slice(
     out_path = run_root / "slice-manifest.json"
     out_path.write_text(json.dumps(manifest_out, indent=2, ensure_ascii=False), encoding="utf-8")
     return manifest_out
+
+
+def main(argv: list[str] | None = None) -> int:
+    import argparse
+
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--corpus-manifest", type=Path, default=Path(r"E:\MeridianData\ooxml-graph-paper\manifests\paper-s7-corpus-manifest-v1.json"))
+    parser.add_argument("--split", required=True, choices=["development", "validation", "primary_holdout"])
+    parser.add_argument("--families", nargs="+", default=list(_FAMILIES))
+    parser.add_argument("--k-values", nargs="+", type=int, default=[1])
+    parser.add_argument("--model", default="haiku")
+    parser.add_argument("--max-workers", type=int, default=4)
+    parser.add_argument("--no-word-receipts", action="store_true")
+    parser.add_argument("--run-root", type=Path, required=True)
+    args = parser.parse_args(argv)
+
+    manifest = run_corpus_slice(
+        args.corpus_manifest, args.split, tuple(args.families), tuple(args.k_values),
+        args.model, args.run_root, max_workers=args.max_workers,
+        word_receipts_enabled=not args.no_word_receipts,
+    )
+
+    counts: dict[str, int] = {}
+    for chain in manifest["chains"]:
+        status = chain.get("status", "unknown")
+        counts[status] = counts.get(status, 0) + 1
+    print(json.dumps(counts, indent=2))
+    print(f"Slice manifest: {args.run_root / 'slice-manifest.json'}")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
