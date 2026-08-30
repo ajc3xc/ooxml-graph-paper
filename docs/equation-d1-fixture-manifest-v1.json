@@ -1,0 +1,552 @@
+{
+  "item": "PAPER-S10 bounded equation-writer comparison and Word-native OMML fixture suite",
+  "generated": "2026-08-30",
+  "method_summary": "13 D1 categories x 2 independent converters (Meridian's live, unmodified meridian_docs.docs_intel.latex_to_omml_local imported from the pixi-editable product package; Microsoft's real, pinned MML2OMML.XSL run via lxml.etree.XSLT). 9 categories backed by real MathMLben records (stratified by LaTeX-content regex match over all 374 usable records), 4 by explicit hand-authored LaTeX/MathML pairs where MathMLben's inline-formula corpus does not naturally contain the construct. Every OMML output independently re-inspected by a from-scratch structural classifier (not reusing either converter's own validator).",
+  "reference_converter": {
+    "tool": "Microsoft MML2OMML.XSL",
+    "path": "C:\\Program Files\\Microsoft Office\\root\\Office16\\MML2OMML.XSL",
+    "sha256": "fdbb663cbbf0ab0b8387d1c65f6691ac6771e96bbb8b4a256af251834e35ed72",
+    "office_build": "16.0.20326.20112 (WINWORD.EXE ProductVersion, this host)",
+    "invocation": "lxml.etree.XSLT(etree.parse(XSL_PATH)) applied directly to each case's MathML <math> root"
+  },
+  "meridian_converter": {
+    "module": "meridian_docs.docs_intel",
+    "resolved_path": "C:\\Users\\13144\\Documents\\Meridian\\repository\\extensions\\meridian-docs\\meridian_docs\\docs_intel.py",
+    "functions_called": [
+      "latex_to_omml_local",
+      "_stdlib_append_mathml (D1-13 supplementary probe only)"
+    ],
+    "note": "Same live-import methodology as docs/omml-builder-audit-v0.md; no product code read, modified, or mocked."
+  },
+  "mathmlben_source": {
+    "checkout_path": "E:\\MeridianData\\ooxml-graph-paper\\raw\\mathmlben",
+    "git_remote": "https://github.com/gipplab/MathMLben.git",
+    "git_head": "26f841d022f1439a9466182673370ad9912d9844",
+    "license": "package.json declares ISC for the GoUldI visualization tool itself",
+    "rights_note": "MathMLben's formula records are extracted from openly-licensed digital-library and Wikipedia sources (per-record 'uri' fields observed: en.formulasearchengine.com, en.wikipedia.org, dlmf.nist.gov, arxiv.org abstract pages) and the dataset is an established, citable academic benchmark (Schubotz et al., JCDL 2018). This is a lightweight source-provenance review for a small (13-record), non-redistributed, research-only sample -- not a full per-record legal rights audit. No content is redistributed by this item; only the individual formulas already used are quoted in the report below, with the exact source record path/hash retained for each.",
+    "total_usable_records_scanned": 374,
+    "records_used": [
+      "26",
+      "27",
+      "35",
+      "36",
+      "65",
+      "103",
+      "110",
+      "237",
+      "285",
+      "295"
+    ]
+  },
+  "cases": [
+    {
+      "case_id": "D1-01",
+      "category": "fraction",
+      "source": "mathmlben:27",
+      "source_record_path": "E:\\MeridianData\\ooxml-graph-paper\\raw\\mathmlben\\data\\27.json",
+      "source_record_sha256": "bc9f504255a2297513cf2755a3669aa6e0af577f7739ddd451029981a3c6121b",
+      "hand_authored_note": null,
+      "latex_used": "v = \\frac{c}{n}",
+      "mathml_used": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" id=\"p1.1.m1.1\" class=\"ltx_Math\" alttext=\"v=\\frac{c}{n}\" display=\"inline\">\n  <semantics id=\"p1.1.m1.1a\">\n    <mrow id=\"p1.1.m1.1.4\" xref=\"p1.1.m1.1.4.cmml\">\n      <mi id=\"p1.1.m1.1.1\" xref=\"p1.1.m1.1.1.cmml\">v</mi>\n      <mo id=\"p1.1.m1.1.2\" xref=\"p1.1.m1.1.2.cmml\">=</mo>\n      <mfrac id=\"p1.1.m1.1.3\" xref=\"p1.1.m1.1.3.cmml\">\n        <mi id=\"p1.1.m1.1.3.2\" xref=\"p1.1.m1.1.3.2.cmml\">c</mi>\n        <mi id=\"p1.1.m1.1.3.3\" xref=\"p1.1.m1.1.3.3.cmml\">n</mi>\n      </mfrac>\n    </mrow>\n    <annotation-xml encoding=\"MathML-Content\" id=\"p1.1.m1.1b\">\n      <apply id=\"p1.1.m1.1.4.cmml\" xref=\"p1.1.m1.1.4\">\n        <eq id=\"p1.1.m1.1.2.cmml\" xref=\"p1.1.m1.1.2\"/>\n        <csymbol cd=\"latexml\" id=\"p1.1.m1.1.1.cmml\" xref=\"p1.1.m1.1.1\">Q13824</csymbol>\n        <apply id=\"p1.1.m1.1.3.cmml\" xref=\"p1.1.m1.1.3\">\n          <divide id=\"p1.1.m1.1.3.1.cmml\" xref=\"p1.1.m1.1.3\"/>\n          <csymbol cd=\"latexml\" id=\"p1.1.m1.1.3.2.cmml\" xref=\"p1.1.m1.1.3.2\">Q2111</csymbol>\n          <csymbol cd=\"latexml\" id=\"p1.1.m1.1.3.3.cmml\" xref=\"p1.1.m1.1.3.3\">Q174102</csymbol>\n        </apply>\n      </apply>\n    </annotation-xml>\n    <annotation encoding=\"application/x-tex\" id=\"p1.1.m1.1c\">v=\\frac{c}{n}</annotation>\n  </semantics>\n</math>",
+      "meridian": {
+        "status": "converted",
+        "omml_raw": "<m:oMath xmlns:m=\"http://schemas.openxmlformats.org/officeDocument/2006/math\"><m:r><m:t>v</m:t></m:r><m:r><m:t>=</m:t></m:r><m:f><m:num><m:e><m:r><m:t>c</m:t></m:r></m:e></m:num><m:den><m:e><m:r><m:t>n</m:t></m:r></m:e></m:den></m:f></m:oMath>",
+        "error": null,
+        "latency_s": 0.201816,
+        "peak_traced_bytes": 3415418,
+        "classification": "correct",
+        "classification_detail": "m:f present; empty children: []"
+      },
+      "msxsl": {
+        "status": "converted",
+        "omml_raw": "<?xml version=\"1.0\"?>\n<m:oMath xmlns:m=\"http://schemas.openxmlformats.org/officeDocument/2006/math\"><m:r><m:t>v=</m:t></m:r><m:f><m:fPr><m:type m:val=\"bar\"/></m:fPr><m:num><m:r><m:t>c</m:t></m:r></m:num><m:den><m:r><m:t>n</m:t></m:r></m:den></m:f></m:oMath>\n",
+        "error": null,
+        "latency_s": 0.001272,
+        "peak_traced_bytes": 2608,
+        "classification": "correct",
+        "classification_detail": "m:f present; empty children: []"
+      }
+    },
+    {
+      "case_id": "D1-02",
+      "category": "radical",
+      "source": "mathmlben:65",
+      "source_record_path": "E:\\MeridianData\\ooxml-graph-paper\\raw\\mathmlben\\data\\65.json",
+      "source_record_sha256": "a99171d6404e7d9192cf78352036a95c26a8cdf54abcae4b16b5ba07c50a5a79",
+      "hand_authored_note": null,
+      "latex_used": "H^1(K)=\\sqrt{2}",
+      "mathml_used": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" id=\"p1.1.m1.1\" class=\"ltx_Math\" alttext=\"H^{1}(K)=\\sqrt{2}\" display=\"inline\">\n  <semantics id=\"p1.1.m1.1a\">\n    <mrow id=\"p1.1.m1.1.8\" xref=\"p1.1.m1.1.8.cmml\">\n      <mrow id=\"p1.1.m1.1.8.1.2\" xref=\"p1.1.m1.1.8.1.1.cmml\">\n        <msup id=\"p1.1.m1.1.8.1.2.1\" xref=\"p1.1.m1.1.8.1.2.1.cmml\">\n          <mi id=\"p1.1.m1.1.1\" xref=\"p1.1.m1.1.1.cmml\">H</mi>\n          <mn id=\"p1.1.m1.1.2.1\" xref=\"p1.1.m1.1.2.1.cmml\">1</mn>\n        </msup>\n        <mo id=\"p1.1.m1.1.8.1.2a\" xref=\"p1.1.m1.1.8.1.1.cmml\">⁡</mo>\n        <mrow id=\"p1.1.m1.1.8.1.2.2\" xref=\"p1.1.m1.1.8.1.1.cmml\">\n          <mo stretchy=\"false\" id=\"p1.1.m1.1.3\" xref=\"p1.1.m1.1.8.1.1.cmml\">(</mo>\n          <mi id=\"p1.1.m1.1.4\" xref=\"p1.1.m1.1.4.cmml\">K</mi>\n          <mo stretchy=\"false\" id=\"p1.1.m1.1.5\" xref=\"p1.1.m1.1.8.1.1.cmml\">)</mo>\n        </mrow>\n      </mrow>\n      <mo id=\"p1.1.m1.1.6\" xref=\"p1.1.m1.1.6.cmml\">=</mo>\n      <msqrt id=\"p1.1.m1.1.7\" xref=\"p1.1.m1.1.7.cmml\">\n        <mn id=\"p1.1.m1.1.7.2\" xref=\"p1.1.m1.1.7.2.cmml\">2</mn>\n      </msqrt>\n    </mrow>\n    <annotation-xml encoding=\"MathML-Content\" id=\"p1.1.m1.1b\">\n      <apply id=\"p1.1.m1.1.8.cmml\" xref=\"p1.1.m1.1.8\">\n        <eq id=\"p1.1.m1.1.6.cmml\" xref=\"p1.1.m1.1.6\"/>\n        <apply id=\"p1.1.m1.1.8.1.1.cmml\" xref=\"p1.1.m1.1.8.1.2\">\n          <apply id=\"p1.1.m1.1.8.1.2.1.cmml\" xref=\"p1.1.m1.1.8.1.2.1\">\n            <power  xref=\"p1.1.m1.1.8.1.2.1\"/>\n            <csymbol cd=\"latexml\" id=\"p1.1.m1.1.1.cmml\" xref=\"p1.1.m1.1.1\">Q1591095</csymbol>\n            <cn type=\"integer\" id=\"p1.1.m1.1.2.1.cmml\" xref=\"p1.1.m1.1.2.1\">1</cn>\n          </apply>\n          <csymbol cd=\"latexml\" id=\"p1.1.m1.1.4.cmml\" xref=\"p1.1.m1.1.4\">Q12813935</csymbol>\n        </apply>\n        <apply id=\"p1.1.m1.1.7.cmml\" xref=\"p1.1.m1.1.7\">\n          <root id=\"p1.1.m1.1.7a.cmml\" xref=\"p1.1.m1.1.7\"/>\n          <cn type=\"integer\" id=\"p1.1.m1.1.7.2.cmml\" xref=\"p1.1.m1.1.7.2\">2</cn>\n        </apply>\n      </apply>\n    </annotation-xml>\n    <annotation encoding=\"application/x-tex\" id=\"p1.1.m1.1c\">H^{1}(K)=\\sqrt{2}</annotation>\n  </semantics>\n</math>",
+      "meridian": {
+        "status": "converted",
+        "omml_raw": "<m:oMath xmlns:m=\"http://schemas.openxmlformats.org/officeDocument/2006/math\"><m:sSup><m:e><m:r><m:t>H</m:t></m:r></m:e><m:sup><m:r><m:t>1</m:t></m:r></m:sup></m:sSup><m:r><m:t>(</m:t></m:r><m:r><m:t>K</m:t></m:r><m:r><m:t>)</m:t></m:r><m:r><m:t>=</m:t></m:r><m:rad><m:radPr><m:degHide m:val=\"1\" /></m:radPr><m:deg /><m:e><m:r><m:t>2</m:t></m:r></m:e></m:rad></m:oMath>",
+        "error": null,
+        "latency_s": 0.002966,
+        "peak_traced_bytes": 31950,
+        "classification": "correct",
+        "classification_detail": "m:rad present"
+      },
+      "msxsl": {
+        "status": "converted",
+        "omml_raw": "<?xml version=\"1.0\"?>\n<m:oMath xmlns:m=\"http://schemas.openxmlformats.org/officeDocument/2006/math\"><m:func><m:fName><m:sSup><m:e><m:r><m:t>H</m:t></m:r></m:e><m:sup><m:r><m:t>1</m:t></m:r></m:sup></m:sSup></m:fName><m:e><m:d><m:dPr><m:sepChr m:val=\"\"/></m:dPr><m:e><m:r><m:t>K</m:t></m:r></m:e></m:d></m:e></m:func><m:r><m:t>=</m:t></m:r><m:rad><m:radPr><m:degHide m:val=\"on\"/></m:radPr><m:deg/><m:e><m:r><m:t>2</m:t></m:r></m:e></m:rad></m:oMath>\n",
+        "error": null,
+        "latency_s": 0.001517,
+        "peak_traced_bytes": 6357,
+        "classification": "correct",
+        "classification_detail": "m:rad present"
+      }
+    },
+    {
+      "case_id": "D1-03",
+      "category": "nary_limits",
+      "source": "mathmlben:36",
+      "source_record_path": "E:\\MeridianData\\ooxml-graph-paper\\raw\\mathmlben\\data\\36.json",
+      "source_record_sha256": "e9a6e1e2f1418824baa7d076a0ce5f6e8c5ddaffa72b67bec6753ebacd3a068c",
+      "hand_authored_note": null,
+      "latex_used": "n = \\prod_{i=1}^r p_i^{a_i}",
+      "mathml_used": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\"\n      xmlns:xlink=\"http://www.w3.org/1999/xlink\"\n      alttext=\"n=\\prod_{i=1}^{r}p_{i}^{a_{i}}\"\n      class=\"ltx_Math\"\n      display=\"inline\"\n      id=\"p1.1.m1.1\">\n  <semantics id=\"p1.1.m1.1a\">\n      <mrow id=\"p1.1.m1.1.9\" xref=\"p1.1.m1.1.9.cmml\">\n         <mi id=\"p1.1.m1.1.1\" xref=\"p1.1.m1.1.1.cmml\">n</mi>\n         <mo id=\"p1.1.m1.1.2\" xref=\"p1.1.m1.1.2.cmml\">=</mo>\n         <mrow id=\"p1.1.m1.1.9.1\" xref=\"p1.1.m1.1.9.1.cmml\">\n            <msubsup id=\"p1.1.m1.1.9.1.1\" xref=\"p1.1.m1.1.9.1.1.cmml\">\n               <mo id=\"p1.1.m1.1.3\"\n                   largeop=\"true\"\n                   symmetric=\"true\"\n                   xref=\"p1.1.m1.1.3.cmml\">∏</mo>\n               <mrow id=\"p1.1.m1.1.4.1\" xref=\"p1.1.m1.1.4.1.cmml\">\n                  <mi id=\"p1.1.m1.1.4.1.1\" xref=\"p1.1.m1.1.4.1.1.cmml\">i</mi>\n                  <mo id=\"p1.1.m1.1.4.1.2\" xref=\"p1.1.m1.1.4.1.2.cmml\">=</mo>\n                  <mn id=\"p1.1.m1.1.4.1.3\" xref=\"p1.1.m1.1.4.1.3.cmml\">1</mn>\n               </mrow>\n               <mi id=\"p1.1.m1.1.5.1\" xref=\"p1.1.m1.1.5.1.cmml\">r</mi>\n            </msubsup>\n            <msubsup id=\"p1.1.m1.1.9.1.2\" xref=\"p1.1.m1.1.9.1.2.cmml\">\n               <mi id=\"p1.1.m1.1.6\" xref=\"p1.1.m1.1.6.cmml\">p</mi>\n               <mi id=\"p1.1.m1.1.7.1\" xref=\"p1.1.m1.1.7.1.cmml\">i</mi>\n               <msub id=\"p1.1.m1.1.8.1\" xref=\"p1.1.m1.1.8.1.cmml\">\n                  <mi id=\"p1.1.m1.1.8.1.1\" xref=\"p1.1.m1.1.8.1.1.cmml\">a</mi>\n                  <mi id=\"p1.1.m1.1.8.1.2.1\" xref=\"p1.1.m1.1.8.1.2.1.cmml\">i</mi>\n               </msub>\n            </msubsup>\n         </mrow>\n      </mrow>\n      <annotation-xml encoding=\"MathML-Content\" id=\"p1.1.m1.1b\">\n         <apply id=\"p1.1.m1.1.9.cmml\" xref=\"p1.1.m1.1.9\">\n            <eq id=\"p1.1.m1.1.2.cmml\" xref=\"p1.1.m1.1.2\"/>\n            <ci id=\"p1.1.m1.1.1.cmml\" xref=\"p1.1.m1.1.1\">𝑛</ci>\n            <apply id=\"p1.1.m1.1.9.1.cmml\" xref=\"p1.1.m1.1.9.1\">\n               <apply id=\"p1.1.m1.1.9.1.1.cmml\" xref=\"p1.1.m1.1.9.1.1\">\n                  <power id=\"p1.1.m1.1.9.1.1.1.cmml\" xref=\"p1.1.m1.1.9.1.1\"/>\n                  <apply id=\"p1.1.m1.1.9.1.1.2.cmml\" xref=\"p1.1.m1.1.9.1.1\">\n                     <csymbol cd=\"latexml\" id=\"p1.1.m1.1.3.cmml\" xref=\"p1.1.m1.1.3\">product</csymbol>\n                     <apply id=\"p1.1.m1.1.4.1.cmml\" xref=\"p1.1.m1.1.4.1\">\n                        <eq id=\"p1.1.m1.1.4.1.2.cmml\" xref=\"p1.1.m1.1.4.1.2\"/>\n                        <ci id=\"p1.1.m1.1.4.1.1.cmml\" xref=\"p1.1.m1.1.4.1.1\">𝑖</ci>\n                        <cn id=\"p1.1.m1.1.4.1.3.cmml\" type=\"integer\" xref=\"p1.1.m1.1.4.1.3\">1</cn>\n                     </apply>\n                  </apply>\n                  <ci id=\"p1.1.m1.1.5.1.cmml\" xref=\"p1.1.m1.1.5.1\">𝑟</ci>\n               </apply>\n               <apply id=\"p1.1.m1.1.9.1.2.cmml\" xref=\"p1.1.m1.1.9.1.2\">\n                  <power id=\"p1.1.m1.1.9.1.2.1.cmml\" xref=\"p1.1.m1.1.9.1.2\"/>\n                  <apply id=\"p1.1.m1.1.9.1.2.2.cmml\" xref=\"p1.1.m1.1.9.1.2\">\n                     <ci id=\"p1.1.m1.1.6.cmml\" xref=\"p1.1.m1.1.6\">𝑝</ci>\n                     <ci id=\"p1.1.m1.1.7.1.cmml\" xref=\"p1.1.m1.1.7.1\">𝑖</ci>\n                  </apply>\n                  <apply id=\"p1.1.m1.1.8.1.cmml\" xref=\"p1.1.m1.1.8.1\">\n                     <ci id=\"p1.1.m1.1.8.1.1.cmml\" xref=\"p1.1.m1.1.8.1.1\">𝑎</ci>\n                     <ci id=\"p1.1.m1.1.8.1.2.1.cmml\" xref=\"p1.1.m1.1.8.1.2.1\">𝑖</ci>\n                  </apply>\n               </apply>\n            </apply>\n         </apply>\n      </annotation-xml>\n      <annotation encoding=\"application/x-tex\" id=\"p1.1.m1.1c\">n=\\prod_{i=1}^{r}p_{i}^{a_{i}}</annotation>\n  </semantics>\n</math>\n",
+      "meridian": {
+        "status": "converted",
+        "omml_raw": "<m:oMath xmlns:m=\"http://schemas.openxmlformats.org/officeDocument/2006/math\"><m:r><m:t>n</m:t></m:r><m:r><m:t>=</m:t></m:r><m:sSubSup><m:e><m:r><m:t>∏</m:t></m:r></m:e><m:sub><m:r><m:t>i</m:t></m:r><m:r><m:t>=</m:t></m:r><m:r><m:t>1</m:t></m:r></m:sub><m:sup><m:r><m:t>r</m:t></m:r></m:sup></m:sSubSup><m:sSubSup><m:e><m:r><m:t>p</m:t></m:r></m:e><m:sub><m:r><m:t>i</m:t></m:r></m:sub><m:sup><m:sSub><m:e><m:r><m:t>a</m:t></m:r></m:e><m:sub><m:r><m:t>i</m:t></m:r></m:sub></m:sSub></m:sup></m:sSubSup></m:oMath>",
+        "error": null,
+        "latency_s": 0.004222,
+        "peak_traced_bytes": 36305,
+        "classification": "lossy_side_script_not_nary",
+        "classification_detail": "big-operator rendered as side sub/sup, not m:nary (matches omml-builder-audit-v0.md case 7-9)"
+      },
+      "msxsl": {
+        "status": "converted",
+        "omml_raw": "<?xml version=\"1.0\"?>\n<m:oMath xmlns:m=\"http://schemas.openxmlformats.org/officeDocument/2006/math\"><m:r><m:t>n=</m:t></m:r><m:nary><m:naryPr><m:chr m:val=\"∏\"/><m:limLoc m:val=\"subSup\"/><m:grow m:val=\"1\"/><m:subHide m:val=\"off\"/><m:supHide m:val=\"off\"/></m:naryPr><m:sub><m:r><m:t>i=1</m:t></m:r></m:sub><m:sup><m:r><m:t>r</m:t></m:r></m:sup><m:e><m:sSubSup><m:e><m:r><m:t>p</m:t></m:r></m:e><m:sub><m:r><m:t>i</m:t></m:r></m:sub><m:sup><m:sSub><m:e><m:r><m:t>a</m:t></m:r></m:e><m:sub><m:r><m:t>i</m:t></m:r></m:sub></m:sSub></m:sup></m:sSubSup></m:e></m:nary></m:oMath>\n",
+        "error": null,
+        "latency_s": 0.003152,
+        "peak_traced_bytes": 14649,
+        "classification": "correct",
+        "classification_detail": "true m:nary big-operator with limits"
+      }
+    },
+    {
+      "case_id": "D1-04",
+      "category": "matrix_array",
+      "source": "mathmlben:285",
+      "source_record_path": "E:\\MeridianData\\ooxml-graph-paper\\raw\\mathmlben\\data\\285.json",
+      "source_record_sha256": "125deffba8d68932e39d6717872525c24d38a3a181e64bbaa9c4294027ee98fc",
+      "hand_authored_note": null,
+      "latex_used": "|A| = \\begin{vmatrix} a & b\\\\c & d \\end{vmatrix}=ad - bc",
+      "mathml_used": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" id=\"p1.1.m1.1\" class=\"ltx_Math\" alttext=\"|A|=\\begin{vmatrix}a&amp;b\\\\&#10;c&amp;d\\end{vmatrix}=ad-bc\" display=\"inline\">\n  <semantics id=\"p1.1.m1.1a\">\n    <mrow id=\"p1.1.m1.1.12\" xref=\"p1.1.m1.1.12.cmml\">\n      <mrow id=\"p1.1.m1.1.12.2\" xref=\"p1.1.m1.1.12.2.1.cmml\">\n        <mo stretchy=\"false\" id=\"p1.1.m1.1.1\" xref=\"p1.1.m1.1.12.2.1.1.cmml\">|</mo>\n        <mi id=\"p1.1.m1.1.2\" xref=\"p1.1.m1.1.2.cmml\">A</mi>\n        <mo stretchy=\"false\" id=\"p1.1.m1.1.3\" xref=\"p1.1.m1.1.12.2.1.1.cmml\">|</mo>\n      </mrow>\n      <mo id=\"p1.1.m1.1.4\" xref=\"p1.1.m1.1.4.cmml\">=</mo>\n      <mrow id=\"p1.1.m1.1.5.5\" xref=\"p1.1.m1.1.5.1.cmml\">\n        <mo id=\"p1.1.m1.1.5.2\" xref=\"p1.1.m1.1.5.1.1.cmml\">|</mo>\n        <mtable columnspacing=\"5pt\" rowspacing=\"0pt\" id=\"p1.1.m1.1.5.3\" xref=\"p1.1.m1.1.5.3.cmml\">\n          <mtr id=\"p1.1.m1.1.5.3a\" xref=\"p1.1.m1.1.5.3.cmml\">\n            <mtd columnalign=\"center\" id=\"p1.1.m1.1.5.3b\" xref=\"p1.1.m1.1.5.3.cmml\">\n              <mi id=\"p1.1.m1.1.5.3.1.1.1.1\" xref=\"p1.1.m1.1.5.3.1.1.1.1.cmml\">a</mi>\n            </mtd>\n            <mtd columnalign=\"center\" id=\"p1.1.m1.1.5.3c\" xref=\"p1.1.m1.1.5.3.cmml\">\n              <mi id=\"p1.1.m1.1.5.3.1.1.2.1\" xref=\"p1.1.m1.1.5.3.1.1.2.1.cmml\">b</mi>\n            </mtd>\n          </mtr>\n          <mtr id=\"p1.1.m1.1.5.3d\" xref=\"p1.1.m1.1.5.3.cmml\">\n            <mtd columnalign=\"center\" id=\"p1.1.m1.1.5.3e\" xref=\"p1.1.m1.1.5.3.cmml\">\n              <mi id=\"p1.1.m1.1.5.3.1.2.1.1\" xref=\"p1.1.m1.1.5.3.1.2.1.1.cmml\">c</mi>\n            </mtd>\n            <mtd columnalign=\"center\" id=\"p1.1.m1.1.5.3f\" xref=\"p1.1.m1.1.5.3.cmml\">\n              <mi id=\"p1.1.m1.1.5.3.1.2.2.1\" xref=\"p1.1.m1.1.5.3.1.2.2.1.cmml\">d</mi>\n            </mtd>\n          </mtr>\n        </mtable>\n        <mo id=\"p1.1.m1.1.5.4\" xref=\"p1.1.m1.1.5.1.1.cmml\">|</mo>\n      </mrow>\n      <mo id=\"p1.1.m1.1.6\" xref=\"p1.1.m1.1.6.cmml\">=</mo>\n      <mrow id=\"p1.1.m1.1.12.3\" xref=\"p1.1.m1.1.12.3.cmml\">\n        <mrow id=\"p1.1.m1.1.12.3.1\" xref=\"p1.1.m1.1.12.3.1.cmml\">\n          <mi id=\"p1.1.m1.1.7\" xref=\"p1.1.m1.1.7.cmml\">a</mi>\n          <mo id=\"p1.1.m1.1.12.3.1.1\" xref=\"p1.1.m1.1.12.3.1.1.cmml\">⁢</mo>\n          <mi id=\"p1.1.m1.1.8\" xref=\"p1.1.m1.1.8.cmml\">d</mi>\n        </mrow>\n        <mo id=\"p1.1.m1.1.9\" xref=\"p1.1.m1.1.9.cmml\">-</mo>\n        <mrow id=\"p1.1.m1.1.12.3.2\" xref=\"p1.1.m1.1.12.3.2.cmml\">\n          <mi id=\"p1.1.m1.1.10\" xref=\"p1.1.m1.1.10.cmml\">b</mi>\n          <mo id=\"p1.1.m1.1.12.3.2.1\" xref=\"p1.1.m1.1.12.3.2.1.cmml\">⁢</mo>\n          <mi id=\"p1.1.m1.1.11\" xref=\"p1.1.m1.1.11.cmml\">c</mi>\n        </mrow>\n      </mrow>\n    </mrow>\n    <annotation-xml encoding=\"MathML-Content\" id=\"p1.1.m1.1b\">\n      <apply id=\"p1.1.m1.1.12.cmml\" xref=\"p1.1.m1.1.12\">\n        <and id=\"p1.1.m1.1.12a.cmml\" xref=\"p1.1.m1.1.12\"/>\n        <apply id=\"p1.1.m1.1.12b.cmml\" xref=\"p1.1.m1.1.12\">\n          <eq id=\"p1.1.m1.1.4.cmml\" xref=\"p1.1.m1.1.4\"/>\n          <apply id=\"p1.1.m1.1.12.2.1.cmml\" xref=\"p1.1.m1.1.12.2\">\n            <abs id=\"p1.1.m1.1.12.2.1.1.cmml\" xref=\"p1.1.m1.1.1\"/>\n            <csymbol cd=\"latexml\" id=\"p1.1.m1.1.2.cmml\" xref=\"p1.1.m1.1.2\">Q44337</csymbol>\n          </apply>\n          <apply id=\"p1.1.m1.1.5.1.cmml\" xref=\"p1.1.m1.1.5.5\">\n            <determinant id=\"p1.1.m1.1.5.1.1.cmml\" xref=\"p1.1.m1.1.5.2\"/>\n            <matrix id=\"p1.1.m1.1.5.3.cmml\" xref=\"p1.1.m1.1.5.3\">\n              <matrixrow id=\"p1.1.m1.1.5.3a.cmml\" xref=\"p1.1.m1.1.5.3\">\n                <csymbol cd=\"latexml\" id=\"p1.1.m1.1.5.3.1.1.1.1.cmml\" xref=\"p1.1.m1.1.5.3.1.1.1.1\">Q25203552</csymbol>\n                <csymbol cd=\"latexml\" id=\"p1.1.m1.1.5.3.1.1.2.1.cmml\" xref=\"p1.1.m1.1.5.3.1.1.2.1\">Q25203552</csymbol>\n              </matrixrow>\n              <matrixrow id=\"p1.1.m1.1.5.3b.cmml\" xref=\"p1.1.m1.1.5.3\">\n                <csymbol cd=\"latexml\" id=\"p1.1.m1.1.5.3.1.2.1.1.cmml\" xref=\"p1.1.m1.1.5.3.1.2.1.1\">Q25203552</csymbol>\n                <csymbol cd=\"latexml\" id=\"p1.1.m1.1.5.3.1.2.2.1.cmml\" xref=\"p1.1.m1.1.5.3.1.2.2.1\">Q25203552</csymbol>\n              </matrixrow>\n            </matrix>\n          </apply>\n        </apply>\n        <apply id=\"p1.1.m1.1.12c.cmml\" xref=\"p1.1.m1.1.12\">\n          <eq id=\"p1.1.m1.1.6.cmml\" xref=\"p1.1.m1.1.6\"/>\n          <share href=\"#p1.1.m1.1.5.cmml\" id=\"p1.1.m1.1.12d.cmml\" xref=\"p1.1.m1.1.12\"/>\n          <apply id=\"p1.1.m1.1.12.3.cmml\" xref=\"p1.1.m1.1.12.3\">\n            <minus id=\"p1.1.m1.1.9.cmml\" xref=\"p1.1.m1.1.9\"/>\n            <apply id=\"p1.1.m1.1.12.3.1.cmml\" xref=\"p1.1.m1.1.12.3.1\">\n              <times id=\"p1.1.m1.1.12.3.1.1.cmml\" xref=\"p1.1.m1.1.12.3.1.1\"/>\n              <csymbol cd=\"latexml\" id=\"p1.1.m1.1.7.cmml\" xref=\"p1.1.m1.1.7\">Q25203552</csymbol>\n              <csymbol cd=\"latexml\" id=\"p1.1.m1.1.8.cmml\" xref=\"p1.1.m1.1.8\">Q25203552</csymbol>\n            </apply>\n            <apply id=\"p1.1.m1.1.12.3.2.cmml\" xref=\"p1.1.m1.1.12.3.2\">\n              <times id=\"p1.1.m1.1.12.3.2.1.cmml\" xref=\"p1.1.m1.1.12.3.2.1\"/>\n              <csymbol cd=\"latexml\" id=\"p1.1.m1.1.10.cmml\" xref=\"p1.1.m1.1.10\">Q25203552</csymbol>\n              <csymbol cd=\"latexml\" id=\"p1.1.m1.1.11.cmml\" xref=\"p1.1.m1.1.11\">Q25203552</csymbol>\n            </apply>\n          </apply>\n        </apply>\n      </apply>\n    </annotation-xml>\n    <annotation encoding=\"application/x-tex\" id=\"p1.1.m1.1c\">|A|=\\begin{vmatrix}a&amp;b\\\\\nc&amp;d\\end{vmatrix}=ad-bc</annotation>\n  </semantics>\n</math>",
+      "meridian": {
+        "status": "converted",
+        "omml_raw": "<m:oMath xmlns:m=\"http://schemas.openxmlformats.org/officeDocument/2006/math\"><m:r><m:t>|</m:t></m:r><m:r><m:t>A</m:t></m:r><m:r><m:t>|</m:t></m:r><m:r><m:t>=</m:t></m:r><m:r><m:t>|</m:t></m:r><m:eqArr><m:e><m:e><m:r><m:t>a</m:t></m:r></m:e><m:e><m:r><m:t>b</m:t></m:r></m:e></m:e><m:e><m:e><m:r><m:t>c</m:t></m:r></m:e><m:e><m:r><m:t>d</m:t></m:r></m:e></m:e></m:eqArr><m:r><m:t>|</m:t></m:r><m:r><m:t>=</m:t></m:r><m:r><m:t>a</m:t></m:r><m:r><m:t>d</m:t></m:r><m:r><m:t>−</m:t></m:r><m:r><m:t>b</m:t></m:r><m:r><m:t>c</m:t></m:r></m:oMath>",
+        "error": null,
+        "latency_s": 0.005192,
+        "peak_traced_bytes": 38965,
+        "classification": "correct",
+        "classification_detail": "grid element used: m:eqArr"
+      },
+      "msxsl": {
+        "status": "converted",
+        "omml_raw": "<?xml version=\"1.0\"?>\n<m:oMath xmlns:m=\"http://schemas.openxmlformats.org/officeDocument/2006/math\"><m:d><m:dPr><m:begChr m:val=\"|\"/><m:sepChr m:val=\"\"/><m:endChr m:val=\"|\"/></m:dPr><m:e><m:r><m:t>A</m:t></m:r></m:e></m:d><m:r><m:t>=</m:t></m:r><m:d><m:dPr><m:begChr m:val=\"|\"/><m:sepChr m:val=\"\"/><m:endChr m:val=\"|\"/></m:dPr><m:e><m:m><m:mPr><m:baseJc m:val=\"center\"/><m:plcHide m:val=\"on\"/><m:mcs><m:mc><m:mcPr><m:count m:val=\"2\"/><m:mcJc m:val=\"center\"/></m:mcPr></m:mc></m:mcs></m:mPr><m:mr><m:e><m:r><m:t>a</m:t></m:r></m:e><m:e><m:r><m:t>b</m:t></m:r></m:e></m:mr><m:mr><m:e><m:r><m:t>c</m:t></m:r></m:e><m:e><m:r><m:t>d</m:t></m:r></m:e></m:mr></m:m></m:e></m:d><m:r><m:t>=</m:t></m:r><m:r><m:t>ad</m:t></m:r><m:r><m:t>-</m:t></m:r><m:r><m:t>bc</m:t></m:r></m:oMath>\n",
+        "error": null,
+        "latency_s": 0.003083,
+        "peak_traced_bytes": 16206,
+        "classification": "correct",
+        "classification_detail": "grid element used: m:m"
+      }
+    },
+    {
+      "case_id": "D1-05",
+      "category": "accent",
+      "source": "mathmlben:237",
+      "source_record_path": "E:\\MeridianData\\ooxml-graph-paper\\raw\\mathmlben\\data\\237.json",
+      "source_record_sha256": "58e2cd4440738ef9d71e4a706323cb2575268c346155c31ed0047be948407370",
+      "hand_authored_note": null,
+      "latex_used": "h_{i}=\\sum_{j}\\hat{w}_{ij}s_{j}",
+      "mathml_used": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" id=\"p1.1.m1.1\" class=\"ltx_Math\" alttext=\"h_{i}=\\sum_{j}\\hat{w}_{ij}s_{j}\" display=\"inline\">\n  <semantics id=\"p1.1.m1.1a\">\n    <mrow id=\"p1.1.m1.1.10\" xref=\"p1.1.m1.1.10.cmml\">\n      <msub id=\"p1.1.m1.1.10.1\" xref=\"p1.1.m1.1.10.1.cmml\">\n        <mi id=\"p1.1.m1.1.1\" xref=\"p1.1.m1.1.1.cmml\">h</mi>\n        <mi id=\"p1.1.m1.1.2.1\" xref=\"p1.1.m1.1.2.1.cmml\">i</mi>\n      </msub>\n      <mo id=\"p1.1.m1.1.3\" xref=\"p1.1.m1.1.3.cmml\">=</mo>\n      <mrow id=\"p1.1.m1.1.10.2\" xref=\"p1.1.m1.1.10.2.cmml\">\n        <msub id=\"p1.1.m1.1.10.2.1\" xref=\"p1.1.m1.1.10.2.1.cmml\">\n          <mo largeop=\"true\" symmetric=\"true\" id=\"p1.1.m1.1.4\" xref=\"p1.1.m1.1.4.cmml\">∑</mo>\n          <mi id=\"p1.1.m1.1.5.1\" xref=\"p1.1.m1.1.5.1.cmml\">j</mi>\n        </msub>\n        <mrow id=\"p1.1.m1.1.10.2.2\" xref=\"p1.1.m1.1.10.2.2.cmml\">\n          <msub id=\"p1.1.m1.1.10.2.2.2\" xref=\"p1.1.m1.1.10.2.2.2.cmml\">\n            <mover accent=\"true\" id=\"p1.1.m1.1.6\" xref=\"p1.1.m1.1.6a.cmml\">\n              <mi id=\"p1.1.m1.1.6.2\" xref=\"p1.1.m1.1.6.2.cmml\">w</mi>\n              <mo stretchy=\"false\" id=\"p1.1.m1.1.6.1\" xref=\"p1.1.m1.1.6.1.cmml\">^</mo>\n            </mover>\n            <mrow id=\"p1.1.m1.1.7.1\" xref=\"p1.1.m1.1.7.1.cmml\">\n              <mi id=\"p1.1.m1.1.7.1.1\" xref=\"p1.1.m1.1.7.1.1.cmml\">i</mi>\n              <mo id=\"p1.1.m1.1.7.1.3\" xref=\"p1.1.m1.1.7.1.3.cmml\">⁢</mo>\n              <mi id=\"p1.1.m1.1.7.1.2\" xref=\"p1.1.m1.1.7.1.2.cmml\">j</mi>\n            </mrow>\n          </msub>\n          <mo id=\"p1.1.m1.1.10.2.2.1\" xref=\"p1.1.m1.1.10.2.2.1.cmml\">⁢</mo>\n          <msub id=\"p1.1.m1.1.10.2.2.3\" xref=\"p1.1.m1.1.10.2.2.3.cmml\">\n            <mi id=\"p1.1.m1.1.8\" xref=\"p1.1.m1.1.8.cmml\">s</mi>\n            <mi id=\"p1.1.m1.1.9.1\" xref=\"p1.1.m1.1.9.1.cmml\">j</mi>\n          </msub>\n        </mrow>\n      </mrow>\n    </mrow>\n    <annotation-xml encoding=\"MathML-Content\" id=\"p1.1.m1.1b\">\n      <apply id=\"p1.1.m1.1.10.cmml\" xref=\"p1.1.m1.1.10\">\n        <eq id=\"p1.1.m1.1.3.cmml\" xref=\"p1.1.m1.1.3\"/>\n        <apply id=\"p1.1.m1.1.10.1.cmml\" xref=\"p1.1.m1.1.10.1\">\n          <csymbol cd=\"ambiguous\" id=\"p1.1.m1.1.10.1.1.cmml\" xref=\"p1.1.m1.1.10.1\">subscript</csymbol>\n          <csymbol cd=\"latexml\" id=\"p1.1.m1.1.1.cmml\" xref=\"p1.1.m1.1.1\">Q190109</csymbol>\n          <csymbol cd=\"latexml\" id=\"p1.1.m1.1.2.1.cmml\" xref=\"p1.1.m1.1.2.1\">Q2303886</csymbol>\n        </apply>\n        <apply id=\"p1.1.m1.1.10.2.cmml\" xref=\"p1.1.m1.1.10.2\">\n          <apply id=\"p1.1.m1.1.10.2.1.cmml\" xref=\"p1.1.m1.1.10.2.1\">\n            <csymbol cd=\"ambiguous\" id=\"p1.1.m1.1.10.2.1.1.cmml\" xref=\"p1.1.m1.1.10.2.1\">subscript</csymbol>\n            <sum id=\"p1.1.m1.1.4.cmml\" xref=\"p1.1.m1.1.4\"/>\n            <csymbol cd=\"latexml\" id=\"p1.1.m1.1.5.1.cmml\" xref=\"p1.1.m1.1.5.1\">Q2303886</csymbol>\n          </apply>\n          <apply id=\"p1.1.m1.1.10.2.2.cmml\" xref=\"p1.1.m1.1.10.2.2\">\n            <times id=\"p1.1.m1.1.10.2.2.1.cmml\" xref=\"p1.1.m1.1.10.2.2.1\"/>\n            <apply id=\"p1.1.m1.1.10.2.2.2.cmml\" xref=\"p1.1.m1.1.10.2.2.2\">\n              <csymbol cd=\"ambiguous\" id=\"p1.1.m1.1.10.2.2.2.1.cmml\" xref=\"p1.1.m1.1.10.2.2.2\">subscript</csymbol>\n              <ci id=\"p1.1.m1.1.6a.cmml\" xref=\"p1.1.m1.1.6\">\n                <mover accent=\"true\" id=\"p1.1.m1.1.6.cmml\" xref=\"p1.1.m1.1.6\">\n                  <mi id=\"p1.1.m1.1.6.2.cmml\" xref=\"p1.1.m1.1.6.2\">w</mi>\n                  <mo stretchy=\"false\" id=\"p1.1.m1.1.6.1.cmml\" xref=\"p1.1.m1.1.6.1\">^</mo>\n                </mover>\n              </ci>\n              <apply id=\"p1.1.m1.1.7.1.cmml\" xref=\"p1.1.m1.1.7.1\">\n                <times id=\"p1.1.m1.1.7.1.3.cmml\" xref=\"p1.1.m1.1.7.1.3\"/>\n                <csymbol cd=\"latexml\" id=\"p1.1.m1.1.7.1.1.cmml\" xref=\"p1.1.m1.1.7.1.1\">Q2303886</csymbol>\n                <csymbol cd=\"latexml\" id=\"p1.1.m1.1.7.1.2.cmml\" xref=\"p1.1.m1.1.7.1.2\">Q2303886</csymbol>\n              </apply>\n            </apply>\n            <apply id=\"p1.1.m1.1.10.2.2.3.cmml\" xref=\"p1.1.m1.1.10.2.2.3\">\n              <csymbol cd=\"ambiguous\" id=\"p1.1.m1.1.10.2.2.3.1.cmml\" xref=\"p1.1.m1.1.10.2.2.3\">subscript</csymbol>\n              <ci id=\"p1.1.m1.1.8.cmml\" xref=\"p1.1.m1.1.8\">𝑠</ci>\n              <csymbol cd=\"latexml\" id=\"p1.1.m1.1.9.1.cmml\" xref=\"p1.1.m1.1.9.1\">Q2303886</csymbol>\n            </apply>\n          </apply>\n        </apply>\n      </apply>\n    </annotation-xml>\n    <annotation encoding=\"application/x-tex\" id=\"p1.1.m1.1c\">h_{i}=\\sum_{j}\\hat{w}_{ij}s_{j}</annotation>\n  </semantics>\n</math>",
+      "meridian": {
+        "status": "converted",
+        "omml_raw": "<m:oMath xmlns:m=\"http://schemas.openxmlformats.org/officeDocument/2006/math\"><m:sSub><m:e><m:r><m:t>h</m:t></m:r></m:e><m:sub><m:r><m:t>i</m:t></m:r></m:sub></m:sSub><m:r><m:t>=</m:t></m:r><m:sSub><m:e><m:r><m:t>∑</m:t></m:r></m:e><m:sub><m:r><m:t>j</m:t></m:r></m:sub></m:sSub><m:sSub><m:e><m:acc><m:accPr><m:chr m:val=\"^\" /></m:accPr><m:e><m:r><m:t>w</m:t></m:r></m:e></m:acc></m:e><m:sub><m:r><m:t>i</m:t></m:r><m:r><m:t>j</m:t></m:r></m:sub></m:sSub><m:sSub><m:e><m:r><m:t>s</m:t></m:r></m:e><m:sub><m:r><m:t>j</m:t></m:r></m:sub></m:sSub></m:oMath>",
+        "error": null,
+        "latency_s": 0.004566,
+        "peak_traced_bytes": 41365,
+        "classification": "correct",
+        "classification_detail": null
+      },
+      "msxsl": {
+        "status": "converted",
+        "omml_raw": "<?xml version=\"1.0\"?>\n<m:oMath xmlns:m=\"http://schemas.openxmlformats.org/officeDocument/2006/math\"><m:sSub><m:e><m:r><m:t>h</m:t></m:r></m:e><m:sub><m:r><m:t>i</m:t></m:r></m:sub></m:sSub><m:r><m:t>=</m:t></m:r><m:nary><m:naryPr><m:chr m:val=\"∑\"/><m:limLoc m:val=\"subSup\"/><m:grow m:val=\"1\"/><m:subHide m:val=\"off\"/><m:supHide m:val=\"on\"/></m:naryPr><m:sub><m:r><m:t>j</m:t></m:r></m:sub><m:sup/><m:e><m:sSub><m:e><m:acc><m:accPr><m:chr m:val=\"̂\"/></m:accPr><m:e><m:r><m:t>w</m:t></m:r></m:e></m:acc></m:e><m:sub><m:r><m:t>ij</m:t></m:r></m:sub></m:sSub><m:r><m:t/></m:r><m:sSub><m:e><m:r><m:t>s</m:t></m:r></m:e><m:sub><m:r><m:t>j</m:t></m:r></m:sub></m:sSub></m:e></m:nary><m:acc><m:accPr><m:chr m:val=\"̂\"/></m:accPr><m:e><m:r><m:t>w</m:t></m:r></m:e></m:acc></m:oMath>\n",
+        "error": null,
+        "latency_s": 0.003334,
+        "peak_traced_bytes": 17881,
+        "classification": "correct",
+        "classification_detail": null
+      },
+      "msxsl_annotation_stripped_probe": {
+        "note": "same MML2OMML.XSL re-run after removing <annotation-xml>/<annotation> (Content-MathML) from the input -- isolates whether the duplicate <m:acc> comes from MS-XSL also processing an embedded presentation-MathML fragment inside the Content-MathML sibling block.",
+        "omml_raw": "<?xml version=\"1.0\"?>\n<m:oMath xmlns:m=\"http://schemas.openxmlformats.org/officeDocument/2006/math\"><m:sSub><m:e><m:r><m:t>h</m:t></m:r></m:e><m:sub><m:r><m:t>i</m:t></m:r></m:sub></m:sSub><m:r><m:t>=</m:t></m:r><m:nary><m:naryPr><m:chr m:val=\"∑\"/><m:limLoc m:val=\"subSup\"/><m:grow m:val=\"1\"/><m:subHide m:val=\"off\"/><m:supHide m:val=\"on\"/></m:naryPr><m:sub><m:r><m:t>j</m:t></m:r></m:sub><m:sup/><m:e><m:sSub><m:e><m:acc><m:accPr><m:chr m:val=\"̂\"/></m:accPr><m:e><m:r><m:t>w</m:t></m:r></m:e></m:acc></m:e><m:sub><m:r><m:t>ij</m:t></m:r></m:sub></m:sSub><m:r><m:t/></m:r><m:sSub><m:e><m:r><m:t>s</m:t></m:r></m:e><m:sub><m:r><m:t>j</m:t></m:r></m:sub></m:sSub></m:e></m:nary></m:oMath>\n",
+        "acc_count_with_annotation_xml": 2,
+        "acc_count_without_annotation_xml": 1
+      }
+    },
+    {
+      "case_id": "D1-06",
+      "category": "fence",
+      "source": "mathmlben:26",
+      "source_record_path": "E:\\MeridianData\\ooxml-graph-paper\\raw\\mathmlben\\data\\26.json",
+      "source_record_sha256": "80442384953520bfede87c9742ee2e566c4fcbff0a6dd26476c3417f3296ff67",
+      "hand_authored_note": null,
+      "latex_used": "L\\left(C\\right) \\leq L\\left(T\\right)",
+      "mathml_used": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" id=\"p1.1.m1.1\" class=\"ltx_Math\" alttext=\"L(C)\\leq L(T)\" display=\"inline\">\n  <semantics id=\"p1.1.m1.1a\">\n    <mrow id=\"p1.1.m1.1.10\" xref=\"p1.1.m1.1.10.cmml\">\n      <mrow id=\"p1.1.m1.1.10.1.2\" xref=\"p1.1.m1.1.10.1.1.cmml\">\n        <mi id=\"p1.1.m1.1.1\" xref=\"p1.1.m1.1.1.cmml\">L</mi>\n        <mo id=\"p1.1.m1.1.10.1.2a\" xref=\"p1.1.m1.1.10.1.1.cmml\">⁡</mo>\n        <mrow id=\"p1.1.m1.1.10.1.2.1\" xref=\"p1.1.m1.1.10.1.1.cmml\">\n          <mo stretchy=\"false\" id=\"p1.1.m1.1.2\" xref=\"p1.1.m1.1.10.1.1.cmml\">(</mo>\n          <mi id=\"p1.1.m1.1.3\" xref=\"p1.1.m1.1.3.cmml\">C</mi>\n          <mo stretchy=\"false\" id=\"p1.1.m1.1.4\" xref=\"p1.1.m1.1.10.1.1.cmml\">)</mo>\n        </mrow>\n      </mrow>\n      <mo id=\"p1.1.m1.1.5\" xref=\"p1.1.m1.1.5.cmml\">≤</mo>\n      <mrow id=\"p1.1.m1.1.10.2.2\" xref=\"p1.1.m1.1.10.2.1.cmml\">\n        <mi id=\"p1.1.m1.1.6\" xref=\"p1.1.m1.1.6.cmml\">L</mi>\n        <mo id=\"p1.1.m1.1.10.2.2a\" xref=\"p1.1.m1.1.10.2.1.cmml\">⁡</mo>\n        <mrow id=\"p1.1.m1.1.10.2.2.1\" xref=\"p1.1.m1.1.10.2.1.cmml\">\n          <mo stretchy=\"false\" id=\"p1.1.m1.1.7\" xref=\"p1.1.m1.1.10.2.1.cmml\">(</mo>\n          <mi id=\"p1.1.m1.1.8\" xref=\"p1.1.m1.1.8.cmml\">T</mi>\n          <mo stretchy=\"false\" id=\"p1.1.m1.1.9\" xref=\"p1.1.m1.1.10.2.1.cmml\">)</mo>\n        </mrow>\n      </mrow>\n    </mrow>\n    <annotation-xml encoding=\"MathML-Content\" id=\"p1.1.m1.1b\">\n      <apply id=\"p1.1.m1.1.10.cmml\" xref=\"p1.1.m1.1.10\">\n        <leq id=\"p1.1.m1.1.5.cmml\" xref=\"p1.1.m1.1.5\"/>\n        <apply id=\"p1.1.m1.1.10.1.1.cmml\" xref=\"p1.1.m1.1.10.1.2\">\n          <csymbol cd=\"latexml\" id=\"p1.1.m1.1.1.cmml\" xref=\"p1.1.m1.1.1\">Q30337841</csymbol>\n          <csymbol cd=\"latexml\" id=\"p1.1.m1.1.3.cmml\" xref=\"p1.1.m1.1.3\">Q188889</csymbol>\n        </apply>\n        <apply id=\"p1.1.m1.1.10.2.1.cmml\" xref=\"p1.1.m1.1.10.2.2\">\n          <csymbol cd=\"latexml\" id=\"p1.1.m1.1.6.cmml\" xref=\"p1.1.m1.1.6\">Q30337841</csymbol>\n          <csymbol cd=\"latexml\" id=\"p1.1.m1.1.8.cmml\" xref=\"p1.1.m1.1.8\">Q188889</csymbol>\n        </apply>\n      </apply>\n    </annotation-xml>\n    <annotation encoding=\"application/x-tex\" id=\"p1.1.m1.1c\">L(C)\\leq L(T)</annotation>\n  </semantics>\n</math>",
+      "meridian": {
+        "status": "converted",
+        "omml_raw": "<m:oMath xmlns:m=\"http://schemas.openxmlformats.org/officeDocument/2006/math\"><m:r><m:t>L</m:t></m:r><m:r><m:t>(</m:t></m:r><m:r><m:t>C</m:t></m:r><m:r><m:t>)</m:t></m:r><m:r><m:t>≤</m:t></m:r><m:r><m:t>L</m:t></m:r><m:r><m:t>(</m:t></m:r><m:r><m:t>T</m:t></m:r><m:r><m:t>)</m:t></m:r></m:oMath>",
+        "error": null,
+        "latency_s": 0.00249,
+        "peak_traced_bytes": 26781,
+        "classification": "flattened_no_marker_gap",
+        "classification_detail": "fully flattened text run(s): 'L(C)≤L(T)'; marker hit=[]"
+      },
+      "msxsl": {
+        "status": "converted",
+        "omml_raw": "<?xml version=\"1.0\"?>\n<m:oMath xmlns:m=\"http://schemas.openxmlformats.org/officeDocument/2006/math\"><m:func><m:fName><m:r><m:t>L</m:t></m:r></m:fName><m:e><m:d><m:dPr><m:sepChr m:val=\"\"/></m:dPr><m:e><m:r><m:t>C</m:t></m:r></m:e></m:d></m:e></m:func><m:r><m:t>≤</m:t></m:r><m:func><m:fName><m:r><m:t>L</m:t></m:r></m:fName><m:e><m:d><m:dPr><m:sepChr m:val=\"\"/></m:dPr><m:e><m:r><m:t>T</m:t></m:r></m:e></m:d></m:e></m:func></m:oMath>\n",
+        "error": null,
+        "latency_s": 0.001297,
+        "peak_traced_bytes": 6579,
+        "classification": "correct",
+        "classification_detail": null
+      }
+    },
+    {
+      "case_id": "D1-07",
+      "category": "binomial",
+      "source": "mathmlben:295",
+      "source_record_path": "E:\\MeridianData\\ooxml-graph-paper\\raw\\mathmlben\\data\\295.json",
+      "source_record_sha256": "d6d579a67fbb1db6d2b3bd4703898ca2156002f8a6e062f7106b990eb637c828",
+      "hand_authored_note": null,
+      "latex_used": "\\binom{n}{k} = \\frac{n!}{k! (n-k)!}.",
+      "mathml_used": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" id=\"p1.1.m1.1\" class=\"ltx_Math\" alttext=\"\\binom{n}{k}=\\frac{n!}{k!(n-k)!}\" display=\"inline\">\n  <semantics id=\"p1.1.m1.1a\">\n    <mrow id=\"p1.1.m1.1.4\" xref=\"p1.1.m1.1.4.cmml\">\n      <mrow id=\"p1.1.m1.1.1.5\" xref=\"p1.1.m1.1.1.1.cmml\">\n        <mo id=\"p1.1.m1.1.1.2\" xref=\"p1.1.m1.1.1.1.1.cmml\">(</mo>\n        <mfrac linethickness=\"0pt\" id=\"p1.1.m1.1.1.3\" xref=\"p1.1.m1.1.1.1.cmml\">\n          <mi id=\"p1.1.m1.1.1.3.2\" xref=\"p1.1.m1.1.1.3.2.cmml\">n</mi>\n          <mi id=\"p1.1.m1.1.1.3.3\" xref=\"p1.1.m1.1.1.3.3.cmml\">k</mi>\n        </mfrac>\n        <mo id=\"p1.1.m1.1.1.4\" xref=\"p1.1.m1.1.1.1.1.cmml\">)</mo>\n      </mrow>\n      <mo id=\"p1.1.m1.1.2\" xref=\"p1.1.m1.1.2.cmml\">=</mo>\n      <mfrac id=\"p1.1.m1.1.3\" xref=\"p1.1.m1.1.3.cmml\">\n        <mrow id=\"p1.1.m1.1.3.2\" xref=\"p1.1.m1.1.3.2.cmml\">\n          <mi id=\"p1.1.m1.1.3.2.1\" xref=\"p1.1.m1.1.3.2.1.cmml\">n</mi>\n          <mo lspace=\"0pt\" rspace=\"3.5pt\" id=\"p1.1.m1.1.3.2.2\" xref=\"p1.1.m1.1.3.2.2.cmml\">!</mo>\n        </mrow>\n        <mrow id=\"p1.1.m1.1.3.3\" xref=\"p1.1.m1.1.3.3.cmml\">\n          <mrow id=\"p1.1.m1.1.3.3.10\" xref=\"p1.1.m1.1.3.3.10.cmml\">\n            <mi id=\"p1.1.m1.1.3.3.1\" xref=\"p1.1.m1.1.3.3.1.cmml\">k</mi>\n            <mo lspace=\"0pt\" rspace=\"3.5pt\" id=\"p1.1.m1.1.3.3.2\" xref=\"p1.1.m1.1.3.3.2.cmml\">!</mo>\n          </mrow>\n          <mo id=\"p1.1.m1.1.3.3.9\" xref=\"p1.1.m1.1.3.3.9.cmml\">⁢</mo>\n          <mrow id=\"p1.1.m1.1.3.3.11\" xref=\"p1.1.m1.1.3.3.11.cmml\">\n            <mrow id=\"p1.1.m1.1.3.3.11.1\" xref=\"p1.1.m1.1.3.3.11.1.2.cmml\">\n              <mo stretchy=\"false\" id=\"p1.1.m1.1.3.3.3\" xref=\"p1.1.m1.1.3.3.11.1.2.cmml\">(</mo>\n              <mrow id=\"p1.1.m1.1.3.3.11.1.2\" xref=\"p1.1.m1.1.3.3.11.1.2.cmml\">\n                <mi id=\"p1.1.m1.1.3.3.4\" xref=\"p1.1.m1.1.3.3.4.cmml\">n</mi>\n                <mo id=\"p1.1.m1.1.3.3.5\" xref=\"p1.1.m1.1.3.3.5.cmml\">-</mo>\n                <mi id=\"p1.1.m1.1.3.3.6\" xref=\"p1.1.m1.1.3.3.6.cmml\">k</mi>\n              </mrow>\n              <mo stretchy=\"false\" id=\"p1.1.m1.1.3.3.7\" xref=\"p1.1.m1.1.3.3.11.1.2.cmml\">)</mo>\n            </mrow>\n            <mo lspace=\"0pt\" rspace=\"3.5pt\" id=\"p1.1.m1.1.3.3.8\" xref=\"p1.1.m1.1.3.3.8.cmml\">!</mo>\n          </mrow>\n        </mrow>\n      </mfrac>\n    </mrow>\n    <annotation-xml encoding=\"MathML-Content\" id=\"p1.1.m1.1b\">\n      <apply id=\"p1.1.m1.1.4.cmml\" xref=\"p1.1.m1.1.4\">\n        <eq id=\"p1.1.m1.1.2.cmml\" xref=\"p1.1.m1.1.2\"/>\n        <apply id=\"p1.1.m1.1.1.1.cmml\" xref=\"p1.1.m1.1.1.5\">\n          <csymbol cd=\"latexml\" id=\"p1.1.m1.1.1.1.1.cmml\" xref=\"p1.1.m1.1.1.2\">binomial</csymbol>\n          <csymbol cd=\"latexml\" id=\"p1.1.m1.1.1.3.2.cmml\" xref=\"p1.1.m1.1.1.3.2\">Q12503</csymbol>\n          <csymbol cd=\"latexml\" id=\"p1.1.m1.1.1.3.3.cmml\" xref=\"p1.1.m1.1.1.3.3\">Q12503</csymbol>\n        </apply>\n        <apply id=\"p1.1.m1.1.3.cmml\" xref=\"p1.1.m1.1.3\">\n          <divide id=\"p1.1.m1.1.3.1.cmml\" xref=\"p1.1.m1.1.3\"/>\n          <apply id=\"p1.1.m1.1.3.2.cmml\" xref=\"p1.1.m1.1.3.2\">\n            <factorial id=\"p1.1.m1.1.3.2.2.cmml\" xref=\"p1.1.m1.1.3.2.2\"/>\n            <csymbol cd=\"latexml\" id=\"p1.1.m1.1.3.2.1.cmml\" xref=\"p1.1.m1.1.3.2.1\">Q12503</csymbol>\n          </apply>\n          <apply id=\"p1.1.m1.1.3.3.cmml\" xref=\"p1.1.m1.1.3.3\">\n            <times id=\"p1.1.m1.1.3.3.9.cmml\" xref=\"p1.1.m1.1.3.3.9\"/>\n            <apply id=\"p1.1.m1.1.3.3.10.cmml\" xref=\"p1.1.m1.1.3.3.10\">\n              <factorial id=\"p1.1.m1.1.3.3.2.cmml\" xref=\"p1.1.m1.1.3.3.2\"/>\n              <csymbol cd=\"latexml\" id=\"p1.1.m1.1.3.3.1.cmml\" xref=\"p1.1.m1.1.3.3.1\">Q12503</csymbol>\n            </apply>\n            <apply id=\"p1.1.m1.1.3.3.11.cmml\" xref=\"p1.1.m1.1.3.3.11\">\n              <factorial id=\"p1.1.m1.1.3.3.8.cmml\" xref=\"p1.1.m1.1.3.3.8\"/>\n              <apply id=\"p1.1.m1.1.3.3.11.1.2.cmml\" xref=\"p1.1.m1.1.3.3.11.1\">\n                <minus id=\"p1.1.m1.1.3.3.5.cmml\" xref=\"p1.1.m1.1.3.3.5\"/>\n                <csymbol cd=\"latexml\" id=\"p1.1.m1.1.3.3.4.cmml\" xref=\"p1.1.m1.1.3.3.4\">Q12503</csymbol>\n                <csymbol cd=\"latexml\" id=\"p1.1.m1.1.3.3.6.cmml\" xref=\"p1.1.m1.1.3.3.6\">Q12503</csymbol>\n              </apply>\n            </apply>\n          </apply>\n        </apply>\n      </apply>\n    </annotation-xml>\n    <annotation encoding=\"application/x-tex\" id=\"p1.1.m1.1c\">\\binom{n}{k}=\\frac{n!}{k!(n-k)!}</annotation>\n  </semantics>\n</math>",
+      "meridian": {
+        "status": "converted",
+        "omml_raw": "<m:oMath xmlns:m=\"http://schemas.openxmlformats.org/officeDocument/2006/math\"><m:r><m:t>(</m:t></m:r><m:f><m:num><m:e><m:r><m:t>n</m:t></m:r></m:e></m:num><m:den><m:e><m:r><m:t>k</m:t></m:r></m:e></m:den></m:f><m:r><m:t>)</m:t></m:r><m:r><m:t>=</m:t></m:r><m:f><m:num><m:e><m:r><m:t>n</m:t></m:r><m:r><m:t>!</m:t></m:r></m:e></m:num><m:den><m:e><m:r><m:t>k</m:t></m:r><m:r><m:t>!</m:t></m:r><m:r><m:t>(</m:t></m:r><m:r><m:t>n</m:t></m:r><m:r><m:t>−</m:t></m:r><m:r><m:t>k</m:t></m:r><m:r><m:t>)</m:t></m:r><m:r><m:t>!</m:t></m:r></m:e></m:den></m:f><m:r><m:t>.</m:t></m:r></m:oMath>",
+        "error": null,
+        "latency_s": 0.004761,
+        "peak_traced_bytes": 42506,
+        "classification": "lossy_binomial_barred_no_fence",
+        "classification_detail": "fraction present but no m:d fence wrapping it (matches omml-builder-audit-v0.md case 30)"
+      },
+      "msxsl": {
+        "status": "converted",
+        "omml_raw": "<?xml version=\"1.0\"?>\n<m:oMath xmlns:m=\"http://schemas.openxmlformats.org/officeDocument/2006/math\"><m:d><m:dPr><m:sepChr m:val=\"\"/></m:dPr><m:e><m:f><m:fPr><m:type m:val=\"noBar\"/></m:fPr><m:num><m:r><m:t>n</m:t></m:r></m:num><m:den><m:r><m:t>k</m:t></m:r></m:den></m:f></m:e></m:d><m:r><m:t>=</m:t></m:r><m:f><m:fPr><m:type m:val=\"bar\"/></m:fPr><m:num><m:r><m:t>n!</m:t></m:r></m:num><m:den><m:r><m:t>k!</m:t></m:r><m:r><m:t/></m:r><m:d><m:dPr><m:sepChr m:val=\"\"/></m:dPr><m:e><m:r><m:t>n-k</m:t></m:r></m:e></m:d><m:r><m:t>!</m:t></m:r></m:den></m:f></m:oMath>\n",
+        "error": null,
+        "latency_s": 0.003034,
+        "peak_traced_bytes": 13041,
+        "classification": "correct",
+        "classification_detail": "fence present around a fraction-like structure"
+      }
+    },
+    {
+      "case_id": "D1-08a",
+      "category": "functions_limits",
+      "source": "mathmlben:103",
+      "source_record_path": "E:\\MeridianData\\ooxml-graph-paper\\raw\\mathmlben\\data\\103.json",
+      "source_record_sha256": "8b25653d0b628de48456edd40764ab16cf7d47187363b550e2d31d2cacd5136b",
+      "hand_authored_note": null,
+      "latex_used": "\\operatorname{ph}z=\\theta+2n\\pi",
+      "mathml_used": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" id=\"p1.1.m1.1\" class=\"ltx_Math\" alttext=\"\\phase@{z}=\\theta+2n\\cpi\" display=\"inline\">\n  <semantics id=\"p1.1.m1.1a\">\n    <mrow id=\"p1.1.m1.1.8\" xref=\"p1.1.m1.1.8.cmml\">\n      <mrow id=\"p1.1.m1.1.1.5\" xref=\"p1.1.m1.1.1.1.cmml\">\n        <mi id=\"p1.1.m1.1.1.2.1.3\" xref=\"p1.1.m1.1.1.2.1.1.cmml\">ph</mi>\n        <mo id=\"p1.1.m1.1.1.5a\" xref=\"p1.1.m1.1.1.1.cmml\">⁡</mo>\n        <mi id=\"p1.1.m1.1.1.4\" xref=\"p1.1.m1.1.1.4.cmml\">z</mi>\n      </mrow>\n      <mo id=\"p1.1.m1.1.2\" xref=\"p1.1.m1.1.2.cmml\">=</mo>\n      <mrow id=\"p1.1.m1.1.8.1\" xref=\"p1.1.m1.1.8.1.cmml\">\n        <mi id=\"p1.1.m1.1.3\" xref=\"p1.1.m1.1.3.cmml\">θ</mi>\n        <mo id=\"p1.1.m1.1.4\" xref=\"p1.1.m1.1.4.cmml\">+</mo>\n        <mrow id=\"p1.1.m1.1.8.1.1\" xref=\"p1.1.m1.1.8.1.1.cmml\">\n          <mn id=\"p1.1.m1.1.5\" xref=\"p1.1.m1.1.5.cmml\">2</mn>\n          <mo id=\"p1.1.m1.1.8.1.1.1\" xref=\"p1.1.m1.1.8.1.1.1.cmml\">⁢</mo>\n          <mi id=\"p1.1.m1.1.6\" xref=\"p1.1.m1.1.6.cmml\">n</mi>\n          <mo id=\"p1.1.m1.1.8.1.1.1a\" xref=\"p1.1.m1.1.8.1.1.1.cmml\">⁢</mo>\n          <mi id=\"p1.1.m1.1.7.2\" xref=\"p1.1.m1.1.7.1.cmml\">π</mi>\n        </mrow>\n      </mrow>\n    </mrow>\n    <annotation-xml encoding=\"MathML-Content\" id=\"p1.1.m1.1b\">\n      <apply id=\"p1.1.m1.1.8.cmml\" xref=\"p1.1.m1.1.8\">\n        <eq id=\"p1.1.m1.1.2.cmml\" xref=\"p1.1.m1.1.2\"/>\n        <apply id=\"p1.1.m1.1.1.1.cmml\" xref=\"p1.1.m1.1.1.5\">\n          <csymbol cd=\"dlmf\" id=\"p1.1.m1.1.1.2.1.1.cmml\" xref=\"p1.1.m1.1.1.2.1.3\">phase</csymbol>\n          <csymbol cd=\"latexml\" id=\"p1.1.m1.1.1.4.cmml\" xref=\"p1.1.m1.1.1.4\">Q11567</csymbol>\n        </apply>\n        <apply id=\"p1.1.m1.1.8.1.cmml\" xref=\"p1.1.m1.1.8.1\">\n          <plus id=\"p1.1.m1.1.4.cmml\" xref=\"p1.1.m1.1.4\"/>\n          <csymbol cd=\"latexml\" id=\"p1.1.m1.1.3.cmml\" xref=\"p1.1.m1.1.3\">Q12916</csymbol>\n          <apply id=\"p1.1.m1.1.8.1.1.cmml\" xref=\"p1.1.m1.1.8.1.1\">\n            <times id=\"p1.1.m1.1.8.1.1.1.cmml\" xref=\"p1.1.m1.1.8.1.1.1\"/>\n            <cn type=\"integer\" id=\"p1.1.m1.1.5.cmml\" xref=\"p1.1.m1.1.5\">2</cn>\n            <csymbol cd=\"latexml\" id=\"p1.1.m1.1.6.cmml\" xref=\"p1.1.m1.1.6\">Q28920052</csymbol>\n            <pi id=\"p1.1.m1.1.7.1.cmml\" xref=\"p1.1.m1.1.7.2\"/>\n          </apply>\n        </apply>\n      </apply>\n    </annotation-xml>\n  </semantics>\n</math>",
+      "meridian": {
+        "status": "converted",
+        "omml_raw": "<m:oMath xmlns:m=\"http://schemas.openxmlformats.org/officeDocument/2006/math\"><m:r><m:t>ph</m:t></m:r><m:r><m:t>z</m:t></m:r><m:r><m:t>=</m:t></m:r><m:r><m:t>θ</m:t></m:r><m:r><m:t>+</m:t></m:r><m:r><m:t>2</m:t></m:r><m:r><m:t>n</m:t></m:r><m:r><m:t>π</m:t></m:r></m:oMath>",
+        "error": null,
+        "latency_s": 0.002385,
+        "peak_traced_bytes": 23058,
+        "classification": "flattened_no_marker_gap",
+        "classification_detail": "fully flattened text run(s): 'phz=θ+2nπ'; marker hit=[]"
+      },
+      "msxsl": {
+        "status": "converted",
+        "omml_raw": "<?xml version=\"1.0\"?>\n<m:oMath xmlns:m=\"http://schemas.openxmlformats.org/officeDocument/2006/math\"><m:func><m:fName><m:r><m:rPr><m:sty m:val=\"p\"/></m:rPr><m:t>ph</m:t></m:r></m:fName><m:e><m:r><m:t>z</m:t></m:r></m:e></m:func><m:r><m:t>=</m:t></m:r><m:r><m:t>θ+</m:t></m:r><m:r><m:t>2nπ</m:t></m:r></m:oMath>\n",
+        "error": null,
+        "latency_s": 0.001843,
+        "peak_traced_bytes": 6924,
+        "classification": "correct",
+        "classification_detail": "m:func present"
+      }
+    },
+    {
+      "case_id": "D1-08b",
+      "category": "functions_limits",
+      "source": "hand-authored",
+      "source_record_path": null,
+      "source_record_sha256": null,
+      "hand_authored_note": "hand-authored control: replicate PAPER-11's \\lim finding independently via the live converter+MS-XSL pair, since MathMLben's naturally-occurring corpus contains \\operatorname{} but no bare \\lim/\\min/\\max under any reasonable length bound.",
+      "latex_used": "\\lim_{x \\to 0} f(x)",
+      "mathml_used": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mrow><munder><mo>lim</mo><mrow><mi>x</mi><mo>&#8594;</mo><mn>0</mn></mrow></munder><mi>f</mi><mo>&#8289;</mo><mrow><mo>(</mo><mi>x</mi><mo>)</mo></mrow></mrow></math>",
+      "meridian": {
+        "status": "converted",
+        "omml_raw": "<m:oMath xmlns:m=\"http://schemas.openxmlformats.org/officeDocument/2006/math\"><m:sSub><m:e><m:r><m:t>lim</m:t></m:r></m:e><m:sub><m:r><m:t>x</m:t></m:r><m:r><m:t>→</m:t></m:r><m:r><m:t>0</m:t></m:r></m:sub></m:sSub><m:r><m:t>f</m:t></m:r><m:r><m:t>(</m:t></m:r><m:r><m:t>x</m:t></m:r><m:r><m:t>)</m:t></m:r></m:oMath>",
+        "error": null,
+        "latency_s": 0.002497,
+        "peak_traced_bytes": 27789,
+        "classification": "lossy_function_as_side_script",
+        "classification_detail": "function name rendered as plain-text base with a subscript, not m:func/m:limLow (matches omml-builder-audit-v0.md case 10/16-18)"
+      },
+      "msxsl": {
+        "status": "converted",
+        "omml_raw": "<?xml version=\"1.0\"?>\n<m:oMath xmlns:m=\"http://schemas.openxmlformats.org/officeDocument/2006/math\"><m:limLow><m:e><m:r><m:t>lim</m:t></m:r></m:e><m:lim><m:r><m:t>x→0</m:t></m:r></m:lim></m:limLow><m:r><m:t>f⁡</m:t></m:r><m:d><m:dPr><m:sepChr m:val=\"\"/></m:dPr><m:e><m:r><m:t>x</m:t></m:r></m:e></m:d></m:oMath>\n",
+        "error": null,
+        "latency_s": 0.001431,
+        "peak_traced_bytes": 2784,
+        "classification": "correct_limit_structure",
+        "classification_detail": null
+      }
+    },
+    {
+      "case_id": "D1-09",
+      "category": "scripts_multiscript",
+      "source": "mathmlben:110",
+      "source_record_path": "E:\\MeridianData\\ooxml-graph-paper\\raw\\mathmlben\\data\\110.json",
+      "source_record_sha256": "5829aa4b082e555f56a694c149a9d464286ebe4fabc4f1b3cf6a63b23ac7194e",
+      "hand_authored_note": null,
+      "latex_used": "f(x)=\\sum^{\\infty}_{k=0}a_{k}x^{k}",
+      "mathml_used": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" id=\"p1.1.m1.1\" class=\"ltx_Math\" alttext=\"f(x)=\\Sum{k}{0}{\\infty}@{a_{k}x^{k}}\" display=\"inline\">\n  <semantics id=\"p1.1.m1.1a\">\n    <mrow id=\"p1.1.m1.1.7\" xref=\"p1.1.m1.1.7.cmml\">\n      <mrow id=\"p1.1.m1.1.7.1.2\" xref=\"p1.1.m1.1.7.1.1.cmml\">\n        <mi id=\"p1.1.m1.1.1\" xref=\"p1.1.m1.1.1.cmml\">f</mi>\n        <mo id=\"p1.1.m1.1.7.1.2a\" xref=\"p1.1.m1.1.7.1.1.cmml\">⁡</mo>\n        <mrow id=\"p1.1.m1.1.7.1.2.1\" xref=\"p1.1.m1.1.7.1.1.cmml\">\n          <mo stretchy=\"false\" id=\"p1.1.m1.1.2\" xref=\"p1.1.m1.1.7.1.1.cmml\">(</mo>\n          <mi id=\"p1.1.m1.1.3\" xref=\"p1.1.m1.1.3.cmml\">x</mi>\n          <mo stretchy=\"false\" id=\"p1.1.m1.1.4\" xref=\"p1.1.m1.1.7.1.1.cmml\">)</mo>\n        </mrow>\n      </mrow>\n      <mo id=\"p1.1.m1.1.5\" xref=\"p1.1.m1.1.5.cmml\">=</mo>\n      <mrow id=\"p1.1.m1.1.6.5\" xref=\"p1.1.m1.1.6.1.cmml\">\n        <msubsup id=\"p1.1.m1.1.6.2.1.6\" xref=\"p1.1.m1.1.6.2.1.1.cmml\">\n          <mo largeop=\"true\" symmetric=\"true\" id=\"p1.1.m1.1.6.2.1.2\" xref=\"p1.1.m1.1.6.2.1.1.1.cmml\">∑</mo>\n          <mrow id=\"p1.1.m1.1.6.2.1.3.1\" xref=\"p1.1.m1.1.6.2.1.1.cmml\">\n            <mi id=\"p1.1.m1.1.6.2.1.3.1.1\" xref=\"p1.1.m1.1.6.2.1.3.1.1.cmml\">k</mi>\n            <mo id=\"p1.1.m1.1.6.2.1.3.1.2\" xref=\"p1.1.m1.1.6.2.1.1.1.cmml\">=</mo>\n            <mn id=\"p1.1.m1.1.6.2.1.3.1.3\" xref=\"p1.1.m1.1.6.2.1.3.1.3.cmml\">0</mn>\n          </mrow>\n          <mi mathvariant=\"normal\" id=\"p1.1.m1.1.6.2.1.4.1\" xref=\"p1.1.m1.1.6.2.1.4.1.cmml\">∞</mi>\n        </msubsup>\n        <mo id=\"p1.1.m1.1.6.5a\" xref=\"p1.1.m1.1.6.1.cmml\">⁡</mo>\n        <mrow id=\"p1.1.m1.1.6.4\" xref=\"p1.1.m1.1.6.4.cmml\">\n          <msub id=\"p1.1.m1.1.6.4.6\" xref=\"p1.1.m1.1.6.4.6.cmml\">\n            <mi id=\"p1.1.m1.1.6.4.1\" xref=\"p1.1.m1.1.6.4.1.cmml\">a</mi>\n            <mi id=\"p1.1.m1.1.6.4.2.1\" xref=\"p1.1.m1.1.6.4.2.1.cmml\">k</mi>\n          </msub>\n          <mo id=\"p1.1.m1.1.6.4.5\" xref=\"p1.1.m1.1.6.4.5.cmml\">⁢</mo>\n          <msup id=\"p1.1.m1.1.6.4.7\" xref=\"p1.1.m1.1.6.4.7.cmml\">\n            <mi id=\"p1.1.m1.1.6.4.3\" xref=\"p1.1.m1.1.6.4.3.cmml\">x</mi>\n            <mi id=\"p1.1.m1.1.6.4.4.1\" xref=\"p1.1.m1.1.6.4.4.1.cmml\">k</mi>\n          </msup>\n        </mrow>\n      </mrow>\n    </mrow>\n    <annotation-xml encoding=\"MathML-Content\" id=\"p1.1.m1.1b\">\n      <apply id=\"p1.1.m1.1.7.cmml\" xref=\"p1.1.m1.1.7\">\n        <eq id=\"p1.1.m1.1.5.cmml\" xref=\"p1.1.m1.1.5\"/>\n        <apply id=\"p1.1.m1.1.7.1.1.cmml\" xref=\"p1.1.m1.1.7.1.2\">\n          <csymbol cd=\"latexml\" id=\"p1.1.m1.1.1.cmml\" xref=\"p1.1.m1.1.1\">Q11348</csymbol>\n          <csymbol cd=\"latexml\" id=\"p1.1.m1.1.3.cmml\" xref=\"p1.1.m1.1.3\">Q12916</csymbol>\n        </apply>\n        <apply id=\"p1.1.m1.1.6.1.cmml\" xref=\"p1.1.m1.1.6.5\">\n          <apply id=\"p1.1.m1.1.6.2.1.1.cmml\" xref=\"p1.1.m1.1.6.2.1.6\">\n            <csymbol cd=\"dlmf\" id=\"p1.1.m1.1.6.2.1.1.1.cmml\" xref=\"p1.1.m1.1.6.2.1.2\">semantic-sum</csymbol>\n            <csymbol cd=\"latexml\" id=\"p1.1.m1.1.6.2.1.3.1.1.cmml\" xref=\"p1.1.m1.1.6.2.1.3.1.1\">Q28920052</csymbol>\n            <cn type=\"integer\" id=\"p1.1.m1.1.6.2.1.3.1.3.cmml\" xref=\"p1.1.m1.1.6.2.1.3.1.3\">0</cn>\n            <infinity id=\"p1.1.m1.1.6.2.1.4.1.cmml\" xref=\"p1.1.m1.1.6.2.1.4.1\"/>\n          </apply>\n          <apply id=\"p1.1.m1.1.6.4.cmml\" xref=\"p1.1.m1.1.6.4\">\n            <times id=\"p1.1.m1.1.6.4.5.cmml\" xref=\"p1.1.m1.1.6.4.5\"/>\n            <apply id=\"p1.1.m1.1.6.4.6.cmml\" xref=\"p1.1.m1.1.6.4.6\">\n              <csymbol cd=\"latexml\" id=\"p1.1.m1.1.6.4.1.cmml\" xref=\"p1.1.m1.1.6.4.1\">Q50700</csymbol>\n              <csymbol cd=\"latexml\" id=\"p1.1.m1.1.6.4.2.1.cmml\" xref=\"p1.1.m1.1.6.4.2.1\">Q28920052</csymbol>\n            </apply>\n            <apply id=\"p1.1.m1.1.6.4.7.cmml\" xref=\"p1.1.m1.1.6.4.7\">\n              <power id=\"p1.1.m1.1.6.4.7.1.cmml\" xref=\"p1.1.m1.1.6.4.7\"/>\n              <csymbol cd=\"latexml\" id=\"p1.1.m1.1.6.4.3.cmml\" xref=\"p1.1.m1.1.6.4.3\">Q12916</csymbol>\n              <csymbol cd=\"latexml\" id=\"p1.1.m1.1.6.4.4.1.cmml\" xref=\"p1.1.m1.1.6.4.4.1\">Q28920052</csymbol>\n            </apply>\n          </apply>\n        </apply>\n      </apply>\n    </annotation-xml>\n  </semantics>\n</math>",
+      "meridian": {
+        "status": "converted",
+        "omml_raw": "<m:oMath xmlns:m=\"http://schemas.openxmlformats.org/officeDocument/2006/math\"><m:r><m:t>f</m:t></m:r><m:r><m:t>(</m:t></m:r><m:r><m:t>x</m:t></m:r><m:r><m:t>)</m:t></m:r><m:r><m:t>=</m:t></m:r><m:sSubSup><m:e><m:r><m:t>∑</m:t></m:r></m:e><m:sub><m:r><m:t>k</m:t></m:r><m:r><m:t>=</m:t></m:r><m:r><m:t>0</m:t></m:r></m:sub><m:sup><m:r><m:t>∞</m:t></m:r></m:sup></m:sSubSup><m:sSub><m:e><m:r><m:t>a</m:t></m:r></m:e><m:sub><m:r><m:t>k</m:t></m:r></m:sub></m:sSub><m:sSup><m:e><m:r><m:t>x</m:t></m:r></m:e><m:sup><m:r><m:t>k</m:t></m:r></m:sup></m:sSup></m:oMath>",
+        "error": null,
+        "latency_s": 0.004523,
+        "peak_traced_bytes": 39919,
+        "classification": "correct_side_script",
+        "classification_detail": null
+      },
+      "msxsl": {
+        "status": "converted",
+        "omml_raw": "<?xml version=\"1.0\"?>\n<m:oMath xmlns:m=\"http://schemas.openxmlformats.org/officeDocument/2006/math\"><m:func><m:fName><m:r><m:t>f</m:t></m:r></m:fName><m:e><m:d><m:dPr><m:sepChr m:val=\"\"/></m:dPr><m:e><m:r><m:t>x</m:t></m:r></m:e></m:d></m:e></m:func><m:r><m:t>=</m:t></m:r><m:func><m:fName><m:nary><m:naryPr><m:chr m:val=\"∑\"/><m:limLoc m:val=\"subSup\"/><m:grow m:val=\"1\"/><m:subHide m:val=\"off\"/><m:supHide m:val=\"off\"/></m:naryPr><m:sub><m:r><m:t>k=0</m:t></m:r></m:sub><m:sup><m:r><m:rPr><m:sty m:val=\"p\"/></m:rPr><m:t>∞</m:t></m:r></m:sup><m:e><m:r><m:t>⁡</m:t></m:r></m:e></m:nary></m:fName><m:e><m:sSub><m:e><m:r><m:t>a</m:t></m:r></m:e><m:sub><m:r><m:t>k</m:t></m:r></m:sub></m:sSub><m:r><m:t/></m:r><m:sSup><m:e><m:r><m:t>x</m:t></m:r></m:e><m:sup><m:r><m:t>k</m:t></m:r></m:sup></m:sSup></m:e></m:func></m:oMath>\n",
+        "error": null,
+        "latency_s": 0.003666,
+        "peak_traced_bytes": 12306,
+        "classification": "correct_side_script",
+        "classification_detail": null
+      }
+    },
+    {
+      "case_id": "D1-10",
+      "category": "alignment",
+      "source": "hand-authored",
+      "source_record_path": null,
+      "source_record_sha256": null,
+      "hand_authored_note": "hand-authored: MathMLben's inline-formula corpus does not naturally contain multi-row alignment systems; MathML side hand-built as the mtable an aligned system compiles to.",
+      "latex_used": "\\begin{aligned}x&=1\\\\y&=2\\end{aligned}",
+      "mathml_used": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mtable><mtr><mtd><mi>x</mi></mtd><mtd><mo>=</mo><mn>1</mn></mtd></mtr><mtr><mtd><mi>y</mi></mtd><mtd><mo>=</mo><mn>2</mn></mtd></mtr></mtable></math>",
+      "meridian": {
+        "status": "fail_closed_none",
+        "omml_raw": null,
+        "error": null,
+        "latency_s": 0.002096,
+        "peak_traced_bytes": 14486,
+        "classification": "fail_closed",
+        "classification_detail": "no OMML produced"
+      },
+      "msxsl": {
+        "status": "converted",
+        "omml_raw": "<?xml version=\"1.0\"?>\n<m:oMath xmlns:m=\"http://schemas.openxmlformats.org/officeDocument/2006/math\"><m:m><m:mPr><m:baseJc m:val=\"center\"/><m:plcHide m:val=\"on\"/><m:mcs><m:mc><m:mcPr><m:count m:val=\"2\"/><m:mcJc m:val=\"center\"/></m:mcPr></m:mc></m:mcs></m:mPr><m:mr><m:e><m:r><m:t>x</m:t></m:r></m:e><m:e><m:r><m:t>=1</m:t></m:r></m:e></m:mr><m:mr><m:e><m:r><m:t>y</m:t></m:r></m:e><m:e><m:r><m:t>=2</m:t></m:r></m:e></m:mr></m:m></m:oMath>\n",
+        "error": null,
+        "latency_s": 0.001079,
+        "peak_traced_bytes": 2384,
+        "classification": "correct",
+        "classification_detail": "m:m matrix rows found: 2 (MS represents an aligned system as a hidden-placeholder 2-column m:m, not m:eqArr)"
+      }
+    },
+    {
+      "case_id": "D1-11",
+      "category": "punctuation_numbering",
+      "source": "mathmlben:35",
+      "source_record_path": "E:\\MeridianData\\ooxml-graph-paper\\raw\\mathmlben\\data\\35.json",
+      "source_record_sha256": "a92ad04886df39f52fe14f84eca5b4e83a8b3c23ad8ac3cd5fbbdb63254956e3",
+      "hand_authored_note": null,
+      "latex_used": "P(n) = \\frac{k}{n}.",
+      "mathml_used": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\" id=\"p1.1.m1.1\" class=\"ltx_Math\" alttext=\"P(n)=\\frac{k}{n}\" display=\"inline\">\n  <semantics id=\"p1.1.m1.1a\">\n    <mrow id=\"p1.1.m1.1.7\" xref=\"p1.1.m1.1.7.cmml\">\n      <mrow id=\"p1.1.m1.1.7.1.2\" xref=\"p1.1.m1.1.7.1.1.cmml\">\n        <mi id=\"p1.1.m1.1.1\" xref=\"p1.1.m1.1.1.cmml\">P</mi>\n        <mo id=\"p1.1.m1.1.7.1.2a\" xref=\"p1.1.m1.1.7.1.1.cmml\">⁡</mo>\n        <mrow id=\"p1.1.m1.1.7.1.2.1\" xref=\"p1.1.m1.1.7.1.1.cmml\">\n          <mo stretchy=\"false\" id=\"p1.1.m1.1.2\" xref=\"p1.1.m1.1.7.1.1.cmml\">(</mo>\n          <mi id=\"p1.1.m1.1.3\" xref=\"p1.1.m1.1.3.cmml\">n</mi>\n          <mo stretchy=\"false\" id=\"p1.1.m1.1.4\" xref=\"p1.1.m1.1.7.1.1.cmml\">)</mo>\n        </mrow>\n      </mrow>\n      <mo id=\"p1.1.m1.1.5\" xref=\"p1.1.m1.1.5.cmml\">=</mo>\n      <mfrac id=\"p1.1.m1.1.6\" xref=\"p1.1.m1.1.6.cmml\">\n        <mi id=\"p1.1.m1.1.6.2\" xref=\"p1.1.m1.1.6.2.cmml\">k</mi>\n        <mi id=\"p1.1.m1.1.6.3\" xref=\"p1.1.m1.1.6.3.cmml\">n</mi>\n      </mfrac>\n    </mrow>\n    <annotation-xml encoding=\"MathML-Content\" id=\"p1.1.m1.1b\">\n      <apply id=\"p1.1.m1.1.7.cmml\" xref=\"p1.1.m1.1.7\">\n        <eq id=\"p1.1.m1.1.5.cmml\" xref=\"p1.1.m1.1.5\"/>\n        <apply id=\"p1.1.m1.1.7.1.1.cmml\" xref=\"p1.1.m1.1.7.1.2\">\n          <csymbol cd=\"latexml\" id=\"p1.1.m1.1.1.cmml\" xref=\"p1.1.m1.1.1\">Q207522</csymbol>\n          <csymbol cd=\"latexml\" id=\"p1.1.m1.1.3.cmml\" xref=\"p1.1.m1.1.3\">Q21199</csymbol>\n        </apply>\n        <apply id=\"p1.1.m1.1.6.cmml\" xref=\"p1.1.m1.1.6\">\n          <divide id=\"p1.1.m1.1.6.1.cmml\" xref=\"p1.1.m1.1.6\"/>\n          <csymbol cd=\"latexml\" id=\"p1.1.m1.1.6.2.cmml\" xref=\"p1.1.m1.1.6.2\">Q2095069</csymbol>\n          <csymbol cd=\"latexml\" id=\"p1.1.m1.1.6.3.cmml\" xref=\"p1.1.m1.1.6.3\">Q21199</csymbol>\n        </apply>\n      </apply>\n    </annotation-xml>\n    <annotation encoding=\"application/x-tex\" id=\"p1.1.m1.1c\">P(n)=\\frac{k}{n}</annotation>\n  </semantics>\n</math>",
+      "meridian": {
+        "status": "converted",
+        "omml_raw": "<m:oMath xmlns:m=\"http://schemas.openxmlformats.org/officeDocument/2006/math\"><m:r><m:t>P</m:t></m:r><m:r><m:t>(</m:t></m:r><m:r><m:t>n</m:t></m:r><m:r><m:t>)</m:t></m:r><m:r><m:t>=</m:t></m:r><m:f><m:num><m:e><m:r><m:t>k</m:t></m:r></m:e></m:num><m:den><m:e><m:r><m:t>n</m:t></m:r></m:e></m:den></m:f><m:r><m:t>.</m:t></m:r></m:oMath>",
+        "error": null,
+        "latency_s": 0.002779,
+        "peak_traced_bytes": 28689,
+        "classification": "correct",
+        "classification_detail": "structural check limited to the oMath node itself; trailing punctuation placement is a document-level (outside-oMath) property checked separately via audit_equation_style"
+      },
+      "msxsl": {
+        "status": "converted",
+        "omml_raw": "<?xml version=\"1.0\"?>\n<m:oMath xmlns:m=\"http://schemas.openxmlformats.org/officeDocument/2006/math\"><m:func><m:fName><m:r><m:t>P</m:t></m:r></m:fName><m:e><m:d><m:dPr><m:sepChr m:val=\"\"/></m:dPr><m:e><m:r><m:t>n</m:t></m:r></m:e></m:d></m:e></m:func><m:r><m:t>=</m:t></m:r><m:f><m:fPr><m:type m:val=\"bar\"/></m:fPr><m:num><m:r><m:t>k</m:t></m:r></m:num><m:den><m:r><m:t>n</m:t></m:r></m:den></m:f></m:oMath>\n",
+        "error": null,
+        "latency_s": 0.001463,
+        "peak_traced_bytes": 5745,
+        "classification": "correct",
+        "classification_detail": "structural check limited to the oMath node itself; trailing punctuation placement is a document-level (outside-oMath) property checked separately via audit_equation_style"
+      }
+    },
+    {
+      "case_id": "D1-12",
+      "category": "malformed_empty_operands",
+      "source": "hand-authored",
+      "source_record_path": null,
+      "source_record_sha256": null,
+      "hand_authored_note": "hand-authored adversarial: both fraction slots empty, mirrors omml-builder-audit-v0.md Section 6's frac{}{} finding.",
+      "latex_used": "\\frac{}{}",
+      "mathml_used": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mfrac><mrow/><mrow/></mfrac></math>",
+      "meridian": {
+        "status": "converted",
+        "omml_raw": "<m:oMath xmlns:m=\"http://schemas.openxmlformats.org/officeDocument/2006/math\"><m:f><m:num><m:e /></m:num><m:den><m:e /></m:den></m:f></m:oMath>",
+        "error": null,
+        "latency_s": 0.000768,
+        "peak_traced_bytes": 17545,
+        "classification": "empty_required_child_accepted",
+        "classification_detail": "empty children: ['num', 'den']"
+      },
+      "msxsl": {
+        "status": "converted",
+        "omml_raw": "<?xml version=\"1.0\"?>\n<m:oMath xmlns:m=\"http://schemas.openxmlformats.org/officeDocument/2006/math\"><m:f><m:fPr><m:type m:val=\"bar\"/></m:fPr><m:num/><m:den/></m:f></m:oMath>\n",
+        "error": null,
+        "latency_s": 0.000278,
+        "peak_traced_bytes": 1883,
+        "classification": "empty_required_child_accepted",
+        "classification_detail": "empty children: ['num', 'den']"
+      }
+    },
+    {
+      "case_id": "D1-13",
+      "category": "forbidden_flattening",
+      "source": "hand-authored",
+      "source_record_path": null,
+      "source_record_sha256": null,
+      "hand_authored_note": "hand-authored adversarial: genuine mmultiscripts prescript (base X, sub 3, sup 4, presub 1, presup 2). No LaTeX side without a prescript package, so the Meridian LaTeX path is reported not_applicable rather than fabricated.",
+      "latex_used": null,
+      "mathml_used": "<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mmultiscripts><mi>X</mi><mn>3</mn><mn>4</mn><mprescripts/><mn>1</mn><mn>2</mn></mmultiscripts></math>",
+      "meridian": {
+        "status": "not_applicable",
+        "omml_raw": null,
+        "error": null,
+        "latency_s": null,
+        "peak_traced_bytes": null,
+        "classification": "fail_closed",
+        "classification_detail": "no OMML produced"
+      },
+      "msxsl": {
+        "status": "converted",
+        "omml_raw": "<?xml version=\"1.0\"?>\n<m:oMath xmlns:m=\"http://schemas.openxmlformats.org/officeDocument/2006/math\"><m:sPre><m:e><m:sSubSup><m:e><m:r><m:t>X</m:t></m:r></m:e><m:sub><m:r><m:t>3</m:t></m:r></m:sub><m:sup><m:r><m:t>4</m:t></m:r></m:sup></m:sSubSup></m:e><m:sub><m:r><m:t>1</m:t></m:r></m:sub><m:sup><m:r><m:t>2</m:t></m:r></m:sup></m:sPre></m:oMath>\n",
+        "error": null,
+        "latency_s": 0.000892,
+        "peak_traced_bytes": 2266,
+        "classification": "correct_prescript_not_flattened",
+        "classification_detail": null
+      },
+      "meridian_internal_mathml_probe": {
+        "note": "direct call to docs_intel._stdlib_append_mathml(mathml_root, omath) -- bypasses the LaTeX-only public latex_to_omml_local, since no LaTeX prescript form exists to feed it. Same live, unmodified function and methodology as omml-builder-audit-v0.md case 32.",
+        "omml_raw": "<m:oMath xmlns:m=\"http://schemas.openxmlformats.org/officeDocument/2006/math\"><m:r><m:t>X3412</m:t></m:r></m:oMath>",
+        "latency_s": 1.2e-05,
+        "classification": "flattened_no_marker_gap"
+      }
+    }
+  ],
+  "materialized_fixtures": {
+    "meridian_fixture": {
+      "path": "E:\\MeridianData\\ooxml-graph-paper\\runs\\equations\\fixtures\\paper-s10-d1-meridian.docx",
+      "sha256": "3fdb8a1533d48548f72afa74bfb7e0d4afefe70d9654a7f9411f0eadce4d0446",
+      "included_cases": [
+        "D1-01",
+        "D1-02",
+        "D1-03",
+        "D1-04",
+        "D1-05",
+        "D1-06",
+        "D1-07",
+        "D1-08a",
+        "D1-08b",
+        "D1-09",
+        "D1-11",
+        "D1-12",
+        "D1-13-internal-probe"
+      ]
+    },
+    "msxsl_fixture": {
+      "path": "E:\\MeridianData\\ooxml-graph-paper\\runs\\equations\\fixtures\\paper-s10-d1-msxsl.docx",
+      "sha256": "7e8e6f62e17be26dada0dcc40d931f051fa4df45694b3c383c26484bc8b5a14a",
+      "included_cases": [
+        "D1-01",
+        "D1-02",
+        "D1-03",
+        "D1-04",
+        "D1-05",
+        "D1-06",
+        "D1-07",
+        "D1-08a",
+        "D1-08b",
+        "D1-09",
+        "D1-10",
+        "D1-11",
+        "D1-12",
+        "D1-13"
+      ]
+    }
+  },
+  "adversarial_raw_omml_controls": {
+    "raw-empty-num": {
+      "path": "E:\\MeridianData\\ooxml-graph-paper\\runs\\equations\\fixtures\\adversarial\\raw-empty-num.docx",
+      "anchor_para_id": "9a6d8c46",
+      "sha256_before": "783ce36bd7c4beeae4ca23663938a209c5172124fff57b9be23756a0ae8dfa87",
+      "attempted": true,
+      "insert_equation_call_result": "client-side request timeout; server-side fail-closed restore confirmed",
+      "sha256_after_attempt": "783ce36bd7c4beeae4ca23663938a209c5172124fff57b9be23756a0ae8dfa87",
+      "sha256_backup_file": "783ce36bd7c4beeae4ca23663938a209c5172124fff57b9be23756a0ae8dfa87",
+      "restore_confirmed_byte_identical": true,
+      "expected_per_prior_audit": "ACCEPTED (omml-builder-audit-v0.md Section 6): could not confirm live acceptance this session because the render step never returned within the tool timeout, and the write was rolled back before any accept/reject verdict was durably observed by this session."
+    },
+    "raw-flatten-marker": {
+      "path": "E:\\MeridianData\\ooxml-graph-paper\\runs\\equations\\fixtures\\adversarial\\raw-flatten-marker.docx",
+      "anchor_para_id": "92e29809",
+      "sha256_before": "e2378b2f8c8ebd3efecf6ed850860764ed5f93c536a6aa12e3b45bb79f57026f",
+      "attempted": false,
+      "reason_not_attempted": "stopped after 3 consecutive Word-COM-dependent timeouts (2x check_render_capability, 1x insert_equation) in this session to avoid a retry loop; see word_render_status below."
+    },
+    "raw-flatten-nomarker": {
+      "path": "E:\\MeridianData\\ooxml-graph-paper\\runs\\equations\\fixtures\\adversarial\\raw-flatten-nomarker.docx",
+      "anchor_para_id": "9a31bd9d",
+      "sha256_before": "442582d0f6b712362c53785cd174bab4ca99530c8ed9a75d9370b9d960388824",
+      "attempted": false,
+      "reason_not_attempted": "same as raw-flatten-marker."
+    }
+  },
+  "word_render_status": {
+    "status": "blocked_this_session",
+    "attempts": [
+      {
+        "target": "paper-s10-d1-meridian.docx (13 equations)",
+        "method": "check_render_capability",
+        "result": "client-side request timeout"
+      },
+      {
+        "target": "paper-s10-d1-msxsl.docx (14 equations)",
+        "method": "check_render_capability",
+        "result": "client-side request timeout"
+      },
+      {
+        "target": "baseline-sanity.docx (1 equation)",
+        "method": "check_render_capability",
+        "result": "client-side request timeout, no WINWORD.EXE process observed"
+      },
+      {
+        "target": "baseline-sanity.docx (1 equation), retry",
+        "method": "check_render_capability",
+        "result": "client-side request timeout, no WINWORD.EXE process observed"
+      },
+      {
+        "target": "adversarial/raw-empty-num.docx",
+        "method": "insert_equation(allow_degraded_render=True)",
+        "result": "client-side request timeout; WINWORD.EXE PID 17420 spawned and had to be taskkilled; file confirmed restored byte-identical to pre-call state (fail-closed rollback verified by hash)"
+      }
+    ],
+    "orphaned_winword_processes_observed_and_terminated": [
+      "PID 33628 (~137MB, ran several minutes before taskkill)",
+      "PID 17420 (~200MB, taskkilled after the 5th timeout)"
+    ],
+    "office_confirmed_present": "16.0.20326.20112 at C:\\Program Files\\Microsoft Office\\root\\Office16\\WINWORD.EXE (file exists, version read successfully)",
+    "interpretation": "Word COM itself is installed and was previously confirmed live-functional on this exact host in docs/omml-builder-audit-v0.md Section 8 (2026-08-26 session). This session's 5 consecutive timeouts, two of which visibly spawned a real WINWORD.EXE process that ran for multiple minutes before being manually terminated, are consistent with Word-COM contention from other concurrent agent sessions active in this same repository during this wave (per this task's own operating instructions, several sibling PAPER-S* items were running in parallel), or a host-level slowdown independent of this script. This was not diagnosed further, per this task's instruction not to retry a failing operation in a loop -- 5 attempts across 3 files and 2 different tool entry points is treated as a genuine, reportable blocker rather than grounds for a 6th attempt.",
+    "consequence": "No PDF render receipt, no Word-openability confirmation, and no visual-fidelity observation could be captured for any D1 fixture this session. The structural/semantic comparison above is unaffected (it never depends on Word rendering), but the item's 'Word-render every accepted fixture' and 'retain ... PDF hashes and receipts' acceptance criteria are NOT satisfied and are recorded here as not_run, not fabricated."
+  }
+}
