@@ -2,8 +2,8 @@
 
 Status: **harness built and mechanically validated end-to-end against the real `claude`
 CLI. The actual 8-process commissioning pilot is BLOCKED, not run** -- a genuine
-credential problem, not a code defect. Read the blocker section before assuming any
-pilot numbers exist; none do.
+credential problem, plus a false-success reporting defect found and fixed during
+reproduction. Read the blocker section before assuming any pilot numbers exist; none do.
 
 ## What was built
 
@@ -66,6 +66,22 @@ as the specific cause) and even for a trivial one-line prompt with no tool use a
 The conclusion: this machine's cached Claude Code OAuth session is genuinely expired,
 and a non-interactive `-p` subprocess cannot trigger the interactive re-auth flow that
 would normally refresh it.
+
+## Harness correction: failed trials cannot count as document passes
+
+The first reproduction exposed a separate harness bug: the pilot graded every copied
+DOCX even when the Claude subprocess returned an authentication error. Because an
+inverse trial was then run against the untouched forward input, its unchanged paragraph
+sequence satisfied the inverse evaluator and produced four misleading document passes;
+the driver also returned exit code 0 and reported all eight isolation audits as clean.
+
+The pilot now records `execution_status` separately from document grading, marks
+process/API/authentication failures as `not_run`, skips an inverse whose required
+forward trial did not complete, reports a manifest-level `status=blocked`, and returns
+exit code 2 whenever the complete eight-trial commissioning matrix did not execute.
+Only a completed Claude process can receive an evaluator pass or an isolation-clean
+count. This correction does not create pilot evidence; authentication must still be
+resolved before the commissioning pilot can run.
 
 **No `.env` file or other sanctioned credential source for headless CLI use was found**
 in this repo (checked `find . -maxdepth 2 -iname "*.env*"` -- no matches). No API key
