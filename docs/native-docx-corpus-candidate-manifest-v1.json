@@ -5,7 +5,8 @@
     "documents": 127,
     "tiers": {"tier1": 8, "tier2": 116, "tier3": 3},
     "raw_docx_observed": 155,
-    "raw_not_promoted": 28,
+    "raw_not_promoted": 39,
+    "raw_not_promoted_correction_note": "PAPER-S11 (2026-08-30) recomputed this figure by an independent whole-file SHA-256 diff of every raw/{docx-corpus,omega-officeval,docx-benchmark} DOCX against every gold/{tier1,tier2,tier3} DOCX and found 39 (23 docx-corpus + 16 omega-officeval + 0 docx-benchmark), not 28. 39 is also independently consistent with docs/gold-corpus-status-v0.md's own promoted/excluded arithmetic (90-67=23, 63-47=16, 2-2=0). The prior '28' in this field was stale/incorrect; see docs/paper-s11-d1-natural-freeze-v1.md for full method and evidence.",
     "sources": {
       "tier1_hand_authored": 8,
       "tier2_omegause_officeval": 47,
@@ -73,5 +74,22 @@
     "code_and_environment": "C:\\Users\\13144\\Documents\\Meridian\\ooxml-graph-paper",
     "data_and_outputs": "E:\\MeridianData\\ooxml-graph-paper",
     "onedrive": "reference_only"
+  },
+  "paper_s11_d1_natural_freeze": {
+    "as_of": "2026-08-30",
+    "status": "frozen",
+    "candidates_individually_inspected": 39,
+    "candidates_promoted": 0,
+    "candidates_rejected": 39,
+    "reject_reason_breakdown": {
+      "already_excluded_for_real_personal_data_by_prior_PAPER-25_independent_review": 22,
+      "already_excluded_for_sensitive_subject_matter_child_sexual_abuse_policy_content_by_prior_PAPER-25_review": 1,
+      "already_excluded_for_real_personal_data_by_prior_PAPER-22_25_tier2_review_note_boolean_field_not_originally_recorded_but_note_text_documents_name_plus_ID_or_phone_in_all_16": 16
+    },
+    "structural_feature_scan_result": "0 of 39 candidates add any D0-missing feature family (0 organic n-ary/matrix/accent/multi-script equations, 0 tracked deletions, 0 tables missing tblGrid); every table-having candidate already had explicit tblGrid.",
+    "decision": "D1-natural expansion from this specific raw-not-promoted pool is empty (0 documents). Every candidate was already independently content-reviewed and rejected before this item ran, for real, specific, human-legible reasons (real personal data, or in one case sensitive child-safeguarding subject matter), and none would have added missing structural/equation coverage even if the privacy bar were set aside. D1-natural cannot be built by re-mining this pool; it requires a fresh acquisition pass with its own privacy screening, not addressed by this item.",
+    "full_ledger": "E:\\MeridianData\\ooxml-graph-paper\\manifests\\paper-s11\\s11_d1_natural_ledger.json",
+    "writeup": "docs/paper-s11-d1-natural-freeze-v1.md",
+    "d0_immutability": "D0 (127 gold documents) was not read-write touched; this item only read raw/ and gold/ to compute hashes and feature vectors."
   }
 }
