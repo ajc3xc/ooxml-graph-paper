@@ -255,8 +255,151 @@ def test_score_document_graph_para_id_not_applicable_for_python_docx_like_candid
 
 
 def test_score_document_graph_unsupported_kinds_are_declared_not_omitted():
+    """reference/source_binding/revision have NO gold ground truth yet (a
+    stronger, more precise statement than 'no candidate adapter') -- caption
+    and anchor are no longer in this bucket at all, since PAPER-S5 gave them
+    real, dedicated scoring (see the tests below)."""
     gold = _make_gold([{"text": "x", "para_id": None}])
     candidate = {"paragraphs": [{"text": "x", "para_id": None}], "tables": [], "equations": [], "full_text": "x"}
     result = graph_scorer.score_document_graph(gold, candidate, candidate_has_para_id=False, candidate_has_omml=False)
-    for kind in ("caption", "anchor", "reference", "source_binding", "revision"):
-        assert result["unsupported_node_kinds"][kind] == graph_scorer.NOT_APPLICABLE_NO_ADAPTER
+    for kind in ("reference", "source_binding", "revision"):
+        assert result["unsupported_node_kinds"][kind] == graph_scorer.NOT_APPLICABLE_NO_GOLD_GROUND_TRUTH
+    assert "caption" not in result["unsupported_node_kinds"]
+    assert "anchor" not in result["unsupported_node_kinds"]
+
+
+def test_score_document_graph_unsupported_edge_kinds_use_correct_reasons():
+    gold = _make_gold([{"text": "x", "para_id": None}])
+    candidate = {"paragraphs": [{"text": "x", "para_id": None}], "tables": [], "equations": [], "full_text": "x"}
+    result = graph_scorer.score_document_graph(gold, candidate, candidate_has_para_id=False, candidate_has_omml=False)
+    # gold DOES resolve caption_for; no candidate computes an equivalent target yet.
+    assert result["unsupported_edge_kinds"]["caption_for"] == graph_scorer.NOT_APPLICABLE_NO_ADAPTER
+    # gold itself has no ground truth for these edge kinds at all.
+    for kind in ("references", "revises", "clones", "conflicts_with"):
+        assert result["unsupported_edge_kinds"][kind] == graph_scorer.NOT_APPLICABLE_NO_GOLD_GROUND_TRUTH
+
+
+def test_score_document_graph_caption_and_anchor_default_not_applicable():
+    """Without explicitly passing candidate_has_caption_detection/
+    candidate_has_anchor_detection=True, both default to not_applicable --
+    matches every current real candidate adapter's actual capability."""
+    gold = _make_gold([{"text": "x", "para_id": None}])
+    gold["captions"] = [{"text": "Table 1: a caption"}]
+    gold["anchors"] = [{"name": "_Ref100000000"}]
+    candidate = {"paragraphs": [{"text": "x", "para_id": None}], "tables": [], "equations": [], "full_text": "x"}
+    result = graph_scorer.score_document_graph(gold, candidate, candidate_has_para_id=False, candidate_has_omml=False)
+    assert result["caption_node_prf1"]["status"] == graph_scorer.NOT_APPLICABLE_NO_ADAPTER
+    assert result["anchor_node_prf1"]["status"] == graph_scorer.NOT_APPLICABLE_NO_ADAPTER
+
+
+def test_score_document_graph_caption_scored_when_candidate_detects_captions():
+    gold = _make_gold([{"text": "Intro paragraph", "para_id": None}])
+    gold["captions"] = [{"text": "Table 1: revenue by quarter"}]
+    candidate = {
+        "paragraphs": [{"text": "Intro paragraph", "para_id": None}],
+        "tables": [], "equations": [], "full_text": "Intro paragraph",
+        "captions": [{"text": "Table 1: revenue by quarter"}],
+    }
+    result = graph_scorer.score_document_graph(
+        gold, candidate, candidate_has_para_id=False, candidate_has_omml=False,
+        candidate_has_caption_detection=True,
+    )
+    assert result["caption_node_prf1"]["status"] == "scored"
+    assert result["caption_node_prf1"]["f1"] == 1.0
+
+
+# ---------------------------------------------------------------------------
+# _caption_node_accuracy / _anchor_node_accuracy (PAPER-S5)
+# ---------------------------------------------------------------------------
+
+def test_caption_node_accuracy_not_applicable_without_detection():
+    result = graph_scorer._caption_node_accuracy(
+        [{"text": "Figure 1: a diagram"}], [], candidate_has_caption_detection=False,
+    )
+    assert result["status"] == graph_scorer.NOT_APPLICABLE_NO_ADAPTER
+    assert result["f1"] is None
+
+
+def test_caption_node_accuracy_scored_missed_caption_reduces_recall():
+    result = graph_scorer._caption_node_accuracy(
+        [{"text": "Figure 1: a diagram"}, {"text": "Table 1: totals"}],
+        [{"text": "Figure 1: a diagram"}],
+        candidate_has_caption_detection=True,
+    )
+    assert result["status"] == "scored"
+    assert result["recall"] == 0.5
+    assert result["precision"] == 1.0
+
+
+def test_anchor_node_accuracy_not_applicable_without_detection():
+    result = graph_scorer._anchor_node_accuracy(
+        [{"name": "_Ref1"}], [], candidate_has_anchor_detection=False,
+    )
+    assert result["status"] == graph_scorer.NOT_APPLICABLE_NO_ADAPTER
+    assert result["f1"] is None
+
+
+def test_anchor_node_accuracy_exact_name_multiset_match():
+    result = graph_scorer._anchor_node_accuracy(
+        [{"name": "_Ref1"}, {"name": "PAPER16_TESTBOOKMARK"}],
+        [{"name": "_Ref1"}, {"name": "_Ref1"}],  # candidate over-reports one, misses the other
+        candidate_has_anchor_detection=True,
+    )
+    assert result["status"] == "scored"
+    assert result["matched"] == 1  # multiset intersection: min(1 gold "_Ref1", 2 cand "_Ref1") = 1
+    assert result["precision"] == 0.5
+    assert result["recall"] == 0.5
+
+
+# ---------------------------------------------------------------------------
+# score_round_trip_editability (PAPER-S5)
+# ---------------------------------------------------------------------------
+
+def _make_items(paragraphs, tables=None, equations=None):
+    return {
+        "paragraphs": [{"text": t, "para_id": None} for t in paragraphs],
+        "tables": tables or [],
+        "equations": equations or [],
+        "full_text": "\n".join(paragraphs),
+    }
+
+
+def test_score_round_trip_editability_clean_round_trip():
+    pre = _make_items(["First paragraph", "Second paragraph"], tables=[{"row_count": 2, "col_count": 2}])
+    post = _make_items(["First paragraph", "Second paragraph", "PAPER-S5 marker"],
+                        tables=[{"row_count": 2, "col_count": 2}])
+    result = graph_scorer.score_round_trip_editability(pre, post, marker_text="PAPER-S5 marker")
+    assert result["marker_paragraph_round_tripped"] is True
+    assert result["unintended_paragraph_drift_prf1"]["f1"] == 1.0
+    assert result["table_count_stable"] is True
+    assert result["overall_status"] == "clean_round_trip"
+
+
+def test_score_round_trip_editability_detects_missing_marker():
+    pre = _make_items(["First paragraph"])
+    post = _make_items(["First paragraph"])  # Word round trip silently dropped the intended edit
+    result = graph_scorer.score_round_trip_editability(pre, post, marker_text="PAPER-S5 marker")
+    assert result["marker_paragraph_round_tripped"] is False
+    assert result["overall_status"] == "marker_paragraph_missing_after_round_trip"
+
+
+def test_score_round_trip_editability_detects_unintended_paragraph_loss():
+    pre = _make_items(["First paragraph", "Second paragraph"])
+    # post lost "Second paragraph" entirely (unintended drift) alongside the intended marker addition
+    post = _make_items(["First paragraph", "PAPER-S5 marker"])
+    result = graph_scorer.score_round_trip_editability(pre, post, marker_text="PAPER-S5 marker")
+    assert result["marker_paragraph_round_tripped"] is True
+    assert result["unintended_paragraph_drift_prf1"]["f1"] < 1.0
+    assert result["overall_status"] == "unintended_paragraph_drift_detected"
+
+
+def test_score_round_trip_editability_detects_equation_semantic_drift():
+    pre = _make_items(["Some text"], equations=[{"omml_raw": _CORRECT_FRACTION_OMML}])
+    empty_num_omml = (
+        '<m:oMath xmlns:m="http://schemas.openxmlformats.org/officeDocument/2006/math">'
+        '<m:f><m:num></m:num><m:den><m:r><m:t>2</m:t></m:r></m:den></m:f></m:oMath>'
+    )
+    post = _make_items(["Some text", "PAPER-S5 marker"], equations=[{"omml_raw": empty_num_omml}])
+    result = graph_scorer.score_round_trip_editability(pre, post, marker_text="PAPER-S5 marker")
+    assert result["equation_semantic_labels_stable"] is False
+    assert result["overall_status"] == "equation_semantic_drift_detected"

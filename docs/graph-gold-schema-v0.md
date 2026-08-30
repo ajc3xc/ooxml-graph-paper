@@ -62,3 +62,20 @@ The gold manifest must be generated independently of the implementation under te
 
 The parent repository's prior planning audit is `docs/meridian-build-b67-3-ooxml-omml-document-graph-2026-08-25.md`. Existing fact sources include `meridian/doc_store.py`, `meridian/research_graph.py`, `extensions/meridian-docs/meridian_docs/docs_intel.py`, and the render/provenance gate modules. This child document is the paper-facing contract; implementation changes remain a later sprint item.
 
+## Implementation status (PAPER-S5, 2026-08-30)
+
+Full detail and evidence: `docs/paper-s5-graph-edge-adapters-v1.md`. Short summary against the node/edge vocabulary declared above, so this contract stays checkable at a glance without opening the evidence doc:
+
+| Kind | Gold ground truth exists? | Scored today? | Reason if not |
+|---|---|---|---|
+| `paragraph`, `table`, `table_row`, `table_cell`, `equation` | Yes | Yes (`tools/graph_scorer.py`, PAPER-30/S5) | -- |
+| `caption` | Yes (`independent_gold_extractor.py`'s SEQ-field heuristic) | Yes for native Meridian; `not_applicable: no_candidate_adapter` for python-docx/Docling | those two libraries expose no field-instruction API |
+| `anchor` | Yes (`w:bookmarkStart` names) | `not_applicable: no_candidate_adapter` for all three current candidates | none expose a bookmark-listing API yet; scorer function itself is real and tested |
+| `reference`, `source_binding`, `revision` | **No** | `not_applicable: no_gold_ground_truth` | `independent_gold_extractor.py` does not produce these node kinds yet |
+| `contains`, `orders` (via reading order) | Yes | Yes | -- |
+| `caption_for` | Yes (resolved to nearest preceding top-level table) | `not_applicable: no_candidate_adapter` | no candidate computes an equivalent target resolution yet |
+| `references`, `revises`, `clones`, `conflicts_with` | **No** | `not_applicable: no_gold_ground_truth` | not produced by the gold extractor yet |
+| `anchors` (edge), `derived_from`, `renders_as` | Partial/no | Not separately scored | out of scope for PAPER-S5; `renders_as` is addressed structurally by the new round-trip render-equivalence check, not as a scored graph edge |
+
+`package_part` and `run` nodes, and Word round-trip editability / render-equivalence, are covered separately: `tools/graph_scorer.score_round_trip_editability` plus `tools/run_paper30_graph_eval.py`'s `_word_open_edit_save_round_trip`/`run_round_trip_editability_check` perform a real Word-COM open(ReadOnly=False)→edit→Save()→Close() round trip and diff a candidate's own before/after extraction (not a gold comparison) for unintended structural drift, plus before/after retained render receipts for page-count render-equivalence.
+

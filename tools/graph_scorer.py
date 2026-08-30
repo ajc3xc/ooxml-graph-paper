@@ -23,19 +23,54 @@ Docling). `omml_raw` is None when the system does not expose OMML (python-docx,
 Docling) -- equation *count* can still be compared, but equation semantic-class
 accuracy is `not_applicable` wherever `omml_raw` is None for every equation.
 
-## What is and is not covered
+## What is and is not covered (PAPER-S5 update)
 
 Per `graph-gold-schema-v0.md`, the full node vocabulary also includes
 `package_part`, `run`, `caption`, `anchor`, `reference`, `source_binding`,
-`revision`, and `render_receipt`. **No candidate adapter currently extracts
-comparable caption/anchor/reference/revision/source_binding data** (that is
-real, uncorrected scope -- `run_paper15_smoke.py`'s `extract_native_meridian`/
-`extract_python_docx` do not surface those), so this scorer reports those
-kinds as `not_applicable: no_candidate_adapter`, never a fabricated 0 or a
-silently omitted row. Edge-level scoring is limited to `contains` (via node
-correspondence + reading order) and does not yet implement `orders`,
-`caption_for`, `references`, `revises`, `clones`, or `conflicts_with` as
-separate scored edges -- named here as explicit remaining scope, not hidden.
+`revision`, and `render_receipt`. As of PAPER-S5, `caption` and `anchor` are
+REAL, scored node kinds (`caption_node_prf1` / `anchor_node_prf1` below) --
+`independent_gold_extractor.py` already produces gold `caption` nodes
+(SEQ-field paragraphs), gold `anchor` nodes (`w:bookmarkStart` names), and a
+resolved `caption_for` edge (nearest preceding top-level table), so these are
+not a fabricated gold-vs-nothing comparison. Candidate-side support is real
+but uneven, honestly reported per system:
+
+- `caption`: native Meridian extraction (`document_content_tree`'s own
+  per-paragraph `fields` list, which already parses SEQ/REF/PAGEREF/NOTEREF
+  field instructions) can identify a SEQ-field paragraph as a caption, so
+  this is `scored` for native Meridian. python-docx and Docling expose no
+  field-instruction API at all, so this remains `not_applicable:
+  no_candidate_adapter` for those two -- a real capability gap, not an
+  oversight.
+- `anchor`: none of the three current candidate adapters (native Meridian's
+  `document_content_tree`, python-docx, Docling) expose a bookmark/anchor
+  listing API, so this is `not_applicable: no_candidate_adapter` for all
+  three today. The scoring function itself is real and tested
+  (exact bookmark-name multiset precision/recall/F1), ready for a future
+  candidate adapter that does extract bookmarks.
+- `caption_for` (edge): gold resolves this edge; no candidate adapter
+  computes an equivalent caption-to-table target resolution yet, so this
+  remains `not_applicable: no_candidate_adapter` -- named remaining scope.
+- `reference`, `source_binding`, `revision` (nodes) and `references`,
+  `revises`, `clones`, `conflicts_with` (edges): **`independent_gold_extractor.py`
+  itself does not produce this data yet** -- there is no gold ground truth to
+  score against at all, for any system. This is reported as
+  `not_applicable: no_gold_ground_truth`, a distinct and more precise reason
+  than "no candidate adapter" (which would wrongly imply gold has the data
+  and only the candidates are missing it).
+
+Edge-level scoring beyond `caption_for` is limited to `contains` (via node
+correspondence) and order (via the reading-order metric); `references`,
+`revises`, `clones`, `conflicts_with` are not yet separate scored edges,
+named here as explicit remaining scope, not hidden.
+
+PAPER-S5 also adds `score_round_trip_editability`: a genuine Word-COM
+open(ReadOnly=False) -> edit -> Save() -> Close() round-trip check (see
+`run_paper30_graph_eval.py`'s `_word_open_edit_save_round_trip`), comparing a
+candidate's own extraction of a document before vs. after the round trip
+(not against gold) to detect unintended structural drift, plus a
+render-equivalence check (before/after retained Word render receipts,
+comparing page counts).
 """
 from __future__ import annotations
 
@@ -50,6 +85,12 @@ _BOOTSTRAP_RESAMPLES = 2000
 _PERMUTATION_RESAMPLES = 2000
 
 NOT_APPLICABLE_NO_ADAPTER = "not_applicable: no_candidate_adapter"
+# Distinct from NOT_APPLICABLE_NO_ADAPTER: this reason means the GOLD
+# extractor itself (independent_gold_extractor.py) does not produce this
+# node/edge kind yet, so there is no ground truth for ANY candidate to be
+# scored against -- never conflate the two ("candidates lack an adapter for
+# data gold already has" vs. "gold has no data for this at all yet").
+NOT_APPLICABLE_NO_GOLD_GROUND_TRUTH = "not_applicable: no_gold_ground_truth"
 
 
 def _normalize(text: str) -> str:
@@ -302,6 +343,146 @@ def _equation_semantic_accuracy(gold_equations: list[dict], cand_equations: list
 
 
 # ---------------------------------------------------------------------------
+# caption / anchor node scoring (PAPER-S5)
+# ---------------------------------------------------------------------------
+
+def _caption_node_accuracy(gold_captions: list[dict], cand_captions: list[dict],
+                            candidate_has_caption_detection: bool) -> dict[str, Any]:
+    """Real precision/recall/F1 for whether a candidate can identify WHICH
+    paragraphs are captions (SEQ-field paragraphs, per
+    `independent_gold_extractor.py`'s `_is_seq_field` heuristic), reusing the
+    same LCS text correspondence as paragraph-node scoring. Explicitly
+    `not_applicable: no_candidate_adapter` (never a fabricated 0) when the
+    candidate's own extraction library exposes no field/SEQ-instruction data
+    -- true today for python-docx and Docling, per this module's docstring."""
+    if not candidate_has_caption_detection:
+        return {"precision": None, "recall": None, "f1": None, "matched": 0,
+                "gold_total": len(gold_captions), "cand_total": len(cand_captions),
+                "status": NOT_APPLICABLE_NO_ADAPTER,
+                "reason": "candidate system's extraction API does not expose field/SEQ-instruction "
+                          "data needed to identify which paragraphs are captions"}
+    gold_texts = [c.get("text", "") for c in gold_captions]
+    cand_texts = [c.get("text", "") for c in cand_captions]
+    pairs = _lcs_correspondence(gold_texts, cand_texts)
+    result = _prf1(len(pairs), len(gold_texts), len(cand_texts))
+    result["status"] = "scored"
+    return result
+
+
+def _anchor_node_accuracy(gold_anchors: list[dict], cand_anchors: list[dict],
+                           candidate_has_anchor_detection: bool) -> dict[str, Any]:
+    """Exact bookmark-NAME multiset precision/recall/F1 (bookmark names are
+    stable identifiers, not free text -- see
+    docs/word-roundtrip-preservation-contract-v0.md Section 2, "Preserved by
+    name" -- so this deliberately does not use fuzzy text correspondence).
+    `not_applicable: no_candidate_adapter` for every candidate adapter as of
+    PAPER-S5 (none expose a bookmark-listing API yet) -- a real, named
+    capability gap, not a fabricated comparison. The function itself is real
+    and tested so a future candidate adapter that does extract bookmarks
+    gets scored automatically."""
+    if not candidate_has_anchor_detection:
+        return {"precision": None, "recall": None, "f1": None, "matched": 0,
+                "gold_total": len(gold_anchors), "cand_total": len(cand_anchors),
+                "status": NOT_APPLICABLE_NO_ADAPTER,
+                "reason": "candidate system's extraction API exposes no bookmark/anchor listing capability"}
+    from collections import Counter
+
+    gold_names = [a.get("name") for a in gold_anchors if a.get("name")]
+    cand_names = [a.get("name") for a in cand_anchors if a.get("name")]
+    gold_counter, cand_counter = Counter(gold_names), Counter(cand_names)
+    matched = sum((gold_counter & cand_counter).values())
+    result = _prf1(matched, len(gold_names), len(cand_names))
+    result["status"] = "scored"
+    return result
+
+
+# ---------------------------------------------------------------------------
+# Word round-trip editability / render-equivalence (PAPER-S5)
+# ---------------------------------------------------------------------------
+
+def score_round_trip_editability(pre_items: dict, post_items: dict, marker_text: str) -> dict[str, Any]:
+    """Compares a candidate's OWN extraction of a document before vs. after a
+    real Word-COM open(ReadOnly=False) -> edit -> Save() -> Close() round
+    trip (see `run_paper30_graph_eval.py`'s `_word_open_edit_save_round_trip`).
+    This is deliberately NOT a gold-vs-candidate score -- both `pre_items`
+    and `post_items` come from the SAME extractor -- so it measures whether
+    the round trip itself introduced unintended structural drift,
+    independent of that extractor's own accuracy against gold.
+
+    `marker_text` is the exact paragraph the round trip intentionally
+    appended. It is normalized-text-matched and removed from `post_items`'s
+    paragraphs before comparing the remainder against `pre_items` via the
+    same LCS correspondence used for gold scoring, so the intended, expected
+    addition never counts against "unintended drift".
+
+    Per docs/word-roundtrip-preservation-contract-v0.md Section 4, raw
+    equation OMML content fingerprints are a KNOWN false-positive source --
+    they drift across a genuine Word save even when semantics do not (Word
+    adds `m:*Pr`/`m:ctrlPr`/`m:rFonts` property wrappers). So equation
+    stability here re-derives each equation's independent semantic label via
+    `_reclassify_omml` and compares LABELS, never raw OMML bytes.
+    """
+    pre_para_texts = [p["text"] for p in pre_items["paragraphs"]]
+    post_para_texts_all = [p["text"] for p in post_items["paragraphs"]]
+
+    marker_norm = _normalize(marker_text)
+    remainder: list[str] = []
+    marker_found = False
+    for text in reversed(post_para_texts_all):
+        if not marker_found and _normalize(text) == marker_norm:
+            marker_found = True
+            continue
+        remainder.append(text)
+    remainder.reverse()
+
+    para_pairs = _lcs_correspondence(pre_para_texts, remainder)
+    unintended_drift_prf1 = _prf1(len(para_pairs), len(pre_para_texts), len(remainder))
+
+    pre_tables, post_tables = pre_items["tables"], post_items["tables"]
+    table_count_stable = len(pre_tables) == len(post_tables)
+    table_row_counts_stable = table_count_stable and all(
+        pre_tables[i].get("row_count") == post_tables[i].get("row_count") for i in range(len(pre_tables))
+    )
+
+    pre_equations, post_equations = pre_items["equations"], post_items["equations"]
+    equation_count_stable = len(pre_equations) == len(post_equations)
+    n_eq = min(len(pre_equations), len(post_equations))
+    equation_label_mismatches = []
+    for i in range(n_eq):
+        pre_omml = pre_equations[i].get("omml_raw")
+        post_omml = post_equations[i].get("omml_raw")
+        pre_label = _reclassify_omml(pre_omml)[0] if pre_omml else None
+        post_label = _reclassify_omml(post_omml)[0] if post_omml else None
+        if pre_label != post_label:
+            equation_label_mismatches.append({"index": i, "pre_label": pre_label, "post_label": post_label})
+    equation_semantic_stable = equation_count_stable and not equation_label_mismatches
+
+    if not marker_found:
+        overall_status = "marker_paragraph_missing_after_round_trip"
+    elif unintended_drift_prf1["f1"] != 1.0:
+        overall_status = "unintended_paragraph_drift_detected"
+    elif not table_count_stable:
+        overall_status = "table_count_drift_detected"
+    elif not table_row_counts_stable:
+        overall_status = "table_row_count_drift_detected"
+    elif not equation_semantic_stable:
+        overall_status = "equation_semantic_drift_detected"
+    else:
+        overall_status = "clean_round_trip"
+
+    return {
+        "marker_paragraph_round_tripped": marker_found,
+        "unintended_paragraph_drift_prf1": unintended_drift_prf1,
+        "table_count_stable": table_count_stable,
+        "table_row_counts_stable": table_row_counts_stable if table_count_stable else None,
+        "equation_count_stable": equation_count_stable,
+        "equation_semantic_labels_stable": equation_semantic_stable,
+        "equation_label_mismatches": equation_label_mismatches,
+        "overall_status": overall_status,
+    }
+
+
+# ---------------------------------------------------------------------------
 # Bootstrap CIs and paired significance tests
 # ---------------------------------------------------------------------------
 
@@ -367,12 +548,16 @@ def paired_permutation_test(values_a: list[float | None], values_b: list[float |
 # ---------------------------------------------------------------------------
 
 def score_document_graph(gold: dict, candidate: dict, candidate_has_para_id: bool,
-                          candidate_has_omml: bool) -> dict[str, Any]:
+                          candidate_has_omml: bool, candidate_has_caption_detection: bool = False,
+                          candidate_has_anchor_detection: bool = False) -> dict[str, Any]:
     """Full graph-aware score for one (gold, candidate) document pair.
 
     `gold` and `candidate` are both in the common schema described in this
     module's docstring, PLUS gold also carries the raw `nodes` list (needed
-    for `attrs.semantic_label` on equation nodes).
+    for `attrs.semantic_label` on equation nodes), plus (PAPER-S5)
+    `captions: [{"text": str}]` and `anchors: [{"name": str}]` -- optional on
+    `candidate` too (defaults to empty, scored `not_applicable` unless the
+    corresponding `candidate_has_*_detection` flag is set).
     """
     gold_para_texts = [p["text"] for p in gold["paragraphs"]]
     cand_para_texts = [p["text"] for p in candidate["paragraphs"]]
@@ -414,8 +599,29 @@ def score_document_graph(gold: dict, candidate: dict, candidate_has_para_id: boo
             preserved = sum(i < len(cand_ids) and cand_ids[i] == gold_ids[i] for i in expected)
             para_id_status = {"preservation_rate": preserved / len(expected), "status": "scored", "evaluable_paragraphs": len(expected)}
 
-    for_no_adapter_kinds = {"caption", "anchor", "reference", "source_binding", "revision"}
-    unsupported_kinds = {kind: NOT_APPLICABLE_NO_ADAPTER for kind in for_no_adapter_kinds}
+    caption_node_prf1 = _caption_node_accuracy(
+        gold.get("captions", []), candidate.get("captions", []), candidate_has_caption_detection,
+    )
+    anchor_node_prf1 = _anchor_node_accuracy(
+        gold.get("anchors", []), candidate.get("anchors", []), candidate_has_anchor_detection,
+    )
+
+    # reference/source_binding/revision: independent_gold_extractor.py itself
+    # produces no ground truth for these node kinds yet -- distinct from (and
+    # a stronger statement than) "no candidate adapter", see module docstring.
+    unsupported_kinds = {
+        kind: NOT_APPLICABLE_NO_GOLD_GROUND_TRUTH for kind in ("reference", "source_binding", "revision")
+    }
+    unsupported_edge_kinds = {
+        # gold DOES resolve caption_for; no candidate adapter computes an
+        # equivalent target resolution yet -- real, named remaining scope.
+        "caption_for": NOT_APPLICABLE_NO_ADAPTER,
+        # gold itself has no ground truth for these edge kinds yet.
+        "references": NOT_APPLICABLE_NO_GOLD_GROUND_TRUTH,
+        "revises": NOT_APPLICABLE_NO_GOLD_GROUND_TRUTH,
+        "clones": NOT_APPLICABLE_NO_GOLD_GROUND_TRUTH,
+        "conflicts_with": NOT_APPLICABLE_NO_GOLD_GROUND_TRUTH,
+    }
 
     return {
         "paragraph_node_prf1": paragraph_prf1,
@@ -425,5 +631,8 @@ def score_document_graph(gold: dict, candidate: dict, candidate_has_para_id: boo
         "equation_node_prf1": equation_prf1,
         "equation_semantic_class_accuracy": equation_semantic,
         "para_id": para_id_status,
+        "caption_node_prf1": caption_node_prf1,
+        "anchor_node_prf1": anchor_node_prf1,
         "unsupported_node_kinds": unsupported_kinds,
+        "unsupported_edge_kinds": unsupported_edge_kinds,
     }

@@ -16,18 +16,37 @@ run_paper15_smoke.py's extract_native_meridian/extract_python_docx, which
 return aggregate counts only -- node-level correspondence needs the actual
 per-paragraph/per-table/per-equation items, not just totals.
 
+PAPER-S5 adds an OPT-IN, bounded Word round-trip editability +
+render-equivalence check (`--round-trip-check`, `--round-trip-sample N`):
+for a small deterministic sample of documents, a real Word-COM
+open(ReadOnly=False) -> append one marker paragraph -> Save() -> Close()
+round trip is performed against a disposable working copy (never the
+original corpus file), then (a) native-Meridian extraction before vs. after
+is diffed via `graph_scorer.score_round_trip_editability` for unintended
+structural drift, and (b) retained Word render receipts of both copies are
+compared for render-equivalence (page count). This is gated off by default
+because it launches real Word processes per sampled document (slow, and
+requires local Word COM) -- `not_run` with the exact reason is reported
+when Word COM is unavailable, never a fabricated pass.
+
 Usage:
   pixi run python tools/run_paper30_graph_eval.py --slice smoke
   pixi run python tools/run_paper30_graph_eval.py --slice all --include-docling
+  pixi run python tools/run_paper30_graph_eval.py --slice smoke --round-trip-check --round-trip-sample 3
 """
 from __future__ import annotations
 
 import datetime
 import hashlib
 import json
+import os
 import platform
+import shutil
+import signal
 import sys
+import threading
 from pathlib import Path
+from typing import Any
 
 REPO_ROOT = Path(r"C:\Users\13144\Documents\Meridian\repository")
 PAPER_ROOT = Path(r"C:\Users\13144\Documents\Meridian\ooxml-graph-paper")
@@ -38,7 +57,12 @@ sys.path.insert(0, str(REPO_ROOT / "extensions" / "meridian-docs"))
 sys.path.insert(0, str(PAPER_ROOT / "tools"))
 
 import graph_scorer  # noqa: E402
+from retained_render_receipt import retained_render_receipt  # noqa: E402
 from run_paper15_smoke import _find_docx_path, _find_render_pdf, _run_docling_subprocess  # noqa: E402
+
+_WORD_ROUNDTRIP_MARKER_TEXT = "PAPER-S5 round-trip editability probe paragraph."
+_WORD_ROUNDTRIP_TIMEOUT_SECONDS = 90.0
+_WORD_ROUNDTRIP_CLEANUP_JOIN_SECONDS = 5.0
 
 
 def _sha256_file(path: Path) -> str:
@@ -59,6 +83,13 @@ def extract_gold_items(manifest_path: Path) -> dict:
     para_ids_set = {n["id"] for n in para_like}
     nested = {e["dst"] for e in edges if e["kind"] == "contains" and e["src"] in cell_ids and e["dst"] in para_ids_set}
     top_level_paragraphs = [n for n in para_like if n["id"] not in nested]
+    # PAPER-S5: caption nodes (a SEQ-field paragraph, per
+    # independent_gold_extractor.py's _is_seq_field) and anchor nodes
+    # (w:bookmarkStart names) as their own comparable lists, distinct from
+    # the generic paragraph list above -- see graph_scorer.py's
+    # _caption_node_accuracy / _anchor_node_accuracy.
+    captions = [{"text": n.get("attrs", {}).get("text", "")} for n in top_level_paragraphs if n["kind"] == "caption"]
+    anchors = [{"name": n.get("attrs", {}).get("name")} for n in nodes if n["kind"] == "anchor"]
 
     table_nodes = [n for n in nodes if n["kind"] == "table"]
     table_row_nodes = [n for n in nodes if n["kind"] == "table_row"]
@@ -92,8 +123,22 @@ def extract_gold_items(manifest_path: Path) -> dict:
         "tables": tables,
         "equations": equations,
         "equation_nodes": equation_nodes,
+        "captions": captions,
+        "anchors": anchors,
         "full_text": gold_record["facts"]["text"],
     }
+
+
+def _block_has_seq_field(block: dict) -> bool:
+    """Mirrors independent_gold_extractor.py's own `_is_seq_field` heuristic
+    (any SEQ field instruction in the paragraph), but reads it from
+    document_content_tree's own per-paragraph `fields` list -- a REAL
+    capability document_content_tree already computes (it parses
+    w:fldSimple/w:fldChar field instructions for every paragraph) that
+    run_paper15_smoke.py's/this module's extraction simply hadn't surfaced
+    until PAPER-S5. This is genuinely native Meridian's own extraction
+    capability, not a reimplementation bolted on from outside it."""
+    return any((f.get("field_type") or "").upper() == "SEQ" for f in block.get("fields", []))
 
 
 def extract_native_meridian_items(docx_path: Path) -> dict:
@@ -102,15 +147,26 @@ def extract_native_meridian_items(docx_path: Path) -> dict:
 
     tree = document_content_tree(str(docx_path))
     blocks = tree["blocks"]
+    para_blocks = [b for b in blocks if b["kind"] in ("paragraph", "heading")]
     paragraphs = [
         {"text": b["text"], "para_id": b["para_id"] if not b["para_id"].startswith(("p", "sp")) else None}
-        for b in blocks if b["kind"] in ("paragraph", "heading")
+        for b in para_blocks
     ]
+    # PAPER-S5: caption nodes, via document_content_tree's own field parsing
+    # (see _block_has_seq_field). Anchor/bookmark nodes remain
+    # not_applicable: no candidate adapter -- document_content_tree exposes
+    # no bookmark-listing API (confirmed by direct reading of
+    # _vendored_content_tree.py this session; there is no bookmarkStart
+    # handling in it at all), and this extraction deliberately does not
+    # reimplement one outside Meridian's own library, which would test this
+    # harness's own code rather than a real product capability.
+    captions = [{"text": b["text"]} for b in para_blocks if _block_has_seq_field(b)]
     tables = [{"row_count": b["row_count"], "col_count": b["col_count"]} for b in blocks if b["kind"] == "table"]
     raw_equations = docs_intel.parse_docx_equations_local(str(docx_path))
     equations = [{"omml_raw": e.get("omml_raw")} for e in sorted(raw_equations, key=lambda e: e.get("ordinal", 0))]
     full_text = "\n".join(p["text"] for p in paragraphs)
-    return {"paragraphs": paragraphs, "tables": tables, "equations": equations, "full_text": full_text}
+    return {"paragraphs": paragraphs, "tables": tables, "equations": equations, "captions": captions,
+            "anchors": [], "full_text": full_text}
 
 
 def extract_python_docx_items(docx_path: Path) -> dict:
@@ -120,8 +176,11 @@ def extract_python_docx_items(docx_path: Path) -> dict:
     paragraphs = [{"text": p.text, "para_id": None} for p in document.paragraphs]
     tables = [{"row_count": len(t.rows), "col_count": len(t.columns)} for t in document.tables]
     full_text = "\n".join(p["text"] for p in paragraphs)
-    # python-docx has zero OMML/equation API surface (PAPER-14 finding).
-    return {"paragraphs": paragraphs, "tables": tables, "equations": [], "full_text": full_text}
+    # python-docx has zero OMML/equation API surface (PAPER-14 finding) and
+    # no field-instruction (SEQ/bookmark) API surface either (PAPER-S5) --
+    # captions/anchors are genuinely not_applicable: no_candidate_adapter.
+    return {"paragraphs": paragraphs, "tables": tables, "equations": [], "captions": [], "anchors": [],
+            "full_text": full_text}
 
 
 def extract_docling_items(render_pdf: Path, timeout_s: float) -> tuple[dict | None, dict]:
@@ -141,9 +200,161 @@ def extract_docling_items(render_pdf: Path, timeout_s: float) -> tuple[dict | No
     paragraphs = [{"text": line, "para_id": None} for line in full_text.split("\n") if line.strip()]
     tables = [{"row_count": None, "col_count": None} for _ in range(raw.get("table_count", 0))]
     equations = [{"omml_raw": None} for _ in range(raw.get("equation_count", 0))]
-    items = {"paragraphs": paragraphs, "tables": tables, "equations": equations, "full_text": full_text,
-              "_raw": raw}
+    # PDF/OCR-derived text carries no OOXML field instructions or bookmarks
+    # at all -- captions/anchors are genuinely not_applicable: no_candidate_adapter.
+    items = {"paragraphs": paragraphs, "tables": tables, "equations": equations, "captions": [], "anchors": [],
+              "full_text": full_text, "_raw": raw}
     return items, raw
+
+
+def _word_open_edit_save_round_trip(docx_path: Path, work_path: Path,
+                                     timeout: float = _WORD_ROUNDTRIP_TIMEOUT_SECONDS) -> dict[str, Any]:
+    """Real Word-COM open(ReadOnly=False) -> append one marker paragraph ->
+    Save() -> Close() round trip against a disposable WORKING COPY at
+    `work_path` (the original `docx_path` is only ever read, via
+    `shutil.copyfile`, never opened for write). Modeled directly on the
+    watchdog/cleanup pattern already validated in this repo by
+    `retained_render_receipt.py` (read directly before writing this) and
+    `docs/word-roundtrip-preservation-contract-v0.md`'s own `roundtrip.py`
+    -- a bounded watchdog thread so a COM hang is caught and reported, never
+    silently blocking the whole eval run.
+
+    Returns `{"status": "ok"|"failed"|"timed_out"|"unavailable", ...}`.
+    `"unavailable"` (pywin32 not importable) is a real, reportable capability
+    gap, never silently skipped or treated as a pass.
+    """
+    try:
+        import win32com.client
+    except ImportError as exc:
+        return {"status": "unavailable", "reason": f"pywin32 not importable: {exc}"}
+
+    work_path.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copyfile(docx_path, work_path)
+
+    outcome: dict[str, Any] = {}
+    owned: dict[str, int | None] = {"pid": None}
+    timeout_requested = threading.Event()
+
+    def _worker() -> None:
+        word = None
+        doc = None
+        try:
+            import pythoncom
+
+            pythoncom.CoInitialize()
+            word = win32com.client.DispatchEx("Word.Application")
+            word.Visible = False
+            word.DisplayAlerts = 0
+            try:
+                import win32process
+
+                _thread_id, process_id = win32process.GetWindowThreadProcessId(word.Hwnd)
+                owned["pid"] = int(process_id)
+            except Exception:
+                owned["pid"] = None
+            doc = word.Documents.Open(
+                str(work_path.resolve()),
+                ConfirmConversions=False,
+                ReadOnly=False,
+                AddToRecentFiles=False,
+                Revert=False,
+                OpenAndRepair=False,
+                NoEncodingDialog=True,
+            )
+            rng = doc.Content
+            rng.Collapse(0)  # wdCollapseEnd
+            rng.InsertAfter("\r" + _WORD_ROUNDTRIP_MARKER_TEXT)
+            doc.Save()
+        except Exception as exc:  # noqa: BLE001
+            outcome["exc"] = exc
+        finally:
+            if not timeout_requested.is_set():
+                try:
+                    if doc is not None:
+                        doc.Close(False)
+                except Exception:
+                    pass
+                try:
+                    if word is not None:
+                        word.Quit()
+                except Exception:
+                    pass
+
+    worker_thread = threading.Thread(target=_worker, daemon=True)
+    worker_thread.start()
+    worker_thread.join(timeout)
+
+    if worker_thread.is_alive():
+        timeout_requested.set()
+        pid = owned.get("pid")
+        if pid is not None:
+            try:
+                os.kill(pid, signal.SIGTERM)
+            except OSError:
+                pass
+        worker_thread.join(_WORD_ROUNDTRIP_CLEANUP_JOIN_SECONDS)
+        return {"status": "timed_out", "owned_pid": pid, "cleanup_pending": worker_thread.is_alive()}
+
+    if "exc" in outcome:
+        return {"status": "failed", "reason": f"{type(outcome['exc']).__name__}: {outcome['exc']}"}
+
+    if not work_path.exists():
+        return {"status": "failed", "reason": "Word COM reported success but the working copy is missing on disk"}
+
+    return {"status": "ok", "marker_text": _WORD_ROUNDTRIP_MARKER_TEXT, "work_path": str(work_path)}
+
+
+def run_round_trip_editability_check(doc_id: str, docx_path: Path, work_dir: Path,
+                                      timeout: float = _WORD_ROUNDTRIP_TIMEOUT_SECONDS) -> dict[str, Any]:
+    """Real Word-COM round-trip editability + render-equivalence check for
+    one document. Every sub-stage reports its own real status; a Word-COM
+    failure at any stage is reported as `status: "failed"/"timed_out"/
+    "unavailable"`, never silently treated as a pass. Only native-Meridian
+    extraction is diffed (this paper's product-under-test); python-docx/
+    Docling round-trip editability is out of scope for this check (they do
+    not write DOCX at all in this harness)."""
+    doc_work_dir = work_dir / doc_id
+    pre_copy = doc_work_dir / f"{doc_id}-pre.docx"
+    post_copy = doc_work_dir / f"{doc_id}-post.docx"
+    doc_work_dir.mkdir(parents=True, exist_ok=True)
+    shutil.copyfile(docx_path, pre_copy)
+
+    round_trip = _word_open_edit_save_round_trip(docx_path, post_copy, timeout=timeout)
+    if round_trip["status"] != "ok":
+        return {"status": round_trip["status"], "reason": round_trip.get("reason"), "stage": "open_edit_save"}
+
+    try:
+        pre_items = extract_native_meridian_items(pre_copy)
+    except Exception as exc:  # noqa: BLE001
+        return {"status": "failed", "stage": "pre_extract", "reason": f"{type(exc).__name__}: {exc}"}
+    try:
+        post_items = extract_native_meridian_items(post_copy)
+    except Exception as exc:  # noqa: BLE001
+        return {"status": "failed", "stage": "post_extract", "reason": f"{type(exc).__name__}: {exc}"}
+
+    editability = graph_scorer.score_round_trip_editability(pre_items, post_items, _WORD_ROUNDTRIP_MARKER_TEXT)
+
+    render_dir = doc_work_dir / "renders"
+    pre_receipt = retained_render_receipt(pre_copy, render_dir, timeout=timeout)
+    post_receipt = retained_render_receipt(post_copy, render_dir, timeout=timeout)
+    both_rendered = pre_receipt.get("status") == "rendered" and post_receipt.get("status") == "rendered"
+    render_equivalence = {
+        "pre_status": pre_receipt.get("status"),
+        "post_status": post_receipt.get("status"),
+        "pre_page_count": pre_receipt.get("page_count"),
+        "post_page_count": post_receipt.get("page_count"),
+        "page_count_equivalent": (
+            (pre_receipt.get("page_count") == post_receipt.get("page_count")) if both_rendered else None
+        ),
+    }
+
+    return {
+        "status": "scored",
+        "editability": editability,
+        "render_equivalence": render_equivalence,
+        "pre_copy": str(pre_copy),
+        "post_copy": str(post_copy),
+    }
 
 
 def _parse_args():
@@ -155,6 +366,13 @@ def _parse_args():
     parser.add_argument("--docling-timeout-seconds", type=float, default=300.0)
     parser.add_argument("--resume-from", type=Path, default=None,
                          help="a previous run's JSONL checkpoint file; already-scored doc_ids are skipped")
+    parser.add_argument("--round-trip-check", action="store_true",
+                         help="PAPER-S5: run a real Word-COM open-edit-save round trip + render-equivalence "
+                              "check on a deterministic sample of documents (slow; requires local Word COM)")
+    parser.add_argument("--round-trip-sample", type=int, default=3,
+                         help="how many documents (first N of this slice's evaluation_ids, deterministic) "
+                              "to run --round-trip-check against")
+    parser.add_argument("--round-trip-timeout-seconds", type=float, default=_WORD_ROUNDTRIP_TIMEOUT_SECONDS)
     return parser.parse_args()
 
 
@@ -203,6 +421,7 @@ def main() -> int:
                 native_items = extract_native_meridian_items(docx_path)
                 row["native_meridian"] = graph_scorer.score_document_graph(
                     gold, native_items, candidate_has_para_id=True, candidate_has_omml=True,
+                    candidate_has_caption_detection=True,
                 )
             except Exception as exc:  # noqa: BLE001
                 row["native_meridian"] = {"status": "failed", "error": f"{type(exc).__name__}: {exc}"}
@@ -235,6 +454,21 @@ def main() -> int:
                         row["docling_pdf_document_ai"] = scored
             else:
                 row["docling_pdf_document_ai"] = {"status": "not_run", "reason": "--include-docling not passed"}
+
+            round_trip_sample_ids = evaluation_ids[: max(args.round_trip_sample, 0)]
+            if args.round_trip_check and doc_id in round_trip_sample_ids:
+                round_trip_work_dir = DATA_ROOT / "runs" / "paper-s5-round-trip" / f"{args.slice}-{ts}"
+                try:
+                    row["round_trip_editability"] = run_round_trip_editability_check(
+                        doc_id, docx_path, round_trip_work_dir, timeout=args.round_trip_timeout_seconds,
+                    )
+                except Exception as exc:  # noqa: BLE001
+                    row["round_trip_editability"] = {"status": "failed", "stage": "runner",
+                                                      "reason": f"{type(exc).__name__}: {exc}"}
+            elif args.round_trip_check:
+                row["round_trip_editability"] = {"status": "not_run", "reason": "outside --round-trip-sample"}
+            else:
+                row["round_trip_editability"] = {"status": "not_run", "reason": "--round-trip-check not passed"}
 
             per_doc_results.append(row)
             checkpoint_fh.write(json.dumps(row, default=str) + "\n")
@@ -272,6 +506,8 @@ def main() -> int:
         "equation_node_f1": ("equation_node_prf1", "f1"),
         "equation_semantic_class_accuracy": ("equation_semantic_class_accuracy", "accuracy"),
         "para_id_preservation_rate": ("para_id", "preservation_rate"),
+        "caption_node_f1": ("caption_node_prf1", "f1"),
+        "anchor_node_f1": ("anchor_node_prf1", "f1"),
     }
 
     baselines = ["native_meridian", "python_docx"] + (["docling_pdf_document_ai"] if args.include_docling else [])
@@ -323,13 +559,32 @@ def main() -> int:
             "baselines were run this slice -- method: paired sign-flip "
             "permutation test, 2000 resamples, fixed seed 20260828, exact "
             "n_paired_documents recorded per metric per pair, never a bare "
-            "p-value without those). caption/anchor/reference/revision/"
-            "source_binding node kinds are explicitly not_applicable: "
-            "no_candidate_adapter extracts them yet -- named remaining scope, "
-            "not a fabricated comparison."
+            "p-value without those). PAPER-S5: caption/anchor node kinds are "
+            "now real, scored metrics (caption: scored for native_meridian via "
+            "document_content_tree's own SEQ-field parsing, not_applicable: "
+            "no_candidate_adapter for python_docx/Docling; anchor: "
+            "not_applicable: no_candidate_adapter for all three -- no candidate "
+            "exposes a bookmark-listing API yet). reference/source_binding/"
+            "revision node kinds, and references/revises/clones/conflicts_with "
+            "edge kinds, are not_applicable: no_gold_ground_truth -- "
+            "independent_gold_extractor.py itself produces no ground truth for "
+            "these yet, distinct from a candidate-adapter gap. caption_for edge "
+            "resolution is not_applicable: no_candidate_adapter (gold resolves "
+            "it; no candidate computes an equivalent target yet). Named "
+            "remaining scope, not a fabricated comparison."
         ),
         "aggregate_bootstrap_ci": aggregate,
         "paired_permutation_tests": paired_tests,
+        "round_trip_check": {
+            "requested": args.round_trip_check,
+            "sample_size_requested": args.round_trip_sample if args.round_trip_check else 0,
+            "results": [
+                {"doc_id": d["doc_id"], "result": d.get("round_trip_editability")}
+                for d in per_doc_results
+                if isinstance(d.get("round_trip_editability"), dict)
+                and d["round_trip_editability"].get("status") not in (None, "not_run")
+            ],
+        },
         "checkpoint_path": str(checkpoint_path),
         "per_document": per_doc_results,
     }
