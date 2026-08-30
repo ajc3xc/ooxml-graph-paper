@@ -75,7 +75,10 @@ unverified claim, which this project's own standing rule forbids).
 | LibreOffice headless conversion | A (re-derived, non-identity-preserving) | Track A ablation / Track C second renderer | **not installed on this host** (confirmed multiple times this sprint) — blocked until installed |
 | Pandoc | B (lossy conversion baseline, explicitly labeled as such) | Track A comparison, never pooled with Track A native scores | not yet installed; pin exact version at install time |
 | Aspose.Words | A (paid) | excluded — no budget authorization sought in this sprint | excluded, not blocked-pending |
-| Docling / Unstructured / MinerU / Mammoth.js | C (no OOXML output) | out of scope for Track A (input-only, cannot produce a comparable graph); may be cited as prior-art context only | not planned to be installed for this benchmark |
+| Docling (PDF pipeline) | document-AI track (comparator-contract-v0.md §7) — not Track A, never pooled with native/parser scores | **pinned and installed** (PAPER-28): `docling==2.123.0` (`docling-core` 2.92.0, `docling-ibm-models` 3.14.0, `docling-parse` 7.16.0, `transformers` 5.16.1, `torch` 2.13.0+cpu). First real capability probe (`docs/dataset-landscape-2026-08-25.md` PAPER-28 section) found 0/2 formulas and 0/2 tables recovered from a Word-COM-rendered PDF with default settings (`do_formula_enrichment=False`), versus 2/2 formulas via Docling's own separate DOCX backend (a parser/converter code path, not document-AI) and 2/2 via native Meridian — a first data point, not the full-corpus PAPER-31 run. |
+| Docling (own DOCX backend) | A (deterministic structural parser, same family as python-docx/Pandoc) | Track A comparator, only if a fair-use case is made for including a second parser baseline — not yet decided | installed alongside the PDF pipeline above (same package); must be labeled as a parser/converter result, never reported as a document-AI result if used |
+| Unstructured / MinerU / Mammoth.js | C (no OOXML output) | out of scope for Track A (input-only, cannot produce a comparable graph); may be cited as prior-art context only | not planned to be installed for this benchmark |
+| Google Document AI / Azure Document Intelligence / AWS Textract | document-AI track, hosted (comparator-contract-v0.md §7, PAPER-32) | optional, gated on explicit credential + data-handling + cost approval | **not_run** — no credential, data-handling approval, or cost approval supplied; not substituted with manual Claude PDF reading per explicit user instruction |
 | DocBank BERT/RoBERTa/LayoutLM reference numbers | Track B historical | reproduced only if exact checkpoint + preprocessing are available (comparator-contract-v0.md §2) | not attempted — no checkpoint sourced |
 
 Any baseline actually run must have its installed version captured in the run manifest (§6) — this
@@ -196,3 +199,16 @@ locally-confirmed RTX 3080's 20 GB VRAM per `runtime-capability-contract-v0.md`.
 
 **Current status: 0 of 10 checked.** This preregistration exists so that, when work resumes on this
 track, it is unambiguous what "ready to benchmark" means — not to claim readiness now.
+
+## 11. PAPER-30: the graph-aware scorer this document originally deferred
+
+Section 4's baseline table and this checklist both predate a real graph-aware scorer -- until
+PAPER-30, only a simplified count/overlap proxy existed (`paper15-first-attempt-v0.md`). That gap
+is now closed: `tools/graph_scorer.py` + `tools/run_paper30_graph_eval.py` implement real node-level
+correspondence (not just counts), precision *and* recall (not recall alone) by node kind, a
+non-tautological reading-order metric, independently re-derived equation semantic-class accuracy,
+bootstrap 95% confidence intervals, and paired document-level permutation tests. Full results and
+methodology: `docs/paper30-graph-scorer-v0.md`. This does not change the checklist above (the gold
+corpus, license review, and Word/LibreOffice items are unrelated to the scorer), but it does mean a
+real graph-level evaluation has now actually been *run* against the full 127-document corpus, not
+merely specified.

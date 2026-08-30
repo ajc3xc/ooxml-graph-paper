@@ -1,0 +1,429 @@
+"""PAPER-30: graph-aware scorer for all comparator outputs.
+
+Upgrades `run_paper15_smoke.py`'s simplified count/overlap proxy with real
+node-level correspondence, precision/recall/F1 by node kind, a genuine
+(non-tautological) reading-order metric, equation semantic-class accuracy
+re-derived independently rather than trusted from the system under test,
+bootstrap confidence intervals, and paired document-level significance
+tests -- all without any dependency beyond the standard library.
+
+## Common schema (declared explicitly, per PAPER-27/30)
+
+Every system's output is normalized to:
+
+    {
+        "paragraphs": [{"text": str, "para_id": str | None}],   # document order
+        "tables": [{"row_count": int, "col_count": int}],       # document order
+        "equations": [{"omml_raw": str | None}],                # document order
+        "full_text": str,
+    }
+
+`para_id` is None when the system cannot mint/preserve one (python-docx,
+Docling). `omml_raw` is None when the system does not expose OMML (python-docx,
+Docling) -- equation *count* can still be compared, but equation semantic-class
+accuracy is `not_applicable` wherever `omml_raw` is None for every equation.
+
+## What is and is not covered
+
+Per `graph-gold-schema-v0.md`, the full node vocabulary also includes
+`package_part`, `run`, `caption`, `anchor`, `reference`, `source_binding`,
+`revision`, and `render_receipt`. **No candidate adapter currently extracts
+comparable caption/anchor/reference/revision/source_binding data** (that is
+real, uncorrected scope -- `run_paper15_smoke.py`'s `extract_native_meridian`/
+`extract_python_docx` do not surface those), so this scorer reports those
+kinds as `not_applicable: no_candidate_adapter`, never a fabricated 0 or a
+silently omitted row. Edge-level scoring is limited to `contains` (via node
+correspondence + reading order) and does not yet implement `orders`,
+`caption_for`, `references`, `revises`, `clones`, or `conflicts_with` as
+separate scored edges -- named here as explicit remaining scope, not hidden.
+"""
+from __future__ import annotations
+
+import difflib
+import random
+import re
+import xml.etree.ElementTree as ET
+from typing import Any
+
+_BOOTSTRAP_SEED = 20260828  # distinct from, but analogous to, _split.json's own seed=20260826
+_BOOTSTRAP_RESAMPLES = 2000
+_PERMUTATION_RESAMPLES = 2000
+
+NOT_APPLICABLE_NO_ADAPTER = "not_applicable: no_candidate_adapter"
+
+
+def _normalize(text: str) -> str:
+    return re.sub(r"\s+", " ", (text or "")).strip().lower()
+
+
+# ---------------------------------------------------------------------------
+# Node correspondence
+# ---------------------------------------------------------------------------
+
+def _lcs_correspondence(gold_texts: list[str], cand_texts: list[str]) -> list[tuple[int, int]]:
+    """Order-preserving text correspondence via LCS alignment (difflib).
+
+    Good for precision/recall/F1 (a real text match is a real match
+    regardless of exact position), but by construction NEVER reveals
+    reordering -- matched pairs are always monotonic in both sequences. Do
+    not use this for a reading-order metric; see `_reading_order_accuracy`.
+
+    Deliberately does NOT special-case empty-string paragraphs: a document
+    that is legitimately all-blank (e.g. an image-only body with one empty
+    placeholder paragraph) must still be able to score a correct 1:1 match
+    on that blank paragraph's existence and position. Excluding empty-empty
+    pairs from matching (an earlier version of this function did) tanks
+    precision/recall to 0 on such a document even though the extraction was
+    structurally perfect -- a real, found-by-testing bug, not a hypothetical
+    one (`tier2-omegause-010-roadmap-diagram`, the corpus's single-blank-
+    paragraph flowchart-image document). SequenceMatcher's own alignment
+    still only pairs two blanks together when doing so is consistent with
+    the surrounding non-blank anchors' order, so this does not risk crediting
+    unrelated blank paragraphs as if they were the same content.
+    """
+    gold_norm = [_normalize(t) for t in gold_texts]
+    cand_norm = [_normalize(t) for t in cand_texts]
+    matcher = difflib.SequenceMatcher(a=gold_norm, b=cand_norm, autojunk=False)
+    pairs: list[tuple[int, int]] = []
+    for block in matcher.get_matching_blocks():
+        for k in range(block.size):
+            gi, ci = block.a + k, block.b + k
+            pairs.append((gi, ci))
+    return pairs
+
+
+def _prf1(matched: int, gold_total: int, cand_total: int) -> dict[str, float | None]:
+    precision = matched / cand_total if cand_total else (1.0 if gold_total == 0 else 0.0)
+    recall = matched / gold_total if gold_total else None  # undefined, not zero -- no instances to find
+    f1 = None
+    if recall is not None and (precision + recall) > 0:
+        f1 = 2 * precision * recall / (precision + recall)
+    elif recall is None:
+        f1 = None
+    return {"precision": precision, "recall": recall, "f1": f1, "matched": matched,
+            "gold_total": gold_total, "cand_total": cand_total}
+
+
+_READING_ORDER_MATCH_THRESHOLD = 0.6
+
+
+def _reading_order_accuracy(gold_texts: list[str], cand_texts: list[str]) -> dict[str, Any]:
+    """A genuine reading-order signal, independent of the LCS correspondence.
+
+    For each candidate item, finds its single best-matching gold item by text
+    similarity alone (no order constraint), then counts *inversions*: pairs of
+    matches where the gold order and candidate order disagree. An LCS-based
+    correspondence is unsuitable here because SequenceMatcher's matching
+    blocks are monotonic by construction -- they would report perfect
+    reading-order "accuracy" even on a document whose paragraphs were fully
+    shuffled, which would be a tautology, not a measurement.
+
+    Naively comparing every candidate item against every unused gold item
+    with `SequenceMatcher.ratio()` is O(n*m) *expensive* comparisons (full
+    Ratcliff/Obershelp matching per pair) -- measured as multi-minute stalls
+    on real corpus documents with hundreds of paragraphs. Two real
+    optimizations, not a shortcut on correctness: (1) an exact-normalized-text
+    bucket pass resolves the (common -- headers, boilerplate, short lines)
+    exact-duplicate case in O(n+m) with no fuzzy comparison at all; (2) for
+    the remaining candidates, `SequenceMatcher.real_quick_ratio()` /
+    `quick_ratio()` -- both O(min(n,m)) upper-bound estimates documented by
+    the stdlib specifically for this pre-filtering use -- are checked before
+    ever calling the expensive O(n*m) `ratio()`, so a pair that cannot
+    possibly clear the match threshold never pays for full alignment.
+    """
+    gold_norm = [_normalize(t) for t in gold_texts]
+    cand_norm = [_normalize(t) for t in cand_texts]
+    if not gold_norm or not cand_norm:
+        return {"accuracy": None, "matched_pairs": 0, "reason": "empty sequence on one or both sides"}
+
+    used_gold: set[int] = set()
+    matches: list[tuple[int, int]] = []  # (gold_index, cand_index)
+
+    # Pass 1: exact-normalized-text matches, cheapest possible resolution.
+    gold_by_text: dict[str, list[int]] = {}
+    for gi, gtext in enumerate(gold_norm):
+        if gtext:
+            gold_by_text.setdefault(gtext, []).append(gi)
+    remaining_cand: list[int] = []
+    for ci, ctext in enumerate(cand_norm):
+        if not ctext:
+            continue
+        bucket = gold_by_text.get(ctext)
+        gi = next((g for g in bucket if g not in used_gold), None) if bucket else None
+        if gi is not None:
+            matches.append((gi, ci))
+            used_gold.add(gi)
+        else:
+            remaining_cand.append(ci)
+
+    # Pass 2: fuzzy matching, only for what pass 1 couldn't resolve, with a
+    # cheap quick-ratio pre-filter before any full ratio() call. Hard circuit
+    # breaker: even with the pre-filter, a document made of many near-
+    # identical short lines (e.g. a repetitive price catalog) can still
+    # approach worst-case O(n*m) full ratio() calls -- rather than risk an
+    # unbounded stall on one pathological document during a multi-document
+    # corpus run, skip the fuzzy pass and report it explicitly instead of
+    # hanging silently.
+    _MAX_FUZZY_PAIR_BUDGET = 400_000
+    remaining_gold = [gi for gi in range(len(gold_norm)) if gi not in used_gold and gold_norm[gi]]
+    fuzzy_pass_skipped = False
+    if len(remaining_cand) * len(remaining_gold) > _MAX_FUZZY_PAIR_BUDGET:
+        if len(matches) < 2:
+            return {"accuracy": None, "matched_pairs": len(matches),
+                    "reason": (f"fuzzy-match search space ({len(remaining_cand)}x{len(remaining_gold)}) "
+                               f"exceeds the {_MAX_FUZZY_PAIR_BUDGET}-pair budget and exact matches alone "
+                               "gave fewer than 2 pairs -- skipped rather than risking an unbounded stall")}
+        fuzzy_pass_skipped = True
+        remaining_cand = []  # keep pass-1 exact matches, skip the expensive fuzzy pass
+    for ci in remaining_cand:
+        ctext = cand_norm[ci]
+        matcher = difflib.SequenceMatcher(autojunk=False)
+        matcher.set_seq2(ctext)
+        best_gi, best_ratio = None, _READING_ORDER_MATCH_THRESHOLD
+        for gi in remaining_gold:
+            if gi in used_gold:
+                continue
+            matcher.set_seq1(gold_norm[gi])
+            if matcher.real_quick_ratio() < best_ratio or matcher.quick_ratio() < best_ratio:
+                continue  # cheap upper bound already below threshold -- skip the expensive ratio()
+            ratio = matcher.ratio()
+            if ratio > best_ratio:
+                best_ratio, best_gi = ratio, gi
+        if best_gi is not None:
+            matches.append((best_gi, ci))
+            used_gold.add(best_gi)
+
+    if len(matches) < 2:
+        return {"accuracy": None, "matched_pairs": len(matches), "reason": "fewer than 2 matched pairs -- order is undefined"}
+
+    # Concordant/discordant pair counts = Kendall-tau's own definition. A
+    # naive double loop is O(k^2) in the number of matched pairs, which can
+    # itself run to the thousands on a large real-world document -- counted
+    # instead via merge-sort inversion counting (O(k log k), exact, no
+    # arbitrary cutoff needed) by sorting matches on gold order and counting
+    # candidate-order inversions.
+    total_pairs = len(matches) * (len(matches) - 1) // 2
+    discordant = _count_inversions([ci for _, ci in sorted(matches, key=lambda pair: pair[0])])
+    concordant = total_pairs - discordant
+    accuracy = concordant / total_pairs if total_pairs else None
+    return {"accuracy": accuracy, "matched_pairs": len(matches), "concordant_pairs": concordant,
+            "discordant_pairs": discordant, "fuzzy_pass_skipped": fuzzy_pass_skipped}
+
+
+def _count_inversions(sequence: list[int]) -> int:
+    """Count inversions in `sequence` via merge sort. O(k log k)."""
+    if len(sequence) <= 1:
+        return 0
+    mid = len(sequence) // 2
+    left, right = sequence[:mid], sequence[mid:]
+    inversions = _count_inversions(left) + _count_inversions(right)
+    merged, i, j = [], 0, 0
+    while i < len(left) and j < len(right):
+        if left[i] <= right[j]:
+            merged.append(left[i])
+            i += 1
+        else:
+            merged.append(right[j])
+            j += 1
+            inversions += len(left) - i  # everything remaining in `left` inverts with right[j]
+    merged.extend(left[i:])
+    merged.extend(right[j:])
+    sequence[:] = merged
+    return inversions
+
+
+# ---------------------------------------------------------------------------
+# Equation semantic-class accuracy (re-derived independently, not trusted)
+# ---------------------------------------------------------------------------
+
+def _reclassify_omml(omml_raw: str) -> tuple[str, str] | None:
+    """Apply independent_gold_extractor.py's OWN classifier to a candidate's
+    claimed OMML, rather than trusting any label the candidate itself might
+    report. Returns None if the string does not even parse as XML (itself a
+    reportable candidate defect, surfaced by the caller as a mismatch)."""
+    import sys
+    from pathlib import Path
+
+    tools_dir = str(Path(__file__).resolve().parent)
+    if tools_dir not in sys.path:
+        sys.path.insert(0, tools_dir)
+    from independent_gold_extractor import _classify_equation  # noqa: PLC0415
+
+    try:
+        element = ET.fromstring(omml_raw)
+    except ET.ParseError:
+        return None
+    return _classify_equation(element)
+
+
+def _equation_semantic_accuracy(gold_equations: list[dict], cand_equations: list[dict]) -> dict[str, Any]:
+    """Three distinct null states, not one conflated "nothing to report":
+
+    - Both sides have zero equations: this document simply has none --
+      `undefined`, a content characteristic, not a capability gap.
+    - Candidate found zero equations (or found some but none carry OMML)
+      while gold has at least one: the candidate system cannot expose OMML
+      at all here -- `not_applicable: no_candidate_adapter`. In the current
+      caller (`score_document_graph`), this path is reachable only when
+      `candidate_has_omml=True` was passed yet this specific document's
+      candidate list still came back OMML-less (e.g. the system's equation
+      detector missed a real equation) -- callers with
+      `candidate_has_omml=False` never reach this function at all.
+    - Otherwise: an ordinary scored comparison.
+    """
+    if not gold_equations and not cand_equations:
+        return {"accuracy": None, "status": "undefined", "reason": "no equations on either side for this document"}
+    if not any(eq.get("omml_raw") for eq in cand_equations):
+        return {
+            "accuracy": None,
+            "status": NOT_APPLICABLE_NO_ADAPTER,
+            "reason": "candidate does not expose OMML for any equation (no semantic class is derivable from text/pixels alone)",
+        }
+    n = min(len(gold_equations), len(cand_equations))
+    if n == 0:
+        return {"accuracy": None, "status": "undefined",
+                "reason": "equation count mismatch (one side has equations, the other has none) -- not a capability gap"}
+    correct = 0
+    mismatches = []
+    for i in range(n):
+        gold_label = gold_equations[i].get("attrs", {}).get("semantic_label")
+        cand_omml = cand_equations[i].get("omml_raw")
+        cand_label = _reclassify_omml(cand_omml)[0] if cand_omml else None
+        if gold_label is not None and cand_label == gold_label:
+            correct += 1
+        elif gold_label is not None:
+            mismatches.append({"index": i, "gold_label": gold_label, "candidate_reclassified_label": cand_label})
+    return {
+        "accuracy": correct / n,
+        "status": "scored",
+        "compared_count": n,
+        "mismatches": mismatches,
+    }
+
+
+# ---------------------------------------------------------------------------
+# Bootstrap CIs and paired significance tests
+# ---------------------------------------------------------------------------
+
+def bootstrap_ci(values: list[float], n_resamples: int = _BOOTSTRAP_RESAMPLES, alpha: float = 0.05,
+                  seed: int = _BOOTSTRAP_SEED) -> dict[str, Any]:
+    """Percentile bootstrap CI for the mean of `values`. Pure stdlib (`random`)."""
+    clean = [v for v in values if v is not None]
+    if len(clean) < 2:
+        return {"mean": (clean[0] if clean else None), "ci_low": None, "ci_high": None,
+                "n": len(clean), "reason": "fewer than 2 non-null values -- CI undefined"}
+    rng = random.Random(seed)
+    n = len(clean)
+    means = []
+    for _ in range(n_resamples):
+        resample = [clean[rng.randrange(n)] for _ in range(n)]
+        means.append(sum(resample) / n)
+    means.sort()
+    lo_idx = int((alpha / 2) * n_resamples)
+    hi_idx = int((1 - alpha / 2) * n_resamples) - 1
+    return {
+        "mean": sum(clean) / n,
+        "ci_low": means[lo_idx],
+        "ci_high": means[min(hi_idx, n_resamples - 1)],
+        "n": n,
+        "confidence_level": 1 - alpha,
+        "n_resamples": n_resamples,
+    }
+
+
+def paired_permutation_test(values_a: list[float | None], values_b: list[float | None],
+                             n_permutations: int = _PERMUTATION_RESAMPLES,
+                             seed: int = _BOOTSTRAP_SEED) -> dict[str, Any]:
+    """Paired sign-flip permutation test on per-document differences (A - B).
+
+    Under the null hypothesis of no systematic difference between the two
+    systems, each document's (A-B) difference is equally likely to have been
+    (B-A) -- so randomly flipping signs and recomputing the mean gives an
+    exact empirical null distribution without assuming normality.
+    """
+    diffs = [a - b for a, b in zip(values_a, values_b) if a is not None and b is not None]
+    if len(diffs) < 2:
+        return {"observed_mean_diff": None, "p_value": None, "n_paired_documents": len(diffs),
+                "reason": "fewer than 2 paired documents with values on both sides"}
+    observed = sum(diffs) / len(diffs)
+    rng = random.Random(seed)
+    extreme_count = 0
+    for _ in range(n_permutations):
+        flipped = [d if rng.random() < 0.5 else -d for d in diffs]
+        if abs(sum(flipped) / len(flipped)) >= abs(observed):
+            extreme_count += 1
+    p_value = extreme_count / n_permutations
+    return {
+        "observed_mean_diff": observed,
+        "p_value": p_value,
+        "n_paired_documents": len(diffs),
+        "n_permutations": n_permutations,
+        "method": "paired sign-flip permutation test",
+    }
+
+
+# ---------------------------------------------------------------------------
+# Per-document scoring entry point
+# ---------------------------------------------------------------------------
+
+def score_document_graph(gold: dict, candidate: dict, candidate_has_para_id: bool,
+                          candidate_has_omml: bool) -> dict[str, Any]:
+    """Full graph-aware score for one (gold, candidate) document pair.
+
+    `gold` and `candidate` are both in the common schema described in this
+    module's docstring, PLUS gold also carries the raw `nodes` list (needed
+    for `attrs.semantic_label` on equation nodes).
+    """
+    gold_para_texts = [p["text"] for p in gold["paragraphs"]]
+    cand_para_texts = [p["text"] for p in candidate["paragraphs"]]
+    para_pairs = _lcs_correspondence(gold_para_texts, cand_para_texts)
+    paragraph_prf1 = _prf1(len(para_pairs), len(gold_para_texts), len(cand_para_texts))
+    reading_order = _reading_order_accuracy(gold_para_texts, cand_para_texts)
+
+    gold_tables = gold["tables"]
+    cand_tables = candidate["tables"]
+    matched_tables = min(len(gold_tables), len(cand_tables))
+    table_prf1 = _prf1(matched_tables, len(gold_tables), len(cand_tables))
+    table_row_exact_matches = sum(
+        1 for i in range(matched_tables) if gold_tables[i]["row_count"] == cand_tables[i].get("row_count")
+    )
+    table_row_exact_match_rate = (table_row_exact_matches / matched_tables) if matched_tables else None
+
+    gold_equations = gold["equations"]
+    cand_equations = candidate["equations"]
+    matched_equations = min(len(gold_equations), len(cand_equations))
+    equation_prf1 = _prf1(matched_equations, len(gold_equations), len(cand_equations))
+    equation_nodes_for_labels = gold.get("equation_nodes", [])
+    if candidate_has_omml:
+        equation_semantic = _equation_semantic_accuracy(equation_nodes_for_labels, cand_equations)
+    else:
+        equation_semantic = {"accuracy": None, "status": NOT_APPLICABLE_NO_ADAPTER,
+                              "reason": "candidate system does not expose OMML"}
+
+    para_id_status: dict[str, Any]
+    if not candidate_has_para_id:
+        para_id_status = {"preservation_rate": None, "status": "not_applicable",
+                           "reason": "candidate system cannot mint/preserve native paragraph identity"}
+    else:
+        gold_ids = [p.get("para_id") for p in gold["paragraphs"]]
+        cand_ids = [p.get("para_id") for p in candidate["paragraphs"]]
+        expected = [i for i, v in enumerate(gold_ids) if v]
+        if not expected:
+            para_id_status = {"preservation_rate": None, "status": "undefined", "reason": "gold has no native paragraph IDs for this document"}
+        else:
+            preserved = sum(i < len(cand_ids) and cand_ids[i] == gold_ids[i] for i in expected)
+            para_id_status = {"preservation_rate": preserved / len(expected), "status": "scored", "evaluable_paragraphs": len(expected)}
+
+    for_no_adapter_kinds = {"caption", "anchor", "reference", "source_binding", "revision"}
+    unsupported_kinds = {kind: NOT_APPLICABLE_NO_ADAPTER for kind in for_no_adapter_kinds}
+
+    return {
+        "paragraph_node_prf1": paragraph_prf1,
+        "reading_order": reading_order,
+        "table_node_prf1": table_prf1,
+        "table_row_exact_match_rate": table_row_exact_match_rate,
+        "equation_node_prf1": equation_prf1,
+        "equation_semantic_class_accuracy": equation_semantic,
+        "para_id": para_id_status,
+        "unsupported_node_kinds": unsupported_kinds,
+    }

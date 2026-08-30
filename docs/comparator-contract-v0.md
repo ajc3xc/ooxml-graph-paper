@@ -95,3 +95,79 @@ Efficiency is secondary to correctness and must not be used to hide a failed str
 This contract does not authorize full-corpus download, model training, or reactivation of unrelated 2030 experiments. Those begin only after the DOCX gold-set source, Word render authority, and baseline availability gates are satisfied.
 
 Sources: [DocBank repository](https://github.com/doc-analysis/DocBank), [DocBank dataset card](https://huggingface.co/datasets/liminghao1630/DocBank), [DocBank paper](https://arxiv.org/abs/2006.01038).
+
+## 7. PAPER-27: dual-track claim contract (native-OOXML vs. document-AI)
+
+Frozen per PAPER-27. This section resolves a real ambiguity found in the first PAPER-15
+attempt: "baseline" was being used for two different kinds of systems (parser libraries
+that read the same `.docx` bytes, and systems that only ever see a rendered PDF). They are
+not comparable on the same footing and must not be pooled.
+
+### 7.1 Two tracks, not one
+
+- **Native-OOXML track** (this paper's product claim). Input: the `.docx` package
+  directly. Systems: Meridian's native extraction/writing (`document_content_tree`,
+  `parse_docx_equations_local`), and parser/converter comparators that also read the
+  `.docx` bytes directly -- **python-docx, Pandoc, LibreOffice are parser/converter
+  comparators in this track, not document-AI systems.** They see the same native facts
+  Meridian does (paragraphs, tables, raw OMML where their format supports it); the
+  question is whether they preserve/expose those facts as well as Meridian does.
+- **Document-AI track** (a separate, harder comparison). Input: the *rendered PDF only*
+  -- the same source `.docx`, rendered through Word COM (canonical render authority,
+  per PAPER-8/`runtime-capability-contract-v0.md`), then handed to a system that has
+  **no access to the original OOXML** -- only pixels/text-layer-of-a-PDF. Candidate
+  systems: Docling (local, open, pinned per PAPER-28) and, optionally and separately, one
+  approved hosted document-AI processor (PAPER-32, gated on explicit credential/data/cost
+  approval -- `not_run` otherwise, never silently substituted).
+
+**Claude manually reading a rendered PDF in this conversation is exploratory only.** It is
+not wrapped in a fixed API/model/prompt harness, is not reproducible run-to-run in the way
+a pinned model+prompt+temperature would be, and must never be reported as a primary
+benchmark baseline. Where used at all, it appears as labeled qualitative appendix evidence,
+never pooled into the document-AI track's scored metrics.
+
+### 7.2 Three distinct claims (do not conflate)
+
+Per PAPER-35's own framing, this paper can support up to three separate claims, and each
+needs its own evidence -- proving one does not prove the others:
+
+1. **Native Meridian OOXML/OMML preserves and editably writes Word structure.** Evidenced
+   by the gold corpus + render receipts + round-trip findings already gathered
+   (`gold-corpus-status-v0.md`, `word-roundtrip-preservation-contract-v0.md`).
+2. **Deterministic native extraction beats generic same-format parsers** (python-docx,
+   Pandoc, LibreOffice) **on native-structure tasks.** Evidenced by the native-OOXML track
+   above, scored against independent graph gold. This is the claim `paper15-first-attempt-v0.md`
+   has real, if partial, evidence for already (para-ID preservation, equation extraction,
+   crash resistance).
+3. **Native OOXML exposes information and guarantees unavailable to rendered-PDF
+   document-AI systems.** This is the hardest, most novel claim, and per PAPER-35's own
+   gate: **it requires a real, reproducible document-AI baseline (Docling at minimum) or
+   must be framed as a capability/observability analysis, not reported as a scored
+   accuracy victory** if no such baseline ran. Do not claim (3) from claim (2)'s evidence.
+
+### 7.3 What cannot be inferred from a PDF-only reader, by construction
+
+These are not measured as "0% recall" against a system that was never asked -- they are
+recorded as **not-applicable / unknown**, with the reason being architectural, not a
+system failure: native `w14:paraId` / paragraph identity (a PDF has no paragraph-identity
+concept at all); revision history (`w:ins`/`w:del` -- rendering flattens tracked changes to
+their accepted-or-rejected visual state); source bindings / provenance metadata (not part
+of any rendered page); direct editability (a PDF is not a `.docx` -- there is nothing to
+write back to); and raw OMML structure (a PDF equation is pixels or, at best, a
+vision-model's re-derived guess at the math, not the original `<m:oMath>` tree). Section
+7.4's denominators formalize this.
+
+### 7.4 Paired-input rules, denominators, and failure categories
+
+- **Paired input**: every document-AI-track result row must name the exact source `.docx`
+  hash it was rendered from, matching a native-OOXML-track row for the same document --
+  never report a document-AI number without its paired native-track number alongside it.
+- **Denominators**: a metric that is architecturally not-applicable to PDF-only input
+  (7.3) is excluded from that system's denominator entirely -- it is not scored as 0 and
+  does not silently drop out of the reported metric list; it is listed with an explicit
+  `not_applicable` status and a one-line reason, per document-AI-track system.
+- **Failure categories** (recorded per document, per system): `crashed`
+  (raised/terminated before producing output), `timed_out`, `malformed_input` (system
+  rejected a valid Word-renderable file), `not_applicable` (7.3), `not_run` (system
+  unavailable/ungated, e.g. PAPER-32 without approval), and `scored` (a real comparable
+  result exists).

@@ -45,3 +45,43 @@ Updated 2026-08-26. Pixi and the RTX 3080 are available locally. Microsoft Word 
 LibreOffice/`soffice` is not installed or on PATH. Word is therefore the canonical renderer on this host; LibreOffice remains an optional secondary compatibility renderer and must never substitute for Word evidence. The current Meridian render gate still needs an audit-grade retained receipt (source/PDF hashes, Word build/path, explicit export method, page count, freshness, and cleanup status). The probe manifest is kept at `E:\MeridianData\ooxml-graph-paper\manifests\meridian-equation-word-probe-20260826.json`.
 
 The paper subproject contains planning documents and the Pixi environment only. Product code and its regression tests remain in the parent repository under `extensions/meridian-docs`; the subproject's own `pixi run test` currently collects zero tests.
+
+## PAPER-32: hosted document-AI track capability report (2026-08-28)
+
+Per `comparator-contract-v0.md` §7 and the explicit user instruction governing this sprint
+("Do not upload documents to Google Document AI, Azure, AWS, or any other hosted API
+unless a specific provider, credential, data-handling approval, and cost approval are
+explicitly supplied. Continue the local Docling track immediately and document any hosted
+track as not_run if those approvals are absent."), the hosted document-AI track is
+recorded here as **`not_run`**, not attempted, and not silently replaced with any manual
+Claude PDF-reading pass.
+
+**Status of the three named candidate hosted processors, checked directly rather than
+assumed:**
+
+| Provider | Credential present in this environment? | Data-handling approval? | Cost approval? |
+|---|---|---|---|
+| Google Document AI (Layout Parser) | No — no `GOOGLE_APPLICATION_CREDENTIALS`/service-account key and no `~/.config/gcloud` directory found on this host | Not sought | Not sought |
+| Azure Document Intelligence (Layout) | No — no endpoint/key environment variables set | Not sought | Not sought |
+| AWS Textract (AnalyzeDocument) | **Ambient only, not project-scoped**: a generic `[default]` profile exists in `~/.aws/credentials` and `~/.aws/config` on this host (checked for profile names only; no secret key material was read or will be read). This is almost certainly left over from unrelated prior work on this machine, not something provisioned for this project. Per the explicit user instruction governing this sprint ("a specific provider, credential, data-handling approval, and cost approval are explicitly supplied"), an ambient, unscoped local credential does **not** satisfy that gate — using it for this purpose without a separate, explicit approval would be exactly the kind of unauthorized-use case the instruction exists to prevent. Treated as **not present** for this item's purposes. | Not sought | Not sought |
+
+All three gates are unmet for all three candidate providers; per the comparator contract's
+own rule (§7.4: `not_run` = "system unavailable/ungated"), this entire track is `not_run`,
+with reason `no_credential_no_approval`, not `unknown` and not a silently-omitted row.
+
+**What would be required to un-block this**, recorded for whoever later decides whether to
+pursue it: (1) an explicit user/organization decision on which single provider to use
+(the contract limits this to *one* hosted processor, never multiple pooled together);
+(2) a credential provisioned through this project's own environment configuration, never
+hand-typed into a request by an agent; (3) an explicit data-handling approval given that
+the corpus contains real-world documents sourced from docx-corpus/OmegaUse-OfficeVal
+(public-web/task-benchmark sources, not private data, but still a third-party upload
+decision the user must make, not an agent); (4) an explicit cost approval, since
+per-page hosted document-AI billing is a real, non-trivial recurring cost across a
+127-document, often multi-page corpus.
+
+No exploratory manual/VLM PDF-reading pass was substituted for this track in this item —
+per explicit standing instruction, that approach was rejected as a benchmark baseline
+entirely, not merely deferred to "qualitative appendix" status.
+
+Machine-readable capability report: `E:\MeridianData\ooxml-graph-paper\manifests\paper32-hosted-document-ai-capability-report.json`.

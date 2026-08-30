@@ -1,0 +1,53 @@
+{
+  "schema_version": "paper-sota-baseline-v1",
+  "as_of": "2026-08-29",
+  "project": "OOXML-Graph Paper",
+  "study_tracks": {
+    "native_ooxml": {
+      "input": "paired_docx_package",
+      "systems": ["meridian_native", "python_docx"],
+      "gold": "independent_native_ooxml_graph"
+    },
+    "rendered_pdf_document_ai": {
+      "input": "word_rendered_pdf_only",
+      "systems": ["docling_pdf_document_ai"],
+      "paired_source_required": true,
+      "not_applicable_native_fields": ["w14_paraId", "revisions", "source_bindings", "editable_writeback", "raw_omml"]
+    }
+  },
+  "installed": {
+    "docling": {"version": "2.123.0", "status": "runnable_cpu", "evidence": "pixi run python importlib.metadata"},
+    "torch": {"version": "2.13.0+cpu", "status": "cpu_only", "cuda_available": false},
+    "transformers": {"version": "5.16.1", "status": "installed"},
+    "python_docx": {"version": "1.2.0", "status": "runnable"},
+    "lxml": {"version": "6.1.2", "status": "installed"}
+  },
+  "hardware": {
+    "reported_gpu": "NVIDIA GeForce RTX 3080 20 GB",
+    "usable_from_current_pixi_env": false,
+    "verification_needed": "Install a CUDA-enabled Torch build and rerun torch.cuda.is_available plus a model smoke test"
+  },
+  "baselines": [
+    {"id": "meridian_native", "input": "docx", "role": "primary", "status": "required"},
+    {"id": "python_docx", "input": "docx", "version": "1.2.0", "role": "same_format_comparator", "status": "required"},
+    {"id": "docling_pdf_document_ai", "input": "word_rendered_pdf", "version": "2.123.0", "role": "local_document_ai", "status": "required", "current_execution": "cpu_fast_pipeline"},
+    {"id": "pandoc", "input": "docx_or_conversion_output", "role": "conversion_comparator", "status": "not_run_unavailable"},
+    {"id": "libreoffice", "input": "docx_or_pdf", "role": "compatibility_renderer", "status": "not_run_unavailable"},
+    {"id": "mineru", "input": "pdf_or_docx", "role": "candidate_open_parser_vlm", "status": "candidate_not_installed"},
+    {"id": "paddleocr_vl_pp_structure_v3", "input": "pdf_or_images", "role": "candidate_open_parser_vlm", "status": "candidate_not_installed"},
+    {"id": "hosted_document_ai", "input": "word_rendered_pdf", "role": "commercial_comparator", "status": "not_run_no_project_approval"},
+    {"id": "manual_claude_pdf_reading", "input": "word_rendered_pdf", "role": "qualitative_only", "status": "excluded_from_scored_baseline"}
+  ],
+  "fairness_requirements": [
+    "Track A receives DOCX bytes and native graph gold.",
+    "Track B receives only the paired Word-rendered PDF.",
+    "Record hashes, revisions, configuration, hardware, wall time, memory, tokens, outputs, and receipts.",
+    "Retain crashed, timed_out, malformed_input, not_run, and not_applicable rows."
+  ],
+  "external_reference": {
+    "benchmark": "OmniDocBench",
+    "url": "https://github.com/opendatalab/OmniDocBench",
+    "use": "candidate selection and external PDF context only",
+    "not_transferable_to_native_docx_claim": true
+  }
+}

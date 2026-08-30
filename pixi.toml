@@ -19,6 +19,10 @@ python-docx = ">=1.2,<2"
 # content hashes, CDN URLs) for stratified sampling. Isolated here for the same reason as
 # python-docx above.
 pyarrow = ">=17,<19"
+# PAPER-27/28/31: local, open-source document-AI baseline (IBM Docling) -- runs entirely
+# on-host, no hosted API, no credentials, no document upload to any third party. Isolated
+# here for the same reason as python-docx above.
+docling = ">=2,<3"
 
 [tasks]
 test = "python -m pytest"

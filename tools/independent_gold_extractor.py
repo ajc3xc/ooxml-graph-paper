@@ -38,9 +38,33 @@ def _extractor_self_hash() -> str:
     return _sha256(Path(__file__).read_bytes())
 
 
+_TAB_TAG = _q(_W, "tab")
+_BR_TAG = _q(_W, "br")
+_CR_TAG = _q(_W, "cr")
+_T_TAG = _q(_W, "t")
+
+
 def _local_text(elem: ET.Element) -> str:
-    """Concatenate w:t descendant text within one element (paragraph or run)."""
-    parts = [t.text or "" for t in elem.iter(_q(_W, "t"))]
+    """Concatenate w:t descendant text within one element (paragraph or run),
+    in document order, converting <w:tab/> to a literal tab and <w:br/>/<w:cr/>
+    to a newline -- matching python-docx's own .text convention.
+
+    PAPER-30 found this function previously dropped <w:tab/>/<w:br/> entirely
+    (iterating only w:t via elem.iter(_q(_W, "t"))), causing gold's paragraph
+    text to differ from what Word actually renders on any tab-heavy document
+    (e.g. numbered legal clauses like "(a)\\tsome text" reconstructed as
+    "(a)some text" with no separator at all) -- a real, root-caused, and now
+    fixed gold-fidelity gap, not a hypothetical one
+    (tier2-docxbenchmark-investment-agreement-executed, ~21/175 paragraphs).
+    """
+    parts: list[str] = []
+    for child in elem.iter():
+        if child.tag == _T_TAG:
+            parts.append(child.text or "")
+        elif child.tag == _TAB_TAG:
+            parts.append("\t")
+        elif child.tag in (_BR_TAG, _CR_TAG):
+            parts.append("\n")
     return "".join(parts)
 
 

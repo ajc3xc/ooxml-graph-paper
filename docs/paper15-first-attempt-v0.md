@@ -147,3 +147,16 @@ pinned PDF/AI or vision baseline on Word-rendered inputs, conversion baselines
 (Pandoc/LibreOffice), and Track C render-parity metrics. This broad pass is
 evidence for native DOCX robustness against a generic DOCX parser, not yet
 evidence that deterministic OOXML beats document-AI systems.
+
+## PAPER-35 final-gate update (2026-08-28)
+
+Everything named as "still missing" above has since been addressed, at least partially, by
+later items: the complete graph node/edge scorer is `docs/paper30-graph-scorer-v0.md`; a
+pinned document-AI baseline (Docling) on Word-rendered PDFs ran on a 10-document smoke slice
+in `docs/paper31-local-baselines-v0.md` (not yet the full corpus -- a named, deliberate scope
+limit, not an oversight); Pandoc/LibreOffice conversion baselines remain genuinely not
+installed and are still `not_run`. The full three-claim synthesis, including what does and
+does not yet constitute evidence that deterministic OOXML beats document-AI systems, is in
+`docs/paper35-final-gate-v0.md` -- this document's own simplified count/overlap numbers above
+remain a valid, honestly-scoped first attempt and are superseded in rigor, not contradicted,
+by PAPER-30's later graph-aware pass on the same corpus.

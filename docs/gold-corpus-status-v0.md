@@ -242,3 +242,16 @@ states in its own sprint-item notes that PAPER-15 must not run until it complete
 passing PAPER-20 gate is necessary but was never sufficient on its own -- the corpus-scale
 and reproducible-isolation requirements are separate, larger conditions this single gate
 script does not check.
+
+## PAPER-35 final-gate update (2026-08-28): the condition above has since been satisfied
+
+PAPER-25 and PAPER-26 both completed prior to this update. PAPER-29 subsequently
+re-audited this same 127-document corpus end-to-end (`docs/paper29-corpus-audit-v0.md`) and
+found it clean after one real, fixed gap (a missing machine-readable rights-rationale entry
+for the 2 docx-benchmark documents). The real, informal count/overlap PAPER-15 pass, the real
+graph-aware PAPER-30 pass, and the real PAPER-31 local-baseline run (including Docling on the
+smoke slice) have all since actually executed against this exact corpus -- see
+`docs/paper15-first-attempt-v0.md`, `docs/paper30-graph-scorer-v0.md`, and
+`docs/paper31-local-baselines-v0.md`. This corpus-status document's own job is done; the final
+synthesis lives in `docs/paper35-final-gate-v0.md`, which this note exists only to link
+forward to, not to duplicate.

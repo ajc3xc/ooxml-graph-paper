@@ -1,0 +1,77 @@
+{
+  "schema_version": "native-docx-corpus-candidate-v1",
+  "as_of": "2026-08-29",
+  "frozen_d0": {
+    "documents": 127,
+    "tiers": {"tier1": 8, "tier2": 116, "tier3": 3},
+    "raw_docx_observed": 155,
+    "raw_not_promoted": 28,
+    "sources": {
+      "tier1_hand_authored": 8,
+      "tier2_omegause_officeval": 47,
+      "tier2_docx_benchmark_cc0": 2,
+      "tier2_docxcorpus_common_crawl": 67,
+      "tier3_composite": 3
+    },
+    "rendered_and_pdf_retained": 127,
+    "documents_with_nonzero_uncertainty": 59,
+    "documents_with_zero_uncertainty": 68
+  },
+  "observed_feature_coverage": {
+    "para_id_documents": 95,
+    "documents_without_para_id": 32,
+    "omath_documents": 7,
+    "omath_containers": 8,
+    "equation_classes": {
+      "fraction": {"documents": 3, "containers": 3},
+      "radical": {"documents": 2, "containers": 2},
+      "subscript": {"documents": 1, "containers": 1},
+      "superscript": {"documents": 1, "containers": 1},
+      "nary": {"documents": 0, "containers": 0},
+      "matrix_or_array": {"documents": 0, "containers": 0},
+      "accent_or_limit": {"documents": 0, "containers": 0},
+      "multi_script": {"documents": 0, "containers": 0}
+    },
+    "tables_documents": 114,
+    "grid_span_documents": 32,
+    "vertical_merge_documents": 20,
+    "documents_with_explicit_tbl_grid": 70,
+    "documents_without_explicit_tbl_grid": 44,
+    "bookmarks_documents": 86,
+    "field_instruction_documents": 49,
+    "tracked_insertion_documents": 83,
+    "tracked_deletion_documents": 0,
+    "headers_or_footers_documents": 65,
+    "drawings_documents": 85,
+    "floating_anchor_documents": 52,
+    "hyperlink_documents": 26,
+    "content_control_documents": 18,
+    "custom_xml_documents": 60
+  },
+  "d1_required_feature_families": [
+    "nary_with_lower_and_upper_limits",
+    "matrix_and_equation_array",
+    "accent_bar_box_enclosure_and_delimiter",
+    "subscript_superscript_and_multi_script",
+    "equation_punctuation_caption_field_and_reference_adjacency",
+    "tracked_insertion_and_deletion",
+    "headers_footers_floating_drawings_bookmarks_hyperlinks_content_controls",
+    "nested_and_merged_tables_with_omitted_tbl_grid",
+    "duplicate_missing_stale_para_ids_and_numbering_collisions"
+  ],
+  "promotion_requirements": [
+    "source_or_authoring_recipe_recorded",
+    "sha256_recorded",
+    "Word_render_receipt_retained",
+    "independent_raw_xml_inspection",
+    "non_empty_graph_manifest",
+    "document_level_split_assignment",
+    "human_review_for_uncertain_semantic_edges"
+  ],
+  "explicit_non_substitutes": ["ReadingBank", "DocBank", "PDF_only_layout_gold"],
+  "storage_policy": {
+    "code_and_environment": "C:\\Users\\13144\\Documents\\Meridian\\ooxml-graph-paper",
+    "data_and_outputs": "E:\\MeridianData\\ooxml-graph-paper",
+    "onedrive": "reference_only"
+  }
+}

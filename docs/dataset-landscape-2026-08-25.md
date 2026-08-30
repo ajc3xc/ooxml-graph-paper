@@ -96,4 +96,142 @@ This builds on the gold manifest structure already frozen in `docs/graph-gold-sc
 
 Sources: [OmegaUse-OfficeVal (arXiv)](https://arxiv.org/abs/2607.27155), [OmegaUse-OfficeVal GitHub](https://github.com/baidu-frontier-research/OmegaUse-OfficeVal), [OmegaUse-OfficeVal dataset (HF)](https://huggingface.co/datasets/baidu-frontier-research/OmegaUse-OfficeVal), [docx-benchmark](https://github.com/dealfluence/docx-benchmark), [docx-benchmark series-seed fixture license](https://github.com/dealfluence/docx-benchmark/blob/main/fixtures/series-seed/LICENSE-INFO.txt), [docx-corpus site](https://docxcorp.us/), [docx-corpus GitHub](https://github.com/superdoc/docx-corpus), [docx-corpus dataset (HF)](https://huggingface.co/datasets/superdoc-dev/docx-corpus), [WordScape GitHub](https://github.com/DS3Lab/WordScape), [WordScape paper (arXiv)](https://arxiv.org/abs/2312.10188), [DocuBench documents folder](https://github.com/DocuPipe/DocuBench/tree/main/documents), [OfficeComprehensionBenchmark (HF)](https://huggingface.co/datasets/microsoft/OfficeComprehensionBenchmark).
 
+## 2026-08-27/28 — PAPER-28: pinning the local document-AI baseline (Docling)
+
+Per the `comparator-contract-v0.md` §7 dual-track contract: this section pins **Docling** as
+the local/open document-AI baseline for the rendered-PDF track. No hosted baseline
+(Google Document AI / Azure Document Intelligence / AWS Textract) is pinned — no credential,
+data-handling approval, or cost approval has been supplied, so PAPER-32's hosted track is
+recorded as `not_run`, per explicit user instruction, not silently replaced with a manual
+Claude PDF-reading pass.
+
+### Installation and a real, reproducible Windows environment blocker
+
+Added `docling>=2,<3` to this subproject's isolated `pixi.toml` (not the shared parent
+lockfile). `pixi install` pulled a large dependency tree (`torch`, `transformers`,
+`docling-ibm-models`, `docling-parse`, `rapidocr` — Docling's default PDF pipeline is a real
+ML/vision stack, not a thin wrapper).
+
+**A genuine, reproducible import-order bug was found and worked around, not hidden.**
+`from docling.document_converter import DocumentConverter` (with nothing imported first)
+fails on this host with:
+
+```
+OSError: [WinError 1114] A dynamic link library (DLL) initialization routine failed.
+Error loading "...\torch\lib\c10.dll" or one of its dependencies.
+```
+
+Root cause, confirmed by direct bisection: docling's own import chain
+(`document_converter` → `asciidoc_backend` → `base_models` → `pipeline_options` →
+`asr_model_specs` → `pipeline_options_asr_model` → `pipeline_options_vlm_model` →
+`from transformers import StoppingCriteria` → `import torch`) loads torch **lazily, deep
+inside an unrelated ASCIIDoc/ASR code path**, and that deferred, nested `import torch`
+fails every time. A plain top-level `import torch` executed first (before touching
+`docling` at all) succeeds every time, and once torch is already in `sys.modules` the
+subsequent `docling.document_converter` import succeeds too. Confirmed reproducible across
+repeated fresh-process runs in both directions (fails every time without the workaround,
+succeeds every time with it). Not bisected further to the exact conflicting DLL (this is a
+well-known general class of Windows native-DLL search-order conflict between
+PyTorch's bundled MKL/OpenMP runtime and another package's own bundled copy) — the
+workaround (`import torch` as the first import in any script that also imports `docling`)
+is documented here and applied in `tools/probe_docling.py` and must be applied in any
+future Docling-invoking script on this host, e.g. PAPER-31's runner.
+
+### Pinned versions (2026-08-27, this host, isolated pixi env)
+
+| Package | Version |
+|---|---|
+| docling | 2.123.0 |
+| docling-core | 2.92.0 |
+| docling-ibm-models | 3.14.0 |
+| docling-parse | 7.16.0 |
+| transformers | 5.16.1 |
+| torch | 2.13.0+cpu |
+| huggingface-hub | 1.29.0 |
+| onnxruntime | not installed (Docling's default OCR path used here is `rapidocr` on the `torch` backend, CPU device, not an ONNX backend) |
+
+Default `PdfPipelineOptions()` on this install: `do_ocr=True`, `do_table_structure=True`
+(`TableFormerMode.ACCURATE`), `do_formula_enrichment=False`, `do_code_enrichment=False`,
+`generate_page_images=False`. **Formula enrichment is off by default** — a load-bearing
+fact for the findings below, not a bug in the probe.
+
+On first run, Docling downloaded real OCR/layout model weights on-host from
+`modelscope.cn` (RapidOCR PP-OCRv6 detection/recognition/classification, ~31 MB total) and
+Hugging Face Hub (`docling-project/docling-layout-heron`, `docling-project/docling-models`
+TableFormer weights). This is Docling fetching its own public model artifacts, not any
+transmission of corpus documents to a third party — consistent with the "local/open, no
+document upload" framing PAPER-28 requires, and recorded here so the distinction is not
+misread later as a hosted-API call.
+
+### Capability probe: what Docling actually returns, run against real gold-corpus documents
+
+Probe script: `tools/probe_docling.py`. Full machine-readable output:
+`E:\MeridianData\ooxml-graph-paper\manifests\paper28-docling-probe.json` (per-document
+input hash, wall time, item/table/formula counts, distinct labels) and
+`E:\MeridianData\ooxml-graph-paper\manifests\paper28-docling-sample-doclingdocument.json`
+(one full exported `DoclingDocument` JSON, for `composite-03-multi`'s rendered PDF).
+
+**A critical distinction this probe surfaced: Docling has two structurally different code
+paths, and only one of them is a document-AI system.** Feeding Docling a `.docx` directly
+invokes its native DOCX backend (a deterministic structural parser over the OOXML,
+comparable in kind to python-docx/Pandoc — **not** vision/OCR-based). Feeding Docling a
+*rendered PDF* invokes its real document-AI pipeline (layout model + OCR + table-structure
+model). Per §7.1's contract, **only the rendered-PDF path counts as this paper's
+document-AI baseline; Docling's own DOCX backend belongs in the native-OOXML track's
+parser/converter family, alongside python-docx/Pandoc, if used at all** — it must not be
+mislabeled as a document-AI result.
+
+Three conversions were run, all `ConversionStatus.SUCCESS` (no crashes), same underlying
+document (`composite-03-multi`, gold: 2 equations, 2 tables, 2 captions) fed two ways plus
+one additional single-equation fixture:
+
+| Input | Path | Wall time | Text items | Tables found | Formula-labeled items |
+|---|---|---:|---:|---:|---:|
+| `composite-03-multi.docx` | Docling's own DOCX backend (parser/converter track, not document-AI) | 0.13 s | 5 | 0 | **2 / 2** |
+| `composite-03-multi.pdf` (Word-COM render of the same document) | Docling's real document-AI PDF pipeline | 234.0 s | 4 | **0** | **0 / 2** |
+| `fixture-02-equation.pdf` (Word-COM render, 1 equation) | Docling's real document-AI PDF pipeline | 3.3 s | 2 | 0 | 0 / 1 |
+
+**Reading the rendered-PDF result honestly, from the exported DoclingDocument JSON**: the
+whole page collapsed to 4 flat `"text"`-labeled items — `"Composite fixture 03: two
+tables, two equations, two captions. T1 Table 1: 1"`, `"𝑥 2"`, `"T2"`, `"Table 2: 2 √2"`.
+Both tables' cell contents were fused into surrounding paragraph text as undifferentiated
+strings (no row/column/cell structure recovered at all, despite `do_table_structure=True`
+being on by default — the table-structure model did not detect a table region on this
+page). Both equations were OCR'd as literal Unicode glyph sequences (an italic mathematical
+"𝑥" followed by "2") rather than recognized as a formula in any sense — expected, given
+`do_formula_enrichment=False` by default, but the practical result is that **Docling's
+rendered-PDF track, run with default settings, currently returns zero usable equation or
+table structure on this document**, while Docling's own DOCX backend and Meridian's native
+extraction each correctly found both equations. This is exactly the kind of concrete,
+reproducible native-vs-document-AI gap PAPER-27's Claim (3) is about — recorded here as a
+first real data point, not yet a full-corpus result (that is PAPER-31's job, and it must
+re-run with `do_formula_enrichment=True` explicitly tried and reported as a separate
+configuration before concluding formula recall is uniformly zero).
+
+**Efficiency finding, load-bearing for PAPER-31 planning:** the default `TableFormerMode.
+ACCURATE` + OCR pipeline took 234 seconds of CPU wall time for a single one-page PDF versus
+0.13 seconds for the same content via Docling's own DOCX backend and ~0.1 second for
+Meridian's native extraction (per `paper15-first-attempt-v0.md`). At that rate, a naive
+127-document, default-settings Docling PDF pass could take on the order of hours to tens of
+hours of CPU time depending on per-document page count and content density — PAPER-31 needs
+an explicit time budget, a possibly-faster `TableFormerMode.FAST` configuration recorded as
+a separate labeled run (not silently substituted for the default), and/or a reduced-slice
+plan, not an unqualified "ran all 127 documents" claim.
+
+### What is and is not pinned
+
+- **Pinned**: Docling 2.123.0 (see version table above) as the local/open document-AI
+  baseline; default `PdfPipelineOptions` behavior on this host; the torch-import-order
+  workaround required to use it at all; one real per-document capability comparison
+  (native-DOCX-backend vs. rendered-PDF-pipeline) showing a concrete formula/table
+  recognition gap on rendered PDFs.
+- **Not pinned / explicitly out of scope here**: any hosted document-AI processor
+  (PAPER-32, `not_run` — no credential/approval supplied); a full 127-document Docling run
+  with resource accounting (PAPER-31); `do_formula_enrichment=True` and
+  `TableFormerMode.FAST` as alternate configurations (named above as follow-up, not yet
+  run); DocBank/DocLayNet/OmniDocBench remain secondary literature/dataset context per
+  PAPER-28's own scope note, not used as Docling inputs here.
+
+Sources (this section only): [Docling GitHub](https://github.com/docling-project/docling), [Docling documentation — pipeline options](https://docling-project.github.io/docling/), [DoclingDocument schema (docling-core)](https://github.com/docling-project/docling-core).
+
 

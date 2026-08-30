@@ -208,6 +208,130 @@ def _sha256_file(path: Path) -> str:
     return digest.hexdigest()
 
 
+def _find_render_pdf(doc_id: str) -> Path | None:
+    p = DATA_ROOT / "renders" / "gold" / doc_id / f"{doc_id}.pdf"
+    return p if p.is_file() else None
+
+
+def _run_docling_subprocess(pdf_path: Path, timeout_s: float) -> dict:
+    """Run tools/docling_convert_one.py as an isolated subprocess for one PDF.
+
+    PAPER-28's probe found `do_formula_enrichment=True` reliably crashes the
+    whole process with a native panic, not a catchable Python exception --
+    subprocess isolation means one document's crash costs one row, not the
+    whole run. TableFormerMode.FAST (not the ACCURATE default) is used inside
+    the worker: ACCURATE measured ~234s for one dense page versus ~28s under
+    FAST for the same page, and a naive full-corpus ACCURATE run would not
+    complete in any reasonable session time budget (859 total corpus pages).
+    """
+    import subprocess
+    import tempfile
+
+    try:
+        import psutil
+    except ImportError:
+        psutil = None
+
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        out_path = Path(tmp_dir) / "result.json"
+        cmd = [sys.executable, str(PAPER_ROOT / "tools" / "docling_convert_one.py"), str(pdf_path), str(out_path)]
+        t0 = time.perf_counter()
+        proc = subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, text=True)
+        ps_proc = None
+        if psutil is not None:
+            try:
+                ps_proc = psutil.Process(proc.pid)
+            except psutil.NoSuchProcess:
+                ps_proc = None
+        peak_rss_bytes = 0
+        timed_out = False
+        while True:
+            try:
+                proc.wait(timeout=0.5)
+                break
+            except subprocess.TimeoutExpired:
+                if ps_proc is not None:
+                    try:
+                        peak_rss_bytes = max(peak_rss_bytes, ps_proc.memory_info().rss)
+                    except Exception:  # noqa: BLE001 -- process may have just exited
+                        pass
+                if time.perf_counter() - t0 > timeout_s:
+                    proc.kill()
+                    proc.wait()
+                    timed_out = True
+                    break
+        elapsed = time.perf_counter() - t0
+        _, stderr = proc.communicate()
+
+        if timed_out:
+            return {
+                "status": "timed_out",
+                "wall_time_seconds_subprocess_total": elapsed,
+                "peak_rss_bytes": peak_rss_bytes,
+                "reason": f"exceeded {timeout_s}s subprocess timeout",
+            }
+        if proc.returncode != 0 or not out_path.exists():
+            return {
+                "status": "crashed",
+                "wall_time_seconds_subprocess_total": elapsed,
+                "peak_rss_bytes": peak_rss_bytes,
+                "returncode": proc.returncode,
+                "stderr_tail": (stderr or "")[-2000:],
+            }
+        try:
+            payload = json.loads(out_path.read_text(encoding="utf-8"))
+        except Exception as exc:  # noqa: BLE001
+            return {
+                "status": "crashed",
+                "wall_time_seconds_subprocess_total": elapsed,
+                "peak_rss_bytes": peak_rss_bytes,
+                "reason": f"unreadable worker output JSON: {type(exc).__name__}: {exc}",
+            }
+        if payload.get("conversion_status") == "EXCEPTION":
+            return {
+                "status": "crashed",
+                "wall_time_seconds_subprocess_total": elapsed,
+                "peak_rss_bytes": peak_rss_bytes,
+                "error": payload.get("error"),
+            }
+        payload["status"] = "scored"
+        payload["peak_rss_bytes"] = peak_rss_bytes
+        payload["wall_time_seconds_subprocess_total"] = elapsed
+        return payload
+
+
+def score_docling_baseline(gold: dict, cand: dict) -> dict:
+    """Score Docling's rendered-PDF document-AI output against gold.
+
+    Deliberately does NOT compute para_id_preservation_rate: per
+    comparator-contract-v0.md Section 7.3, native paragraph identity cannot
+    be inferred from a PDF-only reader by construction, so it is recorded as
+    not_applicable rather than scored as a failure or silently omitted.
+    """
+    text_score = _text_f1(gold["full_text"], cand.get("full_text", ""))
+    return {
+        "table_count_recall": _count_recall(gold["table_count"], cand.get("table_count", 0)),
+        "table_row_recall": _count_recall(gold["table_row_total"], cand.get("table_row_total", 0)),
+        "equation_count_recall": _count_recall(gold["equation_count"], cand.get("equation_count", 0)),
+        "text_token_f1": text_score["f1"],
+        "text_token_precision": text_score["precision"],
+        "text_token_recall": text_score["recall"],
+        "para_id_preservation_rate": None,
+        "para_id_status": "not_applicable",
+        "para_id_not_applicable_reason": (
+            "rendered PDF input has no native paragraph-identity concept "
+            "(comparator-contract-v0.md Section 7.3) -- excluded from the "
+            "denominator, not scored as a failure"
+        ),
+        "wall_time_seconds": cand.get("wall_time_seconds"),
+        "wall_time_seconds_subprocess_total": cand.get("wall_time_seconds_subprocess_total"),
+        "peak_rss_bytes": cand.get("peak_rss_bytes"),
+        "page_count": cand.get("page_count"),
+        "pipeline_config": cand.get("pipeline_config"),
+        "raw_counts": {k: v for k, v in cand.items() if k not in ("full_text", "pipeline_config")},
+    }
+
+
 def _parse_args() -> object:
     import argparse
 
@@ -219,6 +343,27 @@ def _parse_args() -> object:
     parser.add_argument(
         "--output", type=Path, default=None,
         help="optional report path; defaults to E:/.../manifests with a timestamp",
+    )
+    parser.add_argument(
+        "--include-docling", action="store_true",
+        help=(
+            "run the Docling rendered-PDF document-AI baseline (PAPER-28/31). "
+            "Opt-in: even at TableFormerMode.FAST this can take tens of "
+            "seconds per page, so a full-corpus run can take hours."
+        ),
+    )
+    parser.add_argument(
+        "--docling-timeout-seconds", type=float, default=300.0,
+        help="per-document subprocess timeout for the Docling baseline (default: 300s)",
+    )
+    parser.add_argument(
+        "--resume-from", type=Path, default=None,
+        help=(
+            "a previous run's .checkpoint.jsonl file; already-completed doc_ids "
+            "are loaded from it and skipped. Recommended whenever --include-docling "
+            "is used, since a single Docling conversion can take minutes and an "
+            "interrupted run would otherwise lose all prior progress."
+        ),
     )
     return parser.parse_args()
 
@@ -232,12 +377,38 @@ def main() -> int:
         evaluation_ids = split[args.slice]
     summary = {d["doc_id"]: d for d in json.loads((GOLD_ROOT / "manifests" / "_summary.json").read_text(encoding="utf-8"))}
 
-    per_doc_results = []
+    out_dir = DATA_ROOT / "manifests"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    ts = datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    checkpoint_path = out_dir / f"paper15-{args.slice}-run-{ts}.checkpoint.jsonl"
+
+    already_done: dict[str, dict] = {}
+    if args.resume_from and args.resume_from.is_file():
+        for line in args.resume_from.read_text(encoding="utf-8").splitlines():
+            if line.strip():
+                row = json.loads(line)
+                already_done[row["doc_id"]] = row
+
+    per_doc_results = list(already_done.values())
+    checkpoint_fh = checkpoint_path.open("a", encoding="utf-8")
+    try:
+        _run_all_documents(args, evaluation_ids, summary, already_done, per_doc_results, checkpoint_fh)
+    finally:
+        checkpoint_fh.close()
+    return _finalize_report(args, evaluation_ids, per_doc_results, checkpoint_path)
+
+
+def _run_all_documents(args, evaluation_ids, summary, already_done, per_doc_results, checkpoint_fh) -> None:
     for doc_id in evaluation_ids:
+        if doc_id in already_done:
+            continue
         docx_path = _find_docx_path(doc_id)
         manifest_path = Path(summary[doc_id]["manifest_path"])
         if docx_path is None or not manifest_path.is_file():
-            per_doc_results.append({"doc_id": doc_id, "status": "not_run", "reason": "source file or gold manifest missing"})
+            row = {"doc_id": doc_id, "status": "not_run", "reason": "source file or gold manifest missing"}
+            per_doc_results.append(row)
+            checkpoint_fh.write(json.dumps(row) + "\n")
+            checkpoint_fh.flush()
             continue
 
         gold = extract_gold_reference(manifest_path)
@@ -278,28 +449,55 @@ def main() -> int:
             "reason": "LibreOffice is not installed on this host" if not office else "not wired into this runner",
             "executable": office,
         }
-        doc_result["pdf_ai_or_vision"] = {
-            "status": "not_run",
-            "reason": "No pinned PDF/AI model adapter is installed or registered",
-        }
+        if args.include_docling:
+            render_pdf = _find_render_pdf(doc_id)
+            if render_pdf is None:
+                doc_result["docling_pdf_document_ai"] = {
+                    "status": "not_run",
+                    "reason": "no retained Word-COM render PDF found for this doc_id",
+                }
+            else:
+                docling_raw = _run_docling_subprocess(render_pdf, timeout_s=args.docling_timeout_seconds)
+                if docling_raw.get("status") == "scored":
+                    scored_result = score_docling_baseline(gold, docling_raw)
+                    scored_result["status"] = "scored"
+                    scored_result["render_pdf_sha256"] = _sha256_file(render_pdf)
+                    doc_result["docling_pdf_document_ai"] = scored_result
+                else:
+                    doc_result["docling_pdf_document_ai"] = docling_raw
+        else:
+            doc_result["docling_pdf_document_ai"] = {
+                "status": "not_run",
+                "reason": "--include-docling not passed for this run",
+            }
         doc_result["controlled_ablations"] = {"status": "not_run", "reason": "not built in this runner"}
 
         per_doc_results.append(doc_result)
+        checkpoint_fh.write(json.dumps(doc_result, default=str) + "\n")
+        checkpoint_fh.flush()
 
+
+def _finalize_report(args, evaluation_ids, per_doc_results, checkpoint_path: Path) -> int:
     scored = [d for d in per_doc_results if d["status"] == "scored"]
 
     def macro_avg(baseline: str, metric: str) -> float | None:
         vals = [d[baseline][metric] for d in scored if isinstance(d.get(baseline), dict) and d[baseline].get(metric) is not None]
         return sum(vals) / len(vals) if vals else None
 
+    baseline_metrics = {
+        "native_meridian": ("paragraph_count_recall", "table_count_recall", "table_row_recall",
+                            "equation_count_recall", "text_token_f1", "para_id_preservation_rate",
+                            "wall_time_seconds", "peak_python_allocated_bytes"),
+        "python_docx": ("paragraph_count_recall", "table_count_recall", "table_row_recall",
+                        "equation_count_recall", "text_token_f1", "para_id_preservation_rate",
+                        "wall_time_seconds", "peak_python_allocated_bytes"),
+        "docling_pdf_document_ai": ("table_count_recall", "table_row_recall", "equation_count_recall",
+                                    "text_token_f1", "wall_time_seconds",
+                                    "wall_time_seconds_subprocess_total", "peak_rss_bytes"),
+    }
     aggregate = {}
-    for baseline in ("native_meridian", "python_docx"):
-        aggregate[baseline] = {
-            metric: macro_avg(baseline, metric)
-            for metric in ("paragraph_count_recall", "table_count_recall", "table_row_recall",
-                           "equation_count_recall", "text_token_f1", "para_id_preservation_rate",
-                           "wall_time_seconds", "peak_python_allocated_bytes")
-        }
+    for baseline, metrics in baseline_metrics.items():
+        aggregate[baseline] = {metric: macro_avg(baseline, metric) for metric in metrics}
 
     evaluable_id_docs = {
         baseline: sum(
@@ -311,7 +509,7 @@ def main() -> int:
 
     baseline_status = {}
     for baseline in ("native_meridian", "python_docx", "pandoc_conversion_mediated",
-                     "libreoffice_conversion", "pdf_ai_or_vision", "controlled_ablations"):
+                     "libreoffice_conversion", "docling_pdf_document_ai", "controlled_ablations"):
         counts = {}
         for row in per_doc_results:
             status = row.get(baseline, {}).get("status", "scored") if isinstance(row.get(baseline), dict) else "unknown"
@@ -334,15 +532,26 @@ def main() -> int:
             "python_docx_version": __import__("docx").__version__,
             "pandoc_executable": shutil.which("pandoc"),
             "libreoffice_executable": shutil.which("soffice") or shutil.which("libreoffice"),
+            "docling_included": args.include_docling,
+            "docling_config": (
+                {"table_structure_mode": "FAST", "do_formula_enrichment": False,
+                 "isolation": "one subprocess per document via tools/docling_convert_one.py",
+                 "timeout_seconds": args.docling_timeout_seconds}
+                if args.include_docling else None
+            ),
         },
         "scope_note": (
             f"Structural pass on the {args.slice} slice ({len(evaluation_ids)} documents), per "
             "comparator-contract-v0.md Section 4. Native Meridian and python-docx are run; "
-            "Pandoc, LibreOffice, PDF/AI, and controlled ablations are explicitly recorded as "
-            "not_run where unavailable or unwired. Metrics remain a simplified count/overlap "
-            "proxy, not the contract's complete node precision/recall/F1 and graph-edit-distance "
-            "scorer. This is not the final native-vs-AI paper benchmark."
+            "Pandoc, LibreOffice, and controlled ablations are explicitly recorded as not_run "
+            "where unavailable or unwired. Docling (rendered-PDF document-AI track, per "
+            "comparator-contract-v0.md Section 7) is run only when --include-docling is passed, "
+            f"given its per-page cost (this run: {'included' if args.include_docling else 'not_run, --include-docling not passed'}). "
+            "Metrics remain a simplified count/overlap proxy, not the contract's complete node "
+            "precision/recall/F1 and graph-edit-distance scorer (that is PAPER-30's job). This is "
+            "not the final native-vs-AI paper benchmark."
         ),
+        "checkpoint_path": str(checkpoint_path),
         "macro_aggregate": aggregate,
         "per_document": per_doc_results,
     }
@@ -351,7 +560,7 @@ def main() -> int:
     out_dir.mkdir(parents=True, exist_ok=True)
     ts = datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     out_path = out_dir / f"paper15-smoke-run-{ts}.json"
-    out_path.write_text(json.dumps(report, indent=2, ensure_ascii=False), encoding="utf-8")
+    out_path.write_text(json.dumps(report, indent=2, ensure_ascii=False, default=str), encoding="utf-8")
 
     print(f"{args.slice} slice: {len(evaluation_ids)} documents, {len(scored)} scored")
     print(f"Report: {out_path}")
