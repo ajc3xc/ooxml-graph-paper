@@ -164,8 +164,7 @@ def main() -> int:
             fwd_status = _annotate_trial(fwd_result, grade_forward_trial(
                 Path(fwd_result["output_docx_path"]),
                 paragraphs_before,
-                forward_spec.insert_text,
-                forward_spec.anchor_text,
+                forward_spec.marker_title,
             ))
             all_results.append(fwd_result)
             print(json.dumps({k: fwd_result[k] for k in ("trial_id", "returncode", "timed_out", "docx_changed")}))
@@ -189,7 +188,7 @@ def main() -> int:
                 _annotate_trial(inv_result, grade_inverse_trial(
                     Path(inv_result["output_docx_path"]),
                     paragraphs_before,
-                    forward_spec.insert_text,
+                    forward_spec.marker_title,
                 ))
             all_results.append(inv_result)
             print(json.dumps({k: inv_result[k] for k in ("trial_id", "returncode", "timed_out", "docx_changed")}))

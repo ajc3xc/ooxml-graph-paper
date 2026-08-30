@@ -80,8 +80,8 @@ def test_runner_uses_safe_mode_so_oauth_login_remains_available(tmp_path: Path) 
         arm="control",
         direction="forward",
         input_docx=tmp_path / "input.docx",
-        anchor_text="anchor",
-        insert_text="insert",
+        citation_key="pilot-s20-abc123",
+        marker_title="Commissioning Pilot Marker Publication abc123",
         prompt="edit the document",
     )
 
@@ -98,8 +98,8 @@ def test_runner_uses_tools_flag_for_actual_arm_boundary(tmp_path: Path) -> None:
         doc_label="fixture",
         direction="forward",
         input_docx=tmp_path / "input.docx",
-        anchor_text="anchor",
-        insert_text="insert",
+        citation_key="pilot-s20-abc123",
+        marker_title="Commissioning Pilot Marker Publication abc123",
         prompt="edit the document",
     )
 
@@ -109,7 +109,14 @@ def test_runner_uses_tools_flag_for_actual_arm_boundary(tmp_path: Path) -> None:
     assert control[control.index("--tools") + 1] == "Read,Write,Edit,Bash"
     assert "--tools" not in treatment
     assert "Edit" in treatment[treatment.index("--disallowedTools") + 1]
-    assert treatment[treatment.index("--allowedTools") + 1] == "Read,mcp__meridian-docs-pilot__insert_highlighted_note"
+    # REVISION: insert_highlighted_note/anchor_para_id needed a read/discovery
+    # tool this arm never had (see docx_trial_broker.py's module docstring for
+    # the run #1 root cause). The bibliography-entry pair is keyed purely by
+    # citation_key, so no anchor-resolution tool is needed for either direction.
+    assert treatment[treatment.index("--allowedTools") + 1] == (
+        "Read,mcp__meridian-docs-pilot__insert_bibliography_entry,"
+        "mcp__meridian-docs-pilot__remove_bibliography_entry"
+    )
 
 
 def test_runner_resolves_native_claude_executable() -> None:

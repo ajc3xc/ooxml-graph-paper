@@ -79,7 +79,7 @@ def _resolve_claude_executable() -> str:
 _CLAUDE_EXECUTABLE = _resolve_claude_executable()
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from docx_trial_broker import TrialSpec  # noqa: E402
+from docx_trial_broker import TrialSpec, treatment_csl_item  # noqa: E402
 
 _PAPER_ROOT = Path(__file__).resolve().parent.parent
 _PAPER_PYTHON = sys.executable
@@ -87,9 +87,18 @@ _MODEL = "haiku"  # cheap/fast model for a commissioning pilot, not a final benc
 _TIMEOUT_SECONDS = 300.0
 
 _CONTROL_ALLOWED_TOOLS = "Read,Write,Edit,Bash"
-_TREATMENT_MCP_TOOL = "mcp__meridian-docs-pilot__insert_highlighted_note"
-_TREATMENT_ALLOWED_TOOLS = f"Read,{_TREATMENT_MCP_TOOL}"
 _CONTROL_AVAILABLE_TOOLS = "Read,Write,Edit,Bash"
+# REVISION: insert_highlighted_note/anchor_para_id required a read/discovery
+# tool this arm was never given (see docx_trial_broker.py's module docstring
+# for the run #1 root cause). insert_bibliography_entry/
+# remove_bibliography_entry need no anchor resolution at all -- both are
+# keyed purely by citation_key, so Read is no longer even necessary, but is
+# kept available in case the agent wants to confirm the write landed.
+_TREATMENT_MCP_TOOLS = (
+    "mcp__meridian-docs-pilot__insert_bibliography_entry,"
+    "mcp__meridian-docs-pilot__remove_bibliography_entry"
+)
+_TREATMENT_ALLOWED_TOOLS = f"Read,{_TREATMENT_MCP_TOOLS}"
 _TREATMENT_DISALLOWED_TOOLS = (
     "Edit,Write,Bash,PowerShell,Glob,Grep,NotebookEdit,WebFetch,WebSearch,Agent"
 )
@@ -176,7 +185,28 @@ def run_trial(spec: TrialSpec, runs_root: Path) -> dict[str, Any]:
     # The prompt references "the document" -- tell the agent its concrete
     # path via an explicit prefix rather than baking a machine path into the
     # broker's own prompt text (keeps docx_trial_broker.py path-agnostic).
-    located_prompt = f"The document's path is: {docx_in_trial}\n\n{spec.prompt}"
+    prefix = f"The document's path is: {docx_in_trial}\n\n"
+    if spec.arm == "treatment":
+        # Only the treatment arm has a citation_key concept at all -- the
+        # control prompt (and control's own generic edit) never mentions
+        # it, per docx_trial_broker's arm-symmetry design. Naming the exact
+        # tool + CSL item here (rather than making a fast/cheap model
+        # reconstruct the CSL-JSON shape from prose) keeps this a
+        # commissioning pilot of the HARNESS, not a test of whether Haiku
+        # can independently rediscover a tool's argument schema.
+        csl_item = treatment_csl_item(spec)
+        if spec.direction == "forward":
+            prefix += (
+                f"Use the insert_bibliography_entry tool with "
+                f"citation_key={spec.citation_key!r} and "
+                f"csl_item={json.dumps(csl_item)} to add this entry.\n\n"
+            )
+        else:
+            prefix += (
+                f"Use the remove_bibliography_entry tool with "
+                f"citation_key={spec.citation_key!r} to remove this entry.\n\n"
+            )
+    located_prompt = prefix + spec.prompt
     spec_with_path = dataclasses.replace(spec, prompt=located_prompt)
 
     cmd = _build_command(spec_with_path, trial_root, docx_in_trial)
