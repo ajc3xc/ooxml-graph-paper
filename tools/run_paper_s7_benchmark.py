@@ -27,6 +27,8 @@ import dataclasses
 import datetime
 import json
 import sys
+import xml.etree.ElementTree as ET
+import zipfile
 from pathlib import Path
 from typing import Any
 
@@ -59,6 +61,25 @@ from word_receipt_watchdog import word_receipt_with_orphan_diagnostics  # noqa: 
 
 _WORD_RECEIPT_TIMEOUT_SECONDS = 90.0
 _FAMILIES = ("bibliography", "citation", "caption", "section_reorder")
+
+
+def _safe_paragraph_texts(docx_path: Path) -> list[str] | None:
+    """_paragraph_texts() does a raw zipfile read with no corruption guard --
+    fine when the caller already knows the package is valid, but a real
+    KeyError/BadZipFile crash waiting to happen against a PRIOR pair's own
+    (possibly corrupted) output in a long-horizon chain, or a control arm's
+    output docx generically. Found via a real development-slice run
+    (2026-08-30): two control-arm trials corrupted their output packages
+    badly enough that even a raw word/document.xml read raised, crashing the
+    whole chain as an unhandled harness_exception instead of a graded fail.
+    Returns None (never raises) on any corruption; callers treat None as
+    "this document cannot be graded/continued from," not as an empty
+    paragraph list (which would be indistinguishable from a genuinely empty
+    document)."""
+    try:
+        return _paragraph_texts(docx_path)
+    except (KeyError, zipfile.BadZipFile, ET.ParseError):
+        return None
 
 
 def _milestone_word_receipt(docx_path: Path, out_dir: Path, *, milestone: str) -> dict[str, Any]:
@@ -177,7 +198,19 @@ def run_chain(
     chain_status = "completed"
 
     for pair_index in range(k_pairs):
-        paragraphs_before_this_pair = _paragraph_texts(current_input)
+        paragraphs_before_this_pair = _safe_paragraph_texts(current_input)
+        if paragraphs_before_this_pair is None:
+            # The PRIOR pair's own inverse output was corrupted badly enough
+            # that even a raw paragraph read fails -- a real, on-thesis
+            # finding in its own right (found live during development-slice
+            # testing, 2026-08-30), not a reason to crash the whole slice.
+            chain_status = "blocked"
+            pairs.append({
+                "pair_index": pair_index,
+                "forward": None,
+                "blocked_reason": f"input docx from the prior pair's inverse output is corrupted/unreadable: {current_input}",
+            })
+            break
         marker = new_marker(f"s7-{family}")
         forward_spec, inverse_spec = _build_pair_specs(family, doc_label, current_input, marker, applicability)
         forward_spec = dataclasses.replace(forward_spec, arm=arm, pair_index=pair_index, trial_id=f"p{pair_index}-forward")
@@ -237,7 +270,7 @@ def run_chain(
 
         current_input = Path(inv_result["output_docx_path"])
 
-    final_paragraphs = _paragraph_texts(current_input) if current_input.is_file() else None
+    final_paragraphs = _safe_paragraph_texts(current_input) if current_input.is_file() else None
     cumulative_fidelity = final_paragraphs == original_paragraphs if final_paragraphs is not None else False
 
     return {

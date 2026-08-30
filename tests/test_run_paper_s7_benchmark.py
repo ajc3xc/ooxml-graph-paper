@@ -9,7 +9,12 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools"))
 
-from run_paper_s7_benchmark import _build_pair_specs, _grade_forward, _grade_inverse  # noqa: E402
+from run_paper_s7_benchmark import (  # noqa: E402
+    _build_pair_specs,
+    _grade_forward,
+    _grade_inverse,
+    _safe_paragraph_texts,
+)
 
 
 def test_build_pair_specs_bibliography_needs_no_applicability_info(tmp_path: Path) -> None:
@@ -76,3 +81,24 @@ def test_grade_dispatch_rejects_unknown_family(tmp_path: Path) -> None:
         _grade_forward("nonexistent", tmp_path / "out.docx", [], None, {})
     with pytest.raises(ValueError, match="unknown family"):
         _grade_inverse("nonexistent", tmp_path / "out.docx", [], None)
+
+
+def test_safe_paragraph_texts_returns_none_on_corrupt_zip_instead_of_raising(tmp_path: Path) -> None:
+    """Found live in a real development-slice run (2026-08-30): a control
+    arm's own edit corrupted its output package badly enough that even a raw
+    word/document.xml zip read raised KeyError, crashing the whole chain as
+    an unhandled harness_exception rather than a graded failure."""
+    corrupt = tmp_path / "corrupt.docx"
+    import zipfile
+
+    with zipfile.ZipFile(corrupt, "w") as zf:
+        zf.writestr("not-the-right-part.xml", "<x/>")
+
+    assert _safe_paragraph_texts(corrupt) is None
+
+
+def test_safe_paragraph_texts_returns_none_on_non_zip_bytes(tmp_path: Path) -> None:
+    not_a_zip = tmp_path / "not-a-docx.docx"
+    not_a_zip.write_bytes(b"this is not a zip file at all")
+
+    assert _safe_paragraph_texts(not_a_zip) is None
