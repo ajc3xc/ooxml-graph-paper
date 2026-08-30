@@ -31,6 +31,7 @@ from docx_trial_broker import (  # noqa: E402
 )
 from docx_trial_evaluator import grade_forward_trial, grade_inverse_trial  # noqa: E402
 from claude_pair_runner import audit_isolation, run_trial  # noqa: E402
+from word_receipt_watchdog import word_receipt_with_orphan_diagnostics  # noqa: E402
 
 _GOLD_ROOT = Path(r"E:\MeridianData\ooxml-graph-paper\gold")
 _RUNS_ROOT = Path(r"E:\MeridianData\ooxml-graph-paper\runs\paper-s20")
@@ -39,6 +40,27 @@ _FROZEN_DOCS = [
     ("fixture-02-equation", _GOLD_ROOT / "tier1" / "fixture-02-equation.docx"),
 ]
 _ARMS = ["control", "treatment"]
+_WORD_RECEIPT_TIMEOUT_SECONDS = 90.0
+
+
+def _milestone_word_receipt(docx_path: Path, out_dir: Path, *, milestone: str) -> dict[str, Any]:
+    """PAPER-S9 section 5's milestone tier: a retained, watchdog-wrapped Word
+    COM render at a fixed checkpoint (trial start, after a forward/inverse
+    pair, trial end) -- never after every raw tool call. Word COM is
+    'preferred' not 'required' for this item, so any failure (missing
+    dependency, COM error, timeout) is recorded explicitly as not_run/failed
+    rather than raised, and never silently treated as a pass."""
+    if not docx_path.is_file():
+        return {"milestone": milestone, "status": "not_run", "reason": "input docx does not exist"}
+    try:
+        result = word_receipt_with_orphan_diagnostics(
+            docx_path, out_dir, timeout=_WORD_RECEIPT_TIMEOUT_SECONDS,
+        )
+    except Exception as exc:  # noqa: BLE001 -- Word COM/pywin32 failures must not crash the pilot
+        return {"milestone": milestone, "status": "not_run", "reason": f"{type(exc).__name__}: {exc}"}
+    result["milestone"] = milestone
+    result["status"] = result.get("render_receipt", {}).get("status", "unknown")
+    return result
 
 
 def classify_trial_execution(trial_result: dict[str, Any]) -> tuple[str, str | None]:
@@ -110,6 +132,7 @@ def _not_run_trial(spec: TrialSpec, reason: str) -> dict[str, Any]:
         "stderr_tail": "",
         "execution_status": "not_run",
         "execution_failure_reason": reason,
+        "word_receipt": {"milestone": "after_inverse_pair_trial_end", "status": "not_run", "reason": reason},
         "isolation_audit": {
             "trial_id": spec.trial_id,
             "arm": spec.arm,
@@ -145,17 +168,29 @@ def _annotate_trial(trial_result: dict[str, Any], grading: dict[str, Any]) -> st
 
 
 def main() -> int:
+    word_receipts_enabled = "--no-word-receipts" not in sys.argv[1:]
+
     ts = datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     run_root = _RUNS_ROOT / ts
     run_root.mkdir(parents=True, exist_ok=True)
+    receipts_root = run_root / "word_receipts"
 
     all_results = []
+    word_receipts_by_doc: dict[str, dict[str, Any]] = {}
     for doc_label, docx_path in _FROZEN_DOCS:
         if not docx_path.is_file():
             print(f"SKIP {doc_label}: frozen fixture not found at {docx_path}", file=sys.stderr)
             continue
         paragraphs_before = _paragraph_texts(docx_path)
         forward_spec, inverse_spec_template = generate_task_pair(doc_label, docx_path)
+
+        doc_receipts: dict[str, Any] = {}
+        word_receipts_by_doc[doc_label] = doc_receipts
+        if word_receipts_enabled:
+            print(f"--- {doc_label} / word-com milestone: trial-start ---", flush=True)
+            doc_receipts["trial_start"] = _milestone_word_receipt(
+                docx_path, receipts_root / doc_label / "trial-start", milestone="trial_start",
+            )
 
         for arm in _ARMS:
             print(f"=== {doc_label} / {arm} / forward ===", flush=True)
@@ -166,6 +201,18 @@ def main() -> int:
                 paragraphs_before,
                 forward_spec.marker_title,
             ))
+            if word_receipts_enabled:
+                if fwd_status == "completed":
+                    fwd_result["word_receipt"] = _milestone_word_receipt(
+                        Path(fwd_result["output_docx_path"]),
+                        receipts_root / doc_label / f"{arm}-forward",
+                        milestone="after_forward_pair",
+                    )
+                else:
+                    fwd_result["word_receipt"] = {
+                        "milestone": "after_forward_pair", "status": "not_run",
+                        "reason": "forward trial did not complete",
+                    }
             all_results.append(fwd_result)
             print(json.dumps({k: fwd_result[k] for k in ("trial_id", "returncode", "timed_out", "docx_changed")}))
             print(json.dumps(fwd_result["grading"]))
@@ -185,11 +232,23 @@ def main() -> int:
                 )
             else:
                 inv_result = run_trial(inv_spec, run_root)
-                _annotate_trial(inv_result, grade_inverse_trial(
+                inv_status = _annotate_trial(inv_result, grade_inverse_trial(
                     Path(inv_result["output_docx_path"]),
                     paragraphs_before,
                     forward_spec.marker_title,
                 ))
+                if word_receipts_enabled:
+                    if inv_status == "completed":
+                        inv_result["word_receipt"] = _milestone_word_receipt(
+                            Path(inv_result["output_docx_path"]),
+                            receipts_root / doc_label / f"{arm}-inverse",
+                            milestone="after_inverse_pair_trial_end",
+                        )
+                    else:
+                        inv_result["word_receipt"] = {
+                            "milestone": "after_inverse_pair_trial_end", "status": "not_run",
+                            "reason": "inverse trial did not complete",
+                        }
             all_results.append(inv_result)
             print(json.dumps({k: inv_result[k] for k in ("trial_id", "returncode", "timed_out", "docx_changed")}))
             print(json.dumps(inv_result["grading"]))
@@ -209,6 +268,8 @@ def main() -> int:
         "execution_status_counts": execution_counts,
         "trial_count": len(all_results),
         "trials": all_results,
+        "word_receipts_enabled": word_receipts_enabled,
+        "word_receipts_by_doc_trial_start": word_receipts_by_doc,
     }
     manifest_path = run_root / "manifest.json"
     manifest_path.write_text(json.dumps(manifest, indent=2, ensure_ascii=False), encoding="utf-8")
@@ -218,6 +279,18 @@ def main() -> int:
     n_isolation_clean = sum(1 for r in all_results if r.get("execution_status") == "completed" and r.get("isolation_audit", {}).get("isolation_verdict") == "clean")
     print(f"Execution: {n_executed}/{len(all_results)} completed ({pilot_status}).")
     print(f"Grading: {n_pass}/{len(all_results)} passed. Isolation: {n_isolation_clean}/{len(all_results)} clean.")
+    if word_receipts_enabled:
+        n_rendered = sum(1 for r in all_results if r.get("word_receipt", {}).get("status") == "rendered")
+        n_receipt_not_run = sum(1 for r in all_results if r.get("word_receipt", {}).get("status") == "not_run")
+        n_receipt_failed = len(all_results) - n_rendered - n_receipt_not_run
+        print(
+            f"Word-COM milestone receipts: {n_rendered}/{len(all_results)} rendered, "
+            f"{n_receipt_failed} failed, {n_receipt_not_run} not_run "
+            f"(plus {sum(1 for d in word_receipts_by_doc.values() if d.get('trial_start', {}).get('status') == 'rendered')}/"
+            f"{len(word_receipts_by_doc)} trial-start fixture receipts)."
+        )
+    else:
+        print("Word-COM milestone receipts: disabled (--no-word-receipts).")
     return 0 if pilot_status == "complete" else 2
 
 

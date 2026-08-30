@@ -83,6 +83,24 @@ reported here as a single (n=1) illustrative data point from a non-confirmatory
 commissioning pilot, not a statistically supported claim; a real benchmark (PAPER-S7)
 would need many more trials before any superiority claim rests on this pattern.
 
+**Root cause, found by reading the trial's own retained Claude Code session transcript
+(2026-08-30, later same day)** -- not guessed: the control-arm agent unzipped the docx,
+edited `word/document.xml` with a Python script (correctly), then re-zipped it. Its first
+`zip`/`cp` attempts appear to have failed silently (no `zip` binary producing the expected
+archive in that shell), so it fell back to PowerShell's `Compress-Archive -Path
+'[Content_Types].xml','_rels','word' ...`. `-Path` performs **wildcard** resolution, and
+`[Content_Types]` is valid PowerShell wildcard syntax for a character class (any single
+character from the set `C,o,n,t,e,_,T,y,p,s`) -- it does not match the literal file named
+`[Content_Types].xml`. That parameter silently failed to resolve, so `Compress-Archive`
+built the archive without it, and the OOXML package's own literally-bracketed required part
+name was the casualty. This is a real, independently identifiable failure class (bracket-named
+parts are a known PowerShell wildcard footgun; the fix on that side would be `-LiteralPath`,
+not `-Path`), not an unexplained "something went wrong" -- and it is non-deterministic across
+runs (a later re-run of this same pilot, see the Word-COM update below, did not reproduce it,
+because the model did not choose the same shell fallback sequence that run). It confirms the
+control arm's exposure to this failure class is a property of using generic, non-package-aware
+shell tooling at all, not a one-off fluke.
+
 ## Isolation canaries (the part S22 specifically asked for beyond just running the pilot)
 
 Two adversarial canary trials, run separately from the 8-trial pilot, each explicitly
@@ -114,6 +132,20 @@ claims.
   pass (`Microsoft Word COM` is listed `preferred`, not `required`, in this item's own
   tool_requirements) rather than force it in and risk another detour. A future S7 run
   should add it.
+
+**Update (2026-08-30, later same day): this gap is now closed.** `tools/run_paper_s20_pilot.py`
+now calls `word_receipt_watchdog.word_receipt_with_orphan_diagnostics()` at the milestone
+cadence `docs/paper-s9-long-horizon-benchmark-protocol-v0.md` section 5 specifies for today's
+single-pair harness shape (trial-start on the pristine fixture, after the forward output, after
+the inverse output) -- any failure records an explicit `not_run`/`failed` status rather than
+being silently skipped or treated as a pass. Re-ran the full 8-trial pilot with this wired in
+(`E:\MeridianData\ooxml-graph-paper\runs\paper-s20\20260830T213803Z\manifest.json`): 8/8 executed,
+8/8 graded pass, 8/8 isolation-clean, and now also **10/10 Word-COM milestone receipts rendered**
+(8 post-pair + 2 trial-start), each with confirmed orphan-process cleanup
+(`cleanup_complete: true`). This run happened not to reproduce the earlier control-arm
+package-corruption finding -- consistent with the root-cause analysis above: it is a real but
+non-deterministic property of the model's on-the-fly scripting choices each run (which shell
+fallback path it happens to take), not a fixed, always-reproducing bug.
 - **Only 2 frozen documents, 1 task type, the `haiku` model** — explicitly a
   commissioning pilot proving the harness works, not a benchmark with statistical power.
   PAPER-S7 needs a real task/document set and a confirmatory model choice.

@@ -9,7 +9,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools"))
 
 from claude_pair_runner import _build_command, _CLAUDE_EXECUTABLE  # noqa: E402
 from docx_trial_broker import TrialSpec  # noqa: E402
-from run_paper_s20_pilot import classify_trial_execution  # noqa: E402
+from run_paper_s20_pilot import _milestone_word_receipt, classify_trial_execution  # noqa: E402
 
 
 def test_authentication_failure_is_not_a_completed_trial() -> None:
@@ -121,3 +121,30 @@ def test_runner_uses_tools_flag_for_actual_arm_boundary(tmp_path: Path) -> None:
 
 def test_runner_resolves_native_claude_executable() -> None:
     assert Path(_CLAUDE_EXECUTABLE).suffix.lower() == ".exe"
+
+
+def test_milestone_word_receipt_reports_not_run_on_missing_input(tmp_path: Path) -> None:
+    receipt = _milestone_word_receipt(
+        tmp_path / "does-not-exist.docx", tmp_path / "out", milestone="trial_start",
+    )
+
+    assert receipt["milestone"] == "trial_start"
+    assert receipt["status"] == "not_run"
+    assert "does not exist" in receipt["reason"]
+
+
+def test_milestone_word_receipt_never_raises_on_render_failure(tmp_path: Path, monkeypatch) -> None:
+    import run_paper_s20_pilot
+
+    docx_path = tmp_path / "input.docx"
+    docx_path.write_bytes(b"not-a-real-docx")
+
+    def _boom(*args, **kwargs):
+        raise RuntimeError("simulated Word COM failure")
+
+    monkeypatch.setattr(run_paper_s20_pilot, "word_receipt_with_orphan_diagnostics", _boom)
+
+    receipt = _milestone_word_receipt(docx_path, tmp_path / "out", milestone="after_forward_pair")
+
+    assert receipt["status"] == "not_run"
+    assert "simulated Word COM failure" in receipt["reason"]
