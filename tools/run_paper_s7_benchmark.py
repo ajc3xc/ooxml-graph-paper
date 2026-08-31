@@ -44,7 +44,8 @@ from docx_trial_broker import (  # noqa: E402
     generate_bibliography_pair,
     generate_caption_forward,
     generate_caption_inverse,
-    generate_citation_pair,
+    generate_citation_forward,
+    generate_citation_inverse,
     generate_section_reorder_pair,
     new_marker,
 )
@@ -117,16 +118,21 @@ def probe_family_applicability(family: str, docx_path: Path) -> dict[str, Any]:
 def _build_pair_specs(
     family: str, doc_label: str, docx_path: Path, marker: str, applicability: dict[str, Any],
 ) -> tuple[TrialSpec, TrialSpec | None]:
-    """Returns (forward, inverse-or-None). inverse is None only for caption,
-    whose inverse args cannot be built until the forward trial's own output
-    is inspected -- see resolve_para_id_by_marker_text."""
+    """Returns (forward, inverse-or-None). inverse is None for citation and
+    caption: both need the forward trial's own OUTPUT inspected before the
+    inverse's anchor_para_id can be resolved (citation's anchor paragraph's
+    own synthetic id changes once forward edits its text; caption's new
+    paragraph never gets an id back from insert_caption at all) -- see
+    resolve_para_id_by_marker_text and docx_trial_broker.py's citation
+    section docstring for why reusing the pristine-document id is wrong."""
     if family == "bibliography":
         return generate_bibliography_pair(doc_label, docx_path, marker)
     if family == "citation":
         anchor = applicability["anchor"]
-        return generate_citation_pair(
+        forward = generate_citation_forward(
             doc_label, docx_path, marker, anchor["anchor_para_id"], anchor["anchor_text_snippet"],
         )
+        return forward, None
     if family == "caption":
         anchor = applicability["anchor"]
         forward = generate_caption_forward(
@@ -241,9 +247,16 @@ def run_chain(
                 chain_status = "blocked"
                 pairs.append(pair_record)
                 break
-            inverse_spec = generate_caption_inverse(
-                doc_label, Path(fwd_result["output_docx_path"]), forward_spec.trial_id, forward_spec.marker_text, resolved["para_id"],
-            )
+            if family == "caption":
+                inverse_spec = generate_caption_inverse(
+                    doc_label, Path(fwd_result["output_docx_path"]), forward_spec.trial_id, forward_spec.marker_text, resolved["para_id"],
+                )
+            elif family == "citation":
+                inverse_spec = generate_citation_inverse(
+                    doc_label, Path(fwd_result["output_docx_path"]), forward_spec.trial_id, forward_spec.marker_text, resolved["para_id"],
+                )
+            else:
+                raise AssertionError(f"family {family!r} returned inverse=None but has no post-forward resolver wired up")
 
         inverse_spec = dataclasses.replace(
             inverse_spec, arm=arm, pair_index=pair_index, trial_id=f"p{pair_index}-inverse",

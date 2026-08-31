@@ -29,7 +29,7 @@ def test_build_pair_specs_bibliography_needs_no_applicability_info(tmp_path: Pat
     assert forward.treatment_args["citation_key"] == inverse.treatment_args["citation_key"]
 
 
-def test_build_pair_specs_citation_uses_resolved_anchor(tmp_path: Path) -> None:
+def test_build_pair_specs_citation_uses_resolved_anchor_for_forward(tmp_path: Path) -> None:
     applicability = {
         "applicable": True,
         "anchor": {"anchor_para_id": "p42", "anchor_text_snippet": "Hello", "anchor_full_text": "Hello world"},
@@ -38,8 +38,25 @@ def test_build_pair_specs_citation_uses_resolved_anchor(tmp_path: Path) -> None:
     forward, inverse = _build_pair_specs("citation", "doc-a", tmp_path / "in.docx", "marker1", applicability)
 
     assert forward.treatment_args["anchor_para_id"] == "p42"
-    assert inverse.treatment_args["anchor_para_id"] == "p42"
-    assert forward.marker_text == inverse.marker_text
+    # PAPER-S7 correction: citation's anchor paragraph is itself modified by
+    # forward (the marker text is appended into it), so its Meridian
+    # synthetic id changes -- reusing the pristine-document id for inverse
+    # would be stale. inverse must be resolved from forward's own OUTPUT,
+    # same as caption, so it comes back None here (see run_chain).
+    assert inverse is None
+
+
+def test_generate_citation_inverse_uses_the_resolved_post_forward_id() -> None:
+    from docx_trial_broker import generate_citation_inverse
+
+    spec = generate_citation_inverse(
+        "doc-a", Path("/tmp/forward-output.docx"), "marker1",
+        "[PILOT-S7-CITATION-marker1]", "sp_post_forward_id",
+    )
+
+    assert spec.treatment_tool == "remove_citation"
+    assert spec.treatment_args["anchor_para_id"] == "sp_post_forward_id"
+    assert spec.marker_text == "[PILOT-S7-CITATION-marker1]"
 
 
 def test_build_pair_specs_caption_returns_none_inverse(tmp_path: Path) -> None:

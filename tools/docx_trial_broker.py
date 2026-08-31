@@ -154,16 +154,30 @@ def generate_bibliography_pair(doc_label: str, input_docx: Path, marker: str) ->
 
 # ---------------------------------------------------------------------------
 # citation (inline text appended to an existing anchor paragraph)
+#
+# PAPER-S7 correction: anchor_para_id for this family was originally resolved
+# ONCE from the PRISTINE document and reused for both forward and inverse.
+# Meridian's synthetic para_id (`sp<hash>`) is content-derived -- forward's
+# own edit (appending the citation marker) changes that same paragraph's
+# text, which changes its own synthetic id. A real treatment-arm trial
+# (validation slice, docops_v2_l3_009) hit exactly this: the agent correctly
+# self-detected the stale id via locate_anchor, found the right one, but
+# stopped short of acting rather than risk mutating the wrong paragraph --
+# a reasonable, cautious response to a genuinely broken instruction, not an
+# agent failure. Control never had this problem: its instructions are
+# always a fresh text search, never a cached id. Generalizing caption's
+# already-correct pattern (resolve the id AFTER forward, from forward's own
+# output) closes this for citation too.
 # ---------------------------------------------------------------------------
 
-def generate_citation_pair(
+def generate_citation_forward(
     doc_label: str, input_docx: Path, marker: str, anchor_para_id: str, anchor_text_snippet: str,
-) -> tuple[TrialSpec, TrialSpec]:
+) -> TrialSpec:
     marker_text = f"[PILOT-S7-CITATION-{marker}]"
     citation_key = f"pilot-s7-cite-{marker}"
     trial_base = f"{doc_label}-citation-{marker}"
 
-    forward = TrialSpec(
+    return TrialSpec(
         trial_id=f"{trial_base}-forward",
         doc_label=doc_label, arm="", direction="forward", family="citation",
         input_docx=input_docx,
@@ -187,7 +201,18 @@ def generate_citation_pair(
             f"with a single line: DONE."
         ),
     )
-    inverse = TrialSpec(
+
+
+def generate_citation_inverse(
+    doc_label: str, input_docx: Path, marker: str, marker_text: str, anchor_para_id: str,
+) -> TrialSpec:
+    """``anchor_para_id`` here MUST be re-resolved from the forward trial's
+    own OUTPUT document (e.g. via docx_anchor_prober.resolve_para_id_by_marker_text),
+    never reused from the pristine pre-forward document -- see this module's
+    docstring above for why."""
+    trial_base = f"{doc_label}-citation-{marker}"
+
+    return TrialSpec(
         trial_id=f"{trial_base}-inverse",
         doc_label=doc_label, arm="", direction="inverse", family="citation",
         input_docx=input_docx,
@@ -206,7 +231,6 @@ def generate_citation_pair(
             f"with a single line: DONE."
         ),
     )
-    return forward, inverse
 
 
 # ---------------------------------------------------------------------------
