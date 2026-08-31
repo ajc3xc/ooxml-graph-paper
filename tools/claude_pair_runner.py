@@ -44,6 +44,7 @@ import dataclasses
 import datetime
 import hashlib
 import json
+import os
 import shutil
 import subprocess
 import sys
@@ -190,6 +191,29 @@ def run_trial(spec: TrialSpec, runs_root: Path, *, model: str = "haiku") -> dict
     shutil.copyfile(spec.input_docx, docx_in_trial)
     input_hash = _sha256_file(docx_in_trial)
 
+    # PAPER-S7 correction (2026-08-31): a real primary_holdout trial found a
+    # control-arm agent extracting/editing its own scratch copy at a FIXED,
+    # non-trial-specific path (C:\Users\...\AppData\Local\Temp\claude\
+    # extract_doc -- a convention the agent chose on its own, --add-dir
+    # never restricts Bash from writing outside trial_root, only grants
+    # additional read/write access). Under this harness's own concurrent
+    # execution (multiple trials run in parallel threads), a SECOND
+    # control-arm trial was independently running and almost certainly
+    # collided on that same shared path mid-edit, truncating the first
+    # trial's word/document.xml from 48KB to 2.7KB while every other ZIP
+    # part stayed intact -- a harness concurrency defect, not necessarily a
+    # property of generic-tool editing itself. Point TEMP/TMP/TMPDIR at a
+    # trial-unique scratch directory so an agent that (reasonably) assumes
+    # "the system temp directory" is private to its own process gets one
+    # that actually is, closing this specific collision class without
+    # relying on the agent to choose a unique path on its own.
+    scratch_dir = trial_root / "scratch"
+    scratch_dir.mkdir(parents=True, exist_ok=True)
+    trial_env = dict(os.environ)
+    trial_env["TEMP"] = str(scratch_dir)
+    trial_env["TMP"] = str(scratch_dir)
+    trial_env["TMPDIR"] = str(scratch_dir)
+
     # The prompt references "the document" -- tell the agent its concrete
     # path via an explicit prefix rather than baking a machine path into the
     # broker's own prompt text (keeps docx_trial_broker.py path-agnostic).
@@ -216,6 +240,7 @@ def run_trial(spec: TrialSpec, runs_root: Path, *, model: str = "haiku") -> dict
         proc = subprocess.run(
             cmd, cwd=str(trial_root), capture_output=True, text=True,
             timeout=_TIMEOUT_SECONDS, encoding="utf-8", errors="replace",
+            env=trial_env,
             # _resolve_claude_executable() selects the native .exe on
             # Windows, so shell=False preserves every prompt/flag argument.
             shell=False,

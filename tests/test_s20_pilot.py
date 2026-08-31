@@ -157,6 +157,43 @@ def test_milestone_word_receipt_reports_not_run_on_missing_input(tmp_path: Path)
     assert "does not exist" in receipt["reason"]
 
 
+def test_run_trial_gives_each_trial_a_unique_scratch_temp_dir(tmp_path: Path, monkeypatch) -> None:
+    """PAPER-S7 correction (2026-08-31): a real primary_holdout trial showed a
+    control-arm agent extracting/editing at a fixed, shared temp path; a
+    concurrently-running second control-arm trial almost certainly collided
+    on the same path, truncating the first trial's document.xml from 48KB to
+    2.7KB. run_trial must point TEMP/TMP/TMPDIR at a trial-unique directory
+    so two concurrent trials cannot collide on an agent-chosen "system temp
+    directory" path."""
+    import claude_pair_runner
+    import subprocess as subprocess_module
+
+    input_docx = tmp_path / "input.docx"
+    input_docx.write_bytes(b"fake-docx-bytes")
+    spec = TrialSpec(
+        trial_id="trial-a", doc_label="doc", arm="control", direction="forward",
+        family="bibliography", input_docx=input_docx, marker_text="marker",
+        treatment_tool="insert_bibliography_entry", treatment_args={},
+        prompt="edit the document",
+    )
+
+    captured_env = {}
+
+    def _fake_run(*args, **kwargs):
+        captured_env.update(kwargs.get("env") or {})
+        return subprocess_module.CompletedProcess(args=args, returncode=0, stdout="{}", stderr="")
+
+    monkeypatch.setattr(claude_pair_runner.subprocess, "run", _fake_run)
+
+    claude_pair_runner.run_trial(spec, tmp_path / "runs")
+
+    expected_scratch = str(tmp_path / "runs" / "trial-a" / "scratch")
+    assert captured_env["TEMP"] == expected_scratch
+    assert captured_env["TMP"] == expected_scratch
+    assert captured_env["TMPDIR"] == expected_scratch
+    assert (tmp_path / "runs" / "trial-a" / "scratch").is_dir()
+
+
 def test_milestone_word_receipt_never_raises_on_render_failure(tmp_path: Path, monkeypatch) -> None:
     import run_paper_s20_pilot
 
