@@ -33,11 +33,42 @@ _LONG_DIGIT_RUN_RE = re.compile(r"\b\d{13,19}\b")
 _PLACEHOLDER_EMAIL_DOMAINS = {"example.com", "example.org", "example.net", "example.test"}
 
 
-def _extract_visible_text(docx_path: Path) -> str:
-    with zipfile.ZipFile(docx_path) as zf:
-        xml_bytes = zf.read("word/document.xml")
+_TEXT_BEARING_PART_PREFIXES = ("word/header", "word/footer")
+_TEXT_BEARING_PARTS = ("word/document.xml", "word/footnotes.xml", "word/endnotes.xml")
+
+
+def _part_text(xml_bytes: bytes) -> str:
+    """Join a part's own <w:t> runs WITHIN each paragraph (correct -- a run
+    split mid-word, e.g. for bold, must stay contiguous), but insert a
+    newline BETWEEN paragraphs. Found live (2026-08-31): joining every <w:t>
+    in the whole part with "" glues adjacent paragraphs (e.g. an address
+    block's separate lines) into one unbroken run of characters, which can
+    silently swallow a real phone/SSN/email match's trailing `\\b` word
+    boundary -- a false NEGATIVE that let real PII patterns escape detection,
+    not merely the previously-known false-POSITIVE direction (concatenated
+    table cells misread as phone numbers) already documented in
+    docs/paper-s6-organic-omml-round2-3-result-v1.md."""
     root = ET.fromstring(xml_bytes)
-    return "".join(t.text or "" for t in root.iter(f"{{{_W_NS}}}t"))
+    paragraphs = []
+    for p in root.iter(f"{{{_W_NS}}}p"):
+        paragraphs.append("".join(t.text or "" for t in p.iter(f"{{{_W_NS}}}t")))
+    return "\n".join(paragraphs)
+
+
+def _extract_visible_text(docx_path: Path) -> str:
+    """Visible text across every part a reader actually sees -- the main
+    body, headers/footers, and footnotes/endnotes -- not just
+    word/document.xml. A confidentiality notice or contact block living in a
+    header/footer (a separate OOXML part) was previously invisible to this
+    scanner entirely."""
+    with zipfile.ZipFile(docx_path) as zf:
+        names = zf.namelist()
+        parts = [
+            n for n in names
+            if n in _TEXT_BEARING_PARTS or n.startswith(_TEXT_BEARING_PART_PREFIXES)
+        ]
+        texts = [_part_text(zf.read(n)) for n in parts]
+    return "\n".join(texts)
 
 
 def scan_document(docx_path: Path) -> dict[str, Any]:

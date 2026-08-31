@@ -81,3 +81,60 @@ def test_long_digit_run_flags(tmp_path: Path) -> None:
 
     assert result["clean"] is False
     assert result["long_digit_run_matches"] == 1
+
+
+def _make_multi_paragraph_docx(tmp_path: Path, paragraphs: list[str]) -> Path:
+    body = "".join(f"<w:p><w:r><w:t>{p}</w:t></w:r></w:p>" for p in paragraphs)
+    document_xml = (
+        f'<?xml version="1.0" encoding="UTF-8"?>\n'
+        f'<w:document xmlns:w="{_W}"><w:body>{body}</w:body></w:document>'
+    ).encode("utf-8")
+    path = tmp_path / "doc.docx"
+    with zipfile.ZipFile(path, "w") as zf:
+        zf.writestr("word/document.xml", document_xml)
+    return path
+
+
+def test_phone_number_across_a_paragraph_boundary_still_flags(tmp_path: Path) -> None:
+    """Found live (2026-08-31) screening real acquired documents: an address
+    block written as separate paragraphs ('202 E Earll Dr.', 'Phoenix, AZ
+    85012', 'Phone: (602) 759-1905', 'www.example.com') was joined with NO
+    separator, fusing the phone number's trailing digits directly onto the
+    next paragraph's text and breaking the phone regex's trailing \\b word
+    boundary -- a real phone number silently reported as clean."""
+    path = _make_multi_paragraph_docx(
+        tmp_path,
+        ["202 E Earll Dr. Ste 110", "Phoenix, AZ 85012", "Phone: (602) 759-1905", "www.njbsoft.com"],
+    )
+
+    result = scan_document(path)
+
+    assert result["clean"] is False
+    assert result["phone_matches"] == 1
+
+
+def test_pii_in_a_footer_part_is_detected(tmp_path: Path) -> None:
+    """Headers/footers live in separate OOXML parts (word/footer1.xml, etc.),
+    never inline in word/document.xml -- a confidentiality notice or contact
+    block placed there was previously invisible to this scanner entirely."""
+    document_xml = (
+        f'<?xml version="1.0" encoding="UTF-8"?>\n'
+        f'<w:document xmlns:w="{_W}"><w:body>'
+        f'<w:p><w:r><w:t>This is an ordinary body paragraph.</w:t></w:r></w:p>'
+        f'</w:body></w:document>'
+    ).encode("utf-8")
+    footer_xml = (
+        f'<?xml version="1.0" encoding="UTF-8"?>\n'
+        f'<w:ftr xmlns:w="{_W}">'
+        f'<w:p><w:r><w:t>Questions? Email elena.park@realcompany.com</w:t></w:r></w:p>'
+        f'</w:ftr>'
+    ).encode("utf-8")
+    path = tmp_path / "doc.docx"
+    with zipfile.ZipFile(path, "w") as zf:
+        zf.writestr("word/document.xml", document_xml)
+        zf.writestr("word/footer1.xml", footer_xml)
+
+    result = scan_document(path)
+
+    assert result["clean"] is False
+    assert result["email_matches_real_domain"] == 1
