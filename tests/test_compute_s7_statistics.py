@@ -6,7 +6,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools"))
 
-from compute_s7_statistics import _chain_outcome, compute_statistics  # noqa: E402
+from compute_s7_statistics import _chain_outcome, _chain_steady_state_outcome, compute_statistics  # noqa: E402
 
 
 def _passing_chain(doc_label: str, family: str, arm: str, k: int = 1) -> dict:
@@ -105,3 +105,47 @@ def test_compute_statistics_skips_significance_test_below_two_paired_docs() -> N
     stats = compute_statistics(chains)
 
     assert stats["groups"][0]["paired_control_vs_treatment_significance"] is None
+
+
+def _k4_chain_first_pair_fails_rest_pass(doc_label: str, arm: str) -> dict:
+    pass_pair = {"forward": {"grading": {"verdict": "pass"}}, "inverse": {"grading": {"verdict": "pass"}}}
+    fail_pair = {"forward": {"grading": {"verdict": "pass"}}, "inverse": {"grading": {"verdict": "fail"}}}
+    return {
+        "doc_label": doc_label, "family": "bibliography", "arm": arm, "k_pairs": 4,
+        "status": "completed_with_failure",
+        "pairs": [fail_pair, pass_pair, pass_pair, pass_pair],
+    }
+
+
+def test_steady_state_outcome_excludes_first_pair() -> None:
+    chain = _k4_chain_first_pair_fails_rest_pass("d1", "control")
+
+    assert _chain_outcome(chain) == 0.0  # strict: any failing pair fails the whole chain
+    assert _chain_steady_state_outcome(chain) == 1.0  # pairs[1:] all passed
+
+
+def test_steady_state_outcome_is_none_for_k1() -> None:
+    assert _chain_steady_state_outcome(_passing_chain("d1", "bibliography", "control", k=1)) is None
+
+
+def test_steady_state_outcome_is_none_for_not_applicable() -> None:
+    chain = {"doc_label": "d1", "family": "x", "arm": "control", "k_pairs": 4, "status": "not_applicable", "pairs": []}
+    assert _chain_steady_state_outcome(chain) is None
+
+
+def test_compute_statistics_reports_steady_state_for_k4_but_not_k1() -> None:
+    k1_chains = [_passing_chain("d1", "bibliography", "control", k=1), _passing_chain("d1", "bibliography", "treatment", k=1)]
+    k4_chains = [
+        _k4_chain_first_pair_fails_rest_pass("d1", "control"),
+        _k4_chain_first_pair_fails_rest_pass("d1", "treatment"),
+    ]
+
+    stats = compute_statistics(k1_chains + k4_chains)
+
+    by_k = {g["k_pairs"]: g for g in stats["groups"]}
+    assert by_k[1]["steady_state_pairs_1_plus"] is None
+    assert by_k[4]["steady_state_pairs_1_plus"]["control_pass_rate_ci"]["mean"] == 1.0
+    assert by_k[4]["steady_state_pairs_1_plus"]["treatment_pass_rate_ci"]["mean"] == 1.0
+    # Strict, whole-chain outcome still correctly shows 0.0 for both arms.
+    assert by_k[4]["control_pass_rate_ci"]["mean"] == 0.0
+    assert by_k[4]["treatment_pass_rate_ci"]["mean"] == 0.0

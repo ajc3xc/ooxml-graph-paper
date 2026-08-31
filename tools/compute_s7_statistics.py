@@ -45,6 +45,38 @@ def _chain_outcome(chain: dict[str, Any]) -> float | None:
     return 1.0
 
 
+def _pair_passed(pair: dict[str, Any]) -> bool:
+    if (pair.get("forward") or {}).get("grading", {}).get("verdict") != "pass":
+        return False
+    inverse = pair.get("inverse")
+    if inverse is None:
+        return False
+    return inverse.get("grading", {}).get("verdict") == "pass"
+
+
+def _chain_steady_state_outcome(chain: dict[str, Any]) -> float | None:
+    """For K>1 chains only: pass rate over pairs[1:], excluding the first
+    pair. Bibliography's first-ever use on a document always fails the
+    strict exact-restoration check (the disclosed References-heading
+    residue, symmetric across arms -- see docs/paper-s22-harness-
+    verification-v1.md's correction), which would otherwise make EVERY K=4
+    bibliography chain register as a flat 0.0 under _chain_outcome and
+    obscure whether genuine cumulative drift exists once past that one
+    known, one-time side effect. Returns None for k_pairs<2, or for chains
+    that never applied/executed at all."""
+    if chain.get("k_pairs", 1) < 2:
+        return None
+    status = chain.get("status")
+    if status in ("not_applicable", "harness_exception"):
+        return None
+    pairs = chain.get("pairs") or []
+    steady_state_pairs = pairs[1:]
+    if not steady_state_pairs:
+        return None
+    passed = sum(1 for p in steady_state_pairs if _pair_passed(p))
+    return passed / len(steady_state_pairs)
+
+
 def load_chains(slice_manifest_paths: list[Path]) -> list[dict[str, Any]]:
     chains: list[dict[str, Any]] = []
     for path in slice_manifest_paths:
@@ -55,6 +87,7 @@ def load_chains(slice_manifest_paths: list[Path]) -> list[dict[str, Any]]:
 
 def compute_statistics(chains: list[dict[str, Any]]) -> dict[str, Any]:
     by_group: dict[tuple[str, int], dict[str, dict[str, float]]] = {}
+    steady_state_by_group: dict[tuple[str, int], dict[str, dict[str, float]]] = {}
     not_applicable_counts: dict[tuple[str, int], int] = {}
 
     for chain in chains:
@@ -62,13 +95,19 @@ def compute_statistics(chains: list[dict[str, Any]]) -> dict[str, Any]:
         k = chain["k_pairs"]
         arm = chain["arm"]
         doc_label = chain["doc_label"]
-        outcome = _chain_outcome(chain)
         key = (family, k)
+
+        outcome = _chain_outcome(chain)
         if outcome is None:
             not_applicable_counts[key] = not_applicable_counts.get(key, 0) + 1
-            continue
-        by_group.setdefault(key, {"control": {}, "treatment": {}})
-        by_group[key][arm][doc_label] = outcome
+        else:
+            by_group.setdefault(key, {"control": {}, "treatment": {}})
+            by_group[key][arm][doc_label] = outcome
+
+        steady_outcome = _chain_steady_state_outcome(chain)
+        if steady_outcome is not None:
+            steady_state_by_group.setdefault(key, {"control": {}, "treatment": {}})
+            steady_state_by_group[key][arm][doc_label] = steady_outcome
 
     results = []
     for (family, k), arms in sorted(by_group.items()):
@@ -87,6 +126,22 @@ def compute_statistics(chains: list[dict[str, Any]]) -> dict[str, Any]:
             paired_permutation_test(paired_a, paired_b) if len(paired_docs) >= 2 else None
         )
 
+        steady_arms = steady_state_by_group.get((family, k), {"control": {}, "treatment": {}})
+        steady_control_values = list(steady_arms["control"].values())
+        steady_treatment_values = list(steady_arms["treatment"].values())
+        steady_state = {
+            "note": (
+                "Pass rate over pairs[1:] only (excludes the first pair), isolating "
+                "whether repeated cycling introduces NEW drift once past any known "
+                "one-time first-use side effect (e.g. bibliography's References-heading "
+                "residue, which affects both arms equally on pair 0) -- None if k_pairs<2."
+            ),
+            "control_n": len(steady_control_values),
+            "control_pass_rate_ci": bootstrap_ci(steady_control_values) if steady_control_values else None,
+            "treatment_n": len(steady_treatment_values),
+            "treatment_pass_rate_ci": bootstrap_ci(steady_treatment_values) if steady_treatment_values else None,
+        } if k >= 2 else None
+
         results.append({
             "family": family,
             "k_pairs": k,
@@ -95,6 +150,7 @@ def compute_statistics(chains: list[dict[str, Any]]) -> dict[str, Any]:
             "control_pass_rate_ci": control_ci,
             "treatment_n": len(treatment_values),
             "treatment_pass_rate_ci": treatment_ci,
+            "steady_state_pairs_1_plus": steady_state,
             "paired_n": len(paired_docs),
             "paired_control_vs_treatment_significance": significance,
         })
