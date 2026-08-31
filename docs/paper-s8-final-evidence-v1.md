@@ -146,8 +146,10 @@ The actual defect: the agent extracted to a **fixed, non-trial-specific path**
 (`C:\Users\...\AppData\Local\Temp\claude\extract_doc`) rather than a location scoped to its
 own trial. Cross-referencing trial start/end timestamps in the run manifest found a
 **second, independent control-arm trial**
-(`docops_v2_l3_006_docx_grant_closeout_release`, inverse direction) running with an
-almost-fully-overlapping wall-clock window (both active roughly 02:09:13-02:10:32 UTC).
+(`docops_v2_l3_006_docx_grant_closeout_release`, inverse direction) running with a
+partially overlapping wall-clock window: that trial ran 02:09:13.5-02:10:00.8 UTC against
+this one's 02:09:40.3-02:10:32.6 UTC, an overlap of roughly 20 of each trial's ~50 seconds
+(about 40% of either window) -- concurrent, but not fully coincident.
 Under this harness's own concurrent execution (`--max-workers 3`), two agents independently
 choosing the same conventional-looking scratch path very likely collided: one process's
 `rm -rf extract_doc/* && unzip` interleaving with the other's in-progress edit, truncating
