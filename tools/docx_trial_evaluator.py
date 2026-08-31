@@ -196,7 +196,15 @@ def grade_forward_trial_reorder(
     paragraphs_after = _paragraph_texts(output_docx)
     same_multiset = sorted(paragraphs_after) == sorted(paragraphs_before)
     order_changed = paragraphs_after != paragraphs_before
-    heading_present = section_heading_text in paragraphs_after
+    # Found live (2026-08-31) grading a real-world document corpus:
+    # section_heading_text comes from document_outline's raw run text (not
+    # stripped), while paragraphs_after comes from _paragraph_texts (every
+    # entry IS stripped) -- any heading with real, incidental leading/
+    # trailing whitespace in its OOXML runs (common in organic documents,
+    # rare in the curated DocOps benchmark corpus) could never match here
+    # even on a byte-perfect round trip. Strip both sides of this specific
+    # comparison to match how paragraphs_after was already produced.
+    heading_present = section_heading_text.strip() in paragraphs_after
 
     checks = {
         "output_is_valid_docx": True,
