@@ -123,15 +123,30 @@ def generate_bibliography_pair(doc_label: str, input_docx: Path, marker: str) ->
         input_docx=input_docx,
         marker_text=marker_title,
         treatment_tool="remove_bibliography_entry",
-        treatment_args={"citation_key": citation_key},
+        # PAPER-S7 correction: the forward call locate-or-CREATES a
+        # References heading the first time it runs on a document without
+        # one; remove_bibliography_entry never removed it, so a genuine
+        # insert+remove cycle could never return a virgin document to its
+        # exact original state -- both arms failed the strict round-trip
+        # bar 100% of the time for this reason alone (see
+        # docs/paper-s22-harness-verification-v1.md's correction section).
+        # remove_heading_if_empty=True (parent repo commit d65cea2f) closes
+        # this for the treatment arm; the prompt below asks the SAME
+        # complete round trip of the control arm using generic tools, so
+        # both arms are held to the identical, now-achievable bar.
+        treatment_args={"citation_key": citation_key, "remove_heading_if_empty": True},
         prompt=(
             f"You are editing a Word document at the path given to you. "
             f"It contains a reference/bibliography entry whose title is "
             f"exactly:\n\n{marker_title!r}\n\n"
             f"Remove that entire reference entry (its whole paragraph) from "
-            f"the document. Do not change, remove, reorder, or reformat any "
-            f"other paragraph. Save the document in place at the same "
-            f"path. When finished, reply with a single line: DONE."
+            f"the document. If that was the ONLY entry under the "
+            f"References/Bibliography heading, also remove that now-empty "
+            f"heading paragraph, so the document is restored to EXACTLY "
+            f"its state before the entry was ever added. Do not change, "
+            f"remove, reorder, or reformat any other paragraph. Save the "
+            f"document in place at the same path. When finished, reply "
+            f"with a single line: DONE."
         ),
     )
     return forward, inverse
