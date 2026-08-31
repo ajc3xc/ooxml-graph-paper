@@ -112,3 +112,42 @@ held even one day earlier. The raw-count and feature-family bars are clearly met
 topic/source-group bar is substantially, but not completely, closed, for reasons now
 concretely understood (one topic's pool is exhausted, one shows a real near-zero rate) rather
 than merely "not yet tried."
+
+## Correction (2026-08-31): PII scanner false-negative, 2 candidates re-reviewed
+
+While screening an unrelated new document pool (a section_reorder corpus follow-up),
+`tools/pii_pattern_scan.py`'s text extraction was found to join every `<w:t>` run in a
+document with no separator at all, including across paragraph boundaries. This can fuse a
+real pattern (a phone number, in the case that surfaced it) directly onto the next
+paragraph's text with no whitespace, breaking the regex's trailing `\b` word-boundary check
+and causing a real match to go **undetected** -- a false negative, not merely the
+false-positive direction (concatenated table cells misread as phone numbers) already
+disclosed above. Fixed in `tools/pii_pattern_scan.py` (paragraph-aware join, plus extraction
+now also covers headers/footers/footnotes/endnotes, previously unscanned entirely) and
+covered by new regression tests in `tests/test_pii_pattern_scan.py`.
+
+Re-running the fixed scanner over all 36 original candidates (via each candidate's recorded
+sha256, cross-referenced against the three acquisition batch manifests) found 2 candidates
+whose `pii_scan` result changes from `clean` to `flagged_email` (candidate_ids
+`350d07e8bd188f6f` and `9660aec276b37865`). Both were "clean by pattern scan alone" under
+the old, buggy scanner, meaning **neither ever received the narrow-context human review**
+the other 11 pattern-flagged candidates got -- this correction closes that gap, not just the
+scanner bug itself.
+
+Narrow-context review of both (short window around the match only, PII value never recorded
+in any committed file, per this document's own standing rule):
+
+- `350d07e8bd188f6f`: a corresponding-author institutional academic email (`*.wur.nl`,
+  Wageningen University) on a multi-author scientific paper -- the same
+  `cleared_institutional_contact` category as candidate `c3f9be7e2df0fbe7` above.
+- `9660aec276b37865`: two university-research-institute staff bylines (director and
+  research assistant, named with job titles, `*.bahcesehir.edu.tr`) in what is clearly a
+  circulated professional economics report -- the same institutional-byline category as the
+  "several academic-authorship byline emails" already cleared elsewhere in this document.
+
+**Result: both cleared as institutional contact info.** The headline count is unchanged --
+still 35 of 36 cleared -- but for the right reason now: every candidate has actually been
+reviewed, not accidentally waved through by a scanner bug. `manifests/
+s6-organic-candidates-adjudication-v1.json`'s two affected records have been updated in
+place (`pii_scan` and `adjudication` fields) to reflect this re-review; the summary counts
+in that file are unchanged.
