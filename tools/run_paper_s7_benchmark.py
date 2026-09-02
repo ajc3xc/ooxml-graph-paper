@@ -172,6 +172,38 @@ def _grade_inverse(family: str, output_docx: Path, paragraphs_before_forward: li
     raise ValueError(f"unknown family {family!r}")
 
 
+_CHECKPOINT_NAME = "chain-result.json"
+# Statuses that represent a chain that genuinely finished (its outcome may
+# itself be a failure, but the ATTEMPT completed) -- safe to trust and skip
+# on resume. "blocked" is deliberately excluded: found live (2026-09-02)
+# that a Windows STATUS_DLL_INIT_FAILED process-launch failure under shared-
+# host resource contention also produces a "blocked" chain, indistinguishable
+# from a genuine forward-timeout without deeper inspection -- always retry
+# blocked chains on resume rather than risk trusting an infra hiccup as data.
+_CHECKPOINT_TRUSTED_STATUSES = frozenset({"not_applicable", "completed", "completed_with_failure"})
+
+
+def _load_checkpoint(chain_root: Path) -> dict[str, Any] | None:
+    path = chain_root / _CHECKPOINT_NAME
+    if not path.is_file():
+        return None
+    try:
+        result = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return None
+    if result.get("status") not in _CHECKPOINT_TRUSTED_STATUSES:
+        return None
+    return result
+
+
+def _write_checkpoint(chain_root: Path, result: dict[str, Any]) -> None:
+    # Atomic write: a crash mid-write must never leave a checkpoint that
+    # _load_checkpoint could half-parse and trust.
+    tmp_path = chain_root / f"{_CHECKPOINT_NAME}.tmp"
+    tmp_path.write_text(json.dumps(result, indent=2, ensure_ascii=False), encoding="utf-8")
+    tmp_path.replace(chain_root / _CHECKPOINT_NAME)
+
+
 def run_chain(
     family: str, doc_label: str, docx_path: Path, arm: str, k_pairs: int, model: str,
     run_root: Path, *, word_receipts_enabled: bool = True,
@@ -181,18 +213,30 @@ def run_chain(
     # and DocOps doc_labels can be 60+ chars on their own -- truncate rather
     # than let a long label silently produce a WinError 267 deep in
     # subprocess creation.
+    #
+    # chain_id/chain_root are deliberately DETERMINISTIC (no random suffix,
+    # unlike the per-trial marker() used below) so a re-run of the same
+    # (doc, family, arm, k) combo after a crash finds and resumes from the
+    # SAME directory, instead of starting a fresh one blind to prior work --
+    # this is what actually enables checkpointing.
     short_doc_label = doc_label[:32]
-    chain_id = f"{short_doc_label}-{family}-{arm}-k{k_pairs}-{new_marker('c')}"
+    chain_id = f"{short_doc_label}-{family}-{arm}-k{k_pairs}"
     chain_root = run_root / chain_id
     chain_root.mkdir(parents=True, exist_ok=True)
 
+    checkpoint = _load_checkpoint(chain_root)
+    if checkpoint is not None:
+        return checkpoint
+
     applicability = probe_family_applicability(family, docx_path)
     if not applicability["applicable"]:
-        return {
+        result = {
             "chain_id": chain_id, "doc_label": doc_label, "family": family, "arm": arm,
             "k_pairs": k_pairs, "model": model, "status": "not_applicable",
             "reason": applicability["reason"], "pairs": [],
         }
+        _write_checkpoint(chain_root, result)
+        return result
 
     original_paragraphs = _paragraph_texts(docx_path)
     receipts: list[dict[str, Any]] = []
@@ -286,12 +330,17 @@ def run_chain(
     final_paragraphs = _safe_paragraph_texts(current_input) if current_input.is_file() else None
     cumulative_fidelity = final_paragraphs == original_paragraphs if final_paragraphs is not None else False
 
-    return {
+    result = {
         "chain_id": chain_id, "doc_label": doc_label, "family": family, "arm": arm,
         "k_pairs": k_pairs, "model": model, "status": chain_status,
         "pairs_completed": len(pairs), "cumulative_fidelity_after_k_cycles": cumulative_fidelity,
         "pairs": pairs, "word_com_receipts": receipts,
     }
+    # Written even for "blocked" so the attempt is on record for debugging,
+    # but _load_checkpoint will not trust or reuse a "blocked" result on
+    # resume -- see its own docstring for why.
+    _write_checkpoint(chain_root, result)
+    return result
 
 
 def run_corpus_slice(

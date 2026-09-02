@@ -3,6 +3,7 @@ only -- no real Claude CLI or Meridian import needed for these)."""
 from __future__ import annotations
 
 import sys
+import zipfile
 from pathlib import Path
 
 import pytest
@@ -13,7 +14,10 @@ from run_paper_s7_benchmark import (  # noqa: E402
     _build_pair_specs,
     _grade_forward,
     _grade_inverse,
+    _load_checkpoint,
     _safe_paragraph_texts,
+    _write_checkpoint,
+    run_chain,
 )
 
 
@@ -119,3 +123,59 @@ def test_safe_paragraph_texts_returns_none_on_non_zip_bytes(tmp_path: Path) -> N
     not_a_zip.write_bytes(b"this is not a zip file at all")
 
     assert _safe_paragraph_texts(not_a_zip) is None
+
+
+def test_checkpoint_round_trip_for_a_trusted_status(tmp_path: Path) -> None:
+    result = {"chain_id": "x", "status": "completed", "pairs": []}
+    _write_checkpoint(tmp_path, result)
+
+    loaded = _load_checkpoint(tmp_path)
+
+    assert loaded == result
+
+
+def test_checkpoint_not_trusted_for_blocked_status(tmp_path: Path) -> None:
+    """Found live (2026-09-02): a Windows STATUS_DLL_INIT_FAILED process-
+    launch failure under shared-host resource contention produces a
+    "blocked" chain result indistinguishable, without deeper inspection,
+    from a genuine forward-call timeout. A resume must always retry a
+    blocked chain rather than risk silently trusting an infra hiccup as
+    real experimental data."""
+    _write_checkpoint(tmp_path, {"chain_id": "x", "status": "blocked", "pairs": []})
+
+    assert _load_checkpoint(tmp_path) is None
+
+
+def test_checkpoint_missing_file_returns_none(tmp_path: Path) -> None:
+    assert _load_checkpoint(tmp_path) is None
+
+
+def test_checkpoint_corrupt_json_returns_none(tmp_path: Path) -> None:
+    (tmp_path / "chain-result.json").write_text("{not valid json", encoding="utf-8")
+
+    assert _load_checkpoint(tmp_path) is None
+
+
+def test_run_chain_is_resumable_for_a_not_applicable_combo(tmp_path: Path) -> None:
+    """End-to-end test of the actual resume mechanism using a real
+    not_applicable outcome (no Claude CLI subprocess involved, so this can
+    run without mocking): a second run_chain call for the identical
+    (doc, family, arm, k) combo must land on the SAME deterministic
+    chain_root and reuse the checkpoint rather than recomputing."""
+    doc_xml = (
+        '<?xml version="1.0" encoding="UTF-8"?>'
+        '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">'
+        '<w:body><w:p><w:r><w:t>No headings here.</w:t></w:r></w:p></w:body></w:document>'
+    ).encode("utf-8")
+    docx_path = tmp_path / "in.docx"
+    with zipfile.ZipFile(docx_path, "w") as zf:
+        zf.writestr("word/document.xml", doc_xml)
+    run_root = tmp_path / "run-root"
+
+    first = run_chain("section_reorder", "doc-a", docx_path, "control", 1, "sonnet", run_root)
+    assert first["status"] == "not_applicable"
+
+    second = run_chain("section_reorder", "doc-a", docx_path, "control", 1, "sonnet", run_root)
+
+    assert second == first
+    assert first["chain_id"] == second["chain_id"]
