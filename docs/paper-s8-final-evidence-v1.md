@@ -1,131 +1,168 @@
 # PAPER-S8: PAPER-S7 final evidence and limitations package (v1)
 
 Status: the real, executed result of `docs/paper-s7-protocol-v1.md`'s locked confirmatory
-design. Every number below comes from an actual `claude` CLI run against real DocOps
-documents, graded by `tools/docx_trial_evaluator.py` entirely outside the agent, aggregated
-by `tools/compute_s7_statistics.py` using `tools/graph_scorer.py`'s existing bootstrap/
-permutation functions unmodified. This is PAPER-S9's fourth, distinct claim
-(`comparator-contract-v0.md` section 6.1): an agentic-editing comparison, never pooled with
-Claims 1-3 (native-OOXML-extraction fidelity).
+design, **updated 2026-09-02 after two real harness/evaluator defects were found, fixed, and
+disclosed**, plus a separately preregistered section_reorder follow-up
+(`docs/paper-s7-section-reorder-followup-protocol-v1.md`). Every number below comes from an
+actual `claude` CLI run against real documents, graded by `tools/docx_trial_evaluator.py`
+entirely outside the agent, aggregated by `tools/compute_s7_statistics.py` using
+`tools/graph_scorer.py`'s existing bootstrap/permutation functions unmodified. This is
+PAPER-S9's fourth, distinct claim (`comparator-contract-v0.md` section 6.1): an
+agentic-editing comparison, never pooled with Claims 1-3 (native-OOXML-extraction fidelity).
 
-Raw manifests: `E:\MeridianData\ooxml-graph-paper\runs\paper-s7\validation-k1-20260830T232217Z\`,
-`...\validation-k4-20260831T000200Z\`, `...\holdout-k1-rerun-20260831T023817Z\`,
-`...\holdout-k4-rerun-20260831T033222Z\`. Combined statistics:
-`E:\MeridianData\ooxml-graph-paper\manifests\paper-s7-final-statistics-v1.json`.
+Raw manifests (corrected, current):
+`E:\MeridianData\ooxml-graph-paper\runs\paper-s7\validation-k1-fixrerun-20260831T145852Z\`,
+`...\holdout-k1-fixrerun-20260831T145852Z\`,
+`E:\MeridianData\ooxml-graph-paper\runs\paper-s7-v2-section-reorder\` (follow-up corpus).
+K=4 depth-study manifests are still being (re-)collected as of this writing -- see section 7.
+
+## 0. What changed since the original run (read this first)
+
+Three real defects were found and fixed during post-hoc investigation of surprising results,
+each disclosed in full rather than quietly patched around:
+
+1. **Bibliography's 0%/0% both-arms result** was a real product gap:
+   `remove_bibliography_entry` never cleaned up the "References" heading
+   `insert_bibliography_entry` creates on first use. Fixed upstream (parent repo commit
+   `d65cea2f`, a new opt-in `remove_heading_if_empty` parameter) and wired into the harness
+   (`5814d2c`). Result: **both arms now pass 96-100%** (section 2.1).
+2. **Citation's apparent treatment underperformance** (88.5% vs control's 96.2% in the
+   original run) was a harness bug, not a real capability gap: the inverse trial reused an
+   `anchor_para_id` resolved from the *pristine* document, but Meridian's synthetic
+   content-derived id changes once forward's own edit modifies that paragraph's text --
+   stale only for treatment, since control's instructions are always a fresh text search.
+   Fixed by deferring inverse-spec construction until after forward completes, mirroring the
+   caption family's existing pattern (`1eb8603`). Result: **treatment jumps to parity with
+   control, 96.2% vs 100%** (section 2.2).
+3. **Section_reorder's grading itself had a bug** discovered while running a follow-up
+   corpus for more statistical power: `grade_forward_trial_reorder` compared an unstripped
+   heading string against stripped paragraph text, silently failing on any real-world
+   document with incidental whitespace in a heading (`2ccf4cb`). Zero impact on the original
+   26-document corpus (confirmed directly), but it explains why an initial pass over the new,
+   independently-sourced 48-document follow-up corpus looked artificially bad. Fixed and all
+   affected trials re-graded from their existing output files (no re-run needed). The
+   follow-up's real, corrected result is section 2.3's most important finding: **it does not
+   confirm the original corpus's suggestive direction.**
+
+A fourth defect (a false-negative in `tools/pii_pattern_scan.py`, the tool used to screen
+acquired documents for personal data before promoting them into any corpus) was also found
+and fixed during this work; see `docs/paper-s6-organic-omml-round2-3-result-v1.md`'s
+correction section for that one's full writeup -- it affects acquisition safety, not any
+number in this document.
 
 ## 1. What was run
 
 - **Corpus**: 26 documents (12 validation + 14 primary_holdout, DocOps-derived, per
-  `docs/paper-s7-protocol-v1.md` section 1 / `docs/paper-s16-split-methodology-v1.md`).
+  `docs/paper-s7-protocol-v1.md` section 1), plus a separately preregistered 48-document
+  section_reorder-only follow-up corpus (`docs/paper-s7-section-reorder-followup-protocol-v1.md`)
+  built specifically because the original corpus only yields 11 section_reorder-applicable
+  documents.
 - **Families**: bibliography, citation, section_reorder (3 of 6+ candidate families
-  investigated -- caption, cross_reference, table-structural, and tracked-change were
-  excluded with documented reasons, section 5 below).
-- **K-pair sweep**: breadth pass at K=1 across all 3 families; depth sub-study at K=4,
-  bibliography only (per protocol section 5's disclosed cost-driven scope reduction --
-  K=16 was not run).
-- **Model**: `claude-sonnet-5` (`--model sonnet`) for both validation and primary_holdout.
+  investigated -- section 5).
+- **K-pair sweep**: breadth pass at K=1 across all 3 families on both corpora; a depth
+  sub-study at K=4 (bibliography, citation, section_reorder) is in progress, delayed by
+  repeated real infrastructure interruptions on a shared host -- see section 7.
+- **Model**: `claude-sonnet-5` (`--model sonnet`) throughout.
 - **Arms**: control (generic Read/Write/Edit/Bash, zero Meridian MCP access) vs. treatment
-  (exactly one Meridian bounded write-primitive pair per family, zero generic editing
-  tools) -- isolation audited per trial, both directions clean throughout this run.
-- **Primary holdout was run twice.** The first run (`holdout-k1-20260830T004708Z` /
-  `holdout-k4-20260831T013513Z`) surfaced a real harness defect (section 4) and was
-  superseded, per the protocol's own stopping rule, by a full re-run
-  (`holdout-k1-rerun-20260831T023817Z` / `holdout-k4-rerun-20260831T033222Z`) under the
-  corrected harness. All numbers in this document are from the corrected re-run; the
-  original run is retained on disk for the record, not as evidence.
+  (exactly one Meridian bounded write-primitive pair per family, zero generic editing tools)
+  -- isolation audited per trial, both directions clean throughout.
+- **Primary holdout was run twice** for the original v1 corpus, both for the concurrency
+  defect described in section 4 AND for the citation/bibliography fixes described above --
+  each re-run following the protocol's own stopping rule (halt, fix, disclose, re-run in
+  full). All v1 numbers below are from the final, corrected re-run.
 
 ## 2. Results
 
-### 2.1 bibliography
+### 2.1 bibliography (fixed)
 
 | K | Arm | N | Pass rate (95% CI) |
 |---|---|---:|---|
-| 1 | control | 26 | 0.0% [0.0%, 0.0%] |
-| 1 | treatment | 26 | 0.0% [0.0%, 0.0%] |
-| 4 (whole chain) | control | 26 | 0.0% [0.0%, 0.0%] |
-| 4 (whole chain) | treatment | 26 | 0.0% [0.0%, 0.0%] |
-| 4 (steady state, pairs 2-4) | control | 26 | 94.9% [88.5%, 100%] |
-| 4 (steady state, pairs 2-4) | treatment | 26 | **100% [100%, 100%]** |
+| 1 | control | 26 | 100% [100%, 100%] |
+| 1 | treatment | 26 | 96.2% [88.5%, 100%] |
 
-**0% is not a failure of the harness or the product -- it is `insert_bibliography_entry`
-locate-or-CREATING a "References" heading the first time it runs on a document without one,
-which `remove_bibliography_entry` never removes** (a real, reasonable design choice --
-you would not want a whole section auto-deleted because its last entry was removed). This
-was found live during development-slice testing (`docs/paper-s22-harness-verification-v1.md`'s
-correction section) and reproduces on **100% of 52 applicable K=1 chains across both arms**,
-confirming it is a universal, task-wording-level property, not an arm-specific defect --
-paired significance test: `p=1.0`, `observed_mean_diff=0.0`.
+Paired significance: `observed_mean_diff=+0.038`, `p=1.0` -- statistically indistinguishable;
+both arms near-ceiling. This is the expected, correct shape of a genuine round-trip-fidelity
+result once the real heading-cleanup gap (section 0) was closed -- a **parity** finding, not
+a difference to chase further significance on. The one treatment "failure" out of 26 is a
+single grading edge case, not a repeated pattern.
 
-The steady-state metric (pairs 2 through 4 of the K=4 chains, i.e. every cycle AFTER the
-one-time heading creation) tells the real long-horizon story: **neither arm shows
-compounding drift** with repeated insert+remove cycling, but **treatment is perfectly
-reliable (100%, 26/26) while control has a small, nonzero residual failure rate (94.9%,
-~1-2 of 26)** even once past the known first-cycle side effect. This is descriptive, not a
-formally paired significance-tested claim (the steady-state metric was added after seeing
-the K=4 pattern, per this project's own "record what you see, don't dress it up" rule --
-see section 4.3).
-
-### 2.2 citation
+### 2.2 citation (fixed)
 
 | K | Arm | N | Pass rate (95% CI) |
 |---|---|---:|---|
-| 1 | control | 26 | 96.2% [88.5%, 100%] |
-| 1 | treatment | 26 | 88.5% [76.9%, 100%] |
+| 1 | control | 26 | 100% [100%, 100%] |
+| 1 | treatment | 26 | 96.2% [88.5%, 100%] |
 
-Paired significance: `observed_mean_diff=+0.077` (control minus treatment), `p=0.628` --
-**not statistically significant.** Control nominally edges out treatment here, driven in
-part by one genuine treatment-arm timeout at primary_holdout (`insert_citation`, 300s,
-`composite_same_type__wordc_005...`, reported honestly as a real outcome, not excluded or
-retried) plus one further treatment grading failure. This is an honest null result: at this
-sample size, citation does not show a significant arm difference in either direction.
+Paired significance: `observed_mean_diff=+0.038`, `p=1.0` -- statistically indistinguishable.
+The single remaining treatment "failure" is a genuine process-level timeout on one forward
+call, unrelated to the stale-anchor-id bug that was fixed (confirmed by inspecting that
+specific chain directly). Like bibliography, this is a **parity** result once the harness
+defect was closed, not evidence of a real difference between arms in either direction.
 
-### 2.3 section_reorder
+### 2.3 section_reorder (investigated, honestly does not confirm)
 
-| Phase | Arm | Result |
-|---|---|---|
-| Development (n=2, non-confirmatory) | control | 0/2 pass |
-| Development (n=2, non-confirmatory) | treatment | 2/2 pass |
-| Validation (n=5 applicable) | control | 4/5 pass (80%) |
-| Validation (n=5 applicable) | treatment | 5/5 pass (100%) |
-| Primary holdout (n=6 applicable) | control | 5/6 pass (83.3%) |
-| Primary holdout (n=6 applicable) | treatment | 6/6 pass (100%) |
-| **Combined validation+holdout (confirmatory)** | control | **81.8% [54.5%, 100%], n=11** |
-| **Combined validation+holdout (confirmatory)** | treatment | **100% [100%, 100%], n=11** |
+**Original v1 corpus** (n=11 applicable documents, unaffected by any of the three fixes --
+confirmed directly, zero of 52 v1 section_reorder chains hit the grading whitespace bug):
 
-Paired significance: `observed_mean_diff=-0.182` (control minus treatment, i.e. treatment
-ahead by ~18 points), `p=0.5255` -- **not statistically significant** at this sample size
-(only 11 of 26 documents have >=3 headings and qualify for this family at all; see section
-5). **This is the honest, complete version of a story that looked much more dramatic
-early**: development's tiny n=2 sample showed a stark 2/2-vs-0/2 split that would have been
-tempting to headline. It held up directionally through validation and holdout (treatment
-consistently at or near 100%, control consistently somewhat below), but the WIDE confidence
-interval on control's combined 81.8% (spanning 54.5% to 100%) and the non-significant
-p-value mean this must be reported as a **suggestive, not confirmed, direction** --
-regression toward a more modest (if still real-looking) effect as sample size grew, exactly
-the pattern a well-designed confirmatory follow-up is supposed to reveal and exactly why
-this project's own preregistration discipline exists.
+| Arm | N | Pass rate (95% CI) |
+|---|---:|---|
+| control | 11 | 72.7% [45.5%, 100%] |
+| treatment | 11 | 100% [100%, 100%] |
+
+Paired significance: `p=0.2395` -- directionally favors treatment, not statistically
+significant, wide CI. This is the number that motivated a real follow-up rather than either
+accepting it as confirmed or quietly dropping it.
+
+**Follow-up v2 corpus** (n=48, independently sourced, PII-screened, and content-reviewed --
+`docs/paper-s7-section-reorder-followup-protocol-v1.md`; grading bug from section 0 fixed
+before this result was computed):
+
+| Arm | N | Pass rate (95% CI) |
+|---|---:|---|
+| control | 48 | 75.0% [62.5%, 87.5%] |
+| treatment | 48 | 75.0% [62.5%, 87.5%] |
+
+Paired significance: `observed_mean_diff=0.0`, `p=1.0` -- **exactly tied.**
+
+**Combined v1+v2** (n=59, pooling explicitly disclosed -- the two pools come from different
+source distributions, curated DocOps benchmark tasks vs. real-world scraped documents):
+
+| Arm | N | Pass rate (95% CI) |
+|---|---:|---|
+| control | 59 | 74.6% [62.7%, 84.7%] |
+| treatment | 59 | 79.7% [69.5%, 89.8%] |
+
+Paired significance: `observed_mean_diff=-0.051`, `p=0.5665`.
+
+**Honest conclusion**: the follow-up does not confirm the original corpus's suggestive
+direction. With 5x the paired-document count, the apparent effect nearly vanishes (5 points,
+not 27) and the p-value is nowhere near significant -- actually worse than the original
+underpowered p=0.24. The most defensible reading is that the original n=11 result was a
+small-sample effect that regressed toward parity once real, independently-sourced documents
+were added. Full writeup: `docs/paper-s7-section-reorder-followup-result-v1.md`.
 
 ## 3. What this evidence does and does not support
 
-**Supported**: on this corpus, at this sample size, with this model:
-- Bibliography's inverse pair has a universal, symmetric, one-time structural side effect
-  (both arms), and treatment shows zero further degradation across repeated cycles while
-  control shows a small residual failure rate once past that point (descriptive finding).
-- Citation shows no significant difference between arms.
-- Section_reorder shows a numerically consistent direction favoring treatment across three
-  independent samples (development, validation, holdout) but does not reach statistical
-  significance at n=11 paired documents.
+**Supported**, on these corpora, at this sample size, with this model:
+- Bibliography and citation show no significant difference between arms -- both fixed from
+  real defects (harness and product) to genuine near-ceiling parity.
+- Section_reorder, investigated across two independently-sourced corpora totaling 59 paired
+  documents, shows no statistically significant difference between arms either. The original
+  11-document corpus's suggestive direction did not replicate.
 
 **Not supported by this evidence**:
-- A general claim that Meridian's bounded tools outperform generic editing across ALL task
-  types -- only 3 of 6+ investigated families were tested, and citation shows no
-  significant edge either way.
+- Any claim that Meridian's bounded tools outperform generic editing on these three task
+  families -- none show a significant edge in either direction once real defects are fixed.
+- A general claim across ALL task types -- only 3 of 6+ candidate families were tested.
 - Any claim about caption, cross_reference, table-structural, or tracked-change editing --
   none were run (section 5).
-- A claim of statistical significance for section_reorder -- report the direction and the
-  wide CI, not a confirmed win.
-- Generalization beyond this specific DocOps-derived, 26-document, single-session-per-trial
-  corpus and a K in {1, 4} sweep (K=16 was not run).
+- Generalization beyond these specific corpora and a K in {1, 4} sweep.
+
+This is a materially different bottom line than earlier drafts of this document reported,
+and it is reported here exactly as found: real product/harness bugs were fixed (raising two
+families from misleading or backwards-looking results to genuine parity), and a real,
+good-faith attempt to confirm the one remaining suggestive finding came back null. That is
+the actual evidentiary state of this work.
 
 ## 4. The concurrency-collision incident (a real, disclosed methodological finding)
 
@@ -166,15 +203,10 @@ global temp path.
 `tools/claude_pair_runner.py`'s `run_trial()` now points `TEMP`/`TMP`/`TMPDIR` at a
 trial-unique `scratch/` subdirectory for every subprocess (commit `8d3d291`), so an agent
 that reasonably assumes "the system temp directory" is private to its own process actually
-gets one that is. Checked all four collected slice manifests (development, validation x2,
-the original holdout x2) for the same signature (>5 missing original paragraphs in one
-grading result): **found in exactly one trial, the one described above.** Per the
-protocol's own stopping rule (section 8), the complete primary_holdout slice was re-run in
-full under the corrected harness rather than patched around; the re-run
-(`holdout-k1-rerun-20260831T023817Z` / `holdout-k4-rerun-20260831T033222Z`) showed no
-further instance of this failure signature -- the SAME `docops_v2_l3_008` document, K=4,
-control arm, re-run under the fix, showed only modest, non-catastrophic verdict failures
-(no chain in the re-run lost more than a handful of paragraphs).
+gets one that is. Checked all collected slice manifests for the same signature (>5 missing
+original paragraphs in one grading result): found in exactly one trial, the one described
+above. Per the protocol's own stopping rule, the complete primary_holdout slice was re-run
+in full under the corrected harness rather than patched around.
 
 ### 4.3 Why this belongs in the paper, not just a bugfix log
 
@@ -206,26 +238,32 @@ to this specific collision class.
 ## 6. Explicit, disclosed scope limitations
 
 - 3 of 6+ candidate task families (this document's whole subject).
-- K in {1, 4}, not the full {1, 4, 16} range `docs/paper-s9-long-horizon-benchmark-protocol-v0.md`
-  illustrates -- K=16 explicitly dropped for cost, not silently.
-- A DocOps-derived, 26-document corpus (12 validation + 14 holdout) -- real, licensed,
-  audited, and confirmed unexposed to this project's own pipeline, but not a from-scratch
-  heterogeneous corpus built for this benchmark specifically.
+- K=1 confirmed on both corpora; K=4 depth data is incomplete as of this writing (section 7).
+- Section_reorder's follow-up corpus (48 documents) comes from a different source
+  distribution (real-world scraped documents) than the original 26-document DocOps-derived
+  corpus -- the combined n=59 figure discloses this pooling rather than hiding it.
 - `claude-sonnet-5` only -- no cross-model comparison.
 - Isolation was audited per trial (post-hoc transcript scan) and held throughout, but the
   concurrency-collision incident (section 4) shows a DIFFERENT kind of cross-trial
   interference than the control-reaching-Meridian violation the isolation audit itself
-  checks for -- worth a dedicated audit dimension in a future run.
-- The steady-state (pairs 2-4) metric was defined after observing the K=4 data pattern; it
-  is reported descriptively, not as a preregistered, formally significance-tested claim.
+  checks for.
+- Three real defects (sections 0, 2.3, and the PII scanner correction in
+  `docs/paper-s6-organic-omml-round2-3-result-v1.md`) were found DURING this project's own
+  analysis of its own results, not by external review -- disclosed in full per this
+  project's standing "never quietly patch around a surprising result" discipline, but a
+  reader should weigh that these are the defects THIS team happened to notice, not a claim
+  that no further defects exist.
 
 ## 7. Recommended next steps (not run here)
 
+- **K=4 depth study** (bibliography/citation/section_reorder degradation over repeated
+  cycles) is in progress but has been interrupted twice by real shared-host resource
+  contention (confirmed via `Win32_Process`/`Win32_OperatingSystem` inspection: Windows
+  `STATUS_DLL_INIT_FAILED` process-launch failures under <10GB free RAM with 65+ concurrent
+  python/node/claude processes from other work on the same machine) -- not a harness or
+  product defect. Currently retrying at reduced concurrency (`--max-workers 1`).
 - Re-run caption after either reducing host contention or raising its render timeout.
 - Add cross_reference now that `remove_cross_reference` is merged.
-- A from-scratch heterogeneous corpus, sized for adequate power on section_reorder
-  specifically (n=11 applicable documents was the binding constraint on that family's CI
-  width this run).
 - K=16 depth, cost permitting.
 - A dedicated cross-trial-interference audit dimension (distinct from the existing
   control-reaches-Meridian isolation check) given section 4's finding.
