@@ -60,8 +60,11 @@ number in this document.
 - **Families**: bibliography, citation, section_reorder (3 of 6+ candidate families
   investigated -- section 5).
 - **K-pair sweep**: breadth pass at K=1 across all 3 families on both corpora; a depth
-  sub-study at K=4 (bibliography, citation, section_reorder) is in progress, delayed by
-  repeated real infrastructure interruptions on a shared host -- see section 7.
+  sub-study at K=4 (bibliography, citation, section_reorder) on the original v1 corpus,
+  section 2.4 -- delayed by repeated real infrastructure interruptions on a shared host
+  (three separate crashes; see section 7 and `tools/run_paper_s7_benchmark.py`'s new
+  checkpoint/resume support, added mid-collection specifically because of this) but now
+  complete.
 - **Model**: `claude-sonnet-5` (`--model sonnet`) throughout.
 - **Arms**: control (generic Read/Write/Edit/Bash, zero Meridian MCP access) vs. treatment
   (exactly one Meridian bounded write-primitive pair per family, zero generic editing tools)
@@ -140,6 +143,40 @@ not 27) and the p-value is nowhere near significant -- actually worse than the o
 underpowered p=0.24. The most defensible reading is that the original n=11 result was a
 small-sample effect that regressed toward parity once real, independently-sourced documents
 were added. Full writeup: `docs/paper-s7-section-reorder-followup-result-v1.md`.
+
+### 2.4 Depth sub-study: K=4, repeated edit cycles (original v1 corpus only)
+
+Complete as of 2026-09-02, after three real infrastructure interruptions (a session
+disconnect, shared-host resource contention, and a full computer crash) that motivated
+adding checkpoint/resume support to `run_chain` mid-collection (commit `deb2e90`) --
+each chain now writes an atomic result file and a re-run skips anything already
+genuinely finished, rather than losing hours of prior work to redo it. This sub-study was
+run only against the original 26-document v1 corpus, per the locked protocol's own
+disclosed cost-driven scope (section 5 of `docs/paper-s7-protocol-v1.md`); it was not run
+against the 48-document section_reorder follow-up corpus.
+
+| Family | K | Arm | N | Whole-chain pass rate (95% CI) | Steady-state pairs 2-4 (95% CI) |
+|---|---|---|---:|---|---|
+| Bibliography | 4 | control | 26 | 100% [100%, 100%] | 100% [100%, 100%] |
+| Bibliography | 4 | treatment | 26 | 100% [100%, 100%] | 100% [100%, 100%] |
+| Citation | 4 | control | 26 | 96.2% [88.5%, 100%] | 98.7% [96.2%, 100%] |
+| Citation | 4 | treatment | 26 | 96.2% [88.5%, 100%] | 98.1% [94.2%, 100%] |
+| Section reorder | 4 | control | 11 | 63.6% [36.4%, 90.9%] | 90.9% [81.8%, 100%] |
+| Section reorder | 4 | treatment | 11 | 100% [100%, 100%] | 100% [100%, 100%] |
+
+Paired significance (whole chain): bibliography `p=1.0`, citation `p=1.0`, section_reorder
+`p=0.119`.
+
+Bibliography and citation both hold their K=1 parity finding under repeated cycling --
+neither arm shows compounding drift across 4 consecutive edit cycles, and citation's
+steady-state numbers (excluding the first pair) are essentially perfect for both arms.
+Section_reorder's K=4 whole-chain gap (63.6% vs 100%) is numerically larger than its K=1
+result and closer to conventional significance (p=0.119 vs p=0.24) -- but this is still the
+same n=11 original corpus, not the properly-powered 59-document combined sample from
+section 2.3. It does not override that null result; it is additional, honestly-reported
+descriptive evidence about repeated-cycle behavior specifically, at a sample size too small
+to draw a confirmatory conclusion from on its own. The steady-state figures (90.9% vs 100%)
+suggest most of the gap concentrates in the first cycle rather than compounding further.
 
 ## 3. What this evidence does and does not support
 
@@ -238,7 +275,8 @@ to this specific collision class.
 ## 6. Explicit, disclosed scope limitations
 
 - 3 of 6+ candidate task families (this document's whole subject).
-- K=1 confirmed on both corpora; K=4 depth data is incomplete as of this writing (section 7).
+- K=1 confirmed on both corpora; K=4 depth data (section 2.4) is complete but only against
+  the original v1 corpus, not the section_reorder follow-up -- see section 7.
 - Section_reorder's follow-up corpus (48 documents) comes from a different source
   distribution (real-world scraped documents) than the original 26-document DocOps-derived
   corpus -- the combined n=59 figure discloses this pooling rather than hiding it.
@@ -256,12 +294,15 @@ to this specific collision class.
 
 ## 7. Recommended next steps (not run here)
 
-- **K=4 depth study** (bibliography/citation/section_reorder degradation over repeated
-  cycles) is in progress but has been interrupted twice by real shared-host resource
-  contention (confirmed via `Win32_Process`/`Win32_OperatingSystem` inspection: Windows
-  `STATUS_DLL_INIT_FAILED` process-launch failures under <10GB free RAM with 65+ concurrent
-  python/node/claude processes from other work on the same machine) -- not a harness or
-  product defect. Currently retrying at reduced concurrency (`--max-workers 1`).
+- **K=4 depth study is complete** (section 2.4) -- it took three interruptions to collect
+  (a session disconnect, `STATUS_DLL_INIT_FAILED` process-launch failures under real
+  shared-host resource contention, and a full computer crash; none a harness or product
+  defect), which is exactly what motivated adding checkpoint/resume support to the harness
+  itself mid-collection rather than continuing to manually audit and restart.
+- Run section_reorder's K=4 depth study against the 48-document follow-up corpus too, now
+  that checkpointing makes a multi-hour run far cheaper to sustain -- would give a properly
+  powered read on whether section_reorder's K=4 gap (section 2.4) is real or, like its K=1
+  counterpart, regresses toward parity with more data.
 - Re-run caption after either reducing host contention or raising its render timeout.
 - Add cross_reference now that `remove_cross_reference` is merged.
 - K=16 depth, cost permitting.
