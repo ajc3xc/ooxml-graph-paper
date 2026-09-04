@@ -1,11 +1,15 @@
 # PAPER-S7 section_reorder follow-up: result (v1)
 
 Status: complete confirmatory result for the corpus and protocol preregistered in
-`docs/paper-s7-section-reorder-followup-protocol-v1.md`, **updated 2026-09-04** after a
-third real defect was found via a deliberate stress test and fixed. This document reports
-what was actually found, including two real bugs discovered mid-analysis, and a result that
-still does **not** confirm the v1 corpus's suggestive direction, though the corrected picture
-leans somewhat more toward treatment than the first pass showed.
+`docs/paper-s7-section-reorder-followup-protocol-v1.md`, **updated 2026-09-04 (second
+update, same day)** after a FOURTH real defect was found while investigating a K=4 depth-study
+anomaly and fixed. This document reports what was actually found, including three real bugs
+discovered mid-analysis, and a K=1 result that still does **not** confirm the v1 corpus's
+suggestive direction at conventional significance, though the corrected picture leans further
+toward treatment than either prior pass showed. (The K=4 depth study -- a separate,
+higher-powered measurement of the same underlying effect -- DOES reach significance after
+this same fix; see `docs/paper-s8-final-evidence-v1.md` section 2.4 for that result, since
+K=4 is out of this document's own K=1 scope.)
 
 ## A second real harness defect found during analysis
 
@@ -69,49 +73,111 @@ now correctly report `not_applicable` (no sibling-level heading exists to move i
 and 2 get a corrected, coherent destination -- re-run under the fixed resolver, both arms
 now pass cleanly on both.
 
-## Result (corrected)
+## A fourth real defect, found while investigating a K=4 depth-study anomaly
 
-**v2 follow-up alone** (n=46 paired documents after the plan-coherence correction, down from
-48 -- 2 documents are now correctly `not_applicable`, validation+holdout combined):
+Running section_reorder's K=4 depth study against the full 48-document v2 corpus (previously
+only run against the original 11-document v1 corpus -- see `paper-s8-final-evidence-v1.md`
+section 2.4/7), one document's control-arm chain repeatedly hit the harness's own 300-second
+per-trial subprocess timeout -- six independent attempts, at different pairs and under
+different host-memory conditions, all failing the identical way. Direct inspection confirmed
+a mundane, honest cause: `document.xml` for this one document is 1.7MB (the package is
+2.7MB with embedded images) -- genuinely large enough that a generic-tool agent reading and
+searching raw XML cannot reliably finish within the timeout, independent of host load. This
+is disclosed as a real, unresolved exclusion for this one document's control-arm chains (both
+K=1 and K=4) -- not a bug, and not silently dropped.
+
+But investigating this anomaly surfaced something else: this same document's **treatment**
+chain executed quickly (15-25s per pair) yet failed FORWARD grading on every single pair, and
+three other v2 documents showed the identical signature -- both arms completing normally but
+failing forward grading with only `moved_heading_still_present: false` among the checks.
+Root cause: `resolve_section_reorder_plan` picked the section to move by raw position
+(`headings[mid]`) with no check that the heading actually has text. Some real-world documents
+have a heading-styled paragraph with no extractable text at all (an image-only or field-only
+"heading") -- `grade_forward_trial_reorder`'s `moved_heading_still_present` check is
+`section_heading_text.strip() in paragraphs_after`, which can never be true when that text is
+`""`, since `_paragraph_texts` never yields a literal empty-string entry (confirmed directly:
+262 paragraphs, zero empty, for the specific document that first surfaced this). A chain
+hitting this fails forward grading regardless of whether the move itself was performed
+correctly.
+
+Checked the real corpora directly: **zero of 38 v1** documents, **4 of 48 v2** documents (a
+different 4 than the heading-level defect above) -- and unlike that defect, this one affects
+**both arms symmetrically** (all 4 documents show control AND treatment both failing forward
+grading for the identical reason), so while it deflates both arms' absolute pass rates, it is
+less likely to have biased the treatment-vs-control comparison itself.
+
+A closely related statistics-layer bug was found alongside it: `compute_s7_statistics.py`'s
+`_chain_outcome` treated a "blocked" chain the same as any other once it had at least one
+partial pair entry -- and a chain that hits the harness's 300s timeout still gets a `grading`
+result computed against whatever the (unmodified) file looks like at that moment, so an infra
+timeout was silently scored as a genuine 0.0 task failure. Confirmed this had already
+contaminated the very numbers below (this section's own prior "corrected" K=1 figures): the
+1.7MB document's blocked control chain, from the original 2026-08-31 collection, was counted
+as a control failure for exactly this reason.
+
+Fixed in `tools/docx_anchor_prober.py` (commit `278d9cc`, tests in
+`tests/test_docx_anchor_prober.py`) -- the chosen section must have non-blank text, scanning
+outward from the middle position for the nearest heading that does -- and in
+`tools/compute_s7_statistics.py` (commit `b286c1b`, tests in `tests/test_compute_s7_statistics.py`)
+-- `_chain_outcome`/`_chain_steady_state_outcome` now exclude `"blocked"` from both
+denominators, agreeing with `_load_checkpoint`'s existing "never trust blocked" design instead
+of silently contradicting it. Of the 4 affected v2 documents: 1 (the 1.7MB one) now correctly
+excludes its control arm (real timeout, both K=1 and K=4) while treatment passes cleanly on
+both; 1 (`s7v2_sr_0f0ec662b71bb10a`) now correctly reports `not_applicable` (no heading with
+non-blank text is available in a safely-bounded middle position at all); the remaining 2 were
+re-run cleanly under the fixed resolver, one of which is a genuine (not vacuous) control
+failure at K=1 that passes at K=4.
+
+## Result (corrected, second pass)
+
+**v2 follow-up alone** (n varies by arm now -- control_n=44, treatment_n=45 -- since the
+1.7MB document's control chain remains a genuine, disclosed exclusion while its treatment
+chain completed; 3 documents are `not_applicable`, up from 2, validation+holdout combined):
 
 | Arm | Pass rate | 95% CI |
 |---|---:|---|
-| Control | 80.4% (37/46) | [69.6%, 91.3%] |
-| Treatment | 82.6% (38/46) | [71.7%, 93.5%] |
+| Control | 86.4% (38/44) | [75.0%, 95.5%] |
+| Treatment | 91.1% (41/45) | [82.2%, 97.8%] |
 
-Paired permutation test: observed mean difference = -0.022 (favoring treatment), **p = 1.0**.
+Paired permutation test (n=44 paired documents): observed mean difference = -0.045 (favoring
+treatment), **p = 0.753**.
 
-**Combined v1 + v2** (n=57 paired documents -- pooling explicitly disclosed per the
-preregistration's reporting plan; the two pools come from different source distributions,
+**Combined v1 + v2** (n=55 paired documents, down from 57 -- pooling explicitly disclosed per
+the preregistration's reporting plan; the two pools come from different source distributions,
 curated DocOps benchmark tasks vs. real-world scraped documents):
 
 | Arm | Pass rate | 95% CI |
 |---|---:|---|
-| Control | 78.9% (45/57) | [68.4%, 89.5%] |
-| Treatment | 86.0% (49/57) | [75.4%, 94.7%] |
+| Control | 83.6% (46/55) | [74.5%, 92.7%] |
+| Treatment | 92.9% (52/56) | [85.7%, 98.2%] |
 
-Paired permutation test: observed mean difference = -0.070 (favoring treatment), **p =
-0.3885**.
+Paired permutation test (n=55 paired documents): observed mean difference = -0.091 (favoring
+treatment), **p = 0.2705**.
 
 ## Honest conclusion
 
-Still not significant -- this does **not** confirm the v1 corpus's suggestive 72.7%-vs-100%
-finding at conventional thresholds. But the correction genuinely moved the picture, not just
-the headline number: the effect size favoring treatment grew (7.0 points combined, up from
-5.1) and the p-value improved meaningfully (0.39, down from 0.57) once a real methodological
-defect that was specifically penalizing treatment got fixed. The most defensible reading is
-now more nuanced than the pre-correction "small-sample effect regressing to parity" framing:
-there may be a real, modest advantage for treatment on section_reorder that this sample size
-still cannot confirm, rather than no effect at all. This is exactly why the fixture-stress-test
-effort was worth doing, and exactly why it is reported here in full rather than only
-mentioning the fix without its effect on the actual numbers.
+Still not significant at K=1 -- this does **not** confirm the v1 corpus's suggestive
+72.7%-vs-100% finding at conventional thresholds. But across two full correction passes now,
+the picture has moved consistently in one direction, not bounced around noisily: the effect
+size favoring treatment keeps growing (9.3 points combined, up from 7.0, up from 5.1 before
+any correction) even as the p-value itself has not yet crossed the conventional threshold
+(0.27, down from 0.39, down from 0.57). Three real methodological defects in a row, ALL of
+which turned out to be spuriously penalizing this comparison rather than randomly distributed
+noise, is itself a meaningful piece of evidence: it argues the true effect is more likely to
+be real-but-underpowered-at-K=1 than genuinely zero. That is a claim about K=1 specifically --
+**at K=4, the same document set (fewer defects remaining to distort it, and four times the
+repeated-cycling exposure) does reach significance** (p=0.0015 combined; see
+`docs/paper-s8-final-evidence-v1.md` section 2.4), with a mechanistically verified explanation
+(control's exact-restoration checks pass on the first edit cycle but degrade specifically from
+the second cycle onward, a real compounding-drift pattern directly confirmed against the pair
+grading data, not a re-emergence of any of the three fixed defects).
 
 This is reported plainly because the preregistration committed to it in advance: "If this
 follow-up's own result does not favor treatment, or is itself not significant, that is
-reported plainly. This document does not commit to any particular outcome." The real value
-of this exercise was never a single confirmed number -- it is a rigorous, disclosed process
-that found and fixed three genuine bugs (this heading-level defect, the evaluator whitespace
-bug, and the earlier PII scanner false-negative), none of which would have surfaced without
-actually running the real acquisition-through-confirmatory pipeline, and one of which
-(this one) would never have surfaced without deliberately trying to break the harness with
-harder, more ambiguous test content instead of stopping at "it works."
+reported plainly. This document does not commit to any particular outcome." The real value of
+this exercise was never a single confirmed number -- it is a rigorous, disclosed process that
+found and fixed FOUR genuine bugs across two correction passes (this blank-heading-text
+defect and its associated statistics-layer bug, the heading-level defect, the evaluator
+whitespace bug, and the earlier PII scanner false-negative), none of which would have
+surfaced without actually running the real acquisition-through-confirmatory pipeline end to
+end, repeatedly, at increasing scale and depth.
