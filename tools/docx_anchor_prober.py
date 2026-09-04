@@ -119,7 +119,40 @@ def resolve_section_reorder_plan(docx_path: Path) -> dict[str, Any]:
     restore position against; not the last, so there is room to move it
     forward) plus the destination anchors needed for both directions of a
     move_section round trip -- entirely harness-side, mirroring
-    resolve_body_anchor's role for the other families."""
+    resolve_body_anchor's role for the other families.
+
+    Found live (2026-09-03), via a hand-authored adversarial fixture, then
+    confirmed against the real corpus: the original version picked
+    headings[mid-1]/headings[mid]/headings[mid+1] from a FLAT heading list
+    with no awareness of heading LEVEL. On any document with nested
+    headings (a Heading1 section containing its own Heading2 subheadings),
+    the immediately-following heading in document order is very often a
+    CHILD of the just-chosen section, not an independent sibling -- e.g.
+    chosen="Application Process" (level 1), "following" picked as "Guidance
+    on Completing a CV Application" (level 2, a subheading OF Application
+    Process itself). The resulting plan is logically incoherent: "move this
+    section to appear after a heading that is part of the section being
+    moved." move_section correctly (and defensibly) treats this as a no-op
+    -- the destination is already inside the source range -- while a
+    control-arm agent given the same instruction in prose often produces
+    SOME reordering that happens to satisfy the grader's loose checks
+    (same multiset, order changed, heading still present) despite the
+    underlying instruction being nonsensical. This does not measure either
+    arm's real section-reordering capability; it spuriously penalizes
+    treatment specifically, since move_section's no-op is graded as
+    order_actually_changed=False while control's arbitrary response often
+    isn't. Confirmed present in 4 of 48 documents in the v2 section_reorder
+    follow-up corpus (docs/paper-s7-section-reorder-followup-result-v1.md's
+    own correction section has the full audit and re-run).
+
+    Fixed by requiring `following` to be at the SAME level as `chosen` (a
+    genuine sibling section boundary), scanning forward past any deeper
+    (child) headings rather than blindly taking the next one in document
+    order. `preceding` is left as-is (headings[mid-1]): it is always
+    RESTORED TO, never moved into, so an incoherent preceding pick cannot
+    make the forward move itself incoherent the way an incoherent
+    following pick does -- see the correction doc for why only the
+    following side needed this."""
     docs_intel = _import_docs_intel()
     outline = docs_intel.document_outline(str(docx_path))
     headings = outline.get("headings") or []
@@ -132,10 +165,16 @@ def resolve_section_reorder_plan(docx_path: Path) -> dict[str, Any]:
     mid = len(headings) // 2
     chosen = headings[mid]
     preceding = headings[mid - 1]
-    following_index = mid + 1
-    if following_index >= len(headings):
-        return {"found": False, "reason": "no heading available after the chosen section to move into"}
-    following = headings[following_index]
+    chosen_level = chosen.get("level")
+
+    following = None
+    for candidate in headings[mid + 1:]:
+        candidate_level = candidate.get("level")
+        if chosen_level is None or candidate_level is None or candidate_level <= chosen_level:
+            following = candidate
+            break
+    if following is None:
+        return {"found": False, "reason": "no sibling-level heading available after the chosen section to move into"}
 
     return {
         "found": True,
