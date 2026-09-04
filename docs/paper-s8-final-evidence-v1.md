@@ -1,9 +1,11 @@
 # PAPER-S8: PAPER-S7 final evidence and limitations package (v1)
 
 Status: the real, executed result of `docs/paper-s7-protocol-v1.md`'s locked confirmatory
-design, **updated 2026-09-02 after two real harness/evaluator defects were found, fixed, and
-disclosed**, plus a separately preregistered section_reorder follow-up
-(`docs/paper-s7-section-reorder-followup-protocol-v1.md`). Every number below comes from an
+design, **updated 2026-09-04 after four real harness/evaluator defects were found, fixed, and
+disclosed** (the fourth via a deliberate stress test using hand-authored adversarial
+fixtures, not organic corpus data), plus a separately preregistered section_reorder
+follow-up (`docs/paper-s7-section-reorder-followup-protocol-v1.md`) and a 4th task family,
+equation (section 2.5). Every number below comes from an
 actual `claude` CLI run against real documents, graded by `tools/docx_trial_evaluator.py`
 entirely outside the agent, aggregated by `tools/compute_s7_statistics.py` using
 `tools/graph_scorer.py`'s existing bootstrap/permutation functions unmodified. This is
@@ -44,7 +46,20 @@ each disclosed in full rather than quietly patched around:
    follow-up's real, corrected result is section 2.3's most important finding: **it does not
    confirm the original corpus's suggestive direction.**
 
-A fourth defect (a false-negative in `tools/pii_pattern_scan.py`, the tool used to screen
+4. **A second, distinct section_reorder defect** surfaced by deliberately building
+   hand-authored adversarial fixtures to probe genuine structural ambiguity, rather than
+   waiting for organic corpus data to happen to hit it: `resolve_section_reorder_plan`
+   picked its destination heading with no awareness of heading level, so on documents with
+   nested Heading1/Heading2 structure it could pick a heading that is itself a CHILD of the
+   section being moved -- a logically incoherent "move this section to appear after part of
+   itself." `move_section` correctly no-ops on this; the grader read that as a **treatment**
+   failure while control's arbitrary response to the same nonsense instruction often passed
+   anyway. Confirmed in 4 of 48 v2 documents, zero in v1. Fixed (`8c7ae16`); the 2 documents
+   with a genuinely corrected plan were re-run and now pass on both arms. Result: section
+   2.3's combined figure improves from p=0.57 to **p=0.39** -- still not significant, but a
+   meaningfully different picture than before the fix.
+
+A fifth defect (a false-negative in `tools/pii_pattern_scan.py`, the tool used to screen
 acquired documents for personal data before promoting them into any corpus) was also found
 and fixed during this work; see `docs/paper-s6-organic-omml-round2-3-result-v1.md`'s
 correction section for that one's full writeup -- it affects acquisition safety, not any
@@ -116,33 +131,53 @@ Paired significance: `p=0.2395` -- directionally favors treatment, not statistic
 significant, wide CI. This is the number that motivated a real follow-up rather than either
 accepting it as confirmed or quietly dropping it.
 
-**Follow-up v2 corpus** (n=48, independently sourced, PII-screened, and content-reviewed --
-`docs/paper-s7-section-reorder-followup-protocol-v1.md`; grading bug from section 0 fixed
-before this result was computed):
+**Follow-up v2 corpus** (n=46 after a second correction below, independently sourced,
+PII-screened, and content-reviewed -- `docs/paper-s7-section-reorder-followup-protocol-v1.md`;
+grading bug from section 0 fixed before this result was computed):
 
 | Arm | N | Pass rate (95% CI) |
 |---|---:|---|
-| control | 48 | 75.0% [62.5%, 87.5%] |
-| treatment | 48 | 75.0% [62.5%, 87.5%] |
+| control | 46 | 80.4% [69.6%, 91.3%] |
+| treatment | 46 | 82.6% [71.7%, 93.5%] |
 
-Paired significance: `observed_mean_diff=0.0`, `p=1.0` -- **exactly tied.**
+Paired significance: `observed_mean_diff=-0.022` (favoring treatment), `p=1.0`.
 
-**Combined v1+v2** (n=59, pooling explicitly disclosed -- the two pools come from different
+**Combined v1+v2** (n=57, pooling explicitly disclosed -- the two pools come from different
 source distributions, curated DocOps benchmark tasks vs. real-world scraped documents):
 
 | Arm | N | Pass rate (95% CI) |
 |---|---:|---|
-| control | 59 | 74.6% [62.7%, 84.7%] |
-| treatment | 59 | 79.7% [69.5%, 89.8%] |
+| control | 57 | 78.9% [68.4%, 89.5%] |
+| treatment | 57 | 86.0% [75.4%, 94.7%] |
 
-Paired significance: `observed_mean_diff=-0.051`, `p=0.5665`.
+Paired significance: `observed_mean_diff=-0.070`, `p=0.3885`.
 
-**Honest conclusion**: the follow-up does not confirm the original corpus's suggestive
-direction. With 5x the paired-document count, the apparent effect nearly vanishes (5 points,
-not 27) and the p-value is nowhere near significant -- actually worse than the original
-underpowered p=0.24. The most defensible reading is that the original n=11 result was a
-small-sample effect that regressed toward parity once real, independently-sourced documents
-were added. Full writeup: `docs/paper-s7-section-reorder-followup-result-v1.md`.
+**A second correction, found by deliberately trying to break the harness (2026-09-04)**:
+three hand-authored fixtures were built to probe genuine structural ambiguity (not part of
+the confirmatory corpus). One -- duplicate heading text across two subsections -- exposed
+that `resolve_section_reorder_plan` picked its destination heading with no awareness of
+heading LEVEL, so on documents with nested Heading1/Heading2 structure it could pick a
+Heading2 that is itself a CHILD of the section being moved: a logically incoherent "move
+this section to appear after part of itself." `move_section` correctly no-ops on this
+(destination already inside the source range); that graded as a spurious **treatment**
+failure while control's arbitrary response to the same nonsensical instruction often
+satisfied the grader's loose checks anyway. Confirmed present in 4 of 48 v2 documents (zero
+in v1). Fixed (`docx_anchor_prober.py` commit `8c7ae16`): the destination must now be a
+genuine sibling heading. 2 of the 4 affected documents now correctly report
+`not_applicable`; the other 2 were re-run under the corrected resolver and now pass cleanly
+on both arms. The numbers above already reflect this correction -- see
+`docs/paper-s7-section-reorder-followup-result-v1.md` for the pre-correction figures and
+full audit.
+
+**Honest conclusion**: still not significant at conventional thresholds, but the corrected
+picture is more nuanced than "no effect." The effect size favoring treatment grew (7.0
+points combined, up from 5.1 pre-correction) and the p-value improved meaningfully (0.39,
+down from 0.57) once a defect that specifically penalized treatment was fixed. This does
+not confirm the original 11-document corpus's suggestive 72.7%-vs-100% direction at n=11 --
+that gap was still driven by small-sample variance, not a large real effect -- but it no
+longer supports "small-sample fluke, true effect is zero" as confidently as the
+pre-correction number did. A larger follow-up remains the honest way to settle this either
+way. Full writeup: `docs/paper-s7-section-reorder-followup-result-v1.md`.
 
 ### 2.4 Depth sub-study: K=4, repeated edit cycles (original v1 corpus only)
 
@@ -183,9 +218,12 @@ suggest most of the gap concentrates in the first cycle rather than compounding 
 **Supported**, on these corpora, at this sample size, with this model:
 - Bibliography and citation show no significant difference between arms -- both fixed from
   real defects (harness and product) to genuine near-ceiling parity.
-- Section_reorder, investigated across two independently-sourced corpora totaling 59 paired
-  documents, shows no statistically significant difference between arms either. The original
-  11-document corpus's suggestive direction did not replicate.
+- Section_reorder, investigated across two independently-sourced corpora totaling 57 paired
+  documents (after correcting a real plan-coherence defect, section 2.3), shows a direction
+  favoring treatment (86.0% vs 78.9%) that is not statistically significant at this sample
+  size (p=0.39). The original 11-document corpus's much larger suggestive gap did not
+  replicate, but the corrected combined result no longer reads as a clean small-sample fluke
+  either -- a genuinely open question, not a settled null.
 
 **Not supported by this evidence**:
 - Any claim that Meridian's bounded tools outperform generic editing on these three task
