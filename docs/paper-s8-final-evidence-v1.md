@@ -1,9 +1,9 @@
 # PAPER-S8: PAPER-S7 final evidence and limitations package (v1)
 
 Status: the real, executed result of `docs/paper-s7-protocol-v1.md`'s locked confirmatory
-design, **updated 2026-09-04 after four real harness/evaluator defects were found, fixed, and
-disclosed** (the fourth via a deliberate stress test using hand-authored adversarial
-fixtures, not organic corpus data), plus a separately preregistered section_reorder
+design, **updated 2026-09-04 after five real product/harness/evaluator defects were found,
+fixed, and disclosed** (the fourth and fifth via a deliberate stress test using hand-authored
+adversarial fixtures, not organic corpus data), plus a separately preregistered section_reorder
 follow-up (`docs/paper-s7-section-reorder-followup-protocol-v1.md`) and a 4th task family,
 equation (section 2.5). Every number below comes from an
 actual `claude` CLI run against real documents, graded by `tools/docx_trial_evaluator.py`
@@ -59,7 +59,21 @@ each disclosed in full rather than quietly patched around:
    2.3's combined figure improves from p=0.57 to **p=0.39** -- still not significant, but a
    meaningfully different picture than before the fix.
 
-A fifth defect (a false-negative in `tools/pii_pattern_scan.py`, the tool used to screen
+5. **Bibliography's alphabetical-insertion gap**, surfaced by the same hand-authored
+   adversarial fixture stress test as defect 4: `insert_bibliography_entry` always appended a
+   new entry at the end of the References block regardless of author surname, while a
+   generic-tool control agent given the identical "insert between Adams and Zimmerman" task
+   correctly reasoned its way to the right alphabetical position
+   (`docs/paper-s7-hard-fixtures-stress-test-v1.md`). Originally reported only as a
+   documented, deliberately-unfixed product-design question -- on reflection this wasn't
+   actually ambiguous: APA's own alphabetical-ordering convention is unambiguous, and every
+   existing entry's own formatted text already carries the correct sort key
+   (`format_apa_reference` always emits `"{author} ({year}). {title}."`, so comparing that
+   text directly against each existing entry both places new entries correctly and naturally
+   tie-breaks same-author entries by year). Fixed upstream (parent repo commit `4c7569de`,
+   new `_alphabetical_insert_pos` helper).
+
+A sixth defect (a false-negative in `tools/pii_pattern_scan.py`, the tool used to screen
 acquired documents for personal data before promoting them into any corpus) was also found
 and fixed during this work; see `docs/paper-s6-organic-omml-round2-3-result-v1.md`'s
 correction section for that one's full writeup -- it affects acquisition safety, not any
@@ -351,11 +365,9 @@ to this specific collision class.
   `remove_cross_reference`, was implemented, tested, and merged to the parent repo's `dev`
   branch, commit `a89dd999`, and is otherwise ready).
 - **table-structural**: no whole-table create/remove primitive exists at any level;
-  `insert_column`/`split_cell` have zero inverse of any kind. Also worth noting alongside
-  this: a deliberate stress test (`docs/paper-s7-hard-fixtures-stress-test-v1.md`) found that
-  even where a table-adjacent primitive DOES exist (`insert_bibliography_entry`), it has a
-  real, undocumented limitation -- it always appends rather than inserting in the correct
-  position, a gap a capable generic-tool agent did not have.
+  `insert_column`/`split_cell` have zero inverse of any kind. (A related, now-fixed
+  limitation was found on a table-adjacent primitive, `insert_bibliography_entry`, which
+  always appended rather than inserting alphabetically -- section 0 defect 5.)
 - **tracked-change**: `insert_tracked_paragraph` exists as library code but is not
   registered as an MCP tool, and no accept/reject/deletion-tracking primitive exists at all.
 
@@ -374,16 +386,18 @@ to this specific collision class.
   concurrency-collision incident (section 4) shows a DIFFERENT kind of cross-trial
   interference than the control-reaching-Meridian violation the isolation audit itself
   checks for.
-- Five real defects (sections 0 and 2.3, plus the PII scanner correction in
+- Seven real defects (sections 0 and 2.3/2.5, plus the PII scanner correction in
   `docs/paper-s6-organic-omml-round2-3-result-v1.md`) were found DURING this project's own
   analysis of its own results, not by external review -- disclosed in full per this
   project's standing "never quietly patch around a surprising result" discipline, but a
   reader should weigh that these are the defects THIS team happened to notice, not a claim
-  that no further defects exist. Two of the five (section 2.3's second correction, and the
-  malformed-XML grading crash) were found only because of a deliberate effort to break the
-  harness with hand-authored adversarial content -- an argument for more of that kind of
-  testing, not less, since it demonstrably found real, previously-invisible problems that
-  organic corpus data had not yet happened to trigger.
+  that no further defects exist. Two of the seven (section 2.3's second correction, and the
+  bibliography alphabetization gap) were found only because of a deliberate effort to break
+  the harness with hand-authored adversarial content; a further one (the malformed-XML/
+  missing-file grading crash) was found via a different deliberate stress test -- equation's
+  harder, hand-constructed control-arm task. Three defects surfaced by deliberately adversarial
+  testing rather than organic corpus data is an argument for more of that kind of testing, not
+  less.
 
 ## 7. Recommended next steps (not run here)
 
@@ -392,21 +406,23 @@ to this specific collision class.
   shared-host resource contention, and a full computer crash; none a harness or product
   defect), which is exactly what motivated adding checkpoint/resume support to the harness
   itself mid-collection rather than continuing to manually audit and restart.
-- Run section_reorder's K=4 depth study against the 48-document follow-up corpus too, now
-  that checkpointing makes a multi-hour run far cheaper to sustain -- would give a properly
-  powered read on whether section_reorder's K=4 gap (section 2.4) is real or, like its K=1
-  counterpart, regresses toward parity with more data.
+- Section_reorder's K=4 depth study against the 48-document v2 follow-up corpus **is in
+  progress** (started 2026-09-04, `primary_holdout` split, checkpointed/resumable --
+  `E:\MeridianData\ooxml-graph-paper\runs\paper-s7-v2-section-reorder\holdout-k4-*\`; the
+  smaller `validation` split queued to run after) -- would give a properly powered read on
+  whether section_reorder's K=4 gap (section 2.4) is real or, like its K=1 counterpart,
+  regresses toward parity with more data. Not yet complete as of this writing.
 - Run equation to confirmatory scale on a less-loaded host, or after the render-verification
   gate's own timeout/retry behavior is revisited upstream -- the family is implemented,
   tested, and functionally verified correct; only host-level render throughput blocks it here.
 - Re-run caption for the same reason -- both share the identical root cause (section 2.5).
 - Add cross_reference once caption's render-timeout handling is resolved (it depends on
   captions existing, section 5).
-- Design and implement correct-position insertion for `insert_bibliography_entry` (currently
-  always appends -- `docs/paper-s7-hard-fixtures-stress-test-v1.md`'s finding). A real
-  product design decision (sort key, locale-aware collation, numbered vs. alphabetical
-  conventions), not a quick bug fix -- deserves deliberate scoping, not a guess bundled into
-  a benchmark session.
+- ~~Design and implement correct-position insertion for `insert_bibliography_entry`~~ --
+  done (section 0 defect 5, parent repo commit `4c7569de`). On reflection the "real product
+  design decision" framing this item originally carried was overcautious: APA alphabetical
+  order is the unambiguous, universally expected convention for a References list, not a
+  genuinely open design question needing separate input.
 - More hand-authored adversarial fixtures targeting other families and ambiguity classes,
   given how directly this approach paid off this round (`docs/paper-s7-hard-fixtures-stress-test-v1.md`).
 - K=16 depth, cost permitting.

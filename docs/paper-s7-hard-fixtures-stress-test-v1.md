@@ -42,7 +42,7 @@ This is the headline finding from this exercise: a hand-authored fixture built p
 probe an interesting edge case surfaced a real defect that had been silently degrading
 already-published confirmatory results.
 
-### A real, undiscovered product limitation (documented, not fixed here)
+### A real, previously-undiscovered product limitation (found, and now fixed)
 
 Fixture 2 (bibliography alphabetization) produced a clean, striking result:
 
@@ -51,18 +51,28 @@ Fixture 2 (bibliography alphabetization) produced a clean, striking result:
 | Control (generic tools) | Correctly inserted the new entry alphabetically between "Adams" and "Zimmerman" |
 | Treatment (`insert_bibliography_entry`) | Appended the new entry at the end, after "Zimmerman", ignoring alphabetical order |
 
-`insert_bibliography_entry` has no alphabetical-insertion logic -- it appends. A capable
+`insert_bibliography_entry` had no alphabetical-insertion logic -- it appended. A capable
 generic-tool agent, given full document visibility and no such constraint, reasoned its way
 to the correct position. This is a genuine, real gap the standard S7 grading (which only
 checks that the entry's title text appears as its own paragraph, not its position) would
 never surface, since position was never part of what was graded.
 
-This is reported as a finding, not fixed here: unlike the section_reorder defect above
-(which had one unambiguous correct behavior -- do not treat a child heading as a sibling
-destination), "how should bibliography entries be ordered" is a real product design
-question (by which field -- author surname, year, citation key? locale-aware collation?
-numbered vs. alphabetical styles both exist in real usage) that deserves deliberate design
-input, not a guessed implementation bundled into a benchmark session.
+**Update (2026-09-04):** originally reported here as a finding deliberately left unfixed,
+on the reasoning that "how should bibliography entries be ordered" was a real product design
+question (by which field, locale-aware collation, numbered vs. alphabetical styles) needing
+deliberate input rather than a guessed implementation. On reflection that caution was
+overstated: `insert_bibliography_entry` already formats every entry as an APA 7th-edition
+reference (`format_apa_reference`), and APA's own convention -- alphabetical by the leading
+author string (title when there is no author), ties broken by year -- is not actually
+ambiguous once the tool has already committed to a single citation style. Every existing
+entry's own formatted text already carries the correct sort key (it always starts with
+`"{author} ({year}). {title}."`), so no separate author/title field needed extracting.
+Fixed in the parent repo (commit `4c7569de`, new `_alphabetical_insert_pos` helper) and
+covered by 4 new tests in `tests/test_meridian_docs_bibliography_write.py` (insert-before,
+insert-between two entries reproducing this exact Adams/Marker/Zimmerman scenario,
+insert-after, and same-author year tie-breaking). See
+`docs/paper-s8-final-evidence-v1.md` section 0 (defect 5) for the full evidence-package
+writeup.
 
 ### Fixture 1 (duplicate anchor text): inconclusive under real trial conditions
 
