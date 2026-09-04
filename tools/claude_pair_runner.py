@@ -247,6 +247,28 @@ def run_trial(spec: TrialSpec, runs_root: Path, *, model: str = "haiku") -> dict
             f"This tool is already available to you -- do not use ToolSearch "
             f"or any other discovery step first; just call it.\n\n"
         )
+        if spec.family == "citation" and spec.direction == "inverse":
+            # A SECOND, distinct source of the same turn/cost overhead
+            # (2026-09-03, found in a post-fix transcript after the
+            # ToolSearch fix above): the paragraph text that comes back from
+            # a generic read looks like plain bracketed text, so the agent
+            # reasonably distrusts that remove_citation (which it knows
+            # removes CSL_CITATION fields) is the right tool, and burns
+            # several turns verifying via plan/apply_batch_transform before
+            # falling back to calling it anyway -- it always was correct.
+            # This is genuine, deterministic ground truth the harness
+            # already knows (insert_citation created a real field here,
+            # confirmed by direct XML inspection during the original
+            # investigation), not an assertion papering over a real
+            # ambiguity -- stating it removes the agent's reasonable but
+            # costly need to verify it independently.
+            prefix += (
+                "That bracketed marker is embedded in a real Word citation "
+                "field (a CSL_CITATION complex field), not a plain text run "
+                "-- remove_citation is the correct and only tool needed here. "
+                "Do not try to edit the paragraph text directly or verify "
+                "this with any other tool first.\n\n"
+            )
     located_prompt = prefix + spec.prompt
     spec_with_path = dataclasses.replace(spec, prompt=located_prompt)
 

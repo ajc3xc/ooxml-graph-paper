@@ -234,6 +234,47 @@ def test_treatment_prompt_tells_the_agent_to_call_the_tool_directly(tmp_path: Pa
     assert "do not use ToolSearch" in prompt
 
 
+def test_treatment_prompt_asserts_citation_field_ground_truth_on_inverse_only(tmp_path: Path, monkeypatch) -> None:
+    """A second, distinct source of the same overhead (2026-09-03, found in a
+    post-fix transcript): the agent reasonably distrusts that remove_citation
+    is correct when the paragraph reads as plain bracketed text, and burns
+    several turns verifying via batch-transform tools before falling back to
+    calling it anyway. The harness already knows, deterministically, that
+    insert_citation created a real CSL_CITATION field here -- stating that
+    ground truth removes the need for the agent to verify it itself. Forward
+    trials insert a NEW field and have nothing yet to doubt, so this clause
+    must not appear there."""
+    import claude_pair_runner
+    import subprocess as subprocess_module
+
+    input_docx = tmp_path / "input.docx"
+    input_docx.write_bytes(b"fake-docx-bytes")
+
+    def _prompt_for(direction: str, tool: str) -> str:
+        spec = TrialSpec(
+            trial_id="trial-a", doc_label="doc", arm="treatment", direction=direction,
+            family="citation", input_docx=input_docx, marker_text="marker",
+            treatment_tool=tool, treatment_args={"anchor_para_id": "sp123"},
+            prompt="find and remove the marker",
+        )
+        captured = {}
+
+        def _fake_run(*args, **kwargs):
+            captured["argv"] = args[0] if args else kwargs.get("args")
+            return subprocess_module.CompletedProcess(args=args, returncode=0, stdout="{}", stderr="")
+
+        monkeypatch.setattr(claude_pair_runner.subprocess, "run", _fake_run)
+        claude_pair_runner.run_trial(spec, tmp_path / f"runs-{direction}")
+        argv = captured["argv"]
+        return argv[argv.index("-p") + 1]
+
+    inverse_prompt = _prompt_for("inverse", "remove_citation")
+    forward_prompt = _prompt_for("forward", "insert_citation")
+
+    assert "real Word citation field" in inverse_prompt
+    assert "real Word citation field" not in forward_prompt
+
+
 def test_milestone_word_receipt_never_raises_on_render_failure(tmp_path: Path, monkeypatch) -> None:
     import run_paper_s20_pilot
 
