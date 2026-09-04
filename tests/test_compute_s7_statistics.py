@@ -50,6 +50,37 @@ def test_chain_outcome_not_applicable_is_none() -> None:
     assert _chain_outcome(_not_applicable_chain("d1", "section_reorder", "control")) is None
 
 
+def test_chain_outcome_blocked_with_no_pairs_is_none() -> None:
+    chain = {"doc_label": "d1", "family": "section_reorder", "arm": "control", "k_pairs": 4, "status": "blocked", "pairs": []}
+    assert _chain_outcome(chain) is None
+
+
+def test_chain_outcome_blocked_with_a_partial_pair_is_none_not_a_fail() -> None:
+    """Found live (2026-09-04) on a real K=4 v2-corpus run: a chain that hit
+    a genuine 300s subprocess timeout mid-chain still has a pair entry for
+    the trial that never actually completed -- no grading verdict at all,
+    since there was no valid output to grade. Before this fix, "if not
+    pairs: return None" never caught this (the pairs list is non-empty), so
+    the loop fell through and scored a pure infra timeout as a real 0.0 task
+    failure. _load_checkpoint already refuses to trust "blocked" for exactly
+    this reason; _chain_outcome must agree, not silently contradict it."""
+    chain = {
+        "doc_label": "d1", "family": "section_reorder", "arm": "control", "k_pairs": 4,
+        "status": "blocked",
+        "pairs": [{"forward": {"returncode": None, "timed_out": True}}],  # no "grading" key at all
+    }
+    assert _chain_outcome(chain) is None
+
+
+def test_steady_state_outcome_is_none_for_blocked() -> None:
+    chain = {
+        "doc_label": "d1", "family": "section_reorder", "arm": "control", "k_pairs": 4,
+        "status": "blocked",
+        "pairs": [{"forward": {"returncode": None, "timed_out": True}}],
+    }
+    assert _chain_steady_state_outcome(chain) is None
+
+
 def test_chain_outcome_multi_pair_requires_all_pairs_pass() -> None:
     chain = {
         "doc_label": "d1", "family": "bibliography", "arm": "treatment", "k_pairs": 2,

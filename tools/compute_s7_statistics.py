@@ -20,14 +20,23 @@ from graph_scorer import bootstrap_ci, paired_permutation_test  # noqa: E402
 def _chain_outcome(chain: dict[str, Any]) -> float | None:
     """1.0 if every pair in the chain passed both forward and inverse
     grading, 0.0 if the chain completed but any pair failed, None if the
-    chain never executed at all (not_applicable/blocked-before-any-pair-ran/
+    chain never executed at all or never finished (not_applicable/blocked/
     harness_exception) -- a None is excluded from BOTH arms' denominators for
     that (document, family, k) pair, per the protocol's own not_applicable
-    exclusion rule, rather than scored as a 0."""
+    exclusion rule, rather than scored as a 0.
+
+    "blocked" must be excluded here, not just at not_applicable/
+    harness_exception: found live (2026-09-04) on a real K=4 v2-corpus run --
+    a chain that hit a genuine 300s subprocess timeout mid-chain still has a
+    pair entry recorded for the trial that never actually completed (no
+    grading verdict, since there was no valid output to grade), so the old
+    "if not pairs: return None" guard never caught it and the loop below fell
+    through to scoring an infra timeout as a real 0.0 task failure. The
+    harness's own checkpoint/resume logic (_load_checkpoint) already treats
+    "blocked" as never trustworthy for exactly this reason; this function
+    must agree with that, not silently contradict it."""
     status = chain.get("status")
-    if status == "not_applicable":
-        return None
-    if status == "harness_exception":
+    if status in ("not_applicable", "harness_exception", "blocked"):
         return None
     pairs = chain.get("pairs") or []
     if not pairs:
@@ -67,7 +76,7 @@ def _chain_steady_state_outcome(chain: dict[str, Any]) -> float | None:
     if chain.get("k_pairs", 1) < 2:
         return None
     status = chain.get("status")
-    if status in ("not_applicable", "harness_exception"):
+    if status in ("not_applicable", "harness_exception", "blocked"):
         return None
     pairs = chain.get("pairs") or []
     steady_state_pairs = pairs[1:]
