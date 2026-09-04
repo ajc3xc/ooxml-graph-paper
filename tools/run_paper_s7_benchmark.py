@@ -81,10 +81,16 @@ def _safe_paragraph_texts(docx_path: Path) -> list[str] | None:
     Returns None (never raises) on any corruption; callers treat None as
     "this document cannot be graded/continued from," not as an empty
     paragraph list (which would be indistinguishable from a genuinely empty
-    document)."""
+    document).
+
+    FileNotFoundError added 2026-09-04: found live via the equation family's
+    harder control-arm task (hand-constructing OMML) surfacing a pre-existing
+    gap -- a control trial that never wrote its output file at all raised
+    unhandled here too, the same "harness_exception instead of a graded
+    fail" failure mode the original three exceptions were added to close."""
     try:
         return _paragraph_texts(docx_path)
-    except (KeyError, zipfile.BadZipFile, ET.ParseError):
+    except (KeyError, zipfile.BadZipFile, ET.ParseError, FileNotFoundError):
         return None
 
 
@@ -190,6 +196,25 @@ def _grade_inverse(family: str, output_docx: Path, paragraphs_before_forward: li
     raise ValueError(f"unknown family {family!r}")
 
 
+def _safe_grade(grade_fn, *args, **kwargs) -> dict[str, Any]:
+    """_grade_forward/_grade_inverse's own grading functions do a raw
+    _package_is_valid_docx check first, but that only validates the ZIP
+    structure and required-part PRESENCE -- never that word/document.xml's
+    actual bytes parse as well-formed XML. A structurally-valid ZIP holding
+    genuinely malformed XML content (found live, 2026-09-04, via the
+    equation family's harder control-arm task: hand-constructing OMML is
+    hard enough that a haiku control trial produced exactly this) makes the
+    grading function's own ET.fromstring call raise uncaught, which used to
+    crash the whole chain as an uninformative harness_exception -- the same
+    "should be a graded fail, not a lost pair" failure mode
+    _safe_paragraph_texts already exists to close for the inter-pair read.
+    This closes it for the grading call itself, for every family uniformly."""
+    try:
+        return grade_fn(*args, **kwargs)
+    except Exception as exc:  # noqa: BLE001 -- see docstring: must never propagate
+        return {"verdict": "fail", "reason": f"grading raised {type(exc).__name__}: {exc}"}
+
+
 _CHECKPOINT_NAME = "chain-result.json"
 # Statuses that represent a chain that genuinely finished (its outcome may
 # itself be a failure, but the ATTEMPT completed) -- safe to trust and skip
@@ -287,7 +312,7 @@ def run_chain(
         fwd_result["isolation_audit"] = audit_isolation(fwd_result)
         fwd_execution_ok = fwd_result.get("returncode") == 0 and not fwd_result.get("timed_out")
         fwd_grading = (
-            _grade_forward(family, Path(fwd_result["output_docx_path"]), paragraphs_before_this_pair, forward_spec, applicability)
+            _safe_grade(_grade_forward, family, Path(fwd_result["output_docx_path"]), paragraphs_before_this_pair, forward_spec, applicability)
             if fwd_execution_ok else {"verdict": "not_run", "reason": "forward process did not complete"}
         )
         fwd_result["grading"] = fwd_grading
@@ -310,7 +335,16 @@ def run_chain(
                 resolve_equation_para_id_by_marker if family == "equation"
                 else resolve_para_id_by_marker_text
             )
-            resolved = resolver(Path(fwd_result["output_docx_path"]), forward_spec.marker_text)
+            try:
+                resolved = resolver(Path(fwd_result["output_docx_path"]), forward_spec.marker_text)
+            except Exception as exc:  # noqa: BLE001 -- a malformed/corrupted forward output must
+                # degrade to a graded "blocked" outcome, never an unhandled harness_exception
+                # that discards this pair's already-completed forward result. Found live
+                # (2026-09-04) via the equation family's harder control-arm task: a genuinely
+                # malformed word/document.xml (structurally valid ZIP, invalid XML content --
+                # _package_is_valid_docx does not parse XML, only checks required parts exist)
+                # raised ParseError here uncaught.
+                resolved = {"found": False, "reason": f"resolver raised {type(exc).__name__}: {exc}"}
             if not resolved["found"]:
                 pair_record["inverse"] = None
                 pair_record["inverse_resolution_error"] = resolved["reason"]
@@ -340,7 +374,7 @@ def run_chain(
         inv_result["isolation_audit"] = audit_isolation(inv_result)
         inv_execution_ok = inv_result.get("returncode") == 0 and not inv_result.get("timed_out")
         inv_grading = (
-            _grade_inverse(family, Path(inv_result["output_docx_path"]), paragraphs_before_this_pair, inverse_spec)
+            _safe_grade(_grade_inverse, family, Path(inv_result["output_docx_path"]), paragraphs_before_this_pair, inverse_spec)
             if inv_execution_ok else {"verdict": "not_run", "reason": "inverse process did not complete"}
         )
         inv_result["grading"] = inv_grading

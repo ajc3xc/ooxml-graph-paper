@@ -15,6 +15,7 @@ from run_paper_s7_benchmark import (  # noqa: E402
     _grade_forward,
     _grade_inverse,
     _load_checkpoint,
+    _safe_grade,
     _safe_paragraph_texts,
     _write_checkpoint,
     run_chain,
@@ -148,6 +149,40 @@ def test_safe_paragraph_texts_returns_none_on_non_zip_bytes(tmp_path: Path) -> N
     not_a_zip.write_bytes(b"this is not a zip file at all")
 
     assert _safe_paragraph_texts(not_a_zip) is None
+
+
+def test_safe_paragraph_texts_returns_none_on_missing_file(tmp_path: Path) -> None:
+    """Found live (2026-09-04) via the equation family's harder control-arm
+    task: a control trial that never wrote its output file at all raised an
+    unhandled FileNotFoundError here, the same failure mode the original
+    three exceptions were added to close."""
+    assert _safe_paragraph_texts(tmp_path / "does-not-exist.docx") is None
+
+
+def test_safe_grade_converts_a_raised_exception_into_a_graded_fail() -> None:
+    """grade_forward_trial_equation and friends do a raw ET.fromstring parse
+    after _package_is_valid_docx's own check, which only validates ZIP
+    structure and required-part presence -- never that the XML content
+    itself is well-formed. Found live (2026-09-04): a genuinely malformed
+    word/document.xml (structurally valid ZIP, invalid XML content) raised
+    ParseError here uncaught, crashing the whole chain as an uninformative
+    harness_exception instead of a graded, informative fail."""
+    def _always_raises(*args, **kwargs):
+        raise ValueError("simulated malformed-XML parse failure")
+
+    result = _safe_grade(_always_raises, "arg1", kwarg="x")
+
+    assert result["verdict"] == "fail"
+    assert "ValueError" in result["reason"]
+
+
+def test_safe_grade_passes_through_a_real_grading_result() -> None:
+    def _echoes(x):
+        return {"verdict": "pass", "checks": {"ok": True}}
+
+    result = _safe_grade(_echoes, "anything")
+
+    assert result == {"verdict": "pass", "checks": {"ok": True}}
 
 
 def test_checkpoint_round_trip_for_a_trusted_status(tmp_path: Path) -> None:
