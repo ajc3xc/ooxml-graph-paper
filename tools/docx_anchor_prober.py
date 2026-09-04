@@ -152,7 +152,22 @@ def resolve_section_reorder_plan(docx_path: Path) -> dict[str, Any]:
     RESTORED TO, never moved into, so an incoherent preceding pick cannot
     make the forward move itself incoherent the way an incoherent
     following pick does -- see the correction doc for why only the
-    following side needed this."""
+    following side needed this.
+
+    A third, distinct defect found live (2026-09-04) on a real 1.7MB
+    real-world document in the v2 follow-up corpus: `headings[mid]` was
+    picked purely by position, with no check that it actually HAS text.
+    Some real-world documents have a heading-styled paragraph with no
+    extractable text at all (e.g. an image-only or field-only "heading").
+    grade_forward_trial_reorder's `moved_heading_still_present` check is
+    `section_heading_text.strip() in paragraphs_after` -- when that text is
+    `""`, this check can never pass, since `_paragraph_texts` never yields a
+    literal empty-string entry (confirmed directly against this document:
+    262 paragraphs, zero empty), no matter how correctly move_section
+    performed the move. Fixed by requiring the chosen section's own heading
+    to have non-blank text, scanning outward from `mid` (checking `mid`
+    itself, then progressively further indices on both sides) for the
+    nearest heading that has one, rather than blindly trusting position."""
     docs_intel = _import_docs_intel()
     outline = docs_intel.document_outline(str(docx_path))
     headings = outline.get("headings") or []
@@ -163,12 +178,26 @@ def resolve_section_reorder_plan(docx_path: Path) -> dict[str, Any]:
     para_id_to_index = {p["para_id"]: p["index"] for p in paragraphs}
 
     mid = len(headings) // 2
-    chosen = headings[mid]
-    preceding = headings[mid - 1]
+    mid_index = None
+    for offset in range(len(headings)):
+        candidates = {mid - offset, mid + offset}
+        for candidate_index in sorted(candidates):
+            if candidate_index <= 0 or candidate_index >= len(headings) - 1:
+                continue
+            if (headings[candidate_index].get("text") or "").strip():
+                mid_index = candidate_index
+                break
+        if mid_index is not None:
+            break
+    if mid_index is None:
+        return {"found": False, "reason": "no heading with non-blank text is available in a safely-bounded middle position"}
+
+    chosen = headings[mid_index]
+    preceding = headings[mid_index - 1]
     chosen_level = chosen.get("level")
 
     following = None
-    for candidate in headings[mid + 1:]:
+    for candidate in headings[mid_index + 1:]:
         candidate_level = candidate.get("level")
         if chosen_level is None or candidate_level is None or candidate_level <= chosen_level:
             following = candidate

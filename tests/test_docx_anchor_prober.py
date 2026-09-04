@@ -126,6 +126,51 @@ def test_section_reorder_plan_skips_a_child_heading_for_the_destination(tmp_path
     assert plan["destination_heading_para_id"] == "H0000006"  # Appendix, NOT Module B's own child Overview
 
 
+def test_section_reorder_plan_skips_a_blank_heading_at_the_middle_position(tmp_path: Path) -> None:
+    """Found live (2026-09-04) on a real 1.7MB document in the v2 follow-up
+    corpus: headings[mid] was picked purely by position, with no check that
+    it actually has text. Some real-world documents have a heading-styled
+    paragraph with no extractable text at all (an image-only or field-only
+    "heading"). grade_forward_trial_reorder's moved_heading_still_present
+    check is `section_heading_text.strip() in paragraphs_after` -- when
+    that text is "", this can never pass (confirmed: _paragraph_texts never
+    yields a literal empty-string entry), no matter how correctly
+    move_section performed the move. The chosen section must have
+    non-blank text; a blank heading[mid] is skipped in favor of the
+    nearest heading (scanning outward) that has one."""
+    body = "".join([
+        _heading("Introduction", "H0000001", 1),
+        _heading("", "H0000002", 1),  # blank -- must be skipped
+        _heading("", "H0000003", 1),  # mid of 5 headings, ALSO blank -- must be skipped
+        _heading("Module C", "H0000004", 1),  # nearest non-blank heading -- must be chosen instead
+        _heading("Appendix", "H0000005", 1),
+    ])
+    path = _make_docx_raw_body(tmp_path, "blank_middle_heading.docx", body)
+
+    plan = resolve_section_reorder_plan(path)
+
+    assert plan["found"] is True
+    assert plan["section_id"] == "H0000004"
+    assert plan["section_heading_text"] == "Module C"
+    assert plan["destination_heading_para_id"] == "H0000005"
+
+
+def test_section_reorder_plan_not_applicable_when_every_candidate_heading_is_blank(tmp_path: Path) -> None:
+    body = "".join([
+        _heading("", "H0000001", 1),
+        _heading("", "H0000002", 1),
+        _heading("", "H0000003", 1),
+        _heading("", "H0000004", 1),
+        _heading("", "H0000005", 1),
+    ])
+    path = _make_docx_raw_body(tmp_path, "all_blank_headings.docx", body)
+
+    plan = resolve_section_reorder_plan(path)
+
+    assert plan["found"] is False
+    assert "non-blank" in plan["reason"]
+
+
 def test_section_reorder_plan_not_applicable_when_no_sibling_destination_exists(tmp_path: Path) -> None:
     """If every heading after the chosen section is a deeper child (no
     sibling-level heading to move into), this must be reported as a clean
