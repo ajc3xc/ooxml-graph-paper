@@ -213,6 +213,46 @@ descriptive evidence about repeated-cycle behavior specifically, at a sample siz
 to draw a confirmatory conclusion from on its own. The steady-state figures (90.9% vs 100%)
 suggest most of the gap concentrates in the first cycle rather than compounding further.
 
+### 2.5 A 4th family, equation: implemented and verified correct, not reliably runnable here
+
+`insert_equation`/`remove_equation` were wired in as a 4th task family (`tools/docx_trial_broker.py`,
+`docx_trial_evaluator.py`, `docx_anchor_prober.py`, commit `109385d`) -- real, genuine
+primitives, anchor-based like citation, with no dependency on pre-existing document
+structure (unlike cross_reference, section 5). The prompt deliberately asks for a REAL
+native OOXML equation, not plain text that merely looks like math: grading can only pass if
+genuine `<m:oMath>` structure exists (verified directly with a unit test proving plain text
+correctly fails), making this the one family whose grading is a direct test of the same
+native-format-under-generic-tools question this project asks elsewhere.
+
+Implementation correctness is independently verified: direct manual testing confirmed
+`insert_equation_local` produces genuine, Word-COM-rendered OMML; all unit tests pass,
+including the equation-specific paragraph-text gap (a pure-equation paragraph's
+`parse_docx()` text field is empty -- its content lives in `<m:oMath>/<m:t>`, not the
+`<w:t>` runs that field reads -- requiring a dedicated resolver,
+`resolve_equation_para_id_by_marker`); and multiple real trials across two smoke tests
+completed successfully end to end.
+
+However: `insert_equation` shares `insert_caption`'s Word-COM render-verification gate
+(a hardcoded 60-second timeout, `_WORD_COM_TIMEOUT_SECONDS` in the parent repo's
+`render_gate.py` -- deliberately not changed here, since that is real production behavior
+affecting every Meridian user, not a knob to loosen for this benchmark's convenience). Two
+independent smoke tests against the development slice (haiku, 24 chains each) were run: the
+first concurrently with other work (45.8% blocked, contamination suspected), the second in
+complete isolation with nothing else running on the host (45.8% blocked again, ruling out
+concurrency as the sole cause). Both showed the identical failure signature: `"Word COM
+render exceeded its 60s bound"`, confirmed directly in the agent's own transcript, correctly
+failed-closed (file restored, no partial corruption) rather than silently succeeding.
+
+**Honest conclusion**: this is the same host-environment limitation that already excluded
+caption (section 5), now independently confirmed to affect equation too, at a real,
+reproducible rate this host cannot currently sustain for a confirmatory-scale run. It is not
+a flaw in the family's design, prompt, or grading -- those are demonstrably correct when the
+render check succeeds. Investigating this discovery did produce one genuine, broadly useful
+fix along the way: grading previously crashed uncaught on a structurally-valid-but-malformed
+`word/document.xml` or a missing output file (`_safe_grade`, commit `e617855`) -- not
+equation-specific, but equation's harder control-arm task (hand-constructing OMML) was what
+surfaced it. No confirmatory-scale equation run is reported here; see section 7.
+
 ## 3. What this evidence does and does not support
 
 **Supported**, on these corpora, at this sample size, with this model:
@@ -296,23 +336,34 @@ to this specific collision class.
 
 ## 5. Families excluded, with real reasons (per `docs/paper-s15-skill-matrix-v1.md`)
 
-- **caption**: `insert_caption` performs a synchronous Word-COM render-verification write
-  gate that fails closed (by design, per `_enforce_render_verification`'s documented
-  three-state contract) on a render timeout, not merely an unavailable backend. Reproduced
-  twice on this host under concurrent session load. A candidate for a future run under
-  lower host contention or a longer render timeout, not a permanent exclusion.
-- **cross_reference**: `insert_cross_reference` had no removal primitive as of this run's
-  design. `remove_cross_reference` was implemented, tested (83+379 tests passing), and has
-  now been merged to the parent repo's `dev` branch (commit `a89dd999`) -- too late to
-  include in this run, a clean candidate for the next one.
+- **caption** and **equation**: both share `_enforce_render_verification`'s Word-COM
+  render-verification write gate (a hardcoded 60-second timeout, deliberately not loosened
+  here since it is real production behavior, not a benchmark-convenience knob), which fails
+  closed on a render timeout, not merely an unavailable backend. Confirmed for equation
+  specifically at a reproducible ~46% block rate even under complete host isolation (no
+  other work running) -- ruling out concurrency as the sole cause, section 2.5. A candidate
+  for a future run under a less loaded host, not a permanent exclusion; the underlying
+  primitives are independently verified correct.
+- **cross_reference**: `insert_cross_reference` requires an EXISTING caption to target, and
+  zero of the 38 corpus documents have one. Creating one via `insert_caption` first would
+  inherit exactly caption's own render-gate fragility above -- this needs caption's
+  render-timeout handling addressed first, not merely a removal primitive (that part,
+  `remove_cross_reference`, was implemented, tested, and merged to the parent repo's `dev`
+  branch, commit `a89dd999`, and is otherwise ready).
 - **table-structural**: no whole-table create/remove primitive exists at any level;
-  `insert_column`/`split_cell` have zero inverse of any kind.
+  `insert_column`/`split_cell` have zero inverse of any kind. Also worth noting alongside
+  this: a deliberate stress test (`docs/paper-s7-hard-fixtures-stress-test-v1.md`) found that
+  even where a table-adjacent primitive DOES exist (`insert_bibliography_entry`), it has a
+  real, undocumented limitation -- it always appends rather than inserting in the correct
+  position, a gap a capable generic-tool agent did not have.
 - **tracked-change**: `insert_tracked_paragraph` exists as library code but is not
   registered as an MCP tool, and no accept/reject/deletion-tracking primitive exists at all.
 
 ## 6. Explicit, disclosed scope limitations
 
-- 3 of 6+ candidate task families (this document's whole subject).
+- 4 of 6+ candidate task families implemented (bibliography, citation, section_reorder,
+  equation); only 3 have a confirmatory-scale result -- equation's real-world runnability is
+  blocked by a host-environment constraint, not a design or implementation defect (section 2.5).
 - K=1 confirmed on both corpora; K=4 depth data (section 2.4) is complete but only against
   the original v1 corpus, not the section_reorder follow-up -- see section 7.
 - Section_reorder's follow-up corpus (48 documents) comes from a different source
@@ -323,12 +374,16 @@ to this specific collision class.
   concurrency-collision incident (section 4) shows a DIFFERENT kind of cross-trial
   interference than the control-reaching-Meridian violation the isolation audit itself
   checks for.
-- Three real defects (sections 0, 2.3, and the PII scanner correction in
+- Five real defects (sections 0 and 2.3, plus the PII scanner correction in
   `docs/paper-s6-organic-omml-round2-3-result-v1.md`) were found DURING this project's own
   analysis of its own results, not by external review -- disclosed in full per this
   project's standing "never quietly patch around a surprising result" discipline, but a
   reader should weigh that these are the defects THIS team happened to notice, not a claim
-  that no further defects exist.
+  that no further defects exist. Two of the five (section 2.3's second correction, and the
+  malformed-XML grading crash) were found only because of a deliberate effort to break the
+  harness with hand-authored adversarial content -- an argument for more of that kind of
+  testing, not less, since it demonstrably found real, previously-invisible problems that
+  organic corpus data had not yet happened to trigger.
 
 ## 7. Recommended next steps (not run here)
 
@@ -341,8 +396,19 @@ to this specific collision class.
   that checkpointing makes a multi-hour run far cheaper to sustain -- would give a properly
   powered read on whether section_reorder's K=4 gap (section 2.4) is real or, like its K=1
   counterpart, regresses toward parity with more data.
-- Re-run caption after either reducing host contention or raising its render timeout.
-- Add cross_reference now that `remove_cross_reference` is merged.
+- Run equation to confirmatory scale on a less-loaded host, or after the render-verification
+  gate's own timeout/retry behavior is revisited upstream -- the family is implemented,
+  tested, and functionally verified correct; only host-level render throughput blocks it here.
+- Re-run caption for the same reason -- both share the identical root cause (section 2.5).
+- Add cross_reference once caption's render-timeout handling is resolved (it depends on
+  captions existing, section 5).
+- Design and implement correct-position insertion for `insert_bibliography_entry` (currently
+  always appends -- `docs/paper-s7-hard-fixtures-stress-test-v1.md`'s finding). A real
+  product design decision (sort key, locale-aware collation, numbered vs. alphabetical
+  conventions), not a quick bug fix -- deserves deliberate scoping, not a guess bundled into
+  a benchmark session.
+- More hand-authored adversarial fixtures targeting other families and ambiguity classes,
+  given how directly this approach paid off this round (`docs/paper-s7-hard-fixtures-stress-test-v1.md`).
 - K=16 depth, cost permitting.
 - A dedicated cross-trial-interference audit dimension (distinct from the existing
   control-reaches-Meridian isolation check) given section 4's finding.
