@@ -7,9 +7,14 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools"))
 
-from docx_trial_evaluator import grade_forward_trial_reorder  # noqa: E402
+from docx_trial_evaluator import (  # noqa: E402
+    grade_forward_trial_equation,
+    grade_forward_trial_reorder,
+    grade_inverse_trial_equation,
+)
 
 _W = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
+_M = "http://schemas.openxmlformats.org/officeDocument/2006/math"
 
 
 def _make_docx(tmp_path: Path, name: str, paragraphs: list[str]) -> Path:
@@ -17,6 +22,27 @@ def _make_docx(tmp_path: Path, name: str, paragraphs: list[str]) -> Path:
     document_xml = (
         f'<?xml version="1.0" encoding="UTF-8"?>\n'
         f'<w:document xmlns:w="{_W}"><w:body>{body}</w:body></w:document>'
+    ).encode("utf-8")
+    path = tmp_path / name
+    with zipfile.ZipFile(path, "w") as zf:
+        zf.writestr("[Content_Types].xml", "<Types/>")
+        zf.writestr("_rels/.rels", "<Relationships/>")
+        zf.writestr("word/document.xml", document_xml)
+    return path
+
+
+def _equation_paragraph_xml(marker: str) -> str:
+    return (
+        f'<w:p><m:oMath xmlns:m="{_M}">'
+        f'<m:r><m:t>x = {marker}</m:t></m:r>'
+        f'</m:oMath></w:p>'
+    )
+
+
+def _make_docx_raw_body(tmp_path: Path, name: str, body_xml: str) -> Path:
+    document_xml = (
+        f'<?xml version="1.0" encoding="UTF-8"?>\n'
+        f'<w:document xmlns:w="{_W}"><w:body>{body_xml}</w:body></w:document>'
     ).encode("utf-8")
     path = tmp_path / name
     with zipfile.ZipFile(path, "w") as zf:
@@ -69,3 +95,58 @@ def test_reorder_forward_fails_when_heading_genuinely_missing(tmp_path: Path) ->
 
     assert result["verdict"] == "fail"
     assert result["checks"]["moved_heading_still_present"] is False
+
+
+def test_equation_forward_passes_when_marker_equation_present(tmp_path: Path) -> None:
+    """A pure-equation paragraph's parse_docx() text field comes back empty
+    (confirmed directly, 2026-09-03): its content lives in <m:oMath>/<m:t>,
+    not the <w:t> runs that field reads. grade_forward_trial_equation must
+    use the equation-specific parser (parse_docx_equations_local's
+    flat_text), not a plain paragraph-text search, or it could never pass."""
+    before = ["Anchor paragraph."]
+    body = "<w:p><w:r><w:t>Anchor paragraph.</w:t></w:r></w:p>" + _equation_paragraph_xml("1234567890")
+    output = _make_docx_raw_body(tmp_path, "eq_forward.docx", body)
+
+    result = grade_forward_trial_equation(output, before, "1234567890")
+
+    assert result["verdict"] == "pass"
+    assert result["checks"]["marker_equation_present_exactly_once"] is True
+
+
+def test_equation_forward_fails_when_only_plain_text_inserted(tmp_path: Path) -> None:
+    """The whole point of this family: a control-arm agent that inserts
+    plain text reading "x = 1234567890" instead of a real <m:oMath> must
+    fail, not pass on a text-substring technicality -- this is a genuine
+    test of native OOXML math structure, not just visible text."""
+    before = ["Anchor paragraph."]
+    body = (
+        "<w:p><w:r><w:t>Anchor paragraph.</w:t></w:r></w:p>"
+        "<w:p><w:r><w:t>x = 1234567890</w:t></w:r></w:p>"
+    )
+    output = _make_docx_raw_body(tmp_path, "eq_plaintext.docx", body)
+
+    result = grade_forward_trial_equation(output, before, "1234567890")
+
+    assert result["verdict"] == "fail"
+    assert result["checks"]["marker_equation_present_exactly_once"] is False
+
+
+def test_equation_inverse_passes_when_equation_removed_and_paragraphs_restored(tmp_path: Path) -> None:
+    before_forward = ["Anchor paragraph."]
+    output = _make_docx(tmp_path, "eq_inverse_ok.docx", before_forward)
+
+    result = grade_inverse_trial_equation(output, before_forward, "1234567890")
+
+    assert result["verdict"] == "pass"
+    assert result["checks"]["marker_equation_removed"] is True
+
+
+def test_equation_inverse_fails_when_equation_still_present(tmp_path: Path) -> None:
+    before_forward = ["Anchor paragraph."]
+    body = "<w:p><w:r><w:t>Anchor paragraph.</w:t></w:r></w:p>" + _equation_paragraph_xml("1234567890")
+    output = _make_docx_raw_body(tmp_path, "eq_inverse_fail.docx", body)
+
+    result = grade_inverse_trial_equation(output, before_forward, "1234567890")
+
+    assert result["verdict"] == "fail"
+    assert result["checks"]["marker_equation_removed"] is False

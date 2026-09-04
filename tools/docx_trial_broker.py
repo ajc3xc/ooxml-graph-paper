@@ -25,12 +25,34 @@ for the full verdict table):
     paragraph/bookmark keeps its id. Requires >=3 headings
     (docx_anchor_prober.resolve_section_reorder_plan); not every document
     qualifies, and that is recorded as not_applicable, not forced or hidden.
+  - equation: insert_equation / remove_equation. insert_equation DOES return
+    the new paragraph's own id directly (unlike caption), but that id is only
+    reachable by the treatment arm through the tool's own result -- the
+    control arm's output has no such metadata, so post-forward resolution is
+    still needed for both arms uniformly, via
+    docx_anchor_prober.resolve_equation_para_id_by_marker. That resolver is
+    NOT the marker-text one citation/caption use: a pure-equation paragraph's
+    content lives in <m:oMath>/<m:t>, not the <w:t> runs parse_docx() reads,
+    so its plain "text" field comes back empty -- confirmed directly,
+    2026-09-03, by inserting a real equation and checking. The prompt asks
+    for a REAL native OOXML equation (not plain text that merely looks like
+    math) deliberately: this is the one family whose grading can only pass
+    if genuine <m:oMath> structure exists, making it a direct test of the
+    same native-format-under-generic-tools question this whole project asks
+    elsewhere, not just "can the text appear in the right place." Shares
+    insert_caption's Word-COM render-verification gate (_enforce_render_
+    verification, ~60s per call) and its sensitivity to shared-host resource
+    contention -- run at low concurrency, same mitigation as the K=4 depth
+    study's own resource-contention findings.
 
 Deliberately NOT implemented this pass: cross_reference (insert_cross_reference
-has no removal primitive as of this recon; PAPER-S7 CODE separately tracks
-adding one to the parent repo) and table/tracked-change families (no clean
-whole-table or accept/reject primitive exists at all -- see the recon findings
-folded into docs/paper-s15-skill-matrix-v1.md).
+requires an EXISTING caption to target, and zero of the 38 corpus documents
+have one -- creating one via insert_caption first would inherit exactly the
+render-gate fragility that already excluded caption below; needs caption's
+render-timeout handling fixed first, not merely a removal primitive -- that
+part, remove_cross_reference, already exists) and table/tracked-change
+families (no clean whole-table or accept/reject primitive exists at all --
+see the recon findings folded into docs/paper-s15-skill-matrix-v1.md).
 """
 from __future__ import annotations
 
@@ -47,7 +69,7 @@ class TrialSpec:
     doc_label: str
     arm: str  # "control" | "treatment"
     direction: str  # "forward" | "inverse"
-    family: str  # "bibliography" | "citation" | "caption" | "section_reorder"
+    family: str  # "bibliography" | "citation" | "caption" | "section_reorder" | "equation"
     input_docx: Path
     prompt: str
     marker_text: str
@@ -351,3 +373,75 @@ def generate_section_reorder_pair(
         ),
     )
     return forward, inverse
+
+
+# ---------------------------------------------------------------------------
+# equation (new display-mode paragraph; inverse args resolved post-forward by
+# the runner via docx_anchor_prober.resolve_equation_para_id_by_marker, NOT
+# resolve_para_id_by_marker_text -- see this module's docstring above)
+# ---------------------------------------------------------------------------
+
+def _new_numeric_marker() -> str:
+    """A purely-digit marker, not new_marker()'s hex output: it goes straight
+    into a LaTeX expression converted to OMML, and stays easy to eyeball as
+    deliberately planted (no real equation in these documents is going to
+    coincidentally contain a random 10-digit number)."""
+    return str(uuid.uuid4().int)[:10]
+
+
+def generate_equation_forward(
+    doc_label: str, input_docx: Path, marker_prefix: str, anchor_para_id: str, anchor_text_snippet: str,
+) -> TrialSpec:
+    marker = _new_numeric_marker()
+    trial_base = f"{doc_label}-equation-{marker_prefix}"
+    return TrialSpec(
+        trial_id=f"{trial_base}-forward",
+        doc_label=doc_label, arm="", direction="forward", family="equation",
+        input_docx=input_docx,
+        marker_text=marker,
+        treatment_tool="insert_equation",
+        treatment_args={
+            "anchor_para_id": anchor_para_id, "payload": f"x = {marker}", "position": "after",
+        },
+        prompt=(
+            f"You are editing a Word document at the path given to you. "
+            f"Find the paragraph that starts with the exact text: "
+            f"{anchor_text_snippet!r}\n\n"
+            f"Insert a new paragraph immediately AFTER that paragraph "
+            f"containing a REAL native Word equation -- an OOXML math "
+            f"object (<m:oMath>), not plain text that merely looks like an "
+            f"equation -- with exactly this content: x = {marker}\n\n"
+            f"Do not change, remove, reorder, or reformat any other "
+            f"paragraph. Save the document in place at the same path. When "
+            f"finished, reply with a single line: DONE."
+        ),
+    )
+
+
+def generate_equation_inverse(
+    doc_label: str, input_docx: Path, marker_prefix: str, marker: str, equation_para_id: str,
+) -> TrialSpec:
+    """``equation_para_id`` here MUST be re-resolved from the forward trial's
+    own OUTPUT document via docx_anchor_prober.resolve_equation_para_id_by_marker
+    (never reused from a pristine document -- there is nothing to reuse,
+    the equation did not exist before forward ran), same post-forward
+    pattern as caption and citation."""
+    trial_base = f"{doc_label}-equation-{marker_prefix}"
+    return TrialSpec(
+        trial_id=f"{trial_base}-inverse",
+        doc_label=doc_label, arm="", direction="inverse", family="equation",
+        input_docx=input_docx,
+        marker_text=marker,
+        treatment_tool="remove_equation",
+        treatment_args={"equation_para_id": equation_para_id},
+        prompt=(
+            f"You are editing a Word document at the path given to you. "
+            f"It contains a paragraph with a real native Word equation "
+            f"(an OOXML math object, <m:oMath>) with exactly this content: "
+            f"x = {marker}\n\n"
+            f"Remove that entire equation paragraph from the document. Do "
+            f"not change, remove, reorder, or reformat any other "
+            f"paragraph. Save the document in place at the same path. When "
+            f"finished, reply with a single line: DONE."
+        ),
+    )

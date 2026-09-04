@@ -91,6 +91,29 @@ def resolve_para_id_by_marker_text(docx_path: Path, marker_text: str) -> dict[st
     return {"found": True, "para_id": matches[0]["para_id"]}
 
 
+def resolve_equation_para_id_by_marker(docx_path: Path, marker: str) -> dict[str, Any]:
+    """Post-forward resolution for the equation family, analogous to
+    resolve_para_id_by_marker_text above but NOT built on it: a paragraph
+    containing only an <m:oMath> has empty parse_docx() text (that field is
+    <w:t>-only; OMML's own text lives in <m:t>, a different namespace
+    entirely -- confirmed directly, 2026-09-03, inserting a real equation
+    and finding its parse_docx() "text" field empty). Uses
+    parse_docx_equations_local's own flat_text (flattened <m:t> content)
+    instead, which exists specifically to cover this gap. Works for either
+    arm's output identically, same as the marker-text version."""
+    docs_intel = _import_docs_intel()
+    equations = docs_intel.parse_docx_equations_local(str(docx_path))
+    matches = [e for e in equations if marker in (e.get("flat_text") or "")]
+    if not matches:
+        return {"found": False, "reason": f"no equation contains marker {marker!r}"}
+    if len(matches) > 1:
+        return {
+            "found": False,
+            "reason": f"marker {marker!r} found in {len(matches)} equations, expected exactly 1",
+        }
+    return {"found": True, "para_id": matches[0]["para_id"]}
+
+
 def resolve_section_reorder_plan(docx_path: Path) -> dict[str, Any]:
     """Pick a real heading (not the first, so it has a preceding neighbor to
     restore position against; not the last, so there is room to move it

@@ -242,3 +242,83 @@ def grade_inverse_trial_reorder(
         "paragraph_count_after": len(paragraphs_after),
         "paragraph_count_before_forward": len(paragraphs_before_forward),
     }
+
+
+# ---------------------------------------------------------------------------
+# equation (new paragraph, mirrors grade_forward_trial/grade_inverse_trial's
+# "new paragraph" shape, but the marker can NEVER be found via
+# _paragraph_texts: a pure-equation paragraph's content lives entirely in
+# <m:oMath>/<m:t>, a different namespace than the <w:t> runs _paragraph_texts
+# reads. Confirmed directly (2026-09-03): inserting a real equation and
+# calling parse_docx() on the result shows that paragraph's own "text" field
+# as an empty string. Uses parse_docx_equations_local's own flat_text
+# (flattened <m:t> content) for the marker check instead; the surrounding
+# "did any OTHER paragraph change" checks still use _paragraph_texts since
+# that part of the document has nothing to do with OMML.
+# ---------------------------------------------------------------------------
+
+def _import_docs_intel():
+    from meridian_docs import docs_intel
+
+    return docs_intel
+
+
+def _equation_flat_texts(output_docx: Path) -> list[str]:
+    docs_intel = _import_docs_intel()
+    equations = docs_intel.parse_docx_equations_local(str(output_docx))
+    return [e.get("flat_text") or "" for e in equations]
+
+
+def grade_forward_trial_equation(
+    output_docx: Path, paragraphs_before: list[str], marker: str,
+) -> dict[str, Any]:
+    ok, err = _package_is_valid_docx(output_docx)
+    if not ok:
+        return {"verdict": "fail", "reason": f"invalid output package: {err}"}
+
+    paragraphs_after = _paragraph_texts(output_docx)
+    matches = [t for t in _equation_flat_texts(output_docx) if marker in t]
+    missing_originals = [p for p in paragraphs_before if p not in paragraphs_after]
+
+    checks = {
+        "output_is_valid_docx": True,
+        "marker_equation_present_exactly_once": len(matches) == 1,
+        "no_original_paragraph_lost": not missing_originals,
+    }
+    verdict = "pass" if all(checks.values()) else "fail"
+    return {
+        "verdict": verdict,
+        "checks": checks,
+        "paragraph_count_before": len(paragraphs_before),
+        "paragraph_count_after": len(paragraphs_after),
+        "matching_equation_flat_texts": matches,
+        "missing_original_paragraphs": missing_originals,
+    }
+
+
+def grade_inverse_trial_equation(
+    output_docx: Path, paragraphs_before_forward: list[str], marker: str,
+) -> dict[str, Any]:
+    ok, err = _package_is_valid_docx(output_docx)
+    if not ok:
+        return {"verdict": "fail", "reason": f"invalid output package: {err}"}
+
+    paragraphs_after = _paragraph_texts(output_docx)
+    remaining_matches = [t for t in _equation_flat_texts(output_docx) if marker in t]
+    missing_originals = [p for p in paragraphs_before_forward if p not in paragraphs_after]
+
+    checks = {
+        "output_is_valid_docx": True,
+        "marker_equation_removed": len(remaining_matches) == 0,
+        "exact_pre_forward_paragraph_list_restored": paragraphs_after == paragraphs_before_forward,
+        "no_pre_forward_paragraph_lost": not missing_originals,
+    }
+    verdict = "pass" if all(checks.values()) else "fail"
+    return {
+        "verdict": verdict,
+        "checks": checks,
+        "paragraph_count_after": len(paragraphs_after),
+        "paragraph_count_before_forward": len(paragraphs_before_forward),
+        "remaining_matching_equation_flat_texts": remaining_matches,
+        "missing_pre_forward_paragraphs": missing_originals,
+    }

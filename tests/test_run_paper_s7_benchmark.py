@@ -75,6 +75,31 @@ def test_build_pair_specs_caption_returns_none_inverse(tmp_path: Path) -> None:
     assert inverse is None  # resolved post-forward by the runner, not upfront
 
 
+def test_build_pair_specs_equation_returns_none_inverse(tmp_path: Path) -> None:
+    applicability = {
+        "applicable": True,
+        "anchor": {"anchor_para_id": "p1", "anchor_text_snippet": "Snip", "anchor_full_text": "Snip text"},
+    }
+
+    forward, inverse = _build_pair_specs("equation", "doc-a", tmp_path / "in.docx", "marker1", applicability)
+
+    assert forward.treatment_tool == "insert_equation"
+    assert forward.treatment_args["anchor_para_id"] == "p1"
+    assert inverse is None  # resolved post-forward, same as caption/citation -- see docx_anchor_prober.resolve_equation_para_id_by_marker
+
+
+def test_generate_equation_inverse_uses_the_resolved_post_forward_id() -> None:
+    from docx_trial_broker import generate_equation_inverse
+
+    spec = generate_equation_inverse(
+        "doc-a", Path("/tmp/forward-output.docx"), "marker1", "9876543210", "sp_post_forward_id",
+    )
+
+    assert spec.treatment_tool == "remove_equation"
+    assert spec.treatment_args["equation_para_id"] == "sp_post_forward_id"
+    assert spec.marker_text == "9876543210"
+
+
 def test_build_pair_specs_section_reorder_uses_plan(tmp_path: Path) -> None:
     applicability = {
         "applicable": True,
