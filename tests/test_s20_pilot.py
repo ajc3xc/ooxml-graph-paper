@@ -194,6 +194,46 @@ def test_run_trial_gives_each_trial_a_unique_scratch_temp_dir(tmp_path: Path, mo
     assert (tmp_path / "runs" / "trial-a" / "scratch").is_dir()
 
 
+def test_treatment_prompt_tells_the_agent_to_call_the_tool_directly(tmp_path: Path, monkeypatch) -> None:
+    """PAPER-S7 finding (2026-09-03): citation's treatment-arm trials cost far
+    more per chain than any other family despite needing fewer turns on
+    average. Traced to real transcripts: ToolSearch's own "select:" lookup
+    for remove_citation reproducibly returns no match on the very first
+    call (confirmed identically across every expensive trial inspected),
+    sending the agent down an 8+ turn exploration of unrelated tool names
+    before it eventually calls remove_citation directly and it just works.
+    The tool was always callable via --allowedTools; ToolSearch's own index
+    is what's wrong for this specific name -- a host-level defect this repo
+    cannot fix. Telling the agent up front that no discovery step is needed
+    routes around it for every family, not just citation."""
+    import claude_pair_runner
+    import subprocess as subprocess_module
+
+    input_docx = tmp_path / "input.docx"
+    input_docx.write_bytes(b"fake-docx-bytes")
+    spec = TrialSpec(
+        trial_id="trial-a", doc_label="doc", arm="treatment", direction="inverse",
+        family="citation", input_docx=input_docx, marker_text="marker",
+        treatment_tool="remove_citation", treatment_args={"anchor_para_id": "sp123"},
+        prompt="find and remove the marker",
+    )
+
+    captured = {}
+
+    def _fake_run(*args, **kwargs):
+        captured["argv"] = args[0] if args else kwargs.get("args")
+        return subprocess_module.CompletedProcess(args=args, returncode=0, stdout="{}", stderr="")
+
+    monkeypatch.setattr(claude_pair_runner.subprocess, "run", _fake_run)
+
+    claude_pair_runner.run_trial(spec, tmp_path / "runs")
+
+    prompt_index = captured["argv"].index("-p") + 1
+    prompt = captured["argv"][prompt_index]
+    assert "remove_citation tool directly" in prompt
+    assert "do not use ToolSearch" in prompt
+
+
 def test_milestone_word_receipt_never_raises_on_render_failure(tmp_path: Path, monkeypatch) -> None:
     import run_paper_s20_pilot
 

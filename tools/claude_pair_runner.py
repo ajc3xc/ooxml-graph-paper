@@ -226,9 +226,26 @@ def run_trial(spec: TrialSpec, runs_root: Path, *, model: str = "haiku") -> dict
         # rediscover a tool's argument schema from a natural-language task
         # description alone -- matching every family's design intent, not
         # just the original bibliography family's.
+        #
+        # "do not use ToolSearch first" (2026-09-03 finding): citation's
+        # treatment-arm trials cost far more per chain than any other
+        # family despite needing fewer turns on average -- traced to real
+        # transcripts, not guessed. ToolSearch's own "select:" lookup for
+        # `remove_citation` reproducibly returns no match on the very first
+        # call (confirmed identically across every expensive trial
+        # inspected), sending the agent down an 8+ turn exploration of
+        # unrelated tool names before it eventually calls remove_citation
+        # DIRECTLY and it just works -- the tool was always callable via
+        # --allowedTools, ToolSearch's own index is what's stale/wrong for
+        # this specific tool name. That's a host-level ToolSearch defect,
+        # not something fixable in this repo or meridian-docs -- but
+        # telling the agent up front that the tool needs no discovery step
+        # routes around it for every family, not just this one.
         prefix += (
-            f"Use the {spec.treatment_tool} tool with these exact "
-            f"arguments: {json.dumps(spec.treatment_args)}\n\n"
+            f"Call the {spec.treatment_tool} tool directly, right away, with "
+            f"these exact arguments: {json.dumps(spec.treatment_args)}\n\n"
+            f"This tool is already available to you -- do not use ToolSearch "
+            f"or any other discovery step first; just call it.\n\n"
         )
     located_prompt = prefix + spec.prompt
     spec_with_path = dataclasses.replace(spec, prompt=located_prompt)
