@@ -10,6 +10,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools"))
 from docx_anchor_prober import (  # noqa: E402
     resolve_equation_para_id_by_marker,
     resolve_section_reorder_plan,
+    resolve_table_index_by_marker,
 )
 
 _W = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
@@ -80,6 +81,51 @@ def test_resolve_equation_para_id_by_marker_rejects_ambiguous_match(tmp_path: Pa
 
     assert result["found"] is False
     assert "2 equations" in result["reason"]
+
+
+def _table_xml(cell_text: str) -> str:
+    return (
+        "<w:tbl><w:tblGrid><w:gridCol w:w=\"1000\"/></w:tblGrid>"
+        f"<w:tr><w:tc><w:p><w:r><w:t>{cell_text}</w:t></w:r></w:p></w:tc></w:tr></w:tbl>"
+    )
+
+
+def test_resolve_table_index_by_marker_finds_the_right_table(tmp_path: Path) -> None:
+    body = (
+        "<w:p><w:r><w:t>Anchor paragraph.</w:t></w:r></w:p>"
+        + _table_xml("PILOT-S7-TABLE-1111111111")
+        + "<w:p><w:r><w:t>Between the two tables.</w:t></w:r></w:p>"
+        + _table_xml("PILOT-S7-TABLE-2222222222")
+    )
+    path = _make_docx_raw_body(tmp_path, "two_tables.docx", body)
+
+    result = resolve_table_index_by_marker(path, "PILOT-S7-TABLE-2222222222")
+
+    assert result["found"] is True
+    # Body children: [p, tbl, p, tbl] -- the second table is at index 3.
+    assert result["table_index"] == 3
+
+
+def test_resolve_table_index_by_marker_not_found(tmp_path: Path) -> None:
+    body = "<w:p><w:r><w:t>Anchor.</w:t></w:r></w:p>" + _table_xml("PILOT-S7-TABLE-1111111111")
+    path = _make_docx_raw_body(tmp_path, "one_table.docx", body)
+
+    result = resolve_table_index_by_marker(path, "PILOT-S7-TABLE-9999999999")
+
+    assert result["found"] is False
+
+
+def test_resolve_table_index_by_marker_rejects_ambiguous_match(tmp_path: Path) -> None:
+    """Same discipline as resolve_equation_para_id_by_marker: a marker that
+    matches more than one table is reported as not found with a reason,
+    never silently resolved to the first match."""
+    body = _table_xml("PILOT-S7-TABLE-55551111") + _table_xml("PILOT-S7-TABLE-55552222")
+    path = _make_docx_raw_body(tmp_path, "ambiguous_tables.docx", body)
+
+    result = resolve_table_index_by_marker(path, "PILOT-S7-TABLE-5555")
+
+    assert result["found"] is False
+    assert "2 tables" in result["reason"]
 
 
 def _heading(text: str, para_id: str, level: int) -> str:

@@ -10,7 +10,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools"))
 from docx_trial_evaluator import (  # noqa: E402
     grade_forward_trial_equation,
     grade_forward_trial_reorder,
+    grade_forward_trial_table_structural,
     grade_inverse_trial_equation,
+    grade_inverse_trial_table_structural,
 )
 
 _W = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
@@ -50,6 +52,13 @@ def _make_docx_raw_body(tmp_path: Path, name: str, body_xml: str) -> Path:
         zf.writestr("_rels/.rels", "<Relationships/>")
         zf.writestr("word/document.xml", document_xml)
     return path
+
+
+def _table_paragraph_xml(marker: str) -> str:
+    return (
+        "<w:tbl><w:tblGrid><w:gridCol w:w=\"1000\"/></w:tblGrid>"
+        f"<w:tr><w:tc><w:p><w:r><w:t>{marker}</w:t></w:r></w:p></w:tc></w:tr></w:tbl>"
+    )
 
 
 def test_reorder_forward_passes_when_heading_has_no_incidental_whitespace(tmp_path: Path) -> None:
@@ -150,3 +159,48 @@ def test_equation_inverse_fails_when_equation_still_present(tmp_path: Path) -> N
 
     assert result["verdict"] == "fail"
     assert result["checks"]["marker_equation_removed"] is False
+
+
+def test_table_structural_forward_passes_when_marker_table_cell_present(tmp_path: Path) -> None:
+    before = ["Anchor paragraph."]
+    body = "<w:p><w:r><w:t>Anchor paragraph.</w:t></w:r></w:p>" + _table_paragraph_xml("PILOT-S7-TABLE-abc123")
+    output = _make_docx_raw_body(tmp_path, "table_forward.docx", body)
+
+    result = grade_forward_trial_table_structural(output, before, "PILOT-S7-TABLE-abc123")
+
+    assert result["verdict"] == "pass"
+    assert result["checks"]["marker_table_cell_present_exactly_once"] is True
+    assert result["checks"]["no_original_paragraph_lost"] is True
+
+
+def test_table_structural_forward_fails_when_original_paragraph_lost(tmp_path: Path) -> None:
+    before = ["Anchor paragraph.", "A second original paragraph."]
+    # "A second original paragraph." is missing from the output.
+    body = "<w:p><w:r><w:t>Anchor paragraph.</w:t></w:r></w:p>" + _table_paragraph_xml("PILOT-S7-TABLE-abc123")
+    output = _make_docx_raw_body(tmp_path, "table_forward_lost.docx", body)
+
+    result = grade_forward_trial_table_structural(output, before, "PILOT-S7-TABLE-abc123")
+
+    assert result["verdict"] == "fail"
+    assert result["checks"]["no_original_paragraph_lost"] is False
+
+
+def test_table_structural_inverse_passes_when_table_removed_and_paragraphs_restored(tmp_path: Path) -> None:
+    before_forward = ["Anchor paragraph."]
+    output = _make_docx(tmp_path, "table_inverse_ok.docx", before_forward)
+
+    result = grade_inverse_trial_table_structural(output, before_forward, "PILOT-S7-TABLE-abc123")
+
+    assert result["verdict"] == "pass"
+    assert result["checks"]["marker_table_removed"] is True
+
+
+def test_table_structural_inverse_fails_when_table_still_present(tmp_path: Path) -> None:
+    before_forward = ["Anchor paragraph."]
+    body = "<w:p><w:r><w:t>Anchor paragraph.</w:t></w:r></w:p>" + _table_paragraph_xml("PILOT-S7-TABLE-abc123")
+    output = _make_docx_raw_body(tmp_path, "table_inverse_fail.docx", body)
+
+    result = grade_inverse_trial_table_structural(output, before_forward, "PILOT-S7-TABLE-abc123")
+
+    assert result["verdict"] == "fail"
+    assert result["checks"]["marker_table_removed"] is False

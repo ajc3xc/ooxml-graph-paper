@@ -231,7 +231,17 @@ def generate_citation_inverse(
     """``anchor_para_id`` here MUST be re-resolved from the forward trial's
     own OUTPUT document (e.g. via docx_anchor_prober.resolve_para_id_by_marker_text),
     never reused from the pristine pre-forward document -- see this module's
-    docstring above for why."""
+    docstring above for why.
+
+    ``match_display_text=marker_text`` is passed explicitly (2026-09-05):
+    found live via a hand-authored fixture that a paragraph can hold more
+    than one CSL_CITATION field (e.g. a pre-existing citation the forward
+    trial's own insert landed alongside), in which case remove_citation now
+    refuses to guess which one to remove unless told. The harness already
+    knows exactly which marker text identifies ITS OWN inserted field --
+    passing it costs nothing when the paragraph has only one field (the
+    parameter is ignored in that case) and is required whenever it has
+    more than one."""
     trial_base = f"{doc_label}-citation-{marker}"
 
     return TrialSpec(
@@ -240,7 +250,7 @@ def generate_citation_inverse(
         input_docx=input_docx,
         marker_text=marker_text,
         treatment_tool="remove_citation",
-        treatment_args={"anchor_para_id": anchor_para_id},
+        treatment_args={"anchor_para_id": anchor_para_id, "match_display_text": marker_text},
         prompt=(
             f"You are editing a Word document at the path given to you. "
             f"Find the paragraph that contains this exact bracketed text: "
@@ -308,6 +318,65 @@ def generate_caption_inverse(
             f"not change, remove, reorder, or reformat any other "
             f"paragraph. Save the document in place at the same path. When "
             f"finished, reply with a single line: DONE."
+        ),
+    )
+
+
+def generate_table_structural_forward(
+    doc_label: str, input_docx: Path, marker_prefix: str, anchor_para_id: str, anchor_text_snippet: str,
+) -> TrialSpec:
+    marker = new_marker("PILOT-S7-TABLE")
+    trial_base = f"{doc_label}-table_structural-{marker_prefix}"
+    return TrialSpec(
+        trial_id=f"{trial_base}-forward",
+        doc_label=doc_label, arm="", direction="forward", family="table_structural",
+        input_docx=input_docx,
+        marker_text=marker,
+        treatment_tool="insert_table",
+        treatment_args={
+            "anchor_para_id": anchor_para_id, "rows": 1, "cols": 1,
+            "position": "after", "cell_texts": [[marker]],
+        },
+        prompt=(
+            f"You are editing a Word document at the path given to you. "
+            f"Find the paragraph that starts with the exact text: "
+            f"{anchor_text_snippet!r}\n\n"
+            f"Insert a new, real Word table (a genuine table object with "
+            f"rows and columns, not plain text formatted to look like one) "
+            f"immediately AFTER that paragraph. The table should have "
+            f"exactly 1 row and 1 column, and that single cell must "
+            f"contain exactly this text: {marker}\n\n"
+            f"Do not change, remove, reorder, or reformat any other "
+            f"paragraph. Save the document in place at the same path. When "
+            f"finished, reply with a single line: DONE."
+        ),
+    )
+
+
+def generate_table_structural_inverse(
+    doc_label: str, input_docx: Path, marker_prefix: str, marker: str, table_index: int,
+) -> TrialSpec:
+    """``table_index`` here MUST be re-resolved from the forward trial's own
+    OUTPUT document via docx_anchor_prober.resolve_table_index_by_marker
+    (never reused from a pristine document -- there is nothing to reuse,
+    the table did not exist before forward ran), same post-forward pattern
+    as caption/citation/equation."""
+    trial_base = f"{doc_label}-table_structural-{marker_prefix}"
+    return TrialSpec(
+        trial_id=f"{trial_base}-inverse",
+        doc_label=doc_label, arm="", direction="inverse", family="table_structural",
+        input_docx=input_docx,
+        marker_text=marker,
+        treatment_tool="remove_table",
+        treatment_args={"table_index": table_index},
+        prompt=(
+            f"You are editing a Word document at the path given to you. "
+            f"It contains a real Word table whose single cell has exactly "
+            f"this text: {marker}\n\n"
+            f"Remove that entire table from the document. Do not change, "
+            f"remove, reorder, or reformat any other paragraph. Save the "
+            f"document in place at the same path. When finished, reply "
+            f"with a single line: DONE."
         ),
     )
 

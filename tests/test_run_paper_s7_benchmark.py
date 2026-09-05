@@ -62,6 +62,9 @@ def test_generate_citation_inverse_uses_the_resolved_post_forward_id() -> None:
     assert spec.treatment_tool == "remove_citation"
     assert spec.treatment_args["anchor_para_id"] == "sp_post_forward_id"
     assert spec.marker_text == "[PILOT-S7-CITATION-marker1]"
+    # 2026-09-05: passed explicitly so remove_citation can disambiguate when
+    # the anchor paragraph holds more than one CSL_CITATION field.
+    assert spec.treatment_args["match_display_text"] == "[PILOT-S7-CITATION-marker1]"
 
 
 def test_build_pair_specs_caption_returns_none_inverse(tmp_path: Path) -> None:
@@ -99,6 +102,33 @@ def test_generate_equation_inverse_uses_the_resolved_post_forward_id() -> None:
     assert spec.treatment_tool == "remove_equation"
     assert spec.treatment_args["equation_para_id"] == "sp_post_forward_id"
     assert spec.marker_text == "9876543210"
+
+
+def test_build_pair_specs_table_structural_returns_none_inverse(tmp_path: Path) -> None:
+    applicability = {
+        "applicable": True,
+        "anchor": {"anchor_para_id": "p1", "anchor_text_snippet": "Snip", "anchor_full_text": "Snip text"},
+    }
+
+    forward, inverse = _build_pair_specs("table_structural", "doc-a", tmp_path / "in.docx", "marker1", applicability)
+
+    assert forward.treatment_tool == "insert_table"
+    assert forward.treatment_args["anchor_para_id"] == "p1"
+    assert forward.treatment_args["rows"] == 1
+    assert forward.treatment_args["cols"] == 1
+    assert inverse is None  # resolved post-forward, same as caption/citation/equation
+
+
+def test_generate_table_structural_inverse_uses_the_resolved_post_forward_index() -> None:
+    from docx_trial_broker import generate_table_structural_inverse
+
+    spec = generate_table_structural_inverse(
+        "doc-a", Path("/tmp/forward-output.docx"), "marker1", "PILOT-S7-TABLE-abc123", 3,
+    )
+
+    assert spec.treatment_tool == "remove_table"
+    assert spec.treatment_args["table_index"] == 3
+    assert spec.marker_text == "PILOT-S7-TABLE-abc123"
 
 
 def test_build_pair_specs_section_reorder_uses_plan(tmp_path: Path) -> None:

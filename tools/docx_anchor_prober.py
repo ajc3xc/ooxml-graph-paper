@@ -114,6 +114,50 @@ def resolve_equation_para_id_by_marker(docx_path: Path, marker: str) -> dict[str
     return {"found": True, "para_id": matches[0]["para_id"]}
 
 
+def resolve_table_index_by_marker(docx_path: Path, marker: str) -> dict[str, Any]:
+    """Post-forward resolution for the table_structural family, analogous to
+    resolve_equation_para_id_by_marker: insert_table's own new table has no
+    id the harness can predict ahead of time (its body-child position
+    depends on how many body children preceded the anchor, which the
+    control arm's own prose interpretation can shift too), so this
+    re-parses the OUTPUT document fresh and finds which table (by its
+    0-based body-child ``table_index``, the same addressing
+    insert_table/remove_table/relocate_table use) has the marker text in
+    one of its cells. Works for either arm's output identically.
+
+    Direct raw-XML parse (mirrors ``docx_trial_broker._paragraph_texts``'s
+    own style) rather than going through a meridian_docs table-listing
+    helper, since all that's needed is "does any cell paragraph in this
+    table contain the marker," not a full structural table model."""
+    import xml.etree.ElementTree as ET
+    import zipfile
+
+    W = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
+    with zipfile.ZipFile(docx_path) as zf:
+        xml_bytes = zf.read("word/document.xml")
+    root = ET.fromstring(xml_bytes)
+    body = root.find(f"{{{W}}}body")
+    if body is None:
+        return {"found": False, "reason": "document has no <w:body> element"}
+
+    matches: list[int] = []
+    for idx, child in enumerate(body):
+        if child.tag != f"{{{W}}}tbl":
+            continue
+        cell_text = "".join(t.text or "" for t in child.iter(f"{{{W}}}t"))
+        if marker in cell_text:
+            matches.append(idx)
+
+    if not matches:
+        return {"found": False, "reason": f"no table contains marker {marker!r}"}
+    if len(matches) > 1:
+        return {
+            "found": False,
+            "reason": f"marker {marker!r} found in {len(matches)} tables, expected exactly 1",
+        }
+    return {"found": True, "table_index": matches[0]}
+
+
 def resolve_section_reorder_plan(docx_path: Path) -> dict[str, Any]:
     """Pick a real heading (not the first, so it has a preceding neighbor to
     restore position against; not the last, so there is room to move it

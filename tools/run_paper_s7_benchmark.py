@@ -38,6 +38,7 @@ from docx_anchor_prober import (  # noqa: E402
     resolve_equation_para_id_by_marker,
     resolve_para_id_by_marker_text,
     resolve_section_reorder_plan,
+    resolve_table_index_by_marker,
 )
 from docx_trial_broker import (  # noqa: E402
     TrialSpec,
@@ -50,6 +51,8 @@ from docx_trial_broker import (  # noqa: E402
     generate_equation_forward,
     generate_equation_inverse,
     generate_section_reorder_pair,
+    generate_table_structural_forward,
+    generate_table_structural_inverse,
     new_marker,
 )
 from docx_trial_evaluator import (  # noqa: E402
@@ -57,16 +60,18 @@ from docx_trial_evaluator import (  # noqa: E402
     grade_forward_trial_equation,
     grade_forward_trial_inline,
     grade_forward_trial_reorder,
+    grade_forward_trial_table_structural,
     grade_inverse_trial,
     grade_inverse_trial_equation,
     grade_inverse_trial_inline,
     grade_inverse_trial_reorder,
+    grade_inverse_trial_table_structural,
 )
 from claude_pair_runner import audit_isolation, run_trial  # noqa: E402
 from word_receipt_watchdog import word_receipt_with_orphan_diagnostics  # noqa: E402
 
 _WORD_RECEIPT_TIMEOUT_SECONDS = 90.0
-_FAMILIES = ("bibliography", "citation", "caption", "section_reorder", "equation")
+_FAMILIES = ("bibliography", "citation", "caption", "section_reorder", "equation", "table_structural")
 
 
 def _safe_paragraph_texts(docx_path: Path) -> list[str] | None:
@@ -113,7 +118,7 @@ def probe_family_applicability(family: str, docx_path: Path) -> dict[str, Any]:
     not every document need support every template)."""
     if family in ("bibliography",):
         return {"applicable": True}
-    if family in ("citation", "caption", "equation"):
+    if family in ("citation", "caption", "equation", "table_structural"):
         anchor = resolve_body_anchor(docx_path)
         if not anchor["found"]:
             return {"applicable": False, "reason": anchor["reason"]}
@@ -130,15 +135,16 @@ def _build_pair_specs(
     family: str, doc_label: str, docx_path: Path, marker: str, applicability: dict[str, Any],
 ) -> tuple[TrialSpec, TrialSpec | None]:
     """Returns (forward, inverse-or-None). inverse is None for citation,
-    caption, and equation: all three need the forward trial's own OUTPUT
-    inspected before the inverse's anchor_para_id can be resolved (citation's
-    anchor paragraph's own synthetic id changes once forward edits its text;
-    caption's and equation's new paragraph never gets an id back to the
-    CONTROL arm's output at all, and even reading treatment's own tool
-    result would only cover treatment, not control uniformly) -- see
-    resolve_para_id_by_marker_text / resolve_equation_para_id_by_marker and
-    docx_trial_broker.py's citation/equation section docstrings for why
-    reusing the pristine-document id is wrong."""
+    caption, equation, and table_structural: all four need the forward
+    trial's own OUTPUT inspected before the inverse's anchor can be resolved
+    (citation's anchor paragraph's own synthetic id changes once forward
+    edits its text; caption's, equation's, and table_structural's new
+    content never gets an id/index back to the CONTROL arm's output at all,
+    and even reading treatment's own tool result would only cover treatment,
+    not control uniformly) -- see resolve_para_id_by_marker_text /
+    resolve_equation_para_id_by_marker / resolve_table_index_by_marker and
+    docx_trial_broker.py's citation/equation/table_structural section
+    docstrings for why reusing the pristine-document id is wrong."""
     if family == "bibliography":
         return generate_bibliography_pair(doc_label, docx_path, marker)
     if family == "citation":
@@ -156,6 +162,12 @@ def _build_pair_specs(
     if family == "equation":
         anchor = applicability["anchor"]
         forward = generate_equation_forward(
+            doc_label, docx_path, marker, anchor["anchor_para_id"], anchor["anchor_text_snippet"],
+        )
+        return forward, None
+    if family == "table_structural":
+        anchor = applicability["anchor"]
+        forward = generate_table_structural_forward(
             doc_label, docx_path, marker, anchor["anchor_para_id"], anchor["anchor_text_snippet"],
         )
         return forward, None
@@ -181,6 +193,8 @@ def _grade_forward(family: str, output_docx: Path, paragraphs_before: list[str],
         return grade_forward_trial_reorder(output_docx, paragraphs_before, spec.marker_text)
     if family == "equation":
         return grade_forward_trial_equation(output_docx, paragraphs_before, spec.marker_text)
+    if family == "table_structural":
+        return grade_forward_trial_table_structural(output_docx, paragraphs_before, spec.marker_text)
     raise ValueError(f"unknown family {family!r}")
 
 
@@ -193,6 +207,8 @@ def _grade_inverse(family: str, output_docx: Path, paragraphs_before_forward: li
         return grade_inverse_trial_reorder(output_docx, paragraphs_before_forward)
     if family == "equation":
         return grade_inverse_trial_equation(output_docx, paragraphs_before_forward, spec.marker_text)
+    if family == "table_structural":
+        return grade_inverse_trial_table_structural(output_docx, paragraphs_before_forward, spec.marker_text)
     raise ValueError(f"unknown family {family!r}")
 
 
@@ -331,10 +347,15 @@ def run_chain(
             # (its content lives in <m:oMath>/<m:t>, not the <w:t> runs that
             # function reads -- confirmed directly, 2026-09-03), so it needs
             # its own resolver, not the marker-text one citation/caption share.
-            resolver = (
-                resolve_equation_para_id_by_marker if family == "equation"
-                else resolve_para_id_by_marker_text
-            )
+            # table_structural needs a THIRD resolver: the new table has no
+            # paragraph id of its own at all (it's addressed by body-child
+            # table_index, same scheme as insert_table/remove_table).
+            if family == "equation":
+                resolver = resolve_equation_para_id_by_marker
+            elif family == "table_structural":
+                resolver = resolve_table_index_by_marker
+            else:
+                resolver = resolve_para_id_by_marker_text
             try:
                 resolved = resolver(Path(fwd_result["output_docx_path"]), forward_spec.marker_text)
             except Exception as exc:  # noqa: BLE001 -- a malformed/corrupted forward output must
@@ -362,6 +383,10 @@ def run_chain(
             elif family == "equation":
                 inverse_spec = generate_equation_inverse(
                     doc_label, Path(fwd_result["output_docx_path"]), forward_spec.trial_id, forward_spec.marker_text, resolved["para_id"],
+                )
+            elif family == "table_structural":
+                inverse_spec = generate_table_structural_inverse(
+                    doc_label, Path(fwd_result["output_docx_path"]), forward_spec.trial_id, forward_spec.marker_text, resolved["table_index"],
                 )
             else:
                 raise AssertionError(f"family {family!r} returned inverse=None but has no post-forward resolver wired up")
