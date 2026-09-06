@@ -15,11 +15,15 @@ K=4 is out of this document's own K=1 scope.)
 
 Grading the completed trials, both arms showed a much lower pass rate (~60-63%) than the v1
 corpus's section_reorder numbers (72.7-100%) -- worse than expected for a real capability
-comparison, and suspicious because BOTH arms dropped by roughly the same amount. Inspecting
-individual failures found every one sharing the identical failing check
+comparison, and suspicious because BOTH arms dropped by roughly the same amount. Inspecting a
+handful of individual failures found the same failing check
 (`moved_heading_still_present: false`) with every other check passing (valid docx, exact
 paragraph multiset preserved, order genuinely changed) -- a strong signal of a grading bug,
-not a real task failure.
+not a real task failure. **Clarified 2026-09-06**: this describes the initial diagnostic
+sample, not the full failing population -- of the 28 v2 forward trials that failed before this
+fix, 20 had this as their sole failing check (below), 3 failed on a different check entirely,
+and 5 failed on both simultaneously. The root cause and fix are unaffected; only the earlier
+"every one" phrasing overstated how uniform the failure population was.
 
 Root cause: `docx_trial_evaluator.py`'s `grade_forward_trial_reorder` compared
 `section_heading_text` (from `document_outline`'s raw, unstripped run text) against
@@ -88,8 +92,11 @@ K=1 and K=4) -- not a bug, and not silently dropped.
 
 But investigating this anomaly surfaced something else: this same document's **treatment**
 chain executed quickly (15-25s per pair) yet failed FORWARD grading on every single pair, and
-three other v2 documents showed the identical signature -- both arms completing normally but
-failing forward grading with only `moved_heading_still_present: false` among the checks.
+three other v2 documents showed a related signature. **Clarified 2026-09-06**: only one of
+those three matches the description exactly (both arms completing normally, only
+`moved_heading_still_present: false` failing); the other two also fail `order_actually_changed`
+alongside it -- still traceable to the same root cause below, but a broader failure signature
+than "only `moved_heading_still_present: false`" on its own.
 Root cause: `resolve_section_reorder_plan` picked the section to move by raw position
 (`headings[mid]`) with no check that the heading actually has text. Some real-world documents
 have a heading-styled paragraph with no extractable text at all (an image-only or field-only
@@ -102,9 +109,14 @@ correctly.
 
 Checked the real corpora directly: **zero of 38 v1** documents, **4 of 48 v2** documents (a
 different 4 than the heading-level defect above) -- and unlike that defect, this one affects
-**both arms symmetrically** (all 4 documents show control AND treatment both failing forward
-grading for the identical reason), so while it deflates both arms' absolute pass rates, it is
-less likely to have biased the treatment-vs-control comparison itself.
+**3 of the 4 documents symmetrically** (both control and treatment failing forward grading for
+the identical reason). **Corrected 2026-09-06**: the 4th document -- the same 1.7MB one whose
+control-arm chain is discussed above -- is NOT symmetric: its control chain never reached
+forward grading at all (status `blocked`, timed out before producing a result), so only its
+treatment arm actually shows the blank-heading-text failure. So while the defect deflates both
+arms' absolute pass rates on the 3 genuinely symmetric documents, it is less likely to have
+biased the treatment-vs-control comparison on those -- the 4th document's asymmetry is a
+separate, already-disclosed timeout exclusion, not part of this defect's own symmetric effect.
 
 A closely related statistics-layer bug was found alongside it: `compute_s7_statistics.py`'s
 `_chain_outcome` treated a "blocked" chain the same as any other once it had at least one
@@ -159,7 +171,7 @@ treatment), **p = 0.2705**.
 Still not significant at K=1 -- this does **not** confirm the v1 corpus's suggestive
 72.7%-vs-100% finding at conventional thresholds. But across two full correction passes now,
 the picture has moved consistently in one direction, not bounced around noisily: the effect
-size favoring treatment keeps growing (9.3 points combined, up from 7.0, up from 5.1 before
+size favoring treatment keeps growing (9.2 points combined, up from 7.0, up from 5.1 before
 any correction) even as the p-value itself has not yet crossed the conventional threshold
 (0.27, down from 0.39, down from 0.57). Three real methodological defects in a row, ALL of
 which turned out to be spuriously penalizing this comparison rather than randomly distributed
@@ -167,17 +179,28 @@ noise, is itself a meaningful piece of evidence: it argues the true effect is mo
 be real-but-underpowered-at-K=1 than genuinely zero. That is a claim about K=1 specifically --
 **at K=4, the same document set (fewer defects remaining to distort it, and four times the
 repeated-cycling exposure) does reach significance** (p=0.0015 combined; see
-`docs/paper-s8-final-evidence-v1.md` section 2.4), with a mechanistically verified explanation
-(control's exact-restoration checks pass on the first edit cycle but degrade specifically from
-the second cycle onward, a real compounding-drift pattern directly confirmed against the pair
-grading data, not a re-emergence of any of the three fixed defects).
+`docs/paper-s8-final-evidence-v1.md` section 2.4). **Corrected 2026-09-06** (an independent
+pre-publication audit): the mechanism explanation here previously overstated as
+"mechanistically verified... never on pair 0." Directly enumerating every K=4 control chain
+with at least one failing pair (12 of 48, canonical post-fix manifests): 9 of 12 do show the
+claimed pattern (`exact_original_order_restored` passes on pair 0, then fails from some later
+pair onward and typically keeps failing) -- a real, dominant majority trend, not a
+universal rule. But 2 of 12 fail the exact-restoration check AT pair 0 itself, directly
+contradicting "passes on the first cycle universally," and one of those two
+(`s7v2_sr_bec8dc134665926f`) fails ONLY at pair 0 and then passes cleanly on pairs 1-3 -- the
+literal opposite of compounding drift. The honest characterization: control's failures
+predominantly emerge from repeated cycling rather than the first cycle, which is still a real
+and meaningful pattern behind the K=4 result, but it is not a clean, exceptionless mechanism,
+and the K=4 significance finding itself does not depend on it being one.
 
 This is reported plainly because the preregistration committed to it in advance: "If this
 follow-up's own result does not favor treatment, or is itself not significant, that is
 reported plainly. This document does not commit to any particular outcome." The real value of
 this exercise was never a single confirmed number -- it is a rigorous, disclosed process that
-found and fixed FOUR genuine bugs across two correction passes (this blank-heading-text
-defect and its associated statistics-layer bug, the heading-level defect, the evaluator
-whitespace bug, and the earlier PII scanner false-negative), none of which would have
-surfaced without actually running the real acquisition-through-confirmatory pipeline end to
-end, repeatedly, at increasing scale and depth.
+found and fixed FIVE genuine bugs across two correction passes: the earlier PII scanner
+false-negative, the evaluator whitespace bug, the heading-level defect, the blank-heading-text
+defect, and the statistics-layer "blocked chains scored as failures" bug -- five distinct,
+independently-committed, independently-tested fixes (not four, as an earlier revision of this
+document bundled the last two together), none of which would have surfaced without actually
+running the real acquisition-through-confirmatory pipeline end to end, repeatedly, at
+increasing scale and depth.

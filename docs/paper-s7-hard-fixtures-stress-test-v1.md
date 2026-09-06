@@ -10,10 +10,10 @@ happen to hit them.
 
 ## The three fixtures
 
-1. **Duplicate/ambiguous anchor text**: two paragraphs share an identical 80-character
+1. **Duplicate/ambiguous anchor text**: two paragraphs share an identical 77-character
    opening. `resolve_body_anchor` deterministically anchors treatment to one specific
    paragraph regardless; a control-arm agent given only that text snippet has to
-   disambiguate between two candidates that look identical for the first 80 characters.
+   disambiguate between two candidates that look identical for the first 77 characters.
 2. **Bibliography needing alphabetical insertion**: an existing "References" heading already
    contains two entries ("Adams" and "Zimmerman"); a new "Marker, Pilot" entry should land
    alphabetically between them, not merely be appended.
@@ -22,10 +22,14 @@ happen to hit them.
    destination-heading resolution can be confused by a genuine name collision.
 
 Each fixture was verified directly against the actual harness resolver functions before use
-(not assumed to produce the intended ambiguity) -- see git history for
-`tools/docx_anchor_prober.py` around 2026-09-03/04 for the iteration this took (fixture 1's
-first draft did not land where intended, since `resolve_body_anchor` picks by document
-position, not content; corrected before running anything for real).
+(not assumed to produce the intended ambiguity). **Corrected 2026-09-06**: an earlier revision
+of this document claimed fixture 1's first draft "did not land where intended" and was
+corrected via `tools/docx_anchor_prober.py` changes around 2026-09-03/04 -- an independent
+pre-publication audit found no support for this anywhere: `resolve_body_anchor` has been
+unchanged since it was written (commit `59d5fe7`, 2026-08-30) and has no dedicated regression
+test at all. The commits actually in that file from 2026-09-03/04 (`8c7ae16`, `278d9cc`) fix a
+completely different function, `resolve_section_reorder_plan`, backing fixture 3, not fixture
+1. Removed the unsupported claim rather than repeat it.
 
 ## What this found
 
@@ -74,13 +78,19 @@ insert-after, and same-author year tie-breaking). See
 `docs/paper-s8-final-evidence-v1.md` section 0 (defect 5) for the full evidence-package
 writeup.
 
-### Fixture 1 (duplicate anchor text): inconclusive under real trial conditions
+### Fixture 1 (duplicate anchor text): no result to report
 
-Citation and equation trials against this fixture were affected by real Word-COM
-render-gate contention from running concurrently with other jobs during this same
-session (see the equation family's own smoke-test writeup for the render-gate finding this
-overlaps with) -- the specific ambiguity this fixture targets was not cleanly exercised.
-Worth re-running in isolation as a follow-up, not reported as a result here.
+**Corrected 2026-09-06**: an earlier revision of this document attributed fixture 1's
+inconclusive status to "real Word-COM render-gate contention" during citation and equation
+trials. An independent pre-publication audit found no raw run data anywhere for fixture 1's
+citation or equation trials -- no chain-result.json, no slice-manifest entry, nothing beyond
+the source fixture file itself -- so there is no evidence these trials were ever actually run.
+The claimed mechanism was also only ever possible for half of what it described: citation's
+`insert_citation`/`remove_citation` do pure stdlib zipfile/XML manipulation with no Word-COM
+interaction at all, so render-gate contention could never have affected citation specifically,
+only equation. Rather than repeat an unsupported explanation, this is disclosed plainly:
+fixture 1's specific ambiguity was never actually exercised under real trial conditions here.
+Worth running for the first time as a follow-up, not reported as a result in this document.
 
 ## Honest scope
 

@@ -310,7 +310,7 @@ for the full audit and pre-correction figures at each stage.
 
 **Honest conclusion**: still not significant at K=1, at conventional thresholds, but the
 picture has moved consistently in one direction across two full correction passes, not
-bounced around noisily. The effect size favoring treatment keeps growing (9.3 points
+bounced around noisily. The effect size favoring treatment keeps growing (9.2 points
 combined, up from 7.0, up from 5.1 pre-correction) even as the p-value has not yet crossed
 the conventional threshold (0.27, down from 0.39, down from 0.57). This does not confirm the
 original 11-document corpus's suggestive 72.7%-vs-100% direction at n=11 at K=1 -- but three
@@ -368,22 +368,28 @@ defects described in sections 0 and 2.3 were found and fixed -- both were found 
 BECAUSE this K=4 v2 collection was finally run, not despite it, which is itself the argument
 for why the earlier cost-driven deferral of this sub-study was worth revisiting.
 
-The mechanism is not merely "treatment beats control" restated -- it has a concrete, directly
-verified explanation. Inspecting the real per-pair grading data for every v2 control failure:
-every single one fails specifically on `exact_original_order_restored` during the INVERSE
-step, and never on pair 0 -- only from pair 1 onward. That is, control's generic-tool agent
-reliably restores the original section order on the FIRST edit-then-undo cycle, but starting
-on the SECOND cycle (now operating on a document that has already been through one round
-trip), it begins losing track of the true original order closely enough to fail an exact
-paragraph-list comparison. This was verified as genuine behavior, not a grading artifact:
-`run_chain`'s per-pair grading reference (`paragraphs_before_this_pair`) and its
-document-threading (`current_input`) were directly re-read and confirmed to compare each
-pair's inverse output against THAT pair's own actual starting state (the previous pair's real
-output), not a stale or reset reference. Meridian's bounded `move_section`/inverse primitives
-show no equivalent degradation, since each call resolves fresh, exact structural anchors
-rather than relying on an agent's evolving, cycle-to-cycle understanding of "the original
-layout." This is precisely the kind of compounding-reliability difference long-horizon,
-repeated-cycle testing (K>1) is designed to surface and single-shot (K=1) testing cannot.
+The mechanism is not merely "treatment beats control" restated -- it has a concrete,
+data-grounded explanation, though **corrected 2026-09-06** (an independent pre-publication
+audit) to be precise about how uniform it actually is. Inspecting the real per-pair grading
+data for every v2 control chain with at least one failing pair (12 of 48): 9 of 12 fail
+specifically on `exact_original_order_restored` during the INVERSE step starting from pair 1
+onward and typically continue failing -- a real, dominant majority pattern, not a universal
+rule as an earlier revision of this document claimed ("never on pair 0"). 2 of 12 fail that
+same check AT pair 0 itself, and one of those two recovers fully on pairs 1-3 (the opposite of
+compounding drift). So the honest description is: control's generic-tool agent predominantly
+-- not universally -- reliably restores section order on the FIRST edit-then-undo cycle, and
+predominantly begins losing track of the true original order from later cycles onward closely
+enough to fail an exact paragraph-list comparison. This was verified as genuine behavior, not
+a grading artifact: `run_chain`'s per-pair grading reference (`paragraphs_before_this_pair`)
+and its document-threading (`current_input`) were directly re-read and confirmed to compare
+each pair's inverse output against THAT pair's own actual starting state (the previous pair's
+real output), not a stale or reset reference. Meridian's bounded `move_section`/inverse
+primitives show no equivalent degradation, since each call resolves fresh, exact structural
+anchors rather than relying on an agent's evolving, cycle-to-cycle understanding of "the
+original layout." This is precisely the kind of compounding-reliability difference
+long-horizon, repeated-cycle testing (K>1) is designed to surface and single-shot (K=1)
+testing cannot -- and the K=4 significance finding itself (p=0.0015) does not depend on the
+majority mechanism being exceptionless.
 
 One document (1.7MB `document.xml`, 2.7MB package with embedded images) has a control-arm
 chain that did not complete within the harness's 300-second per-trial timeout across 6
@@ -563,8 +569,8 @@ results above, which remain the primary confirmatory finding.
 **Supported**, on these corpora, at this sample size, with this model:
 - Bibliography and citation show no significant difference between arms **at K=1**, and hold
   that parity under K=4 repeated cycling too -- both fixed from real defects (harness and
-  product) to genuine near-ceiling parity, with no compounding drift across 4 consecutive
-  edit cycles.
+  product) to a genuine, literal 100%/100% parity, with no compounding drift across 4
+  consecutive edit cycles.
 - Section_reorder at K=1, investigated across two independently-sourced corpora totaling 55
   paired documents (after correcting two real plan-coherence defects, section 2.3), shows a
   direction favoring treatment (92.9% vs 83.6%) that is not statistically significant at this
@@ -572,11 +578,14 @@ results above, which remain the primary confirmatory finding.
 - **Section_reorder at K=4 (repeated edit-then-undo cycles) DOES show a statistically
   significant advantage for treatment** -- 92.9% vs 67.3% combined across both corpora
   (n=55, p=0.0015; section 2.4). This is the one confirmed, significant directional finding
-  in this evidence package, and it has a verified mechanism: control's generic-tool approach
-  reliably restores section order correctly on the first edit cycle, but specifically begins
-  failing to exactly restore it from the second cycle onward, while Meridian's bounded tool
-  shows no equivalent degradation. This is a claim about REPEATED-CYCLE reliability
-  specifically, not about single-shot editing capability (K=1 shows no such gap).
+  in this evidence package, and it has a data-grounded, though not exceptionless, mechanism:
+  control's generic-tool approach predominantly (9 of 12 failing chains) restores section
+  order correctly on the first edit cycle but begins failing to exactly restore it from a
+  later cycle onward, while Meridian's bounded tool shows no equivalent degradation -- a
+  minority of failing chains (2 of 12) do fail on the first cycle itself, so this is a
+  dominant trend behind the result, not a universal rule the significance finding depends on.
+  This is a claim about REPEATED-CYCLE reliability specifically, not about single-shot editing
+  capability (K=1 shows no such gap).
 
 **Not supported by this evidence**:
 - Any claim that Meridian's bounded tools outperform generic editing on a SINGLE edit
