@@ -397,10 +397,30 @@ synthetic package showed a successful render-verified insert) -- it is the same
 host-environment throughput limitation excluding caption and equation, now confirmed a third
 time on an entirely different tool.
 
+**Update (2026-09-06): the full 26-document confirmatory corpus was run.** Control's side is
+now a complete, real confirmatory-scale result: **24/26 (92.3%) pass**, both directions,
+independently graded by the same structural checks used everywhere else in this project --
+not just a transcript claim. The 2 real control failures were both on the removal step
+(genuine task mistakes, not harness artifacts): one left the paragraph list not exactly
+restored after removing the table, one failed to remove the marker table at all. Treatment
+resolved only **1 of 26** chains (that one passed cleanly, forward and inverse) before
+repeated retries -- at both higher (2) and lower (1) harness concurrency, across three
+separate attempts -- stopped making meaningful progress. Direct host measurement during this
+run showed why: free memory had dropped to ~7.3-7.7GB (vs. 11.5-14.5GB at earlier points in
+this same session) with ~84 python/claude/soffice/node processes running, consistent with
+materially heavier concurrent load from other sessions sharing this host than at any earlier
+point this project measured it. Raising harness concurrency made the block rate WORSE (26/26
+blocked) before lowering it again only partially helped (13-14/26 blocked, unchanged across
+two further retries) -- evidence the bottleneck is dominated by real-time, largely
+external host contention, not solely this harness's own concurrency setting.
+
 **Honest conclusion**: table_structural is implemented, unit-tested (61 new tests across
 `docs_intel.py`'s table primitives and the S7 harness wiring), and functionally verified
-correct, but joins caption and equation as host-limited for confirmatory-scale testing here.
-No confirmatory-scale table_structural run is reported; see section 7.
+correct -- confirmed now not just by unit tests but by a complete, real confirmatory-scale
+control-arm run. It joins caption and equation as host-limited for a complete confirmatory-scale
+TREATMENT run specifically, and this session's own direct measurements now tie that
+limitation concretely to real-time host load rather than treating it as a fixed, static rate --
+worth re-attempting when this shared host is under lighter concurrent use. See section 7.
 
 ## 3. What this evidence does and does not support
 
