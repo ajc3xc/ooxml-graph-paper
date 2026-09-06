@@ -290,3 +290,149 @@ def test_milestone_word_receipt_never_raises_on_render_failure(tmp_path: Path, m
 
     assert receipt["status"] == "not_run"
     assert "simulated Word COM failure" in receipt["reason"]
+
+
+def _treatment_spec(input_docx: Path) -> TrialSpec:
+    return TrialSpec(
+        trial_id="trial-a", doc_label="doc", arm="treatment", direction="forward",
+        family="bibliography", input_docx=input_docx, marker_text="marker",
+        treatment_tool="insert_bibliography_entry", treatment_args={},
+        prompt="insert the entry",
+    )
+
+
+def _completed_process(text: str) -> "subprocess.CompletedProcess":
+    import subprocess as subprocess_module
+    import json as json_module
+
+    return subprocess_module.CompletedProcess(
+        args=[], returncode=0,
+        stdout=json_module.dumps({"result": text}), stderr="",
+    )
+
+
+def test_run_trial_retries_once_on_mcp_tool_unavailable_flake(tmp_path: Path, monkeypatch) -> None:
+    """PAPER-S8 defect 11 (2026-09-06): a real bibliography treatment trial
+    failed because the meridian-docs-pilot MCP server never loaded for that
+    one CLI invocation at all -- the agent correctly reported its own
+    toolset as the bare Claude Code default and left the docx untouched.
+    Confirmed corpus-wide unique (1 of 330+ trials) and confirmed to pass
+    cleanly on a fresh re-run of the identical spec. run_trial must retry
+    automatically rather than silently scoring this as a real capability
+    failure."""
+    import claude_pair_runner
+
+    input_docx = tmp_path / "input.docx"
+    input_docx.write_bytes(b"fake-docx-bytes")
+    spec = _treatment_spec(input_docx)
+
+    calls = []
+    trial_docx = tmp_path / "runs" / "trial-a" / "doc.docx"
+
+    def _fake_run(*args, **kwargs):
+        calls.append(1)
+        if len(calls) == 1:
+            return _completed_process(
+                "Confirmed: my available tools in this environment are only "
+                "Artifact, Read, ReportFindings... There is no "
+                "`insert_bibliography_entry` tool... no way to modify or save "
+                "a .docx file in this session at all."
+            )
+        # Second attempt: a normal successful run that actually edits the
+        # trial's own working copy (the real CLI subprocess edits doc.docx
+        # in place inside trial_root, not the pristine spec.input_docx).
+        trial_docx.write_bytes(b"fake-docx-bytes-edited")
+        return _completed_process("Done.")
+
+    monkeypatch.setattr(claude_pair_runner.subprocess, "run", _fake_run)
+
+    result = claude_pair_runner.run_trial(spec, tmp_path / "runs")
+
+    assert len(calls) == 2
+    assert result["mcp_flake_retry_triggered"] is True
+    assert result["docx_changed"] is True
+    assert result["claude_json_result"]["result"] == "Done."
+
+
+def test_run_trial_does_not_retry_when_docx_was_actually_changed(tmp_path: Path, monkeypatch) -> None:
+    """The retry must be narrow: a trial whose docx WAS modified is never
+    treated as the MCP-unavailable flake, even if its transcript happens to
+    contain similar wording (e.g. quoting the task back), since a blanket
+    retry-on-matching-text policy could mask a genuine reasoning failure."""
+    import claude_pair_runner
+
+    input_docx = tmp_path / "input.docx"
+    input_docx.write_bytes(b"fake-docx-bytes")
+    spec = _treatment_spec(input_docx)
+
+    calls = []
+    trial_docx = tmp_path / "runs" / "trial-a" / "doc.docx"
+
+    def _fake_run(*args, **kwargs):
+        calls.append(1)
+        trial_docx.write_bytes(b"fake-docx-bytes-edited")
+        return _completed_process("no way to modify or save mentioned in passing, but I did it anyway. Done.")
+
+    monkeypatch.setattr(claude_pair_runner.subprocess, "run", _fake_run)
+
+    result = claude_pair_runner.run_trial(spec, tmp_path / "runs")
+
+    assert len(calls) == 1
+    assert result["mcp_flake_retry_triggered"] is False
+
+
+def test_run_trial_does_not_retry_control_arm(tmp_path: Path, monkeypatch) -> None:
+    """The flake is specific to treatment (the arm that depends on the MCP
+    server actually loading) -- control's generic tools have no equivalent
+    failure mode, so the retry must never fire for it even on matching text."""
+    import claude_pair_runner
+
+    input_docx = tmp_path / "input.docx"
+    input_docx.write_bytes(b"fake-docx-bytes")
+    spec = dataclasses_replace_arm(_treatment_spec(input_docx), "control")
+
+    calls = []
+
+    def _fake_run(*args, **kwargs):
+        calls.append(1)
+        return _completed_process("no way to modify or save the file was found.")
+
+    monkeypatch.setattr(claude_pair_runner.subprocess, "run", _fake_run)
+
+    result = claude_pair_runner.run_trial(spec, tmp_path / "runs")
+
+    assert len(calls) == 1
+    assert result["mcp_flake_retry_triggered"] is False
+
+
+def test_run_trial_gives_up_after_one_retry(tmp_path: Path, monkeypatch) -> None:
+    """If the flake recurs even on retry, run_trial must not loop forever --
+    exactly one retry, then accept whatever the second attempt produced."""
+    import claude_pair_runner
+
+    input_docx = tmp_path / "input.docx"
+    input_docx.write_bytes(b"fake-docx-bytes")
+    spec = _treatment_spec(input_docx)
+
+    calls = []
+
+    def _fake_run(*args, **kwargs):
+        calls.append(1)
+        return _completed_process(
+            "There is no `insert_bibliography_entry` tool... no way to "
+            "modify or save a .docx file in this session at all."
+        )
+
+    monkeypatch.setattr(claude_pair_runner.subprocess, "run", _fake_run)
+
+    result = claude_pair_runner.run_trial(spec, tmp_path / "runs")
+
+    assert len(calls) == 2
+    assert result["mcp_flake_retry_triggered"] is True
+    assert result["docx_changed"] is False
+
+
+def dataclasses_replace_arm(spec: TrialSpec, arm: str) -> TrialSpec:
+    import dataclasses
+
+    return dataclasses.replace(spec, arm=arm)

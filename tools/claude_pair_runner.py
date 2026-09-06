@@ -93,6 +93,18 @@ _PAPER_ROOT = Path(__file__).resolve().parent.parent
 _PAPER_PYTHON = sys.executable
 _TIMEOUT_SECONDS = 300.0
 
+# See the retry logic in run_trial (PAPER-S8 defect 11): these phrases are
+# how the agent itself describes a treatment session where --mcp-config's
+# server never loaded at all, leaving it with the bare default Claude Code
+# toolset instead of Meridian's bounded tool. Confirmed corpus-wide unique
+# (1 occurrence in 330+ scanned trials) before this retry was added --
+# narrow and specific on purpose, not a general "no-op means flake" rule.
+_MCP_TOOL_UNAVAILABLE_SIGNATURES = (
+    "doesn't exist in my toolset",
+    "isn't loaded in this session",
+    "no way to modify or save",
+)
+
 _CONTROL_ALLOWED_TOOLS = "Read,Write,Edit,Bash"
 _CONTROL_AVAILABLE_TOOLS = "Read,Write,Edit,Bash"
 _TREATMENT_DISALLOWED_TOOLS = (
@@ -273,34 +285,70 @@ def run_trial(spec: TrialSpec, runs_root: Path, *, model: str = "haiku") -> dict
     spec_with_path = dataclasses.replace(spec, prompt=located_prompt)
 
     cmd = _build_command(spec_with_path, trial_root, docx_in_trial, model)
-    started = datetime.datetime.now(datetime.timezone.utc)
-    t0 = time.time()
-    try:
-        proc = subprocess.run(
-            cmd, cwd=str(trial_root), capture_output=True, text=True,
-            timeout=_TIMEOUT_SECONDS, encoding="utf-8", errors="replace",
-            env=trial_env,
-            # _resolve_claude_executable() selects the native .exe on
-            # Windows, so shell=False preserves every prompt/flag argument.
-            shell=False,
-        )
-        timed_out = False
-        stdout, stderr, returncode = proc.stdout, proc.stderr, proc.returncode
-    except subprocess.TimeoutExpired as exc:
-        timed_out = True
-        stdout = (exc.stdout or "") if isinstance(exc.stdout, str) else ""
-        stderr = (exc.stderr or "") if isinstance(exc.stderr, str) else ""
-        returncode = None
-    wall_time = time.time() - t0
 
-    output_hash = _sha256_file(docx_in_trial)
-
-    parsed_json: dict[str, Any] | None = None
-    if stdout.strip():
+    mcp_flake_retried = False
+    for attempt in range(2):
+        started = datetime.datetime.now(datetime.timezone.utc)
+        t0 = time.time()
         try:
-            parsed_json = json.loads(stdout)
-        except json.JSONDecodeError:
-            parsed_json = None
+            proc = subprocess.run(
+                cmd, cwd=str(trial_root), capture_output=True, text=True,
+                timeout=_TIMEOUT_SECONDS, encoding="utf-8", errors="replace",
+                env=trial_env,
+                # _resolve_claude_executable() selects the native .exe on
+                # Windows, so shell=False preserves every prompt/flag argument.
+                shell=False,
+            )
+            timed_out = False
+            stdout, stderr, returncode = proc.stdout, proc.stderr, proc.returncode
+        except subprocess.TimeoutExpired as exc:
+            timed_out = True
+            stdout = (exc.stdout or "") if isinstance(exc.stdout, str) else ""
+            stderr = (exc.stderr or "") if isinstance(exc.stderr, str) else ""
+            returncode = None
+        wall_time = time.time() - t0
+
+        output_hash = _sha256_file(docx_in_trial)
+        docx_changed = input_hash != output_hash
+
+        parsed_json: dict[str, Any] | None = None
+        if stdout.strip():
+            try:
+                parsed_json = json.loads(stdout)
+            except json.JSONDecodeError:
+                parsed_json = None
+
+        # PAPER-S8 defect 11 (2026-09-06): a real, confirmed-unique (1 of
+        # 330+ trials scanned corpus-wide) one-off flake where the
+        # meridian-docs-pilot MCP server never loaded for a treatment CLI
+        # invocation at all -- the agent correctly reported its own toolset
+        # as the bare Claude Code default (Artifact/Read/ReportFindings/...,
+        # none of --mcp-config's servers), left the docx untouched, and
+        # apologized. Re-running the identical trial fresh passed cleanly,
+        # confirming this is CLI/MCP-startup flakiness, not a real capability
+        # gap -- so it must not be silently scored as a treatment failure.
+        # Retry ONCE automatically rather than requiring a human to notice
+        # and manually re-collect, the same "don't count real infra
+        # hiccups as task failures" principle already applied to render-gate
+        # timeouts ("blocked" chains) and 300s process timeouts elsewhere in
+        # this harness. Deliberately narrow: only fires for treatment, only
+        # when the docx was never touched, and only on this exact, specific
+        # phrasing -- a genuine reasoning failure that happens to also leave
+        # the docx untouched must NOT be masked by a blanket retry-on-no-op
+        # policy, which would bias treatment's measured pass rate upward.
+        is_mcp_flake = (
+            spec.arm == "treatment"
+            and not docx_changed
+            and bool((parsed_json or {}).get("result"))
+            and any(
+                sig in parsed_json["result"]
+                for sig in _MCP_TOOL_UNAVAILABLE_SIGNATURES
+            )
+        )
+        if is_mcp_flake and attempt == 0:
+            mcp_flake_retried = True
+            continue
+        break
 
     return {
         "trial_id": spec.trial_id,
@@ -316,13 +364,14 @@ def run_trial(spec: TrialSpec, runs_root: Path, *, model: str = "haiku") -> dict
         "returncode": returncode,
         "input_hash_sha256": input_hash,
         "output_hash_sha256": output_hash,
-        "docx_changed": input_hash != output_hash,
+        "docx_changed": docx_changed,
         "trial_root": str(trial_root),
         "output_docx_path": str(docx_in_trial),
         "cli_command_argv": cmd,
         "claude_json_result": parsed_json,
         "stdout_tail": stdout[-4000:],
         "stderr_tail": stderr[-4000:],
+        "mcp_flake_retry_triggered": mcp_flake_retried,
     }
 
 
