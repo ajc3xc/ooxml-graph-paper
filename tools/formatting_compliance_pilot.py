@@ -42,9 +42,10 @@ from docx_trial_broker import TrialSpec  # noqa: E402
 FIXTURES = {
     "violations": Path(r"E:\MeridianData\ooxml-graph-paper\raw\hard-fixtures-v1\hard_equation_style_violations.docx"),
     "compliant": Path(r"E:\MeridianData\ooxml-graph-paper\raw\hard-fixtures-v1\hard_equation_style_compliant.docx"),
+    "numbering": Path(r"E:\MeridianData\ooxml-graph-paper\raw\hard-fixtures-v1\hard_equation_numbering_violations.docx"),
 }
 
-TASK_PROMPT = (
+_ALIGNMENT_PUNCTUATION_PROMPT = (
     "You are reviewing a Word document at the path given to you for formatting "
     "compliance against this style rule: every STANDALONE display equation (an "
     "equation that is the only content in its own paragraph) must be (a) "
@@ -57,8 +58,29 @@ TASK_PROMPT = (
     "(not a tool call)."
 )
 
+_NUMBERING_PROMPT = (
+    "You are reviewing a Word document at the path given to you for formatting "
+    "compliance against this style rule: the document contains table-numbered "
+    "equations (a table row whose first cell holds an equation and whose second "
+    "cell holds a parenthesized number like \"(1)\"). Every equation number must "
+    "be UNIQUE (no two equations share the same number), and the numbers must "
+    "form a CONTIGUOUS sequence starting from 1 with no gaps.\n\n"
+    "Check every table-numbered equation against both parts of this rule and "
+    "report every violation you find -- which equations are involved, which "
+    "part of the rule is violated, and why. This is a READ-ONLY review: do not "
+    "modify the document. When finished, give your findings as a clear final "
+    "message (not a tool call)."
+)
+
+_TASK_PROMPTS = {
+    "violations": _ALIGNMENT_PUNCTUATION_PROMPT,
+    "compliant": _ALIGNMENT_PUNCTUATION_PROMPT,
+    "numbering": _NUMBERING_PROMPT,
+}
+
 
 def build_specs(doc_label: str, fixture: Path) -> tuple[TrialSpec, TrialSpec]:
+    prompt = _TASK_PROMPTS[doc_label]
     control = TrialSpec(
         trial_id=f"{doc_label}-control-forward",
         doc_label=doc_label,
@@ -66,7 +88,7 @@ def build_specs(doc_label: str, fixture: Path) -> tuple[TrialSpec, TrialSpec]:
         direction="forward",
         family="formatting_compliance",
         input_docx=fixture,
-        prompt=TASK_PROMPT,
+        prompt=prompt,
         marker_text="n/a",
         treatment_tool="audit_equation_style",
         treatment_args={},
@@ -78,7 +100,7 @@ def build_specs(doc_label: str, fixture: Path) -> tuple[TrialSpec, TrialSpec]:
         direction="forward",
         family="formatting_compliance",
         input_docx=fixture,
-        prompt=TASK_PROMPT,
+        prompt=prompt,
         marker_text="n/a",
         treatment_tool="audit_equation_style",
         treatment_args={},
@@ -102,6 +124,8 @@ _COMPLIANT_CLAIM_PHRASES = (
     "no violation", "no violations", "fully compliant", "is compliant",
     "compliant with both", "zero findings", "zero violations",
 )
+_DUPLICATE_NUMBER_KEYWORDS = ("duplicate", "same number", "both numbered", "reused", "repeated number")
+_NUMBER_GAP_KEYWORDS = ("gap", "missing", "skip", "not contiguous", "out of sequence")
 
 
 def _mentions_any(text: str, keywords: tuple[str, ...]) -> bool:
@@ -112,9 +136,30 @@ def _mentions_any(text: str, keywords: tuple[str, ...]) -> bool:
 def grade(result: dict, doc_label: str) -> dict:
     cj = result.get("claude_json_result") or {}
     report_text = str(cj.get("result") or "")
+    claims_fully_compliant = _mentions_any(report_text, _COMPLIANT_CLAIM_PHRASES)
+
+    if doc_label == "numbering":
+        mentions_duplicate = _mentions_any(report_text, _DUPLICATE_NUMBER_KEYWORDS)
+        mentions_gap = _mentions_any(report_text, _NUMBER_GAP_KEYWORDS)
+        # Ground truth: equations 1&2 share number "(1)" (duplicate), and
+        # number 2 is skipped (gap) -- correct means the report catches BOTH,
+        # not merely one of the two distinct violation types.
+        correct = mentions_duplicate and mentions_gap and not claims_fully_compliant
+        return {
+            "verdict_note": "exploratory phrase-based grading, not PAPER-S7-grade structural "
+                            "checks; always spot-check report_text directly",
+            "report_text": report_text,
+            "mentions_duplicate_number": mentions_duplicate,
+            "mentions_number_gap": mentions_gap,
+            "claims_fully_compliant": claims_fully_compliant,
+            "matches_ground_truth": correct,
+            "is_error": cj.get("is_error"),
+            "num_turns": cj.get("num_turns"),
+            "wall_time_seconds": result.get("wall_time_seconds"),
+        }
+
     mentions_alignment_topic = _mentions_any(report_text, _ALIGNMENT_KEYWORDS)
     mentions_punctuation_topic = _mentions_any(report_text, _PUNCTUATION_KEYWORDS)
-    claims_fully_compliant = _mentions_any(report_text, _COMPLIANT_CLAIM_PHRASES)
     if doc_label == "violations":
         # Ground truth: both violations ARE present -- correct means the
         # report discusses both AND does not conclude "fully compliant".
@@ -140,7 +185,12 @@ def grade(result: dict, doc_label: str) -> dict:
 
 
 def main() -> int:
-    for label, fixture in FIXTURES.items():
+    # Optional: pass fixture labels as argv to run a subset (e.g. re-running
+    # only a newly-added fixture rather than re-spending real API calls on
+    # ones already verified in a prior invocation's saved pilot-result.json).
+    selected_labels = sys.argv[1:] or list(FIXTURES.keys())
+    fixtures_to_run = {k: v for k, v in FIXTURES.items() if k in selected_labels}
+    for label, fixture in fixtures_to_run.items():
         if not fixture.exists():
             print(f"fixture not found: {fixture}", file=sys.stderr)
             return 1
@@ -148,8 +198,12 @@ def main() -> int:
     run_root = Path(r"E:\MeridianData\ooxml-graph-paper\runs\paper-s9-formatting-compliance-pilot")
     run_root.mkdir(parents=True, exist_ok=True)
 
+    out_path = run_root / "pilot-result.json"
     all_results: dict[str, dict] = {}
-    for doc_label, fixture in FIXTURES.items():
+    if out_path.exists():
+        all_results = json.loads(out_path.read_text(encoding="utf-8"))
+
+    for doc_label, fixture in fixtures_to_run.items():
         control_spec, treatment_spec = build_specs(doc_label, fixture)
         for spec in (control_spec, treatment_spec):
             print(f"running {doc_label}/{spec.arm}...", file=sys.stderr)
@@ -158,18 +212,16 @@ def main() -> int:
             res["diagnosis_grading"] = grade(res, doc_label)
             all_results[f"{doc_label}-{spec.arm}"] = res
 
-    out_path = run_root / "pilot-result.json"
     out_path.write_text(json.dumps(all_results, indent=2, default=str), encoding="utf-8")
 
     for key, res in all_results.items():
         g = res["diagnosis_grading"]
         print(f"\n=== {key} ===")
-        print(f"mentions_alignment_topic: {g['mentions_alignment_topic']}")
-        print(f"mentions_punctuation_topic: {g['mentions_punctuation_topic']}")
-        print(f"claims_fully_compliant: {g['claims_fully_compliant']}")
-        print(f"matches_ground_truth: {g['matches_ground_truth']}")
+        for field_name, value in g.items():
+            if field_name in ("report_text", "verdict_note"):
+                continue
+            print(f"{field_name}: {value}")
         print(f"isolation_verdict: {res['isolation_audit'].get('isolation_verdict')}")
-        print(f"wall_time_seconds: {g['wall_time_seconds']:.1f}")
 
     print(f"\nFull result: {out_path}")
     return 0
