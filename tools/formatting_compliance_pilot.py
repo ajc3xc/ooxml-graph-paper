@@ -43,6 +43,24 @@ FIXTURES = {
     "violations": Path(r"E:\MeridianData\ooxml-graph-paper\raw\hard-fixtures-v1\hard_equation_style_violations.docx"),
     "compliant": Path(r"E:\MeridianData\ooxml-graph-paper\raw\hard-fixtures-v1\hard_equation_style_compliant.docx"),
     "numbering": Path(r"E:\MeridianData\ooxml-graph-paper\raw\hard-fixtures-v1\hard_equation_numbering_violations.docx"),
+    # ORGANIC, not hand-authored: candidate_id 9c3a58ce12b73d20 from the real
+    # PAPER-S6 cleared organic-equation corpus (topic-sampled, PII-screened,
+    # admitted -- see docs/paper-s6-organic-omml-round2-3-result-v1.md).
+    # Ground truth confirmed directly against the raw XML (2026-09-06): BOTH
+    # of the document's 2 equations violate BOTH parts of the rule (misaligned
+    # -- left instead of center -- AND incorrect trailing punctuation, a
+    # parenthetical annotation ending in ")" rather than one of .,;:). This
+    # was NOT the first thing found: audit_equation_style initially reported
+    # only equation 1 as a violation because of a real bug (a <w:bookmarkStart>
+    # immediately before equation 2's <m:oMath> was silently treated as prose
+    # mixing the equation into a sentence, skipping its checks entirely) --
+    # see docs/paper-s9-formatting-compliance-pilot-v1.md section "A second,
+    # more consequential bug" and the fix in docs_intel.audit_equation_style.
+    # Tests whether the task generalizes beyond hand-authored fixtures to a
+    # real, naturally-occurring document -- and, as it turned out, whether
+    # control's from-scratch XML reading can catch a real defect in
+    # treatment's bounded tool that the tool's own (buggy) output would hide.
+    "organic": Path(r"E:\MeridianData\ooxml-graph-paper\raw\docx-corpus\batch-2-v1\831be9ef6e55fc913f8d5b2cd053db0ab410618210dc181080616d04c87d94db.docx"),
 }
 
 _ALIGNMENT_PUNCTUATION_PROMPT = (
@@ -76,6 +94,7 @@ _TASK_PROMPTS = {
     "violations": _ALIGNMENT_PUNCTUATION_PROMPT,
     "compliant": _ALIGNMENT_PUNCTUATION_PROMPT,
     "numbering": _NUMBERING_PROMPT,
+    "organic": _ALIGNMENT_PUNCTUATION_PROMPT,
 }
 
 
@@ -160,9 +179,10 @@ def grade(result: dict, doc_label: str) -> dict:
 
     mentions_alignment_topic = _mentions_any(report_text, _ALIGNMENT_KEYWORDS)
     mentions_punctuation_topic = _mentions_any(report_text, _PUNCTUATION_KEYWORDS)
-    if doc_label == "violations":
-        # Ground truth: both violations ARE present -- correct means the
-        # report discusses both AND does not conclude "fully compliant".
+    if doc_label in ("violations", "organic"):
+        # Ground truth: both violations ARE present (on the organic fixture,
+        # both land on the SAME one of its two equations) -- correct means
+        # the report discusses both AND does not conclude "fully compliant".
         correct = mentions_alignment_topic and mentions_punctuation_topic and not claims_fully_compliant
     else:
         # doc_label == "compliant": ground truth is NO violations -- correct
