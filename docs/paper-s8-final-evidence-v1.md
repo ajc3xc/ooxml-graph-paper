@@ -1,10 +1,10 @@
 # PAPER-S8: PAPER-S7 final evidence and limitations package (v1)
 
 Status: the real, executed result of `docs/paper-s7-protocol-v1.md`'s locked confirmatory
-design, **updated 2026-09-06 (fourth update) after ten real product/harness/evaluator
+design, **updated 2026-09-06 (fifth update) after eleven real product/harness/evaluator
 defects were found, fixed, and disclosed** (the fourth and fifth via a deliberate stress test
 using hand-authored adversarial fixtures; the seventh via investigating a K=4 depth-study
-anomaly; the eighth via a further hand-authored fixture; the ninth and tenth via an
+anomaly; the eighth via a further hand-authored fixture; the ninth, tenth, and eleventh via an
 independent pre-publication accuracy audit (2026-09-06) that re-derived every published
 statistic and cross-checked every commit/test claim against raw data -- not organic corpus
 data in any of these four cases), plus a separately preregistered section_reorder follow-up
@@ -154,7 +154,20 @@ number in this document.
    a clean, literal 100%/100% parity, not 96.2%/96.2% -- see the corrected sections 2.2 and
    2.4 below. No other family's published number was affected (bibliography has zero
    `"blocked"` chains at either K, so the bug had nothing to bite on there; its own single
-   treatment "failure" is real and independently discussed below).
+   treatment "failure" had a different cause, fixed separately -- see defect 11).
+
+11. **Bibliography's one K=1 treatment "failure" was a one-off MCP-server-loading flake,
+    fixed at the harness level (2026-09-06)**: that one CLI invocation's own transcript
+    showed it had no `insert_bibliography_entry` tool (or any generic editing tool)
+    available at all -- the meridian-docs-pilot MCP server never loaded for that specific
+    process. Confirmed corpus-wide unique (1 occurrence in 330+ scanned trials) before
+    treating it as fixable rather than an unexplained outlier. Re-ran the identical trial
+    fresh (same document, `--model sonnet`): passed cleanly, both forward and inverse.
+    `tools/claude_pair_runner.py`'s `run_trial` now detects this exact signature (treatment
+    arm, docx never touched, transcript explicitly reports the tool as unavailable) and
+    retries automatically once, deliberately narrow so a genuine reasoning failure that
+    happens to also leave the docx untouched is never masked. Bibliography K=1 is now a
+    clean 100%/100% parity (section 2.1), not 96.2%/100%.
 
 ## 1. What was run
 
@@ -189,17 +202,22 @@ number in this document.
 | K | Arm | N | Pass rate (95% CI) |
 |---|---|---:|---|
 | 1 | control | 26 | 100% [100%, 100%] |
-| 1 | treatment | 26 | 96.2% [88.5%, 100%] |
+| 1 | treatment | 26 | 100% [100%, 100%] |
 
-Paired significance: `observed_mean_diff=+0.038`, `p=1.0` -- statistically indistinguishable;
-both arms near-ceiling. This is the expected, correct shape of a genuine round-trip-fidelity
-result once the real heading-cleanup gap (section 0) was closed -- a **parity** finding, not
-a difference to chase further significance on. The one treatment "failure" out of 26 is a
-genuine harness/tool-provisioning defect, not a grading-logic edge case: that one CLI
-invocation's own transcript shows it had no `insert_bibliography_entry` tool (or any
-generic editing tool) available at all, so the document was correctly graded as untouched --
-confirmed as a one-off by scanning every other trial's transcript for the same signature (it
-appears exactly once) and by that same document passing cleanly on all 4 cycles at K=4.
+Paired significance: `observed_mean_diff=0.0`, `p=1.0` -- a clean, literal parity result. This
+is the expected, correct shape of a genuine round-trip-fidelity result once the real
+heading-cleanup gap (section 0) was closed. **Corrected 2026-09-06 (defect 11)**: the single
+treatment "failure" behind the previously-published 96.2% was a genuine harness/tool-provisioning
+defect, not a grading-logic edge case or a real capability gap: that one CLI invocation's own
+transcript shows it had no `insert_bibliography_entry` tool (or any generic editing tool)
+available at all -- the MCP server never loaded for that specific invocation -- so the document
+was correctly graded as untouched. Confirmed as a genuine one-off by scanning every trial's
+transcript corpus-wide for the same signature (appears exactly once in 330+ trials) and by that
+same document passing cleanly on all 4 cycles at K=4. Rather than merely excluding it,
+re-ran the identical trial fresh (same document, `--model sonnet`): it passed cleanly on both
+forward and inverse. `tools/claude_pair_runner.py`'s `run_trial` now detects this exact
+signature and retries automatically once, so this class of flake self-heals in any future run
+instead of requiring manual re-collection.
 
 ### 2.2 citation (fixed)
 
@@ -506,6 +524,40 @@ TREATMENT run specifically, and this session's own direct measurements now tie t
 limitation concretely to real-time host load rather than treating it as a fixed, static rate --
 worth re-attempting when this shared host is under lighter concurrent use. See section 7.
 
+### 2.7 Timing: treatment is also substantially faster, not just equally accurate
+
+Every trial already records real wall-clock time (`wall_time_seconds` per forward/inverse
+call); this had never been reported as its own dimension before now. Computed directly from
+the same K=1 v1-corpus raw data behind sections 2.1-2.3 (forward+inverse wall time, summed per
+chain, only `completed`/`completed_with_failure` chains):
+
+| Family | Arm | N | Mean (s) | Median (s) | Range (s) |
+|---|---|---:|---:|---:|---|
+| Bibliography | control | 26 | 150.4 | 148.1 | 76.5 - 254.3 |
+| Bibliography | treatment | 26 | 46.2 | 48.6 | 24.7 - 68.9 |
+| Citation | control | 26 | 128.4 | 116.8 | 46.4 - 242.7 |
+| Citation | treatment | 25 | 117.3 | 96.0 | 56.5 - 237.9 |
+| Section reorder | control | 11 | 175.2 | 160.9 | 88.5 - 310.7 |
+| Section reorder | treatment | 11 | 39.3 | 32.4 | 23.5 - 56.6 |
+
+For bibliography and section_reorder, the separation is large and the distributions barely
+overlap: treatment's slowest chain (68.9s, 56.6s respectively) is still faster than most of
+control's chains, not just its mean. This tracks the qualitative task shape directly --
+treatment is told to call one named tool immediately with no discovery step, while control
+must read, parse, and reason about raw OOXML through generic tools, which costs real turns and
+wall time even when it eventually arrives at the same correct answer. Citation shows a real
+but smaller gap with substantial overlap in both directions -- consistent with a defect already
+disclosed elsewhere in this project (`tools/claude_pair_runner.py`'s prompt-engineering
+comments): citation's `ToolSearch` lookup for `remove_citation` reproducibly fails on the first
+call, sending some treatment trials down an 8+ turn exploration before it eventually calls the
+tool directly anyway, adding cost without changing the outcome.
+
+This is not a formally powered timing comparison (no confidence intervals or significance test
+computed here, and it is a K=1 v1-corpus-only measurement, not run across every corpus/K
+combination) -- reported as a real, directly-observed, and fairly large effect worth noting
+rather than a confirmatory claim on its own. It has no bearing on the accuracy/pass-rate
+results above, which remain the primary confirmatory finding.
+
 ## 3. What this evidence does and does not support
 
 **Supported**, on these corpora, at this sample size, with this model:
@@ -651,21 +703,21 @@ to this specific collision class.
   concurrency-collision incident (section 4) shows a DIFFERENT kind of cross-trial
   interference than the control-reaching-Meridian violation the isolation audit itself
   checks for.
-- Ten real defects (sections 0, 2.3/2.5/2.6, plus the PII scanner correction in
+- Eleven real defects (sections 0, 2.3/2.5/2.6, plus the PII scanner correction in
   `docs/paper-s6-organic-omml-round2-3-result-v1.md`) were found DURING this project's own
   analysis of its own results, not by external review -- disclosed in full per this
   project's standing "never quietly patch around a surprising result" discipline, but a
   reader should weigh that these are the defects THIS team happened to notice, not a claim
-  that no further defects exist. Four of the ten (section 2.3's second correction, the
+  that no further defects exist. Four of the eleven (section 2.3's second correction, the
   bibliography alphabetization gap, citation's multi-field removal defect, and the
   malformed-XML/missing-file grading crash found via equation's harder, hand-constructed
   control-arm task) were found only because of a deliberate effort to break the harness or
   its evaluators with adversarial content. The blank-heading-text plan defect (section 0 item
   7) was NOT adversarially surfaced -- it was found during routine operation, while finally
-  running the K=4 depth study against the full 48-document v2 corpus -- and the two most
-  recent (defects 9 and 10) were found by an independent pre-publication audit re-deriving
-  every published number from raw data, a different discipline again. Four of ten defects
-  surfaced by deliberately adversarial testing, a further two by independent post-hoc
+  running the K=4 depth study against the full 48-document v2 corpus -- and the three most
+  recent (defects 9, 10, and 11) were found by an independent pre-publication audit re-deriving
+  every published number from raw data, a different discipline again. Four of eleven defects
+  surfaced by deliberately adversarial testing, a further three by independent post-hoc
   verification, is a strong argument for more of both kinds, not less.
 
 ## 7. Recommended next steps (not run here)
