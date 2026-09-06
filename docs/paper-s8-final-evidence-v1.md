@@ -398,22 +398,41 @@ However: `insert_equation` shares `insert_caption`'s Word-COM render-verificatio
 (a hardcoded 60-second timeout, `_WORD_COM_TIMEOUT_SECONDS` in the parent repo's
 `render_gate.py` -- deliberately not changed here, since that is real production behavior
 affecting every Meridian user, not a knob to loosen for this benchmark's convenience). Two
-independent smoke tests against the development slice (haiku, 24 chains each) were run: the
-first concurrently with other work (45.8% blocked, contamination suspected), the second in
-complete isolation with nothing else running on the host (45.8% blocked again, ruling out
-concurrency as the sole cause). Both showed the identical failure signature: `"Word COM
-render exceeded its 60s bound"`, confirmed directly in the agent's own transcript, correctly
-failed-closed (file restored, no partial corruption) rather than silently succeeding.
+earlier smoke tests were reported here (haiku, 24 chains each, ~45.8% blocked both
+concurrently and in full isolation); a 2026-09-06 pre-publication audit could not locate any
+raw run data for either one anywhere in the evidence store, so that specific claim is flagged
+as unverifiable rather than silently repeated -- see section 0 defect 10's audit for the
+methodology.
 
-**Honest conclusion**: this is the same host-environment limitation that already excluded
-caption (section 5), now independently confirmed to affect equation too, at a real,
-reproducible rate this host cannot currently sustain for a confirmatory-scale run. It is not
-a flaw in the family's design, prompt, or grading -- those are demonstrably correct when the
-render check succeeds. Investigating this discovery did produce one genuine, broadly useful
-fix along the way: grading previously crashed uncaught on a structurally-valid-but-malformed
-`word/document.xml` or a missing output file (`_safe_grade`, commit `e617855`) -- not
-equation-specific, but equation's harder control-arm task (hand-constructing OMML) was what
-surfaced it. No confirmatory-scale equation run is reported here; see section 7.
+**Update (2026-09-06): a real, confirmatory-shaped attempt was run** (development slice, 11
+applicable documents, `--model sonnet`, the first of its kind for this family -- the prior
+smoke tests, even setting aside their missing raw data, used haiku). Control: 10/11 completed
++ 1 completed with a genuine task failure (11/11 resolved, no render-gate blocking at all).
+**Treatment: 0/11 resolved -- every single treatment chain blocked** on the render-verification
+gate's very first check (the `chain_start` milestone, which renders the untouched pristine
+input, before `insert_equation` is even called). Inspecting the raw Word-COM receipts
+directly: that same first-check milestone never blocks for control on the identical source
+document. The harness submits jobs in `(doc, control), (doc, treatment)` order per document
+(`tools/run_paper_s7_benchmark.py`'s job list), so under `--max-workers 1` treatment's
+`chain_start` check always runs immediately after control's full 3-automation chain
+(chain_start + forward + inverse) for the same document just finished -- consistent with,
+though not yet proven to be caused by, Word's COM automation server not having fully released
+its prior instance before the next one starts. This is a more precise, and more actionable,
+characterization than "shared host contention": it points at a specific measurable sequencing
+effect rather than diffuse external load, and was reproduced identically across two separate
+attempts under materially different host-memory conditions (see section 2.6's parallel
+finding for table_structural, run at the same time on the same host).
+
+**Honest conclusion**: equation's implementation, prompt, and grading are demonstrably
+correct -- control resolves cleanly and the render check succeeds whenever it isn't hit by
+this timing effect. The render-verification bottleneck is real, reproducible, and now
+characterized precisely enough to investigate as a concrete engineering question (does a
+brief cooldown between chains change the block rate?) rather than something to wait out.
+Investigating this discovery did produce one genuine, broadly useful fix along the way:
+grading previously crashed uncaught on a structurally-valid-but-malformed `word/document.xml`
+or a missing output file (`_safe_grade`, commit `e617855`) -- not equation-specific, but
+equation's harder control-arm task (hand-constructing OMML) was what surfaced it. No
+confirmatory-scale PASS-RATE result is reported for equation's treatment arm -- see section 7.
 
 ### 2.6 A 5th family, table_structural: also implemented and verified correct, also host-limited
 
@@ -460,6 +479,23 @@ point this project measured it. Raising harness concurrency made the block rate 
 blocked) before lowering it again only partially helped (25/26 blocked, unchanged across
 two further retries) -- evidence the bottleneck is dominated by real-time, largely
 external host contention, not solely this harness's own concurrency setting.
+
+**Update (2026-09-06, continued): re-run under materially better host conditions, same
+result.** A subsequent retry, hours later, found free host memory recovered to ~13.7GB with
+~40 relevant processes running (the best measured all project) -- and re-ran all 25 blocked
+treatment chains at `--max-workers 1`. Result: **still 25/26 blocked**, the identical set of
+documents, zero net change. This rules out "the host was simply busy" as a sufficient
+explanation on its own. Inspecting the raw Word-COM receipts for a blocked chain shows the
+failure is specifically the render-verification gate's very first check (`chain_start`, on
+the untouched pristine input, before `insert_table` is even called) -- and that this same
+check never blocks for control on the identical source document. Per
+`tools/run_paper_s7_benchmark.py`'s job-submission order (`(doc, control)` immediately
+followed by `(doc, treatment)`), under single-worker execution treatment's `chain_start` check
+always runs immediately after control's full 3-automation chain for the same document just
+finished. This is the identical pattern independently found for equation in section 2.5,
+observed on the same host at the same time -- a specific, testable sequencing effect
+(Word's COM automation server possibly not fully releasing between rapid consecutive
+invocations), not simply diffuse external contention.
 
 **Honest conclusion**: table_structural is implemented, unit-tested (30 new tests: 21 for
 `insert_table`/`remove_table` themselves in `docs_intel.py`, plus 9 for the S7 harness
@@ -644,10 +680,16 @@ to this specific collision class.
   dates), without losing any of the other 44 documents' results. This gave the properly powered read section_reorder's K=1 result could
   not: **the K=4 gap is real and significant (p=0.0015 combined), not a small-sample
   regression toward parity** -- see section 2.4 for the full result and its mechanism.
-- Run equation and table_structural to confirmatory scale on a less-loaded host, or after the
-  render-verification gate's own timeout/retry behavior is revisited upstream -- both
-  families are implemented, tested, and functionally verified correct; only host-level render
-  throughput blocks them here (sections 2.5, 2.6).
+- Investigate the specific, testable sequencing hypothesis in sections 2.5/2.6: treatment's
+  render-verification `chain_start` check consistently runs immediately after control's full
+  automation chain for the same document (per the harness's own job-submission order), and
+  reproduced identically across two attempts under very different host-memory conditions --
+  try inserting a brief cooldown between a document's control and treatment chains, or
+  running treatment's chains before control's, and see whether the block rate changes. This
+  is now a more specific, actionable question than "run it again on a quieter host."
+  Otherwise, run equation and table_structural to confirmatory scale on a less-loaded host --
+  both families are implemented, tested, and functionally verified correct; only host-level
+  render throughput blocks them here (sections 2.5, 2.6).
 - Re-run caption for the same reason -- all three share the identical root cause.
 - Add cross_reference once caption's render-timeout handling is resolved (it depends on
   captions existing, section 5).
