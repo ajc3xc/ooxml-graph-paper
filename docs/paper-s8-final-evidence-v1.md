@@ -1,11 +1,13 @@
 # PAPER-S8: PAPER-S7 final evidence and limitations package (v1)
 
 Status: the real, executed result of `docs/paper-s7-protocol-v1.md`'s locked confirmatory
-design, **updated 2026-09-05 (third update) after eight real product/harness/evaluator
+design, **updated 2026-09-06 (fourth update) after ten real product/harness/evaluator
 defects were found, fixed, and disclosed** (the fourth and fifth via a deliberate stress test
 using hand-authored adversarial fixtures; the seventh via investigating a K=4 depth-study
-anomaly; the eighth via a further hand-authored fixture -- not organic corpus data in any of
-these three cases), plus a separately preregistered section_reorder follow-up
+anomaly; the eighth via a further hand-authored fixture; the ninth and tenth via an
+independent pre-publication accuracy audit (2026-09-06) that re-derived every published
+statistic and cross-checked every commit/test claim against raw data -- not organic corpus
+data in any of these four cases), plus a separately preregistered section_reorder follow-up
 (`docs/paper-s7-section-reorder-followup-protocol-v1.md`) and two more task families,
 equation (section 2.5) and table_structural (section 2.6). **The section_reorder K=4 depth
 study now has a complete, statistically significant result** (section 2.4) -- the first
@@ -39,8 +41,9 @@ each disclosed in full rather than quietly patched around:
    content-derived id changes once forward's own edit modifies that paragraph's text --
    stale only for treatment, since control's instructions are always a fresh text search.
    Fixed by deferring inverse-spec construction until after forward completes, mirroring the
-   caption family's existing pattern (`1eb8603`). Result: **treatment jumps to parity with
-   control, 96.2% vs 100%** (section 2.2).
+   caption family's existing pattern (`1eb8603`). Result: **treatment reaches full parity with
+   control, 100% vs 100%** (section 2.2; the previously-published "96.2% vs 100%" was itself a
+   stale artifact of defect 7's since-fixed statistics bug -- see defect 10).
 3. **Section_reorder's grading itself had a bug** discovered while running a follow-up
    corpus for more statistical power: `grade_forward_trial_reorder` compared an unstripped
    heading string against stripped paragraph text, silently failing on any real-world
@@ -124,6 +127,35 @@ number in this document.
    the S7 harness updated to pass `match_display_text` explicitly on every citation inverse
    call.
 
+9. **Grading itself could crash instead of failing gracefully**, found via the equation
+   family's harder control-arm task (a structurally-valid ZIP holding genuinely malformed
+   XML, or a trial that never wrote an output file at all): `docx_trial_evaluator.py`'s
+   graders threw uncaught exceptions on these inputs instead of returning an informative
+   failure. Not specific to equation -- any family could hit either input shape. Fixed with a
+   `_safe_grade` wrapper (`e617855`) so every family now degrades gracefully. This defect was
+   disclosed in section 2.5 but omitted from this list in every prior revision of this
+   document; added here for an accurate total count (found by the same 2026-09-06
+   pre-publication audit as defect 10).
+
+10. **Citation's K=1 and K=4 statistics were never regenerated after the defect-7 fix,
+   found by an independent pre-publication audit (2026-09-06)**: defect 7 fixed
+   `compute_s7_statistics.py` to exclude `"blocked"` chains (real infra timeouts) from the
+   denominator instead of scoring them as 0.0 failures, and section_reorder's numbers were
+   correctly recomputed with the fix -- but citation's published "96.2% treatment" figures at
+   both K=1 (section 2.2) and K=4 (section 2.4) were left as-is, still coming from the
+   pre-fix statistics files (`k1-fixrerun-statistics-20260831T145852Z.json`,
+   `k4-final-statistics-20260902.json`, both dated before the `b286c1b` fix). Each one's
+   single counted "failure" is in fact the identical genuine 300-second Word-COM/subprocess
+   timeout already correctly described in the surrounding prose as a harness artifact --
+   it was just never re-excluded from the actual published number. Independently
+   re-derived directly from the raw chain data (both by re-running the current, fixed
+   `tools/compute_s7_statistics.py` against the exact manifests the document itself cites,
+   and by hand-tallying every citation chain's status): the correct result at both depths is
+   a clean, literal 100%/100% parity, not 96.2%/96.2% -- see the corrected sections 2.2 and
+   2.4 below. No other family's published number was affected (bibliography has zero
+   `"blocked"` chains at either K, so the bug had nothing to bite on there; its own single
+   treatment "failure" is real and independently discussed below).
+
 ## 1. What was run
 
 - **Corpus**: 26 documents (12 validation + 14 primary_holdout, DocOps-derived, per
@@ -132,9 +164,9 @@ number in this document.
   built specifically because the original corpus only yields 11 section_reorder-applicable
   documents.
 - **Families**: bibliography, citation, section_reorder confirmed at confirmatory scale;
-  equation and table_structural implemented and functionally verified correct but
-  host-limited (sections 2.5, 2.6) -- 5 of 6+ candidate families now implemented, remaining
-  candidates investigated in section 5.
+  caption, equation, and table_structural implemented and functionally verified correct but
+  host-limited (section 3, sections 2.5-2.6) -- 6 of 7+ candidate families now implemented,
+  remaining candidates investigated in section 5.
 - **K-pair sweep**: breadth pass at K=1 across all 3 families on both corpora; a depth
   sub-study at K=4 (bibliography, citation, section_reorder) on the original v1 corpus,
   section 2.4 -- delayed by repeated real infrastructure interruptions on a shared host
@@ -163,20 +195,28 @@ Paired significance: `observed_mean_diff=+0.038`, `p=1.0` -- statistically indis
 both arms near-ceiling. This is the expected, correct shape of a genuine round-trip-fidelity
 result once the real heading-cleanup gap (section 0) was closed -- a **parity** finding, not
 a difference to chase further significance on. The one treatment "failure" out of 26 is a
-single grading edge case, not a repeated pattern.
+genuine harness/tool-provisioning defect, not a grading-logic edge case: that one CLI
+invocation's own transcript shows it had no `insert_bibliography_entry` tool (or any
+generic editing tool) available at all, so the document was correctly graded as untouched --
+confirmed as a one-off by scanning every other trial's transcript for the same signature (it
+appears exactly once) and by that same document passing cleanly on all 4 cycles at K=4.
 
 ### 2.2 citation (fixed)
 
 | K | Arm | N | Pass rate (95% CI) |
 |---|---|---:|---|
 | 1 | control | 26 | 100% [100%, 100%] |
-| 1 | treatment | 26 | 96.2% [88.5%, 100%] |
+| 1 | treatment | 25 | 100% [100%, 100%] |
 
-Paired significance: `observed_mean_diff=+0.038`, `p=1.0` -- statistically indistinguishable.
-The single remaining treatment "failure" is a genuine process-level timeout on one forward
-call, unrelated to the stale-anchor-id bug that was fixed (confirmed by inspecting that
-specific chain directly). Like bibliography, this is a **parity** result once the harness
-defect was closed, not evidence of a real difference between arms in either direction.
+Paired significance (paired_n=25): `observed_mean_diff=0.0`, `p=1.0` -- a clean, literal
+parity result, not merely "statistically indistinguishable." **Corrected 2026-09-06 (defect
+10)**: this table previously read treatment N=26, 96.2% [88.5%,100%], `observed_mean_diff=
++0.038`, copied from a statistics file generated before defect 7's "exclude blocked chains"
+fix. The one chain behind that stale 96.2% is a genuine 300-second process-level timeout on
+one forward call (`composite_same_type__wordc_007_d...`, unrelated to the stale-anchor-id bug
+that was fixed) -- a harness infra timeout that the project's own rule (defect 7) requires
+excluding from the denominator, not scoring as a failure. Once correctly excluded
+(`not_applicable_count=1`), there are zero real citation failures on either arm at K=1.
 
 ### 2.3 section_reorder (investigated, honestly does not confirm)
 
@@ -278,8 +318,8 @@ resumable across the same kind of interruption.
 |---|---|---|---:|---|---|
 | Bibliography | 4 | control | 26 | 100% [100%, 100%] | 100% [100%, 100%] |
 | Bibliography | 4 | treatment | 26 | 100% [100%, 100%] | 100% [100%, 100%] |
-| Citation | 4 | control | 26 | 96.2% [88.5%, 100%] | 98.7% [96.2%, 100%] |
-| Citation | 4 | treatment | 26 | 96.2% [88.5%, 100%] | 98.1% [94.2%, 100%] |
+| Citation | 4 | control | 25 | 100% [100%, 100%] | 100% [100%, 100%] |
+| Citation | 4 | treatment | 25 | 100% [100%, 100%] | 100% [100%, 100%] |
 | Section reorder (v1, n=11) | 4 | control | 11 | 63.6% [36.4%, 90.9%] | 90.9% [81.8%, 100%] |
 | Section reorder (v1, n=11) | 4 | treatment | 11 | 100% [100%, 100%] | 100% [100%, 100%] |
 | Section reorder (v2, n=44/45) | 4 | control | 44 | 68.2% [54.5%, 81.8%] | 84.8% [76.5%, 92.4%] |
@@ -287,12 +327,19 @@ resumable across the same kind of interruption.
 | Section reorder (v1+v2, n=55) | 4 | control | 55 | 67.3% [54.5%, 78.2%] | 86.1% [78.8%, 92.1%] |
 | Section reorder (v1+v2, n=55) | 4 | treatment | 56 | 92.9% [85.7%, 98.2%] | 95.8% [89.9%, 100%] |
 
-Paired significance (whole chain): bibliography `p=1.0`, citation `p=1.0`, section_reorder
-v2-alone (n=44) **`p=0.026`**, section_reorder combined v1+v2 (n=55) **`p=0.0015`**.
+Paired significance (whole chain): bibliography `p=1.0` (paired_n=26), citation `p=1.0`
+(paired_n=24), section_reorder v2-alone (n=44) **`p=0.026`**, section_reorder combined v1+v2
+(n=55) **`p=0.0015`**.
 
 Bibliography and citation both hold their K=1 parity finding under repeated cycling --
 neither arm shows compounding drift across 4 consecutive edit cycles, and citation's
-steady-state numbers (excluding the first pair) are essentially perfect for both arms.
+steady-state numbers (excluding the first pair) are a clean 100%/100% for both arms.
+**Corrected 2026-09-06 (defect 10)**: the citation row previously read N=26/26 with
+96.2%/98.7% (control) and 96.2%/98.1% (treatment), copied from a pre-defect-7-fix statistics
+file (unlike section_reorder's K=4 numbers, which were correctly regenerated after that fix).
+Each arm has exactly one chain with a genuine 300-second infra timeout (`status: "blocked"`)
+that should have been excluded from the denominator rather than scored as a 0.0 failure;
+correctly excluded, both arms are a clean 100%/100% at N=25 with zero real failures.
 
 **Section_reorder is the first family in this project to reach a statistically significant
 confirmatory result.** The v1-alone K=4 gap (63.6% vs 100%, p=0.119) that motivated running
@@ -410,12 +457,13 @@ run showed why: free memory had dropped to ~7.3-7.7GB (vs. 11.5-14.5GB at earlie
 this same session) with ~84 python/claude/soffice/node processes running, consistent with
 materially heavier concurrent load from other sessions sharing this host than at any earlier
 point this project measured it. Raising harness concurrency made the block rate WORSE (26/26
-blocked) before lowering it again only partially helped (13-14/26 blocked, unchanged across
+blocked) before lowering it again only partially helped (25/26 blocked, unchanged across
 two further retries) -- evidence the bottleneck is dominated by real-time, largely
 external host contention, not solely this harness's own concurrency setting.
 
-**Honest conclusion**: table_structural is implemented, unit-tested (61 new tests across
-`docs_intel.py`'s table primitives and the S7 harness wiring), and functionally verified
+**Honest conclusion**: table_structural is implemented, unit-tested (30 new tests: 21 for
+`insert_table`/`remove_table` themselves in `docs_intel.py`, plus 9 for the S7 harness
+wiring), and functionally verified
 correct -- confirmed now not just by unit tests but by a complete, real confirmatory-scale
 control-arm run. It joins caption and equation as host-limited for a complete confirmatory-scale
 TREATMENT run specifically, and this session's own direct measurements now tie that
@@ -551,10 +599,11 @@ to this specific collision class.
 
 ## 6. Explicit, disclosed scope limitations
 
-- 5 of 6+ candidate task families implemented (bibliography, citation, section_reorder,
-  equation, table_structural); only 3 have a confirmatory-scale result -- equation's and
-  table_structural's real-world runnability are both blocked by the same host-environment
-  render-verification constraint, not a design or implementation defect (sections 2.5, 2.6).
+- 6 of 7+ candidate task families implemented (bibliography, citation, section_reorder,
+  caption, equation, table_structural); only 3 have a confirmatory-scale result -- caption's,
+  equation's, and table_structural's real-world runnability are all blocked by the same
+  host-environment render-verification constraint, not a design or implementation defect
+  (section 3, sections 2.5-2.6).
 - K=1 and K=4 both confirmed on both corpora now (section 2.4 covers the full 48-document
   section_reorder follow-up, not just the original v1 corpus, as of 2026-09-04).
 - Section_reorder's follow-up corpus (48 documents) comes from a different source
@@ -566,19 +615,22 @@ to this specific collision class.
   concurrency-collision incident (section 4) shows a DIFFERENT kind of cross-trial
   interference than the control-reaching-Meridian violation the isolation audit itself
   checks for.
-- Eight real defects (sections 0, 2.3/2.5/2.6, plus the PII scanner correction in
+- Ten real defects (sections 0, 2.3/2.5/2.6, plus the PII scanner correction in
   `docs/paper-s6-organic-omml-round2-3-result-v1.md`) were found DURING this project's own
   analysis of its own results, not by external review -- disclosed in full per this
   project's standing "never quietly patch around a surprising result" discipline, but a
   reader should weigh that these are the defects THIS team happened to notice, not a claim
-  that no further defects exist. Four of the eight (section 2.3's second correction, the
-  bibliography alphabetization gap, the blank-heading-text plan defect, and citation's
-  multi-field removal defect) were found only because of a deliberate effort to break the
-  harness with hand-authored adversarial content; a further one (the malformed-XML/
-  missing-file grading crash) was found via a different deliberate stress test -- equation's
-  harder, hand-constructed control-arm task. Five of eight defects surfaced by deliberately
-  adversarial testing rather than organic corpus data or routine operation is a strong
-  argument for more of that kind of testing, not less.
+  that no further defects exist. Four of the ten (section 2.3's second correction, the
+  bibliography alphabetization gap, citation's multi-field removal defect, and the
+  malformed-XML/missing-file grading crash found via equation's harder, hand-constructed
+  control-arm task) were found only because of a deliberate effort to break the harness or
+  its evaluators with adversarial content. The blank-heading-text plan defect (section 0 item
+  7) was NOT adversarially surfaced -- it was found during routine operation, while finally
+  running the K=4 depth study against the full 48-document v2 corpus -- and the two most
+  recent (defects 9 and 10) were found by an independent pre-publication audit re-deriving
+  every published number from raw data, a different discipline again. Four of ten defects
+  surfaced by deliberately adversarial testing, a further two by independent post-hoc
+  verification, is a strong argument for more of both kinds, not less.
 
 ## 7. Recommended next steps (not run here)
 
@@ -587,9 +639,9 @@ to this specific collision class.
   `STATUS_DLL_INIT_FAILED` process-launch failures under real shared-host resource
   contention, and a full computer crash; none a harness or product defect), which is exactly
   what motivated adding checkpoint/resume support to the harness mid-collection; the
-  48-document v2 follow-up's own K=4 collection (2026-09-04) needed it too, surviving 6
-  independent timeout attempts on one oversized document without losing any of the other 44
-  documents' results. This gave the properly powered read section_reorder's K=1 result could
+  48-document v2 follow-up needed it too: one oversized document's control-arm chain hit 6
+  independent 300-second timeouts spanning both the K=1 and K=4 collections (run on separate
+  dates), without losing any of the other 44 documents' results. This gave the properly powered read section_reorder's K=1 result could
   not: **the K=4 gap is real and significant (p=0.0015 combined), not a small-sample
   regression toward parity** -- see section 2.4 for the full result and its mechanism.
 - Run equation and table_structural to confirmatory scale on a less-loaded host, or after the
