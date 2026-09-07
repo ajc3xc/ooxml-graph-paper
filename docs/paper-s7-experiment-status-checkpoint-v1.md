@@ -26,37 +26,55 @@ mean); a smaller, more variable gap for citation (117s vs 128s mean).
 | Table_structural | 24/26 (92.3%) pass, full confirmatory scale, both directions | **1/26 resolved**, unchanged after a full re-run under materially better host conditions (13.7GB free vs 6.7GB) with the corrected `--model sonnet` (an earlier attempt accidentally used the harness's `haiku` default -- see below) | Same render-gate mechanism as equation. |
 | Caption | **Zero run directories exist anywhere.** | **Zero run directories exist anywhere.** | Never attempted at confirmatory scale at all -- confirmed by direct filesystem search 2026-09-06, not just "excluded" in prose. |
 
-**The diagnosis, refined 2026-09-06**: this is NOT simply "the shared host is busy." The
-render-gate `chain_start` check (on the untouched pristine input, before any Meridian tool
-call) fails almost exclusively for treatment, never for control, on the identical document.
-`tools/run_paper_s7_benchmark.py` submits jobs as `(doc, control), (doc, treatment)` pairs;
-under `--max-workers 1` this means treatment's first Word-COM automation call always runs
-immediately after control's own 3 just-completed automations (chain_start + forward +
-inverse) for the same document. Reproduced identically for both equation and table_structural,
-at the same time, on the same host, under two very different memory conditions -- a specific,
-testable sequencing effect, not diffuse contention.
+**The diagnosis, corrected and precisely pinned down 2026-09-06 (this was the third and final
+hypothesis -- the first two were tested directly and REFUTED, kept below for the record):**
 
-**In progress right now (2026-09-06, this checkpoint)**: testing this hypothesis directly and
-cheaply -- re-running ONE currently-blocked treatment chain each for table_structural and
-equation in complete isolation (no preceding control chain in the same process), via
-`run_chain` called directly rather than through the full harness's job queue. Script:
-`test_sequencing_hypothesis.py` in this session's scratchpad
-(`C:\Users\13144\AppData\Local\Temp\claude\...\scratchpad\`), run root
-`E:\MeridianData\ooxml-graph-paper\runs\paper-s7-sequencing-isolation-test\`. **If this
-completed successfully after this checkpoint was written and you are reading this fresh,
-check that run root's `chain-result.json` files for `"status"` before assuming anything about
-the outcome -- do not guess.**
+1. ~~Diffuse "shared host contention"~~ -- REFUTED. Re-running the same 25 table_structural
+   chains under materially better host memory (13.7GB free vs 6.7GB) produced the identical
+   25/26-blocked result, unchanged.
+2. ~~Chain-sequencing (treatment's first Word-COM call always follows control's automations
+   for the same document)~~ -- REFUTED. Re-running one blocked chain per family for
+   table_structural and equation via `run_chain` directly, completely alone, with zero
+   preceding chain in the same process, still blocked both times.
+3. **CONFIRMED, by directly reading the raw chain data and independently reproducing it
+   myself**: `insert_table`/`insert_equation` each perform their OWN internal write-time
+   render-verification (LibreOffice `soffice --convert-to pdf`, 60-second bound) AFTER making
+   the edit, and reject/roll back the write if that conversion doesn't finish in time. Control
+   never calls this tool at all (it edits raw XML directly), so it never hits this path --
+   which is exactly why control is unaffected while treatment overwhelmingly is. Classified
+   every currently-blocked treatment chain across both families (38 total): **28 of 38 (74%)**
+   show this EXACT signature in their own transcript (near-identical wording across
+   independently-run trials -- "soffice --convert-to pdf exceeds its 60-second bound", tool
+   safely restores the file each time); the other **10 of 38 (26%)** are genuine
+   subprocess-level timeouts (the whole `claude -p` CLI call exceeded the harness's own 300s
+   cap) -- a different, more classic infra failure mode, still real but distinct.
 
-- If isolation lets treatment succeed where the full-batch run blocked it: this CONFIRMS the
-  sequencing hypothesis. Next step: modify `run_paper_s7_benchmark.py`'s job submission
-  (either interleave a cooldown between a document's control and treatment chains, or process
-  all of one arm before starting the other, whichever is cheaper to implement) and re-run
-  equation + table_structural + caption at confirmatory scale for real.
-- If it still blocks even in isolation: the sequencing hypothesis is REFUTED for at least this
-  document; look instead at whether Word itself has degraded (orphaned processes, DCOM
-  exhaustion) from the cumulative automation load of this whole multi-hour sprint, independent
-  of immediate sequencing -- a machine restart before the next attempt would be the cheapest
-  way to rule this in or out.
+   **Directly verified this is not a fixed, permanent block**: called `insert_table` myself,
+   directly (bypassing the CLI/agent entirely), against the identical document and anchor that
+   had just failed in the benchmark -- it succeeded in 4.3 seconds, first attempt, render
+   verified. The mechanism works correctly when LibreOffice/host conditions are momentarily
+   favorable; the failure rate is real but TIME-VARYING, not structural. This reopens a real
+   possibility that a well-timed re-run (or a paced one -- fewer chains per batch, or a pause
+   between batches to let LibreOffice settle) can genuinely complete these families at
+   confirmatory scale, which the earlier "sequencing" and "shared-memory-contention" framings
+   had made sound close to hopeless.
+
+   **Not yet determined**: WHY soffice's reliability varies over time -- plausible mechanisms
+   include LibreOffice's own single-instance profile lock degrading after many rapid
+   consecutive conversions within one long-running harness process, or orphaned `soffice.bin`
+   processes from earlier timed-out conversions never fully releasing (the harness's own
+   Word-side orphan-cleanup logic, visible in every receipt's `orphan_diagnostics` field, does
+   not appear to have a LibreOffice-side equivalent -- worth checking
+   `render_gate.py`/`check_render_capability` for one). Not investigated further this session;
+   a real, scoped next step if this recurs.
+
+**In progress right now (2026-09-06, this checkpoint)**: immediately after confirming the
+render-gate works under current conditions, relaunched the full remaining-chains resume for
+table_structural (25 blocked treatment chains) and equation (development-slice, 11 blocked
+treatment chains) via `finish_remaining_experiments.sh` (background task, log
+`finish_remaining_experiments_v3.log` in this session's scratchpad) -- seizing the favorable
+window rather than just documenting it. **Check that log and the actual chain-result.json
+files under the same run roots as before for real status before assuming any outcome.**
 
 ## Known, real bugs fixed this sprint (defects 1-11, full detail in paper-s8 section 0)
 
