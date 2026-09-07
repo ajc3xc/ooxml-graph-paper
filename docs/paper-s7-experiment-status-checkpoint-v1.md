@@ -244,10 +244,46 @@ plowing through. Skips any chain already resolved (checked via the same chain-id
 convention the harness itself uses), so it only spends real work on the ~50 chains actually
 still blocked across both families. Launched as this session's 7th real attempt; **immediately
 confirmed the host really is this starved** -- free memory measured at 2.84GB (below even this
-script's own 4GB backoff threshold) on its very first check. Log: `resilient_finish.log` in
-this session's scratchpad. **Check that log's real output before assuming any outcome -- this
-one is designed to run for a long time regardless, backing off through low-memory windows
-rather than failing on them.**
+script's own 4GB backoff threshold) on its very first check.
+
+**That first attempt (`resilient_finish.py`, Python-orchestrated) ran to completion but did
+ZERO real work**: every single one of the ~50 subprocess calls failed instantly with
+`AssertionError: SRE module mismatch` from `C:\Program Files\LibreOffice\program\python-core-
+3.11.14\...` -- `subprocess.run(["pixi","run","python",...])`, when invoked from WITHIN a
+nested Python process, was silently picking up LibreOffice's bundled Python instead of the
+pixi-managed environment (root cause not fully pinned down; not simply the wrong executable
+path -- even invoking the resolved pixi python.exe directly still hit the identical error,
+so something about the nested-subprocess environment itself, not just executable resolution).
+`pixi run python -c "..."` invoked DIRECTLY from bash has worked reliably 100+ times this
+session, so **rewrote the orchestrator as `resilient_finish.sh`** (bash, not Python) --
+per-doc skip check, per-chain memory gate, and the actual `pixi run python` call all done at
+the bash level, matching the pattern that has never failed. (One more fix along the way:
+`Win32_OperatingSystem.FreePhysicalMemory` is in KILOBYTES, not bytes -- easy to get wrong,
+though PowerShell's `1MB` constant, 1,048,576, happens to equal the KB-per-GB conversion
+factor, so `/1MB` on that property was accidentally already correct all session; used the
+same formula, just truncated to a whole number since this host has no `bc` for float
+comparison in bash.)
+
+**Relaunched with the corrected bash orchestrator; its very first memory check found free
+memory under 0.5GB** -- the most severe reading this entire session, worse than every prior
+crash-adjacent measurement. Correctly waited (120s increments) and did proceed once memory
+recovered to 7GB -- but then hit an **eighth real bug**, found via `resilient_finish2.log`:
+every single chain attempt (`word_005`, `word_006`, `word_008`, ...) crashed near-instantly
+with `OSError: [Errno 22] Invalid argument`, the docx path always ending in a stray `\r`. Cause:
+`list_docs.py`'s `print()` runs under Windows text-mode stdout, which translates `\n` to
+`\r\n`; piped into bash's `while IFS=$'\t' read -r doc_label docx_path`, `read` strips only
+the trailing `\n`, leaving `\r` stuck on the LAST field. This is a scratchpad orchestration
+bug (not a product-code bug) but it meant **zero real chains had actually been attempted** in
+that run despite the log showing activity -- every one failed before ever reaching
+`probe_family_applicability`/soffice. Fixed at the source (`list_docs.py`:
+`sys.stdout.reconfigure(newline="\n")`) plus a defense-in-depth `${docx_path%$'\r'}` strip in
+`resilient_finish.sh`; verified the fix with `od -c` showing clean `\n`-only output before
+relaunching. Relaunched (free mem 6GB at launch) as `resilient_finish3.log`, now confirmed via
+live log tail to be past the string-parsing bug and genuinely inside a real `one_chain.py`
+subprocess call. A persistent Monitor (task `brt2vi3me`) is watching that log for
+completions/skips/errors/OOM signatures going forward. **Check `resilient_finish3.log` (or
+the monitor's notifications) for real outcomes -- this is the first run this session that has
+gotten PAST both the memory-backoff gate and the path bug into an actual chain attempt.**
 
 ## Known, real bugs fixed this sprint (defects 1-11, full detail in paper-s8 section 0)
 
