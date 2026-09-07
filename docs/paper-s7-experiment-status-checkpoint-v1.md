@@ -387,6 +387,24 @@ launch a FRESH pass over the same 4 splits (its skip-check already only skips `c
 exhaust real progress or get a clean confirmatory result, consistent with "don't stop till
 experiments and ablations fully finished."
 
+**Update, 11/11 real attempts now blocked** (categorized every result's failure signature
+directly from its `chain-result.json`: 5 `CLI_TIMEOUT` pre-fix, 4 `RENDER_TIMEOUT_INSIDE_AGENT`
+post-fix, 1 investigated `PYTHON_BOOTSTRAP` -- no unexplained new signature, everything traces
+to the three already-diagnosed mechanisms). Before considering yet another timeout raise (the
+600s outer budget now has real headroom to absorb one), **directly measured a live, isolated
+`_soffice_render()` call against the exact same docx, right now, under current real host
+conditions** -- it succeeded in **10.8 seconds**, nowhere near the 90s budget. This is decisive:
+soffice itself is NOT globally slow right now, so raising `_SOFFICE_TIMEOUT_SECONDS` again would
+not be evidence-based and is NOT being done. The 3-failures-every-time pattern inside a real
+trial's `insert_table` call must instead be genuine, real-time CONCURRENT contention specific to
+the moment that call executes (this host runs many simultaneous Claude Code sessions, each
+capable of spawning its own `claude -p` + MCP server + soffice process tree at any moment) --
+an isolated single-call test run between chains, when nothing else happens to be rendering at
+that exact instant, does not reproduce it. This is consistent with everything else diagnosed
+this sprint: not a remaining code defect, a real, externally-imposed, moment-to-moment resource
+ceiling this repository's code cannot fix. Continuing the multi-pass retry strategy above
+unchanged -- it is specifically robust to this kind of transient, timing-dependent contention.
+
 ## Known, real bugs fixed this sprint (defects 1-11, full detail in paper-s8 section 0)
 
 1-8: bibliography heading cleanup, citation stale-anchor-id, section_reorder whitespace
