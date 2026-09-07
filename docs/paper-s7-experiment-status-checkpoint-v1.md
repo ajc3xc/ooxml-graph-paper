@@ -341,9 +341,51 @@ this single data point alone (that would be the same kind of guess that made fix
 regression) -- 3 internal attempts x a larger per-attempt timeout risks approaching the new
 600s outer budget again. Letting the resilient run continue to accumulate real outcomes under
 naturally fluctuating load instead; `resilient_finish.sh`'s existing memory-gated backoff is
-itself already a reasonable, evidence-respecting strategy for this. **Check
-`resilient_finish4.log` / monitor `b040naf6x` for the real, accumulating pass/blocked split --
-some chains succeeding when load dips is expected and should show up as load fluctuates.**
+itself already a reasonable, evidence-respecting strategy for this. **Update after 9 real post-loop-fix attempts: 9/9 still `blocked`, zero successes**, across free
+-memory readings from 4GB to 13GB at chain start (no visible correlation with the memory-gate
+reading) -- correlating each result's `started_at` against the timeout-fix commit time (`be19deb`,
+2026-09-07 20:44:10 UTC) splits them cleanly: the 5 chains before the fix all show the old
+uniform `timed_out: true, wall~300.1s, returncode: None` signature (as expected, pre-fix); the
+4 chains after it now ALWAYS complete the whole `claude -p` process normally (`timed_out: false`,
+up to 510.9s, well under the new 600s budget) and STILL end up `blocked` every time -- i.e.
+raising the outer timeout didn't create a single new success, it just let the process run to
+its own natural (failing) conclusion instead of being cut off mid-attempt. That argues against
+pure "timeout too short" and for a persistent, still-ongoing problem.
+
+**A NEW, more specific failure signature surfaced in the longest (510.9s) case**, and it is
+NOT a render-timeout at all: the agent's own report quotes `"Could not find platform
+independent libraries <prefix>"` -- CPython's own interpreter-bootstrap failure message, not
+anything soffice or Word-COM would emit. Traced the process chain: `resilient_finish.sh` runs
+`pixi run python one_chain.py` -> `run_trial` builds `trial_env = dict(os.environ)` (TEMP/TMP/
+TMPDIR overridden to the trial's scratch dir, everything else inherited) and passes it to the
+`claude -p` subprocess -> the MCP config (`mcp-config-treatment.json`) launches
+`meridian-docs-pilot` via a HARD-CODED path to the pixi env's own `python.exe -m
+meridian_docs.server`, presumably inheriting that same env from `claude -p`. Hypothesized an
+environment leak (mirroring the earlier `resilient_finish.py` pixi/subprocess bug, but in the
+opposite direction: soffice's bundled Python picking up the WRONG PYTHONHOME) and tested it
+directly: `pixi run python` itself sets no `PYTHONHOME`/`PYTHONPATH` (confirmed empty), and
+reproducing the EXACT env-copy-plus-TEMP-override pattern outside the real harness (spawning
+the same pixi python.exe with a copied+modified env) succeeded cleanly every time -- no
+deterministic bug reproduces. This rules out a simple, fixable environment-variable defect and
+instead points to the SAME root cause as everything else this sprint: a Python interpreter
+bootstrap occasionally failing when spawned during a genuine, transient host-resource spike
+(consistent with the already-proven severe, sustained multi-session memory contention on this
+host) -- just a different proximate symptom (interpreter startup) than the render-timeout
+symptom seen in other trials, not a new code defect to fix.
+
+**Conclusion for now: no further code change is being made on this evidence** -- a clean
+direct reproduction attempt argues against it, and guessing at another fix without reproducing
+the failure would repeat the exact mistake fix #4 already taught this session. The design
+intent already documented for `run_chain()` (blocked is never treated as terminal -- see
+top of this file) means the correct response to persistent host contention is simply to keep
+re-attempting over time, which is exactly what `resilient_finish.sh`'s per-chain, memory-gated,
+short-lived-process design already does. Plan: let the current pass finish (watching for `ALL
+JOBS DONE` in `resilient_finish4.log`), tally the real pass/blocked split it produces, then
+launch a FRESH pass over the same 4 splits (its skip-check already only skips `completed`/
+`completed_with_failure`/`not_applicable`, so a plain re-run naturally retries everything still
+`blocked` without needing new code) -- repeating for as many passes as it takes to either
+exhaust real progress or get a clean confirmatory result, consistent with "don't stop till
+experiments and ablations fully finished."
 
 ## Known, real bugs fixed this sprint (defects 1-11, full detail in paper-s8 section 0)
 
