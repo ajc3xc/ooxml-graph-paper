@@ -424,6 +424,21 @@ against "just contention" and grounds to look harder (including, if truly warran
 the user whether other concurrent sessions on this host could be paused) rather than continuing
 to attribute it to load alone.
 
+**Table_structural family now fully attempted this pass: 25/25 blocked, 0 successes** (both
+`primary_holdout` and `validation` splits, 2 already-resolved chains correctly skipped by the
+loop's own skip-check). Sent the user a proactive push notification at 23/23 flagging that
+concurrent host load from other Claude Code sessions on this shared host is the most likely
+remaining, actionable lever -- not blocking on a response, continuing to run per their standing
+directive. `resilient_finish.sh` has now moved on to the `equation` family (starting fresh with
+`word_005` again, `equation` `primary_holdout` split) -- this is the family's FIRST-EVER
+confirmatory-scale attempt this whole session (no prior equation confirmatory data existed
+before this session at all). Watching those results next; the table_structural 0/25 result
+above already exceeds this file's own escalation threshold ("a full second pass with zero
+successes") in spirit -- 25/25 across BOTH splits of one family, at memory readings from 4GB to
+14GB, is stronger evidence than what a second retry pass would add. Treating the push
+notification as the escalation already made; continuing to run rather than waiting idle for a
+response, since the user's explicit standing instruction is not to stop.
+
 **16/16 now blocked, including at 14GB free -- the best memory reading all session.** This
 particular chain's OWN `word_com_receipts` both rendered cleanly (no Word-COM timeout at all
 this time), yet `insert_table`'s internal soffice-based check STILL failed, and the agent's own
