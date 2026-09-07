@@ -405,6 +405,25 @@ this sprint: not a remaining code defect, a real, externally-imposed, moment-to-
 ceiling this repository's code cannot fix. Continuing the multi-pass retry strategy above
 unchanged -- it is specifically robust to this kind of transient, timing-dependent contention.
 
+**Further corroboration, 14/14 now blocked**: before accepting "contention" as the final word,
+directly re-ran the isolated `_soffice_render` test again, this time deliberately reproducing
+the EXACT deeply-nested TEMP/TMP/TMPDIR path a real trial's own `claude_pair_runner.py` sets
+(the precise condition that caused the original `0xC0000409` crash) rather than a clean shell's
+temp dir -- confirmed the short-path fix genuinely holds under the real condition too (5.7s,
+success). Also checked host-wide CPU: `30.2%` average utilization, but with **50 concurrent
+node/claude/soffice processes** competing for it right now. Moderate average utilization with
+that many concurrent latency-sensitive processes is consistent with sporadic, bursty
+scheduling starvation for any one specific subprocess call at any given moment, without the
+host needing to be pinned at 100% on average -- a plausible mechanism for a real trial's
+internal render call to intermittently starve past 90s even while an isolated solo script
+(no sibling `claude -p`/MCP-server process competing in the same moment) sails through in
+single-digit seconds. Zero successes across 14 diverse attempts is stronger than pure chance
+would suggest for a purely-random-timing story, so this is being watched closely -- if a full
+additional retry pass produces literally zero successes too, that will be treated as evidence
+against "just contention" and grounds to look harder (including, if truly warranted, asking
+the user whether other concurrent sessions on this host could be paused) rather than continuing
+to attribute it to load alone.
+
 ## Known, real bugs fixed this sprint (defects 1-11, full detail in paper-s8 section 0)
 
 1-8: bibliography heading cleanup, citation stale-anchor-id, section_reorder whitespace
