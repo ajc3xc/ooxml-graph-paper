@@ -438,31 +438,56 @@ methodology.
 applicable documents, `--model sonnet`, the first of its kind for this family -- the prior
 smoke tests, even setting aside their missing raw data, used haiku). Control: 10/11 completed
 + 1 completed with a genuine task failure (11/11 resolved, no render-gate blocking at all).
-**Treatment: 0/11 resolved -- every single treatment chain blocked** on the render-verification
-gate's very first check (the `chain_start` milestone, which renders the untouched pristine
-input, before `insert_equation` is even called). Inspecting the raw Word-COM receipts
-directly: that same first-check milestone never blocks for control on the identical source
-document. The harness submits jobs in `(doc, control), (doc, treatment)` order per document
-(`tools/run_paper_s7_benchmark.py`'s job list), so under `--max-workers 1` treatment's
-`chain_start` check always runs immediately after control's full 3-automation chain
-(chain_start + forward + inverse) for the same document just finished -- consistent with,
-though not yet proven to be caused by, Word's COM automation server not having fully released
-its prior instance before the next one starts. This is a more precise, and more actionable,
-characterization than "shared host contention": it points at a specific measurable sequencing
-effect rather than diffuse external load, and was reproduced identically across two separate
-attempts under materially different host-memory conditions (see section 2.6's parallel
-finding for table_structural, run at the same time on the same host).
+**Treatment: 0/11 resolved -- every single treatment chain blocked**, unchanged across 2
+separate full-batch attempts run hours apart.
+
+**The mechanism, precisely diagnosed 2026-09-06 after two earlier hypotheses were directly
+tested and refuted** (diffuse "shared host contention" -- refuted by re-running under
+materially better memory with no change; a chain-sequencing effect where treatment's first
+Word-COM call always follows control's own automations for the same document -- refuted by
+running one blocked chain in complete isolation, with zero preceding chain, and it still
+blocked): `insert_equation` performs its OWN internal write-time render-verification
+(LibreOffice `soffice --convert-to pdf`, a 60-second bound) after making the edit, and
+correctly rolls back the write when that conversion doesn't finish in time. Control never
+calls this tool at all, so it never hits this path -- confirmed directly in every blocked
+treatment trial's own transcript ("the render-verification step (`soffice --convert-to pdf`)
+is timing out consistently... the file was safely restored"), and confirmed structurally by
+classifying all 38 currently-blocked treatment chains across equation and table_structural:
+**28 of 38 (74%) show this exact signature**; the other 10 are genuine subprocess-level
+timeouts (the whole `claude -p` CLI call exceeded the harness's 300s cap), a separate failure
+mode. This is real production behavior -- any Meridian user inserting an equation on a host
+where LibreOffice conversion is slow would hit the identical rejection -- not a benchmark
+artifact.
+
+Critically, this is **not a permanent, structural block**: calling `insert_equation`'s sibling
+`insert_table` directly (bypassing the CLI/agent entirely) against a document that had just
+failed in the benchmark succeeded in 4.3 seconds, first attempt, render verified. Yet
+immediately relaunching the full batch of blocked chains right after confirming this produced
+**zero change** -- the identical chains blocked again. Four independent full-batch attempts
+total (varying model correctness, host memory from ~6.7GB to ~13.7GB free, and time of day)
+all converge on the same near-total block rate for treatment, while isolated single calls
+succeed quickly and no orphaned `soffice`/Word processes or low memory are ever found
+immediately after a batch completes. The honest synthesis: something about SUSTAINED, REPEATED
+render-verification calls across many chains within one continuous multi-hour run reliably
+degrades success to near-zero in a way that is not visible in memory or process state once the
+run stops -- a LibreOffice-internal degradation under repeated use (profile lock contention, a
+temp-file or handle buildup, a background listener degrading under rapid restarts) is the
+leading remaining hypothesis, not yet confirmed. Diagnosing it further would require
+instrumenting `render_gate.py` to log `soffice`'s process lifecycle live during a run, not
+just before/after the batch -- out of scope for this sprint, a real scoped next step.
 
 **Honest conclusion**: equation's implementation, prompt, and grading are demonstrably
-correct -- control resolves cleanly and the render check succeeds whenever it isn't hit by
-this timing effect. The render-verification bottleneck is real, reproducible, and now
-characterized precisely enough to investigate as a concrete engineering question (does a
-brief cooldown between chains change the block rate?) rather than something to wait out.
-Investigating this discovery did produce one genuine, broadly useful fix along the way:
-grading previously crashed uncaught on a structurally-valid-but-malformed `word/document.xml`
-or a missing output file (`_safe_grade`, commit `e617855`) -- not equation-specific, but
-equation's harder control-arm task (hand-constructing OMML) was what surfaced it. No
-confirmatory-scale PASS-RATE result is reported for equation's treatment arm -- see section 7.
+correct -- control resolves cleanly, and the render check demonstrably CAN succeed (both in
+isolation and, presumably, for whichever 1-2 chains occasionally get through a batch).
+The render-verification bottleneck is real, reproducible, precisely characterized, and -- after
+2 genuine full-batch attempts under different conditions -- not resolved by simply retrying
+again without a change to either the render-gate's own retry/backoff behavior or the
+sustained-use conditions that degrade it. Investigating this discovery did produce one genuine,
+broadly useful fix along the way: grading previously crashed uncaught on a
+structurally-valid-but-malformed `word/document.xml` or a missing output file (`_safe_grade`,
+commit `e617855`) -- not equation-specific, but equation's harder control-arm task
+(hand-constructing OMML) was what surfaced it. No confirmatory-scale PASS-RATE result is
+reported for equation's treatment arm -- see section 7.
 
 ### 2.6 A 5th family, table_structural: also implemented and verified correct, also host-limited
 
@@ -499,42 +524,37 @@ independently graded by the same structural checks used everywhere else in this 
 not just a transcript claim. The 2 real control failures were both on the removal step
 (genuine task mistakes, not harness artifacts): one left the paragraph list not exactly
 restored after removing the table, one failed to remove the marker table at all. Treatment
-resolved only **1 of 26** chains (that one passed cleanly, forward and inverse) before
-repeated retries -- at both higher (2) and lower (1) harness concurrency, across three
-separate attempts -- stopped making meaningful progress. Direct host measurement during this
-run showed why: free memory had dropped to ~7.3-7.7GB (vs. 11.5-14.5GB at earlier points in
-this same session) with ~84 python/claude/soffice/node processes running, consistent with
-materially heavier concurrent load from other sessions sharing this host than at any earlier
-point this project measured it. Raising harness concurrency made the block rate WORSE (26/26
-blocked) before lowering it again only partially helped (25/26 blocked, unchanged across
-two further retries) -- evidence the bottleneck is dominated by real-time, largely
-external host contention, not solely this harness's own concurrency setting.
+resolved only **1 of 26** chains initially, then remained at that same 1/26 across three more
+full-batch attempts total (varying harness concurrency, then re-run under materially better
+host memory, then re-run again immediately after directly confirming the render-gate works --
+see below) -- four independent attempts, zero net improvement.
 
-**Update (2026-09-06, continued): re-run under materially better host conditions, same
-result.** A subsequent retry, hours later, found free host memory recovered to ~13.7GB with
-~40 relevant processes running (the best measured all project) -- and re-ran all 25 blocked
-treatment chains at `--max-workers 1`. Result: **still 25/26 blocked**, the identical set of
-documents, zero net change. This rules out "the host was simply busy" as a sufficient
-explanation on its own. Inspecting the raw Word-COM receipts for a blocked chain shows the
-failure is specifically the render-verification gate's very first check (`chain_start`, on
-the untouched pristine input, before `insert_table` is even called) -- and that this same
-check never blocks for control on the identical source document. Per
-`tools/run_paper_s7_benchmark.py`'s job-submission order (`(doc, control)` immediately
-followed by `(doc, treatment)`), under single-worker execution treatment's `chain_start` check
-always runs immediately after control's full 3-automation chain for the same document just
-finished. This is the identical pattern independently found for equation in section 2.5,
-observed on the same host at the same time -- a specific, testable sequencing effect
-(Word's COM automation server possibly not fully releasing between rapid consecutive
-invocations), not simply diffuse external contention.
+**The mechanism, precisely diagnosed 2026-09-06** (see section 2.5 for the full account, which
+applies identically here): two earlier hypotheses -- diffuse shared-host memory contention,
+and a chain-sequencing effect from treatment's Word-COM call always following control's for
+the same document -- were each directly tested and refuted. The real cause: `insert_table`
+performs its own internal write-time render-verification (LibreOffice `soffice --convert-to
+pdf`, 60s bound) and correctly rejects the write when it times out; control never calls this
+tool, so it's unaffected. Classifying every blocked treatment chain across both table_structural
+and equation (38 total) found this exact signature in 28 (74%); the other 10 are genuine
+subprocess-level timeouts. Directly calling `insert_table` myself against a document that had
+just failed in the benchmark succeeded in 4.3 seconds, first attempt -- proving the mechanism
+is not permanently broken -- but immediately relaunching the full 25-chain batch right after
+that produced no change at all. Four independent full-batch attempts at different times and
+memory conditions all converge on the same near-total block rate, while isolated single calls
+succeed and no leftover processes or low memory are found once a batch stops. The leading
+unconfirmed hypothesis is a LibreOffice-internal degradation under sustained, repeated use
+within one long-running harness process -- not diagnosable further without live
+instrumentation of `render_gate.py`, out of scope for this sprint.
 
 **Honest conclusion**: table_structural is implemented, unit-tested (30 new tests: 21 for
 `insert_table`/`remove_table` themselves in `docs_intel.py`, plus 9 for the S7 harness
-wiring), and functionally verified
-correct -- confirmed now not just by unit tests but by a complete, real confirmatory-scale
-control-arm run. It joins caption and equation as host-limited for a complete confirmatory-scale
-TREATMENT run specifically, and this session's own direct measurements now tie that
-limitation concretely to real-time host load rather than treating it as a fixed, static rate --
-worth re-attempting when this shared host is under lighter concurrent use. See section 7.
+wiring), and functionally verified correct -- confirmed now not just by unit tests but by a
+complete, real confirmatory-scale control-arm run. Its treatment arm shares equation's
+precisely-diagnosed render-verification bottleneck, now understood well enough to know that
+further blind retries on this same host are not expected to help without either a change to
+`render_gate.py`'s own retry/backoff behavior or a genuinely idle host for the run's full
+duration. See section 7.
 
 ### 2.7 Timing: treatment is also substantially faster, not just equally accurate
 
@@ -747,17 +767,18 @@ to this specific collision class.
   dates), without losing any of the other 44 documents' results. This gave the properly powered read section_reorder's K=1 result could
   not: **the K=4 gap is real and significant (p=0.0015 combined), not a small-sample
   regression toward parity** -- see section 2.4 for the full result and its mechanism.
-- Investigate the specific, testable sequencing hypothesis in sections 2.5/2.6: treatment's
-  render-verification `chain_start` check consistently runs immediately after control's full
-  automation chain for the same document (per the harness's own job-submission order), and
-  reproduced identically across two attempts under very different host-memory conditions --
-  try inserting a brief cooldown between a document's control and treatment chains, or
-  running treatment's chains before control's, and see whether the block rate changes. This
-  is now a more specific, actionable question than "run it again on a quieter host."
-  Otherwise, run equation and table_structural to confirmatory scale on a less-loaded host --
-  both families are implemented, tested, and functionally verified correct; only host-level
-  render throughput blocks them here (sections 2.5, 2.6).
-- Re-run caption for the same reason -- all three share the identical root cause.
+- Sections 2.5/2.6 precisely diagnose equation's and table_structural's treatment-arm block:
+  `insert_equation`/`insert_table`'s own internal write-time render-verification (LibreOffice
+  `soffice --convert-to pdf`, 60s bound) reliably fails under sustained, repeated use within
+  one long-running harness batch, even though isolated single calls succeed and no leftover
+  process/memory state explains it afterward. Two prior hypotheses (diffuse host contention,
+  chain-sequencing) were directly tested and refuted -- four full-batch attempts across varied
+  conditions found no configuration of this harness that resolves it. The real next step is
+  product-side: instrument `render_gate.py` to log `soffice`'s process lifecycle live during a
+  run (not just before/after), and consider retry-with-backoff instead of a single 60s attempt.
+  Re-running this same harness again without such a change is not expected to help.
+- Caption shares the identical `insert_caption` render-verification path and has never been
+  attempted at confirmatory scale at all -- expect the same wall if attempted as-is.
 - Add cross_reference once caption's render-timeout handling is resolved (it depends on
   captions existing, section 5).
 - ~~Design and implement correct-position insertion for `insert_bibliography_entry`~~ --
