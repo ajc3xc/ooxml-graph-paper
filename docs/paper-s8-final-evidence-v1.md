@@ -95,10 +95,11 @@ number in this document.
    `grade_forward_trial_reorder`'s `moved_heading_still_present` check (`section_heading_text
    in paragraphs_after`) can never pass when that text is `""`, failing forward grading
    regardless of whether the move itself was correct. Confirmed 0/38 v1, 4/48 v2 -- a
-   different 4 documents than defect 4 above, and unlike that defect, this one hits **both
-   arms symmetrically** (all 4 documents show control AND treatment both failing for the
-   identical reason), so it deflated absolute pass rates without necessarily biasing the
-   comparison. Alongside it: `compute_s7_statistics.py`'s `_chain_outcome` did not exclude
+   different 4 documents than defect 4 above, and unlike that defect, this one hits **3 of the
+   4 documents symmetrically** (both arms failing for the identical reason; the 4th document's
+   control-arm chain never reached forward grading at all, having separately timed out --
+   see section 2.3), so on those 3 it deflated absolute pass rates without necessarily biasing
+   the comparison. Alongside it: `compute_s7_statistics.py`'s `_chain_outcome` did not exclude
    `"blocked"` chains the way it already excluded `not_applicable`/`harness_exception` --
    a chain that hits the harness's 300s per-trial timeout still gets a grading result
    computed against the (unmodified) file on disk, so a pure infra timeout was silently
@@ -183,8 +184,10 @@ number in this document.
 - **K-pair sweep**: breadth pass at K=1 across all 3 families on both corpora; a depth
   sub-study at K=4 (bibliography, citation, section_reorder) on the original v1 corpus,
   section 2.4 -- delayed by repeated real infrastructure interruptions on a shared host
-  (three separate crashes; see section 7 and `tools/run_paper_s7_benchmark.py`'s new
-  checkpoint/resume support, added mid-collection specifically because of this) but now
+  (three separate interruptions -- a session disconnect, shared-host resource contention, and
+  one full computer crash, only the last of which was an actual crash; see section 7 and
+  `tools/run_paper_s7_benchmark.py`'s new checkpoint/resume support, added mid-collection
+  specifically because of this) but now
   complete.
 - **Model**: `claude-sonnet-5` (`--model sonnet`) throughout.
 - **Arms**: control (generic Read/Write/Edit/Bash, zero Meridian MCP access) vs. treatment
@@ -415,8 +418,11 @@ Implementation correctness is independently verified: direct manual testing conf
 including the equation-specific paragraph-text gap (a pure-equation paragraph's
 `parse_docx()` text field is empty -- its content lives in `<m:oMath>/<m:t>`, not the
 `<w:t>` runs that field reads -- requiring a dedicated resolver,
-`resolve_equation_para_id_by_marker`); and multiple real trials across two smoke tests
-completed successfully end to end.
+`resolve_equation_para_id_by_marker`). **Corrected 2026-09-06**: an earlier revision also
+claimed "multiple real trials across two smoke tests completed successfully end to end" here
+-- no raw run data supporting that specific claim could be located anywhere in the evidence
+store (see the next paragraph's own disclosure about the smoke-test data). Removed rather than
+repeated; the manual-testing and unit-test claims above remain independently verified.
 
 However: `insert_equation` shares `insert_caption`'s Word-COM render-verification gate
 (a hardcoded 60-second timeout, `_WORD_COM_TIMEOUT_SECONDS` in the parent repo's

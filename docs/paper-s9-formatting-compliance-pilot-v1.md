@@ -1,8 +1,11 @@
 # PAPER-S9: formatting-compliance pilot (v1)
 
 Status: exploratory, not confirmatory. Four fixtures (three hand-authored, one a real
-organically-occurring document), one trial per arm each (8 real `claude` CLI trials total,
-updated 2026-09-06 twice: first to add a 3rd fixture covering a different violation
+organically-occurring document), nominally one trial per arm each -- 9 real `claude` CLI
+trials actually run, not 8, since the organic fixture's treatment arm was invoked twice (a
+first run that hit the `audit_equation_style` bookmarkStart bug, a second re-run after the fix
+-- see below; only the second is reported as this pilot's result for that cell), updated
+2026-09-06 twice: first to add a 3rd fixture covering a different violation
 dimension, then to add a 4th, organic fixture) -- not part of the locked PAPER-S7 corpora,
 families, or statistics. Purpose: test whether a genuinely different task SHAPE -- read-only
 diagnosis ("find every formatting violation") rather than edit/inverse -- shows any
@@ -36,8 +39,11 @@ memory), too volatile to build a fixture against right now.
 
 ## Fixtures
 
-Both verified directly against the real `docs_intel.audit_equation_style` function before any
-trial was run (same discipline as every hard-authored PAPER-S7 fixture):
+The three hand-authored fixtures were each verified directly against the real
+`docs_intel.audit_equation_style` function before any trial was run (same discipline as every
+hard-authored PAPER-S7 fixture); the 4th, organic fixture's ground truth was established the
+same way but only after the bookmark bug below was found and fixed (see "A second, more
+consequential bug"), since the tool's pre-fix output was itself part of what needed checking:
 
 1. `hard_equation_style_violations.docx` -- one standalone display equation, deliberately
    left-aligned (violates the default policy's `center` expectation) with no trailing
