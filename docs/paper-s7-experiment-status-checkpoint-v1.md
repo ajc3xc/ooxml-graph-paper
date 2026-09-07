@@ -424,6 +424,28 @@ against "just contention" and grounds to look harder (including, if truly warran
 the user whether other concurrent sessions on this host could be paused) rather than continuing
 to attribute it to load alone.
 
+**16/16 now blocked, including at 14GB free -- the best memory reading all session.** This
+particular chain's OWN `word_com_receipts` both rendered cleanly (no Word-COM timeout at all
+this time), yet `insert_table`'s internal soffice-based check STILL failed, and the agent's own
+report explicitly paired the 90s timeout WITH the same "platform independent libraries"
+bootstrap-error text seen once before -- no longer a one-off. Took this seriously enough to
+retest the exact gap in the earlier reproduction: my prior tests used `pixi run python -c
+"..."` (letting pixi's OWN activation logic run fresh for that call), but the REAL MCP server
+is launched via a RAW hardcoded pixi python.exe path (see `mcp-config-treatment.json`'s
+`command`), bypassing `pixi run` entirely and relying purely on inherited env vars -- a
+meaningfully different code path I had not yet tested. Reproduced that exact raw-path
+invocation (spawned from within a `pixi run python` parent, inheriting its env, calling the
+hardcoded python.exe directly to import `render_gate` and call `_soffice_render`) -- it ALSO
+succeeded cleanly (8.8s). This rules out the raw-path-env-inheritance hypothesis too. At this
+point every code-level hypothesis reachable via direct, isolated reproduction has been tested
+and has NOT reproduced the failure; the one thing no standalone script can replicate is a live
+sibling `claude -p` process (with its own MCP server, its own soffice child) consuming
+resources at the identical instant a real trial's render check runs, alongside ~50 other
+concurrent processes on this host. Continuing to treat this as the best-supported remaining
+explanation, but holding the escalation threshold above: if a full second retry pass (once
+this one reaches `ALL JOBS DONE`) also produces zero successes, that is grounds to flag the
+host's concurrent load to the user rather than keep attributing this to timing indefinitely.
+
 ## Known, real bugs fixed this sprint (defects 1-11, full detail in paper-s8 section 0)
 
 1-8: bibliography heading cleanup, citation stale-anchor-id, section_reorder whitespace
