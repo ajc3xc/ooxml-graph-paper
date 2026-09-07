@@ -152,8 +152,25 @@ document and exact long `TEMP` value that had just crashed the real benchmark: r
 cleanly, first attempt, every time.** This is a real, deterministic, now-confirmed root cause
 and fix -- not another probabilistic mitigation.
 
-Relaunched the completion run a third time with all three fixes in place. Script:
-`finish_with_fix.sh`, log `finish_with_fix3.log` in this session's scratchpad. **Check that
+Relaunched the completion run a third time with all three fixes in place. **Result: still no
+meaningful change (same 13/13, 12/12 split).** But this time, diagnosed with a live, single-chain
+run using temporary debug logging (removed after) rather than guessing: the fix engages
+correctly (confirmed 66-character profile paths, TEMP correctly bypassed, zero crashes) --
+but that same diagnostic chain still ended `blocked`, this time on a GENUINE 60-second
+timeout (5 separate attempts, ~65s apart, no crash signature at all). Confirmed 25 concurrent
+`claude` processes and 40 `python` processes running on this shared host at the time.
+
+**Fourth fix**: `_soffice_render` classified timeouts as `retryable=False`, reasoning "a render
+that hung once is likely to hang again" -- correct for the OLD shared-lock design (a retry hit
+the identical stuck resource), no longer true now that each call gets an isolated profile.
+Flipped to `retryable=True` for soffice's timeout classification specifically (Word-COM's own
+separate classification untouched) -- commit `0f32ba27`, updated/added regression tests
+including an end-to-end recovery test on the real backend. This means a genuinely slow-under-
+load render now gets a real second attempt (with the existing 2s backoff) instead of failing
+outright on the first 60s timeout.
+
+Relaunched the completion run a fourth time with all four fixes in place. Script:
+`finish_with_fix.sh`, log `finish_with_fix4.log` in this session's scratchpad. **Check that
 log's real output before assuming any outcome.**
 
 ## Known, real bugs fixed this sprint (defects 1-11, full detail in paper-s8 section 0)
