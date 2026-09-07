@@ -131,9 +131,30 @@ every attempt" description).
 
 **Second fix**: added a 2-second backoff before a retry (never before the first attempt, never
 after a final non-retryable failure) -- commit `20eb8039`, 3 new regression tests. Relaunched
-the identical completion run a second time with both fixes in place immediately after. Script:
-`finish_with_fix.sh`, log `finish_with_fix2.log` in this session's scratchpad. **Check that
-log's real output before assuming any outcome -- this is another multi-hour run.**
+with both fixes in place. **Result: no meaningful change either** -- same crash, same rate.
+The backoff genuinely didn't help, which was itself informative: a crash that a 2-second delay
+doesn't fix is unlikely to be pure timing/lock contention.
+
+**Third fix, and the one that actually explains the crash**: read the failing chain's own
+scratch-directory path and did the arithmetic -- `claude_pair_runner.run_trial` (this
+project's own harness) redirects `TEMP`/`TMP` to a trial-specific scratch directory
+specifically so concurrent trials can't collide on a shared path, and that path is itself
+~174 characters deep (`E:\...\holdout-k1-...\atomic__word_005_...-table_structural-treatment-k1\p0-forward\scratch`).
+Fix 1's isolated profile directory nests INSIDE whatever `tempfile.gettempdir()` resolves to
+-- which honors that redirected `TEMP` -- pushing the total path past ~210 characters once
+LibreOffice bootstraps its own nested internal profile structure on top. **Reproduced this
+with a clean, deterministic, isolated repro**: ran `soffice` myself with a profile directory
+at that exact length, no other harness code involved at all -- crashed with the identical
+`0xC0000409` on the first try, every time. Rooted the profile directory at `LOCALAPPDATA` (a
+short, stable per-user path with no reason to be redirected the way `TEMP` is) instead of
+`tempfile.gettempdir()` -- commit `cf6d064a`. **Directly re-verified against the exact
+document and exact long `TEMP` value that had just crashed the real benchmark: renders
+cleanly, first attempt, every time.** This is a real, deterministic, now-confirmed root cause
+and fix -- not another probabilistic mitigation.
+
+Relaunched the completion run a third time with all three fixes in place. Script:
+`finish_with_fix.sh`, log `finish_with_fix3.log` in this session's scratchpad. **Check that
+log's real output before assuming any outcome.**
 
 ## Known, real bugs fixed this sprint (defects 1-11, full detail in paper-s8 section 0)
 
