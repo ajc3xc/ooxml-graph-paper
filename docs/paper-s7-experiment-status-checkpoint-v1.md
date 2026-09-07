@@ -297,10 +297,29 @@ match, not guesswork, given how many concurrent Meridian-session processes share
 Fixed with `< /dev/null` on the inner `pixi run python one_chain.py` call, isolating its stdin
 from the loop's pipe. Relaunched (10GB free at launch) as `resilient_finish4.log`; a persistent
 Monitor (task `bcv0fdzon`, replacing the now-stopped `brt2vi3me`) is watching it for
-completions/skips/errors/OOM signatures. **Check `resilient_finish4.log` (or the monitor's
-notifications) for real outcomes, and specifically confirm the SECOND doc in a split (e.g.
-`word_006` after `word_005`) actually gets attempted -- that is the direct regression test for
-this bug.**
+completions/skips/errors/OOM signatures. The stdin fix held (confirmed: `word_006`, `word_008`, `word_012`, both `wordc_005`/`wordc_007`
+all genuinely attempted after `word_005`, plus a correct `SKIP (completed)` for the one
+already-resolved chain) -- so the loop itself is now sound. But the first 6 real chain results
+all came back **`blocked`, and all 6 share one uniform, new signature**, checked directly in
+each `chain-result.json`: the forward trial's `claude -p` subprocess hit `timed_out: true`,
+`wall_time_seconds` ~300.08 (the outer harness timeout in `claude_pair_runner.py`), `returncode:
+None`, with EMPTY stdout/stderr -- not a soffice crash, not a soffice-level timeout, the WHOLE
+agent CLI process producing zero output before the outer 300s subprocess budget killed it.
+Checked `run_trial`'s retry logic before touching anything: a plain `TimeoutExpired` leaves
+`parsed_json` `None`, which never satisfies the narrow MCP-flake retry condition -- so this is
+a single-attempt-budget problem, not a hidden retry compounding the way fix #4 did. Consistent
+with the independently-confirmed severe host memory crisis (this is the same host that hit
+~0.5GB free RAM and Cygwin `fork()` failures earlier this session) from many concurrent Claude
+Code sessions -- the whole agent process (model turns + tool round trips + render-gate checks)
+plausibly just needs more real wall-clock time under that contention, even with every
+render_gate fix working correctly. **Tenth real fix**: raised `claude_pair_runner.py`'s
+`_TIMEOUT_SECONDS` 300 -> 600s (commit `be19deb`); confirmed no other module imports this
+constant and no retry logic depends on its exact value, so this cannot reproduce the fix-4
+regression. `one_chain.py` re-imports the module fresh on every invocation, so the fix took
+effect on the NEXT chain attempt without needing to restart `resilient_finish.sh`. Monitor
+swapped to task `b040naf6x` (now also surfacing real `{"status": ...}` outcome lines, not just
+progress). **Check `resilient_finish4.log` for whether chains now complete within 600s instead
+of hitting `blocked` at 300s -- this is the direct test of the tenth fix.**
 
 ## Known, real bugs fixed this sprint (defects 1-11, full detail in paper-s8 section 0)
 
