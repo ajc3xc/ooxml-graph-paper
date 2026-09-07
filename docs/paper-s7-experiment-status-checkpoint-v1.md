@@ -278,12 +278,29 @@ that run despite the log showing activity -- every one failed before ever reachi
 `probe_family_applicability`/soffice. Fixed at the source (`list_docs.py`:
 `sys.stdout.reconfigure(newline="\n")`) plus a defense-in-depth `${docx_path%$'\r'}` strip in
 `resilient_finish.sh`; verified the fix with `od -c` showing clean `\n`-only output before
-relaunching. Relaunched (free mem 6GB at launch) as `resilient_finish3.log`, now confirmed via
-live log tail to be past the string-parsing bug and genuinely inside a real `one_chain.py`
-subprocess call. A persistent Monitor (task `brt2vi3me`) is watching that log for
-completions/skips/errors/OOM signatures going forward. **Check `resilient_finish3.log` (or
-the monitor's notifications) for real outcomes -- this is the first run this session that has
-gotten PAST both the memory-backoff gate and the path bug into an actual chain attempt.**
+relaunching. Relaunched (free mem 6GB at launch) as `resilient_finish3.log`, confirmed via live log tail to
+be past the string-parsing bug and genuinely inside a real `one_chain.py` subprocess call --
+but this exposed a **ninth real bug**, a classic bash trap: `run_split`'s inner loop is
+`list_docs.py ... | while IFS=$'\t' read -r doc_label docx_path; do ... pixi run python
+one_chain.py ...; done`. The `pixi run python one_chain.py ...` call had NO stdin redirect, so
+it inherited the SAME stdin as the `while read` loop -- the piped `list_docs.py` output.
+Something in the pixi/one_chain.py/claude-pair-runner chain touches stdin, draining every
+remaining doc line from that pipe during the FIRST iteration. The loop's own next `read -r`
+then hit EOF immediately and silently moved to the next `run_split` call -- confirmed directly
+in `resilient_finish3.log`: after `word_005` finished (line 32), the very next `read -r` (line
+33-34) got nothing and jumped straight to `table_structural / validation` (line 35), having
+never attempted the other 13 primary_holdout docs at all (not logged as SKIP -- just consumed
+and discarded from the pipe, unlogged). **This means the entire `resilient_finish3.log` run
+processed only 1 doc per split (4 chains total) before silently short-circuiting each split.**
+Killed the live process (verified exact PID via `Get-CimInstance Win32_Process` command-line
+match, not guesswork, given how many concurrent Meridian-session processes share this host).
+Fixed with `< /dev/null` on the inner `pixi run python one_chain.py` call, isolating its stdin
+from the loop's pipe. Relaunched (10GB free at launch) as `resilient_finish4.log`; a persistent
+Monitor (task `bcv0fdzon`, replacing the now-stopped `brt2vi3me`) is watching it for
+completions/skips/errors/OOM signatures. **Check `resilient_finish4.log` (or the monitor's
+notifications) for real outcomes, and specifically confirm the SECOND doc in a split (e.g.
+`word_006` after `word_005`) actually gets attempted -- that is the direct regression test for
+this bug.**
 
 ## Known, real bugs fixed this sprint (defects 1-11, full detail in paper-s8 section 0)
 
