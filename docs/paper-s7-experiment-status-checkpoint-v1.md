@@ -318,8 +318,32 @@ constant and no retry logic depends on its exact value, so this cannot reproduce
 regression. `one_chain.py` re-imports the module fresh on every invocation, so the fix took
 effect on the NEXT chain attempt without needing to restart `resilient_finish.sh`. Monitor
 swapped to task `b040naf6x` (now also surfacing real `{"status": ...}` outcome lines, not just
-progress). **Check `resilient_finish4.log` for whether chains now complete within 600s instead
-of hitting `blocked` at 300s -- this is the direct test of the tenth fix.**
+progress). **Correction after the first post-fix real result** (`composite_same_type__wordc_010...`,
+checked directly in its full `chain-result.json`): the earlier "uniform 300s CLI timeout"
+diagnosis was too narrow. This trial's forward `claude -p` process actually completed
+NORMALLY -- `timed_out: false`, `returncode: 0`, a real `stop_reason: "end_turn"` agent turn,
+296s wall time (under even the OLD 300s budget, so the 600s raise wasn't even exercised here).
+The agent's own final message: *"The `allow_degraded_render` opt-in didn't bypass the render
+check -- it still fails and restores the file on every attempt... render verification via
+soffice timed out on all 3 attempts, including with allow_degraded_render=true."* -- i.e. the
+render_gate fixes are all still functioning correctly (no crash, no profile-lock hang), but
+the soffice call itself is still regularly exceeding its 90s budget under current real load,
+and `insert_table` retries the whole verification path up to 3x internally (independent of
+render_gate.py's own now-non-retryable TimeoutExpired handling) before giving up. **Independent
+cross-backend corroboration in the SAME chain's `word_com_receipts`**: the harness's separate
+Word-COM milestone check (a totally different rendering pipeline, untouched by any soffice fix
+this session) ALSO timed out at its own 90s budget on the very first receipt (`milestone:
+chain_start`), then rendered successfully in ~5s on the very next receipt
+(`milestone: after_pair_forward`) minutes later -- strong evidence the bottleneck is
+genuinely fluctuating host-level render wall-clock time under contention, not a remaining
+code defect in either backend. Deliberately NOT raising `_SOFFICE_TIMEOUT_SECONDS` again on
+this single data point alone (that would be the same kind of guess that made fix #4 a
+regression) -- 3 internal attempts x a larger per-attempt timeout risks approaching the new
+600s outer budget again. Letting the resilient run continue to accumulate real outcomes under
+naturally fluctuating load instead; `resilient_finish.sh`'s existing memory-gated backoff is
+itself already a reasonable, evidence-respecting strategy for this. **Check
+`resilient_finish4.log` / monitor `b040naf6x` for the real, accumulating pass/blocked split --
+some chains succeeding when load dips is expected and should show up as load fluctuates.**
 
 ## Known, real bugs fixed this sprint (defects 1-11, full detail in paper-s8 section 0)
 
