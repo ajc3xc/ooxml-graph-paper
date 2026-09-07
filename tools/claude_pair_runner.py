@@ -91,7 +91,24 @@ from docx_trial_broker import TrialSpec  # noqa: E402
 
 _PAPER_ROOT = Path(__file__).resolve().parent.parent
 _PAPER_PYTHON = sys.executable
-_TIMEOUT_SECONDS = 300.0
+# Raised 300s -> 600s 2026-09-07 (PAPER-S7 confirmatory completion sprint): every
+# equation/table_structural treatment trial attempted after the render_gate fixes
+# (profile isolation, short-path fix, retry left OFF) is STILL ending "blocked",
+# but with a materially different signature than earlier in this sprint -- not a
+# soffice crash or a soffice-level timeout, but the WHOLE claude -p subprocess
+# hitting exactly this outer budget with zero stdout/stderr captured (returncode
+# None, wall_time_seconds ~300.08, 100% consistent across every trial checked).
+# This is a single-attempt budget, not a retry count (a plain TimeoutExpired
+# leaves parsed_json None, which never satisfies the narrow MCP-flake retry
+# below) -- so raising it cannot reproduce the earlier fix-4 regression, where
+# making one *step* retryable silently doubled worst-case latency past this same
+# ceiling. Consistent with the independently-confirmed, severe, ongoing host
+# memory crisis this session (down to ~0.5GB free at one point, Cygwin fork()
+# itself failing for >2 hours in an earlier crash) from many concurrent Claude
+# Code sessions sharing this host -- the whole agent process (model turns + tool
+# round trips + render-gate checks) plausibly needs more than 300s of real
+# wall-clock time under that contention, even with no single step broken.
+_TIMEOUT_SECONDS = 600.0
 
 # See the retry logic in run_trial (PAPER-S8 defect 11): these phrases are
 # how the agent itself describes a treatment session where --mcp-config's
