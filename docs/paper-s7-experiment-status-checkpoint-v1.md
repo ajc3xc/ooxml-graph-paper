@@ -111,12 +111,29 @@ against fresh copies of the same document that had reliably blocked under the ol
 **Result: 10/10 succeeded, 9-19 seconds each, zero degradation across the run** -- the exact
 sustained-use pattern that previously failed almost universally now works cleanly every time.
 
-**In progress right now**: relaunched table_structural's remaining chains AND, for the first
-time ever, equation's TRUE confirmatory corpus (holdout + validation, 26 documents, not just
-the 12-doc development slice) with the fix in place. Script: `finish_with_fix.sh` in this
-session's scratchpad, log `finish_with_fix.log`, 4 stages (table_structural holdout, table_
-structural validation, equation holdout, equation validation). **Check that log's real output
-before assuming any outcome -- this is a multi-hour run.**
+**Result of the first real re-run with this fix (2026-09-07, ~00:08-04:12, ~4 hours)**:
+relaunched table_structural's remaining chains AND, for the first time ever, equation's TRUE
+confirmatory corpus (holdout + validation, 26 documents, not the 12-doc development slice).
+table_structural: **no change at all** (13/13 and 12/12 blocked, identical split to every
+prior attempt). Equation (brand new data): control 49/51 clean + 2 completed_with_failure
+(healthy), **treatment still overwhelmingly blocked**.
+
+**But the FAILURE SIGNATURE had changed**, which is real, useful information, not just another
+failure: classifying the new blocked chains found **44 of ~52 (85%) now show soffice CRASHING**
+with exit code `3221226505` / `0xC0000409` (a Windows stack-buffer-overrun) instead of the old
+60-second timeout. The isolation fix had genuinely worked -- it eliminated the HANG -- but
+exposed a second, distinct problem: `check_render_capability` already classifies this kind of
+nonzero-exit failure as retryable and retries once, but with ZERO delay (an immediate
+`continue`). Confirmed 25 concurrent `claude` processes and 40 `python` processes running on
+this shared host at the time -- a plausible real source of the resource contention causing the
+crash, which a zero-delay retry gives no time to clear (matching the transcripts' own "fails on
+every attempt" description).
+
+**Second fix**: added a 2-second backoff before a retry (never before the first attempt, never
+after a final non-retryable failure) -- commit `20eb8039`, 3 new regression tests. Relaunched
+the identical completion run a second time with both fixes in place immediately after. Script:
+`finish_with_fix.sh`, log `finish_with_fix2.log` in this session's scratchpad. **Check that
+log's real output before assuming any outcome -- this is another multi-hour run.**
 
 ## Known, real bugs fixed this sprint (defects 1-11, full detail in paper-s8 section 0)
 
