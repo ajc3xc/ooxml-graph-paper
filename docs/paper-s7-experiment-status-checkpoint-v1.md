@@ -218,6 +218,37 @@ now a evidence-based timeout increase), and the remaining variable increasingly 
 genuine, currently-severe shared-host contention from OTHER concurrent sessions, which no
 further code change in this repo can resolve.
 
+## STRATEGY PIVOT (2026-09-07): the sixth run crashed with DEFINITIVE proof of host OOM
+
+Not inference this time -- direct evidence in the log: `dofork: ... died unexpectedly ...
+errno 11 Resource temporarily unavailable`, Cygwin's own `fork()` failing to spawn a new
+subprocess at all, recurring over more than 2 hours before the session died. This is a severe,
+sustained host-level memory exhaustion that no change in this repo can fix -- it is well
+outside "maybe retry again," so retrying the same monolithic 4-stage script a 7th time blind
+would just repeat a failed action rather than adapt to it.
+
+**Table_structural's holdout split DID complete fresh under this run** (before the fork
+failures started) -- still 13/13 blocked, unchanged even with the 90s timeout. Given the
+proven severity of memory pressure at the time, this specific data point should not be read as
+"fix 6 didn't help" -- it may simply have been too starved a moment for ANY conversion to
+succeed reliably.
+
+**Pivoted the execution strategy, not the render_gate fixes** (fixes 1/2/3/6 remain as
+committed): instead of one long-lived Python process working through dozens of chains in a
+single continuous run (which never lets the OS reclaim memory between chains, and ran for
+hours before the fork failures appeared), `resilient_finish.py` (this session's scratchpad)
+processes the remaining chains ONE AT A TIME, each as its own short-lived subprocess exiting
+cleanly between chains, and checks free memory before every single one -- backing off and
+waiting (120s) rather than piling more load onto an already-starved host, instead of just
+plowing through. Skips any chain already resolved (checked via the same chain-id/status
+convention the harness itself uses), so it only spends real work on the ~50 chains actually
+still blocked across both families. Launched as this session's 7th real attempt; **immediately
+confirmed the host really is this starved** -- free memory measured at 2.84GB (below even this
+script's own 4GB backoff threshold) on its very first check. Log: `resilient_finish.log` in
+this session's scratchpad. **Check that log's real output before assuming any outcome -- this
+one is designed to run for a long time regardless, backing off through low-memory windows
+rather than failing on them.**
+
 ## Known, real bugs fixed this sprint (defects 1-11, full detail in paper-s8 section 0)
 
 1-8: bibliography heading cleanup, citation stale-anchor-id, section_reorder whitespace
