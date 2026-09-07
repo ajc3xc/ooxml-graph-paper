@@ -22,9 +22,9 @@ mean); a smaller, more variable gap for citation (117s vs 128s mean).
 
 | Family | Control | Treatment | Blocker |
 |---|---|---|---|
-| Equation | 10/11 resolved (1 genuine task failure), first real confirmatory-shaped attempt run 2026-09-06 on the 12-doc development slice only | **0/11 resolved, all blocked** | Render-verification gate's `chain_start` check times out. No confirmatory-scale (26-doc holdout+validation) run has EVER been attempted for this family, control or treatment. |
-| Table_structural | 24/26 (92.3%) pass, full confirmatory scale, both directions | **1/26 resolved**, unchanged after a full re-run under materially better host conditions (13.7GB free vs 6.7GB) with the corrected `--model sonnet` (an earlier attempt accidentally used the harness's `haiku` default -- see below) | Same render-gate mechanism as equation. |
-| Caption | **Zero run directories exist anywhere.** | **Zero run directories exist anywhere.** | Never attempted at confirmatory scale at all -- confirmed by direct filesystem search 2026-09-06, not just "excluded" in prose. |
+| Equation | 10/11 resolved (1 genuine task failure), development-slice only (12 docs) -- no confirmatory-scale 26-doc run ever attempted | **0/11 resolved, all blocked, unchanged across 2 full-batch attempts** | `insert_equation`'s own internal write-time render-verification (LibreOffice `soffice --convert-to pdf`, 60s bound) -- see full diagnosis below. |
+| Table_structural | 24/26 (92.3%) pass, full confirmatory scale, both directions | **1/26 resolved, unchanged across 4 full-batch attempts** at different times/memory conditions | Same mechanism as equation -- confirmed identical signature in 28 of 38 blocked chains across both families. |
+| Caption | **Zero run directories exist anywhere.** | **Zero run directories exist anywhere.** | Never attempted at confirmatory scale at all -- confirmed by direct filesystem search 2026-09-06, not just "excluded" in prose. Shares the identical `insert_caption` render-verification path, so almost certainly hits the same wall if attempted. |
 
 **The diagnosis, corrected and precisely pinned down 2026-09-06 (this was the third and final
 hypothesis -- the first two were tested directly and REFUTED, kept below for the record):**
@@ -68,13 +68,55 @@ hypothesis -- the first two were tested directly and REFUTED, kept below for the
    `render_gate.py`/`check_render_capability` for one). Not investigated further this session;
    a real, scoped next step if this recurs.
 
-**In progress right now (2026-09-06, this checkpoint)**: immediately after confirming the
-render-gate works under current conditions, relaunched the full remaining-chains resume for
-table_structural (25 blocked treatment chains) and equation (development-slice, 11 blocked
-treatment chains) via `finish_remaining_experiments.sh` (background task, log
-`finish_remaining_experiments_v3.log` in this session's scratchpad) -- seizing the favorable
-window rather than just documenting it. **Check that log and the actual chain-result.json
-files under the same run roots as before for real status before assuming any outcome.**
+**Result of seizing that window (2026-09-06, ~19:30-22:39, ~3 hours)**: relaunched the full
+remaining-chains resume for both families immediately after the isolated call succeeded.
+Outcome: **no change at all** -- table_structural still 25/26 blocked (13+12, identical split
+to every prior attempt), equation still 11/11 blocked. Checked immediately afterward for
+leftover `soffice`/`WINWORD` processes: none found, and free memory was a healthy 9.74GB --
+so this is not simple persistent process/memory leakage surviving after the fact either.
+
+**This is now the 4th independent full-batch attempt** (haiku/bad-memory, sonnet/good-memory,
+sonnet/good-memory again, sonnet/this-favorable-window), at different times of day and
+memory conditions, all converging on the same ~96-100% treatment block rate -- while isolated,
+standalone single calls (mine, and presumably whatever moment let 1-2 chains through each
+batch) succeed quickly. The honest synthesis: the render-gate mechanism is not permanently
+broken (a single call demonstrably works), but something about SUSTAINED, REPEATED
+render-verification calls across many chains within one continuous multi-hour run reliably
+degrades success to near-zero, and that degradation is not visible in memory/process state
+once the run stops. This smells like a resource that degrades DURING sustained use and
+recovers on its own once idle (a LibreOffice-internal state -- profile lock contention,
+a leaked file handle or temp-file buildup that only shows up mid-run, a `soffice` background
+listener that degrades under repeated rapid restarts) rather than anything visible to
+Task Manager-level inspection.
+
+## FOUND AND FIXED (2026-09-07): the real root cause was the shared soffice profile lock
+
+Read `render_gate.py`'s actual `_soffice_render` implementation directly rather than continuing
+to speculate: it invokes `soffice --headless --convert-to pdf ...` with **no
+`-env:UserInstallation=` override**, meaning every single conversion on this machine -- from
+this harness's own sequential chains AND from any other concurrent process on this shared host
+-- uses ONE shared default LibreOffice profile directory and its lock file. Concurrent/rapid
+contention for that lock is a well-documented LibreOffice failure mode, and the code's own
+existing comment had already anticipated the exact symptom ("a render that hung once is likely
+to hang again... never retried") without identifying the cause.
+
+**Fix**: give each `_soffice_render` call its own private, isolated profile directory via
+`-env:UserInstallation=`, so it can never contend with any other soffice invocation for the
+shared lock (commit `7f32fb60` in `repository`, `extensions/meridian-docs/meridian_docs/
+render_gate.py` + a new regression test in `test_docx_render_gate.py`). Standard practice for
+concurrent/automated LibreOffice use.
+
+**Verified live, directly, before trusting it**: called `insert_table` 10 times in a row
+against fresh copies of the same document that had reliably blocked under the old code.
+**Result: 10/10 succeeded, 9-19 seconds each, zero degradation across the run** -- the exact
+sustained-use pattern that previously failed almost universally now works cleanly every time.
+
+**In progress right now**: relaunched table_structural's remaining chains AND, for the first
+time ever, equation's TRUE confirmatory corpus (holdout + validation, 26 documents, not just
+the 12-doc development slice) with the fix in place. Script: `finish_with_fix.sh` in this
+session's scratchpad, log `finish_with_fix.log`, 4 stages (table_structural holdout, table_
+structural validation, equation holdout, equation validation). **Check that log's real output
+before assuming any outcome -- this is a multi-hour run.**
 
 ## Known, real bugs fixed this sprint (defects 1-11, full detail in paper-s8 section 0)
 
