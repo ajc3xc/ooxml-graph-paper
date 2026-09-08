@@ -651,9 +651,18 @@ auto-retried by `claude_pair_runner.run_trial`.
 
 ## Where the live public summary stands
 
-Structural Ledger artifact: `https://claude.ai/code/artifact/7af4510a-ea1e-4049-bb03-6abba2ac5cfe`
--- republished through this checkpoint with every correction above. 18 real defects disclosed
-in its fixgrid.
+**Both primary write-ups now carry the final, definitive equation/table_structural numbers**
+(2026-09-08): `docs/paper-s8-final-evidence-v1.md` sections 2.5/2.6 rewritten (commit
+`ebcf294`) with the full five-real-bug-fixes + every-hypothesis-ruled-out account and the
+final 1/26 (3.8%) confirmatory number for each family, plus consistency updates to the
+document's status header, section 1, section 3, and section 5. The Structural Ledger artifact
+(`https://claude.ai/code/artifact/7af4510a-ea1e-4049-bb03-6abba2ac5cfe`) republished to match:
+subheads 04/equation and 06/table_structural rewritten, a new "Confirmed" callout added
+replacing the old "Still open" framing for these two families, 3 new fixgrid cards added for
+the real product defects (profile-lock contention, the path-length crash, the outer-timeout
+fix), the defect-count stat card raised 18 -> 21, and the chain-count figure raised to 500+.
+Neither doc treats this as an open question anymore -- both report the real, final,
+host-contention-limited result.
 
 ## If you are picking this up cold after a crash
 
