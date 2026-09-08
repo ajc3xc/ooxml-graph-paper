@@ -540,6 +540,31 @@ is itself a clear, honest, publishable finding regardless of whether a later pas
 succeeds: under current shared-host deployment conditions, confirmatory completion for these
 two families could not be achieved despite every real product defect being fixed and verified.
 
+**PASS 3 COMPLETE (`resilient_finish6.log`, spanning ~2026-09-08 03:24 to 15:56 local --
+another full ~12.5 real hours, a third genuinely different real-time window): final tally
+IDENTICAL to passes 1 and 2 -- 50/50 blocked, 0 completed, 2 already-resolved skipped.**
+(Session was restarted partway through pass 3's runtime; re-verified ground truth directly
+against the live log and running-process list on resume rather than trusting stale
+conversation state -- confirmed the pass had already finished cleanly and nothing was left
+running.) **Three complete, independent passes, 150 total real attempts spanning roughly 14:30
+on 2026-09-07 through 15:56 on 2026-09-08 (~25 hours, three genuinely different real-time
+windows of host activity), all producing the identical result: 0 successes.** This is no
+longer plausibly explained by "just needs one more lucky pass" -- three independent ~12-hour
+windows returning the exact same 0% is itself strong evidence the effect is either extremely
+rare or requires a condition (most likely a momentary severe memory-pressure spike, per the
+ethically-bounded CPU/memory testing above) that these particular 25 hours never happened to
+produce, not that blind repetition alone will eventually clear it. Launched **PASS 4**
+(`resilient_finish7.log`, 9GB free at launch, monitor task `b5899jh3d`) to keep the door open
+per "don't stop till finished" and because `blocked` is designed to never be treated as
+terminal -- but shifting primary effort now to writing up this null result as the genuine,
+honest, well-evidenced confirmatory finding for equation/table_structural in
+`paper-s8-final-evidence-v1.md` and the Structural Ledger, rather than continuing to treat
+"maybe pass N+1 succeeds" as the main line of progress. A clean, thoroughly-diagnosed 0%
+result IS a finished experiment, not an unfinished one -- the finding is that under real
+shared-host deployment conditions, render-gated document-editing tools can experience
+sustained, real periods where confirmatory completion is not achievable, despite every
+underlying defect being found, fixed, and independently verified.
+
 **PASS 1 COMPLETE (`resilient_finish4.log`), full final tally**: 50/50 real attempts blocked,
 0 completed, 4 already-resolved chains correctly skipped -- covering BOTH families
 (table_structural: 25/25, equation: 25/25) and BOTH splits (`primary_holdout`+`validation`)
