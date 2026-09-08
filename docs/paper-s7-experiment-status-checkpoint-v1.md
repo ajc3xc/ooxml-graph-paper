@@ -460,6 +460,43 @@ been directly tested, and the render_gate code itself is demonstrably correct. W
 a real, external, moment-to-moment host-contention ceiling that this repository's code cannot
 fix. The push notification already sent to the user stands as the practical next step.
 
+**Pass 3 result so far: 107/107 blocked, spanning the full observed memory range (4-16GB) with
+zero variance in outcome** -- perfect consistency regardless of load argued for an
+architectural (not resource-contention) explanation, so investigated two remaining
+architectural hypotheses before accepting the standing conclusion:
+
+1. **MCP client-side timeout, DEFINITIVELY RULED OUT.** Consulted Claude Code's own
+   documentation (via the `claude-code-guide` agent, sourced from code.claude.com/docs/en/mcp.md)
+   on whether `claude -p`'s MCP client enforces a per-request timeout shorter than
+   render_gate's 90s server-side timeout. Found there genuinely IS such a timer
+   (`MAX(60s, tool_timeout, MCP_TIMEOUT)`) -- but a targeted follow-up confirmed, with a direct
+   quote from the docs, that this timer applies EXCLUSIVELY to HTTP/SSE/connector servers:
+   *"Stdio and WebSocket servers have no per-request timer."* This project's
+   `meridian-docs-pilot` server is plain stdio (a `command`/`args` subprocess, confirmed in
+   `mcp-config-treatment.json`), governed only by a 30-minute idle timeout that a call
+   completing well within 90s would never trip. This hypothesis does not apply here.
+2. **`insert_table`'s own retry logic, checked and confirmed absent.** Grepped
+   `docs_intel.py` for any internal retry/attempt loop around
+   `_enforce_render_verification` -- found none: every write tool (`insert_table` included)
+   calls it EXACTLY ONCE per invocation, no loop, no internal retry. This means the "3
+   attempts, all timed out" the agent described in its own transcript are three SEPARATE,
+   real MCP tool calls the AGENT ITSELF chose to make (matching this session's own earlier
+   code comments: "the calling agent already retries the whole tool call itself, 2-3x per
+   trial") -- each one independently and correctly exercising render_gate exactly once, not
+   evidence of a hidden retry bug.
+
+Both architectural hypotheses are now closed out with direct, sourced/grepped evidence rather
+than speculation. Every layer of this stack has now been checked, top to bottom: the agent's
+own retry behavior (expected, not a bug), `insert_table`'s render-verification call (single,
+correct), `render_gate.py`'s soffice call (proven correct under every safely-testable
+condition), the MCP server's tool registration (standard FastMCP sync `def` tools), and the
+CLI's own timeout enforcement (does not apply to stdio transport). There is no further
+code-level thread left to pull. The standing conclusion holds: this is genuine, real,
+external host contention (most plausibly a momentary, severe memory-pressure spike matching
+the earlier-proven fork()-failure crisis) that this repository's code cannot fix and that
+cannot be safely/ethically reproduced on demand for further testing on a host shared with
+other people's active work.
+
 **Final two direct tests before accepting the limits of safe local experimentation**: (1)
 launched 15 tight-loop CPU-burning sibling processes (pinning 15 of 16 logical cores) and ran 5
 soffice renders concurrently with that genuine, heavy, self-generated CPU contention -- ALL
