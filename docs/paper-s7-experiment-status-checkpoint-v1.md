@@ -13,18 +13,18 @@ status changes; do not let it go stale the way other docs in this project have.
 | Bibliography | 100% / 100% (N=26/26) | 100% / 100% (N=26/26) | Defect 11 (MCP-loading flake) fixed 2026-09-06; harness now auto-retries this signature. |
 | Citation | 100% / 100% (N=26/25*) | 100% / 100% (N=25*/25*) | Defect 10 (stale pre-fix statistics) fixed 2026-09-06. *1 chain per depth correctly excluded as a genuine 300s infra timeout ("blocked"), not scored as a failure. |
 | Section_reorder | 83.6% / 92.9% (N=55/56), **p=0.27, not significant** | 67.3% / 92.9% (N=55/56), **p=0.0015, significant** | The one confirmed, significant directional finding in this project. Combined v1+v2 corpora. Mechanism (compounding drift from repeated cycling) is a real 9-of-12 majority pattern, not exceptionless -- see paper-s8 section 2.4. |
+| Equation | 11/11 resolved (dev-slice, 12 docs; no larger control-arm corpus needed -- control never touches the render gate) | **1/26 (3.8%) resolved**, unchanged across three complete independent confirmatory passes (~25 real hours) after five real render-gate defects were fixed and every remaining hypothesis was tested and ruled out | Real, final, host-contention-limited result -- see full diagnosis below and paper-s8 section 2.5. NOT an open question anymore. |
+| Table_structural | 24/26 (92.3%) pass, full confirmatory scale, both directions | **1/26 (3.8%) resolved**, identical to equation across the same three passes | Same mechanism, same final number as equation -- paper-s8 section 2.6. NOT an open question anymore. |
 
 Timing (K=1, v1 corpus only, not formally powered -- paper-s8 section 2.7): treatment is
 substantially faster for bibliography (46s vs 150s mean) and section_reorder (39s vs 175s
 mean); a smaller, more variable gap for citation (117s vs 128s mean).
 
-## Incomplete -- real, open work
+## In progress
 
-| Family | Control | Treatment | Blocker |
+| Family | Control | Treatment | Status |
 |---|---|---|---|
-| Equation | 10/11 resolved (1 genuine task failure), development-slice only (12 docs) -- no confirmatory-scale 26-doc run ever attempted | **0/11 resolved, all blocked, unchanged across 2 full-batch attempts** | `insert_equation`'s own internal write-time render-verification (LibreOffice `soffice --convert-to pdf`, 60s bound) -- see full diagnosis below. |
-| Table_structural | 24/26 (92.3%) pass, full confirmatory scale, both directions | **1/26 resolved, unchanged across 4 full-batch attempts** at different times/memory conditions | Same mechanism as equation -- confirmed identical signature in 28 of 38 blocked chains across both families. |
-| Caption | **Zero run directories exist anywhere.** | **Zero run directories exist anywhere.** | Never attempted at confirmatory scale at all -- confirmed by direct filesystem search 2026-09-06, not just "excluded" in prose. Shares the identical `insert_caption` render-verification path, so almost certainly hits the same wall if attempted. |
+| Caption | Not yet run | Not yet resolved | **Launched 2026-09-08** (`resilient_finish_caption1.log`, monitor `bkxry3alx`) -- first-ever confirmatory attempt, reusing the same proven per-chain harness as equation/table_structural. A single test chain confirmed the wiring works cleanly before committing to the full run. Shares the identical `insert_caption` render-verification path already diagnosed for equation/table_structural, so a similarly low pass rate is the expected, not surprising, outcome -- this run is about honestly completing the attempt, not expecting a different result. |
 
 **The diagnosis, corrected and precisely pinned down 2026-09-06 (this was the third and final
 hypothesis -- the first two were tested directly and REFUTED, kept below for the record):**
