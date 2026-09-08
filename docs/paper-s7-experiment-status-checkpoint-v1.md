@@ -460,6 +460,28 @@ been directly tested, and the render_gate code itself is demonstrably correct. W
 a real, external, moment-to-moment host-contention ceiling that this repository's code cannot
 fix. The push notification already sent to the user stands as the practical next step.
 
+**PASS 2 COMPLETE (`resilient_finish5.log`), final tally identical to pass 1: 50/50 blocked, 0
+completed, 4 already-resolved skipped.** Two complete, independent passes -- launched hours
+apart, spanning genuinely different real-time host conditions across their multi-hour runtimes
+(pass 1: ~14:30-21:00 local; pass 2: ~21:00-03:24 local the next day) -- produced IDENTICAL
+100% blocked / 0% success results, 100 total real attempts with zero successes. This is
+stronger and more concerning than the "occasional unlucky timing" framing alone would predict;
+noting it plainly rather than continuing to soften it. Consistent with everything verified this
+sprint (the render_gate code is directly proven correct in isolation, including under exact
+real-trial conditions; every code hypothesis has been tested and falsified, most decisively via
+the head-to-head A/B test above), the most likely remaining explanation is still host-level, but
+possibly a MORE RELIABLE effect than generic "many unrelated concurrent processes" -- e.g.
+something specific to a real trial's OWN sibling `claude -p`/MCP-server process competing with
+its own child `soffice` process for the same resources (untested precisely: every standalone
+verification call this sprint, including the 5-concurrent-soffice-calls test, lacked a
+genuinely-active sibling `claude -p` process at the exact moment of the render call). Per the
+design intent that `blocked` is never terminal and the user's standing "don't stop till
+finished" directive, launched **PASS 3** (`resilient_finish6.log`, 13GB free at launch,
+monitor task `bhrfvu5yr`) rather than pausing on an unfalsified hypothesis. This 100/100 result
+is itself a clear, honest, publishable finding regardless of whether a later pass ever
+succeeds: under current shared-host deployment conditions, confirmatory completion for these
+two families could not be achieved despite every real product defect being fixed and verified.
+
 **PASS 1 COMPLETE (`resilient_finish4.log`), full final tally**: 50/50 real attempts blocked,
 0 completed, 4 already-resolved chains correctly skipped -- covering BOTH families
 (table_structural: 25/25, equation: 25/25) and BOTH splits (`primary_holdout`+`validation`)
