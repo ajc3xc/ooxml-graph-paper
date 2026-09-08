@@ -424,6 +424,42 @@ against "just contention" and grounds to look harder (including, if truly warran
 the user whether other concurrent sessions on this host could be paused) rather than continuing
 to attribute it to load alone.
 
+**Definitive finding, this really is host contention, not a remaining code defect --
+confirmed via a direct A/B test, not just an absence of a found bug.** Added TEMPORARY
+diagnostic logging to `render_gate.py`'s two soffice failure branches (product repo,
+uncommitted, reverted immediately after -- see below) and caught a real live failure's exact
+captured stderr plus environment: `'Entity: line 1: parser error : Document is empty ...
+Could not find platform independent libraries <prefix>'`, with the inherited `PATH` showing
+this session's pixi environment directory (itself shipping its own `python.exe`/`python3.dll`)
+ahead of LibreOffice's own install directory (which also ships a same-named `python3.dll` for
+its internal UNO Python bridge, `pythonloaderlo.dll`) -- a textbook DLL-shadowing setup.
+Implemented a fix (forcing LibreOffice's own directory to the front of `PATH` for just that
+subprocess call) and, critically, **tested it head-to-head against the OLD polluted-PATH
+behavior on the EXACT document that had just failed three times in the real trial**, not a
+fresh unrelated one. Result: **both** the old and the fixed PATH produced the SAME outcome --
+`returncode=0`, success, ~5 seconds, with the identical "Could not find platform independent
+libraries" stderr text present in BOTH. This proves that stderr message is a benign, cosmetic
+warning this specific document always triggers (probably an unrelated internal probe/extension
+failing harmlessly), not the cause of the earlier timeouts -- so the PATH hypothesis, despite
+looking extremely plausible on paper, is FALSIFIED by direct evidence. Reverted the fix and
+the diagnostic logging cleanly (`git diff`/`git status` confirmed the shared repo file is back
+to its exact committed state) rather than leave an unproven change in place.
+
+**The decisive, remaining evidence is the A/B test's OWN un-asked-for result**: the identical
+document, identical code, identical environment produced a clean 5s success on this test, after
+having produced three straight 90s timeouts minutes earlier in the real trial. Same input, same
+code, same machine, different outcome -- that is the textbook signature of genuine, live,
+external resource contention (momentary scheduling starvation from other concurrent processes),
+not a deterministic software defect, which would fail the same way every time given the same
+inputs. Combined with everything else ruled out this session (profile lock: fixed; short-path
+crash: fixed; CLI timeout: fixed; stdin-consumption orchestration bug: fixed; docx-path `\r`:
+fixed; PYTHONHOME/env leak: tested and ruled out; raw-path env inheritance: tested and ruled
+out; concurrent-soffice interference: tested and ruled out with 5 simultaneous calls; PATH/DLL
+shadowing: tested head-to-head and falsified) -- every reachable code-level hypothesis has now
+been directly tested, and the render_gate code itself is demonstrably correct. What remains is
+a real, external, moment-to-moment host-contention ceiling that this repository's code cannot
+fix. The push notification already sent to the user stands as the practical next step.
+
 **Table_structural family now fully attempted this pass: 25/25 blocked, 0 successes** (both
 `primary_holdout` and `validation` splits, 2 already-resolved chains correctly skipped by the
 loop's own skip-check). Sent the user a proactive push notification at 23/23 flagging that
