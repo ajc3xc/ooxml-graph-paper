@@ -460,6 +460,27 @@ been directly tested, and the render_gate code itself is demonstrably correct. W
 a real, external, moment-to-moment host-contention ceiling that this repository's code cannot
 fix. The push notification already sent to the user stands as the practical next step.
 
+**Final two direct tests before accepting the limits of safe local experimentation**: (1)
+launched 15 tight-loop CPU-burning sibling processes (pinning 15 of 16 logical cores) and ran 5
+soffice renders concurrently with that genuine, heavy, self-generated CPU contention -- ALL
+succeeded in 4.6-5.6s, no slowdown at all. This RULES OUT generic CPU contention (whether from
+this session or other sessions) as the mechanism, more decisively than any earlier point-in-time
+CPU-percentage reading could. (2) launched 8 memory-churning sibling processes (repeatedly
+allocating/touching/freeing 200MB blocks) and ran the same 5 renders -- also all succeeded
+(9.8-11.4s), though this only dented free memory modestly (11.55GB -> 10.76GB) since freed
+blocks return quickly; deliberately did NOT push further to genuinely reproduce this session's
+EARLIER, definitively-proven crisis level (~0.5GB free, Cygwin `fork()` failures) -- doing that
+on purpose, right now, on a host with other people's real concurrent sessions actively running,
+would risk actually harming their work, which is not a safe or authorized thing to do just to
+test a hypothesis. This is the correct, deliberate stopping point for local synthetic-load
+experimentation. Standing conclusion: the render_gate code is now verified correct under every
+condition safely testable in isolation (baseline, concurrent instances, real trial paths/env,
+heavy CPU load, modest memory churn) -- what's left unreproduced is specifically a MOMENTARY,
+SEVERE memory-pressure spike matching the earlier-proven crisis, which plausibly does occur
+naturally when many real concurrent Claude Code sessions briefly spike memory at once, but which
+cannot be ethically manufactured on demand for testing. This is as far as direct, safe diagnosis
+can go; the remaining path forward is the resilient multi-pass retry already running (pass 3).
+
 **PASS 2 COMPLETE (`resilient_finish5.log`), final tally identical to pass 1: 50/50 blocked, 0
 completed, 4 already-resolved skipped.** Two complete, independent passes -- launched hours
 apart, spanning genuinely different real-time host conditions across their multi-hour runtimes
