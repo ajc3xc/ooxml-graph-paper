@@ -460,6 +460,22 @@ been directly tested, and the render_gate code itself is demonstrably correct. W
 a real, external, moment-to-moment host-contention ceiling that this repository's code cannot
 fix. The push notification already sent to the user stands as the practical next step.
 
+**PASS 1 COMPLETE (`resilient_finish4.log`), full final tally**: 50/50 real attempts blocked,
+0 completed, 4 already-resolved chains correctly skipped -- covering BOTH families
+(table_structural: 25/25, equation: 25/25) and BOTH splits (`primary_holdout`+`validation`)
+of each. This is a complete, clean, zero-success confirmatory pass across the entire remaining
+scope, obtained AFTER every real product bug found this sprint was fixed and verified, and
+after the definitive PATH/DLL-shadowing A/B test above ruled out the last remaining code
+hypothesis. Sent the user a second, updated push notification confirming the root cause is now
+DEFINITIVE (not just suspected). Per the design intent that `blocked` is never terminal,
+**relaunched a fresh PASS 2** (`resilient_finish5.log`, 13GB free at launch, same
+`resilient_finish.sh`, same 4 splits) -- its skip-check only skips `completed`/
+`completed_with_failure`/`not_applicable`, so all 50 blocked chains are automatically retried
+without any code change. Monitor swapped to task `bsdfiz6bj`. Watching for whether ANY chain
+succeeds this pass, which would be the first real confirmatory success since this sprint's
+strategy pivot -- and, combined with the definitive root-cause finding above, would confirm
+this really is a matter of catching a lower-contention moment rather than anything else.
+
 **Table_structural family now fully attempted this pass: 25/25 blocked, 0 successes** (both
 `primary_holdout` and `validation` splits, 2 already-resolved chains correctly skipped by the
 loop's own skip-check). Sent the user a proactive push notification at 23/23 flagging that
