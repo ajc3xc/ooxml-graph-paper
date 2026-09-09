@@ -24,7 +24,7 @@ mean); a smaller, more variable gap for citation (117s vs 128s mean).
 
 | Family | Control | Treatment | Status |
 |---|---|---|---|
-| Caption | Not yet run | Not yet resolved | **Launched 2026-09-08** (`resilient_finish_caption1.log`, monitor `bkxry3alx`) -- first-ever confirmatory attempt, reusing the same proven per-chain harness as equation/table_structural. A single test chain confirmed the wiring works cleanly before committing to the full run. Shares the identical `insert_caption` render-verification path already diagnosed for equation/table_structural, so a similarly low pass rate is the expected, not surprising, outcome -- this run is about honestly completing the attempt, not expecting a different result. |
+| Caption | Not yet run | **0/26 (0%) resolved, pass 1 of N** | **Pass 1 complete** (`resilient_finish_caption1.log`): 26/26 blocked, 0 successes, 0 skips (caption has never had even one lucky early success the way equation/table_structural each did before their multi-pass runs started -- this is a clean, comparable first data point). Exactly matches the predicted outcome -- same `insert_caption` render-verification path as `insert_table`/`insert_equation`, same host-contention mechanism. **Pass 2 launched** (`resilient_finish_caption2.log`, monitor `bu2ierbun`) to apply the same multi-pass rigor (3 independent passes) that established equation/table_structural's result as stable rather than a single unlucky window. |
 
 **The diagnosis, corrected and precisely pinned down 2026-09-06 (this was the third and final
 hypothesis -- the first two were tested directly and REFUTED, kept below for the record):**
@@ -564,6 +564,30 @@ result IS a finished experiment, not an unfinished one -- the finding is that un
 shared-host deployment conditions, render-gated document-editing tools can experience
 sustained, real periods where confirmatory completion is not achievable, despite every
 underlying defect being found, fixed, and independently verified.
+
+**2026-09-08 evening, session restarted again -- re-verified ground truth directly rather than
+trusting stale context** (per this file's own standing recovery instructions): confirmed via
+`Get-CimInstance Win32_Process` that PASS 4 (`resilient_finish7.log`) is genuinely still alive
+and making real progress (currently mid-`equation`/`primary_holdout`), not stalled or
+duplicated -- the process tree showed 3 `bash resilient_finish.sh` entries chained
+parent-to-child (not sibling), which on inspection is just Cygwin's normal subshell-per-pipe
+process accounting for one single coherent script run (each near-zero CPU, consistent with
+idly waiting on its own child, not doing redundant duplicate work); only one
+`resilient_finish7.log` exists, confirming a single launch. Also found that, in the same prior
+(now-compacted) turn, the equation/table_structural write-up was already finished
+(`paper-s8-final-evidence-v1.md` sections 2.5/2.6 and the Structural Ledger both updated with
+the final 3-pass numbers, commits `ebcf294`/`62b2701`/`f3d6e1c`) and **caption's first-ever
+confirmatory pass was launched and had already completed**: `resilient_finish_caption1.log`,
+`ALL JOBS DONE` at 21:00:33 -- **26/26 blocked, 0 successes, 0 skips** (caption has no
+pre-existing lucky success the way the other two families did, so this is a clean 0% first
+data point, not diluted by an old skip). Exactly the predicted outcome given the identical
+`insert_caption` render-verification path. Applying the same multi-pass rigor used for
+equation/table_structural before treating a result as stable: **launched caption PASS 2**
+(`resilient_finish_caption2.log`, 12GB free at launch, monitor `bu2ierbun`) rather than
+generalizing from a single pass. Pass 4 (equation/table_structural) continues running in
+parallel as a 4th confirmatory data point -- not expected to change the already-finalized
+write-up, but left running per "don't stop till finished" since a real success would still be
+valuable new information.
 
 **PASS 1 COMPLETE (`resilient_finish4.log`), full final tally**: 50/50 real attempts blocked,
 0 completed, 4 already-resolved chains correctly skipped -- covering BOTH families
