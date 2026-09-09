@@ -172,7 +172,51 @@ evaluator against the already-collected chain directories (a "blocked" chain wit
 on-disk data already sitting under the E: run roots, without re-spending any live Claude CLI
 budget) before any of the currently-published numbers can be trusted as final.
 
-**The diagnosis, corrected and precisely pinned down 2026-09-06 (this was the third and final
+**Ran that sweep, same day (2026-09-09)**: swept every treatment chain in both the holdout and
+validation splits for all three render-gated families (26 treatment chains each, exactly
+matching the published denominators), re-grading every "blocked" chain whose final pair had
+`docx_changed: true` directly against its own pre-write backup. Script:
+`regrade_sweep.py` (scratchpad, not committed -- pure offline re-derivation, no new Claude CLI
+spend). **Result: the evaluator bug affected table_structural specifically, not equation or
+caption.**
+
+- **equation**: all 25 "blocked" chains are genuine clean-exit grading failures (the process
+  exited cleanly, returncode 0, not timed out -- the model just never produced a correct
+  equation). The evaluator bug never had anything to recover here. **1/26 stands as real,
+  unaffected by this fix.**
+- **caption**: identical pattern, all 26 "blocked" chains are genuine clean-exit failures.
+  **0/26 stands as real, unaffected by this fix.**
+- **table_structural**: 2 of the 26 chains were genuinely misclassified --
+  `atomic__word_006_section_reorder-table_structural-treatment-k1` (already discussed above)
+  and `composite_same_type__wordc_009_i-table_structural-treatment-k1`. Both had their forward
+  leg killed by the harness's outer timeout with `docx_changed: true`, and both re-grade as a
+  clean **pass** against their own pre-write backup. Neither had ever reached the inverse leg
+  (the old evaluator broke the chain at forward), so their final chain-level fate could not be
+  known from offline data alone -- recovering the forward leg only proves that HALF of the pair
+  genuinely succeeded.
+
+**Closed that gap live, same day**: ran the missing inverse leg for both chains for real
+(`run_missing_inverse_legs.py`, scratchpad) -- NOT a full chain re-run (which would have thrown
+away the already-proven-good forward result and re-spent an unnecessary, riskier forward
+retry), just the one missing leg, using the existing recovered forward output as its input,
+through the exact same `run_trial`/`audit_isolation`/`grade_inverse_trial_table_structural`
+path `run_chain` itself uses. Both chain-result.json files patched in place with the real
+inverse result and an explicit `manually_recovered_inverse_leg: true` marker for audit
+transparency (this was live work, not offline re-derivation, for the inverse leg specifically).
+
+**Both came back genuinely clean**: `atomic__word_006_section_reorder-...` -- inverse ran to
+completion (returncode 0, not timed out), `docx_changed: true`, graded `pass` (table genuinely
+removed, every pre-forward paragraph restored exactly). `composite_same_type__wordc_009_i-...`
+-- identical outcome, inverse ran clean and graded `pass`. Both chains' `chain-result.json`
+`status` is now `completed`, for real, not reconstructed or inferred.
+
+**table_structural's real, final confirmatory number is 3/26, not 1/26.** This is a genuine,
+live-verified improvement from the evaluator fix -- not a re-interpretation of the same data,
+not an artifact of relaxed grading (the SAME grading functions were used throughout, unchanged;
+only the harness's decision to attempt grading at all changed), and not something that could
+have been found without directly inspecting what a "blocked" chain had actually left on disk.
+**equation (1/26) and caption (0/26) are unaffected -- confirmed by the same sweep to be
+genuine capability failures, not evaluator artifacts, and remain as previously published.**
 hypothesis -- the first two were tested directly and REFUTED, kept below for the record):**
 
 1. ~~Diffuse "shared host contention"~~ -- REFUTED. Re-running the same 25 table_structural
@@ -852,12 +896,14 @@ widened to cover all three render-gated families, and the stale "caption never r
 in "Still open" removed. All 6 implemented families now have a real, final, honestly-reported
 result in both public write-ups -- this sprint's confirmatory work is complete.
 
-**SUPERSEDED, 2026-09-09**: the "complete" framing directly above is no longer trustworthy. See
-the fifth bug in "In progress" above -- the evaluator that produced the 1/26, 1/26, 0/26
-treatment numbers this section describes had its own defect that discarded some genuinely
-correct chains as "blocked" without ever grading them. Neither `paper-s8-final-evidence-v1.md`
-nor the Structural Ledger has been re-checked against the fixed evaluator yet. Do not cite the
-numbers in this section as final until that re-check happens.
+**SUPERSEDED, 2026-09-09**: the "complete" framing directly above is stale. See the fifth bug
+in "In progress" above -- the evaluator that produced the 1/26, 1/26, 0/26 treatment numbers
+this section describes had its own defect that discarded some genuinely correct chains as
+"blocked" without ever grading them. **Resolved same day**: a full sweep plus two targeted live
+inverse trials confirmed table_structural's real number is **3/26**, not 1/26; equation (1/26)
+and caption (0/26) are confirmed genuine and unaffected. `paper-s8-final-evidence-v1.md`
+section 2.6 and the Structural Ledger's table_structural subhead still need updating with the
+3/26 number and this account -- not yet done as of this checkpoint.
 
 ## If you are picking this up cold after a crash
 
