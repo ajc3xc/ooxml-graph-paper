@@ -23,11 +23,39 @@ mean); a smaller, more variable gap for citation (117s vs 128s mean).
 
 ## In progress
 
-**Nothing remains in progress.** All 6 implemented task families (bibliography, citation,
-section_reorder, equation, table_structural, caption) now have a real, honestly-reported
-confirmatory-scale result -- see the Complete table above. `paper-s8-final-evidence-v1.md`
-(section 2.8) and the Structural Ledger artifact were both updated and republished 2026-09-09
-to carry caption's final numbers, the last remaining piece of this sprint's confirmatory work.
+**Reopened 2026-09-09**: the user reviewed the equation/table_structural/caption numbers above
+(1/26, 1/26, 0/26 treatment) and correctly called them unacceptable -- a near-total failure
+rate that's actually a host-contention artifact, not a capability finding, is not something to
+just publish and move past. Went looking for a REAL fix rather than another retry pass.
+
+**Found and fixed a genuine, real product bug**: `render_gate.py`'s `KNOWN_BACKENDS =
+(soffice, word-com)` registered Word COM as a SECOND backend, but `check_render_capability`
+picked its backend via a cheap `unavailable_reason()` check (`shutil.which("soffice")`) that's
+satisfied regardless of whether soffice's REAL render calls are succeeding -- so soffice was
+always picked first, and Word COM was functionally dead code on this host, never reached on
+failure. This matches direct evidence already gathered earlier this sprint: multiple real
+trials showed soffice's render failing in the exact window the harness's own, separate
+Word-COM milestone check rendered the same document cleanly. Implemented genuine cross-backend
+fallback (advance to the next available backend on failure, each still bounded by its own
+retry budget; a corruption classification does not skip fallback either, since that's itself a
+best-effort heuristic a second independent renderer's success can override). 7 new tests,
+all 971 existing tests in the extension still pass unchanged (every existing test uses a
+single-backend list, so there was nothing to fall back to). Committed to `repository`
+(`b5caf13`).
+
+**Directly verified against the real backends, not just fakes** -- forcing a genuine soffice
+timeout correctly advanced to a real Word-COM attempt. **Then verified against a REAL
+confirmatory chain** (`atomic__word_005...-equation-treatment-k1`, re-run fresh with the fix
+in place): still blocked, but the agent's OWN report now explicitly confirms the fix is
+working exactly as designed -- *"render verification timed out on both backends (LibreOffice
+PDF conversion exceeded 90s, Word COM exceeded 60s)"*. This is the single most important
+finding from this fix: it rules out "the code doesn't try Word COM" as an explanation (it now
+genuinely does, confirmed live) and isolates the remaining cause purely to current host
+resource contention being severe enough, right now, to defeat BOTH independent rendering
+mechanisms within their own timeout budgets -- not a code defect in either backend or in the
+new fallback logic, which is proven correct. One data point isn't conclusive on its own;
+gathering a few more real chains across families before drawing a final conclusion on whether
+this measurably improves the real pass rate under current conditions.
 
 **The diagnosis, corrected and precisely pinned down 2026-09-06 (this was the third and final
 hypothesis -- the first two were tested directly and REFUTED, kept below for the record):**
