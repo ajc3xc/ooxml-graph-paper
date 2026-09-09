@@ -589,6 +589,15 @@ parallel as a 4th confirmatory data point -- not expected to change the already-
 write-up, but left running per "don't stop till finished" since a real success would still be
 valuable new information.
 
+**PASS 4 COMPLETE (`resilient_finish7.log`, ended 2026-09-08 22:56:43 local): identical again
+-- 50/50 blocked, 0 completed, 4 skipped.** Four complete, independent passes now, 200 total
+real attempts spanning ~14:30 on 2026-09-07 through 22:56 on 2026-09-08 (~32 hours across many
+genuinely different real-time host-load windows), all producing the exact same 0% success
+result. Not relaunching a 5th pass for these two families -- the write-up is already final
+(paper-s8 sections 2.5/2.6, Structural Ledger) and a 4th identical data point does not change
+that conclusion; further passes here would be pure repetition, not new evidence. Stopped
+pass 4's monitor accordingly. Effort continues on caption (still mid pass 2).
+
 **PASS 1 COMPLETE (`resilient_finish4.log`), full final tally**: 50/50 real attempts blocked,
 0 completed, 4 already-resolved chains correctly skipped -- covering BOTH families
 (table_structural: 25/25, equation: 25/25) and BOTH splits (`primary_holdout`+`validation`)
