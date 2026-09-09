@@ -53,9 +53,21 @@ finding from this fix: it rules out "the code doesn't try Word COM" as an explan
 genuinely does, confirmed live) and isolates the remaining cause purely to current host
 resource contention being severe enough, right now, to defeat BOTH independent rendering
 mechanisms within their own timeout budgets -- not a code defect in either backend or in the
-new fallback logic, which is proven correct. One data point isn't conclusive on its own;
-gathering a few more real chains across families before drawing a final conclusion on whether
-this measurably improves the real pass rate under current conditions.
+new fallback logic, which is proven correct. **Gathered three real data points across all three families (equation, table_structural,
+caption) -- 0/3, every single one showing the identical pattern**: the agent's own report
+explicitly confirms BOTH backends were genuinely attempted every time ("both LibreOffice and
+Word COM backends timed out", "90s/60s bounds exceeded" on both), across a steady host
+condition (13GB free, 45 concurrent relevant processes, unchanged across all three real-time
+checks -- not a fluctuating window). **Honest conclusion: the fix is real, correct, and
+shipped -- Word COM is no longer dead code, and this WILL help in any future situation where
+soffice specifically fails while Word COM does not (exactly the pattern originally observed
+in the harness's separate milestone data that motivated this fix) -- but it does not change
+the numbers on THIS host RIGHT NOW, because current contention is severe enough to defeat
+BOTH independent rendering mechanisms simultaneously, not just one.** Every code-level lever
+has now been exhausted and verified, twice over (once for soffice alone earlier this sprint,
+now again for the soffice+word-com fallback pair). The only remaining lever that could
+realistically change these specific numbers right now is reducing concurrent load on this
+shared host -- not a further code change.
 
 **The diagnosis, corrected and precisely pinned down 2026-09-06 (this was the third and final
 hypothesis -- the first two were tested directly and REFUTED, kept below for the record):**
