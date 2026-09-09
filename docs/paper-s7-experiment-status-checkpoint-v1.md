@@ -69,6 +69,60 @@ now again for the soffice+word-com fallback pair). The only remaining lever that
 realistically change these specific numbers right now is reducing concurrent load on this
 shared host -- not a further code change.
 
+**CORRECTION, same day: the "host contention defeats both backends" conclusion above was
+itself wrong -- or at least badly incomplete.** The user pushed back ("there isn't a remote
+VM... we need to finish this") rather than accepting that as final, which prompted digging
+into WHY Word COM specifically kept failing, instead of stopping at "both backends timed out."
+Traced it directly, live, step by step (spawn timing, PID reporting, `.Hwnd`/`.Documents`
+property access, `Documents.Open`, `SaveAs`) and found **two more real, deterministic bugs --
+neither is contention, both are 100% reproducible on demand, confirmed by direct testing
+against the real Word COM backend, not fakes**:
+
+1. **Missing pywin32 type-library cache.** Plain `win32com.client.DispatchEx("Word.Application")`
+   returns a dynamic-dispatch COM object missing basic properties (`.Documents`, `.Hwnd`) when
+   this process's `gen_py` cache has never been built -- confirmed the cache directory was
+   essentially empty (a 10-byte stub, no real generated bindings). This is the DEFAULT,
+   EVERY-SINGLE-TIME state for a real trial, because `claude_pair_runner.run_trial` redirects
+   `TEMP` to a fresh, trial-scoped scratch directory per trial (the SAME mechanism, note, that
+   motivated `_short_temp_root()` for soffice's own profile dir earlier this sprint) -- pywin32
+   roots its cache under `%TEMP%\gen_py`, so every real trial got a genuinely fresh, empty
+   cache, every time. `check_render_capability`'s own except-and-classify handling reported
+   the resulting `AttributeError` uniformly alongside genuine timeouts, which is EXACTLY why
+   every earlier diagnosis this sprint (including the "both backends timed out" conclusion
+   two paragraphs up) misread this as contention. Fixed: switched to
+   `win32com.client.gencache.EnsureDispatch`, which builds (or reuses) the real bindings;
+   directly verified live.
+2. **A second, independent bug found right alongside it**: calling `SaveAs` immediately after
+   `Documents.Open` can raise `RPC_E_SERVERCALL_RETRYLATER` ("Call was rejected by callee") --
+   confirmed deterministic, not transient (5 consecutive retries with a real sleep between
+   each all failed identically -- sleeping does not service a COM message queue). Fixed:
+   added `pythoncom.PumpWaitingMessages()` before `SaveAs`; directly verified live, succeeded
+   on the very next attempt.
+
+Both fixes applied consistently to the real production path (`_word_com_process_worker`) and
+its test-only thread-based twin (`_word_com_render_thread`), with both test fixtures updated
+and 3 new tests added (message-pump ordering, and a regression guard that the real code never
+calls plain `DispatchEx` again). All 973 tests in the extension pass. Committed to
+`repository` (`b22efa9f`).
+
+**A third, related data point, evidence-based (not guessed) fix**: a genuinely successful,
+live `Documents.Open` call against a different real corpus document took 72.23s -- longer
+than the OLD 60s Word-COM timeout, meaning that specific real success would have been wrongly
+killed. Raised `_WORD_COM_TIMEOUT_SECONDS` 60 -> 90 (matching soffice's own evidence-based
+raise earlier this sprint), same discipline: a single-attempt budget increase, not a retry
+change. Committed (`8c63b231`).
+
+**Still open, honestly**: a fourth distinct signature was found during this same investigation
+-- `Documents.Open` itself failing immediately with Word's own generic `"Command failed"`
+error (SCODE `0x800A1066`) on the FIRST corpus document tested, with no Mark-of-the-Web/zone
+identifier present and no obvious document-level explanation found yet. A SECOND document
+tested via the same path did NOT show this error at all -- it just succeeded slowly (the 72s
+case above). Whether this fourth signature is a genuinely separate, document-specific bug, a
+rarer manifestation of contention, or something else is NOT yet resolved -- deliberately not
+chasing it further right now in favor of running a real batch of confirmatory chains with the
+three already-confirmed fixes in place, to get an honest read on the AGGREGATE improvement
+before deciding whether this fourth issue is worth pursuing on its own.
+
 **The diagnosis, corrected and precisely pinned down 2026-09-06 (this was the third and final
 hypothesis -- the first two were tested directly and REFUTED, kept below for the record):**
 
