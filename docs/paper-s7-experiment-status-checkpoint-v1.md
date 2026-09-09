@@ -123,6 +123,55 @@ chasing it further right now in favor of running a real batch of confirmatory ch
 three already-confirmed fixes in place, to get an honest read on the AGGREGATE improvement
 before deciding whether this fourth issue is worth pursuing on its own.
 
+**A fifth, independent bug found in the same investigation -- this time in the PAPER REPO'S OWN
+EVALUATOR, not the product**: `run_chain()` (`tools/run_paper_s7_benchmark.py`) unconditionally
+marked a chain "blocked" and skipped grading entirely whenever the wrapping `claude -p` CLI
+process didn't cleanly exit (non-zero returncode, or killed by the harness's own outer
+subprocess timeout) -- regardless of whether the document it actually left on disk was correct.
+Found live (2026-09-09) by directly inspecting one of the real chains already counted above as
+"blocked": `atomic__word_006_section_reorder-table_structural-treatment-k1` (`timed_out: true`,
+zero agent output, `returncode: null`) had `docx_changed: true`, and directly parsing its actual
+output file via `zipfile` confirmed a real `<w:tbl>` element holding the exact expected marker
+text (`PILOT-S7-TABLE-8d000118d255`) -- a genuinely correct write the evaluator had discarded
+unseen, purely because the wrapping CLI process was killed by an outer timeout before the agent
+could report "DONE".
+
+Root cause: `insert_table`/`insert_equation`/`insert_caption`'s own render-verification gate
+(the one this whole investigation has been about) is atomic -- it restores the file from backup
+on ANY failure and only ever persists a change after a real backend successfully renders it --
+so `docx_changed: true` on a killed trial is safe, positive evidence the underlying task
+genuinely completed, independent of whether the wrapping CLI process itself survived to report
+it. Fixed `run_chain` to attempt grading (via the same exception-safe `_safe_grade` already used
+for a clean exit) whenever EITHER the process exited cleanly OR the docx actually changed, and
+to only trust the recovery when grading itself comes back "pass" -- a changed docx that
+genuinely fails grading (a real corruption, not just a killed process) still correctly blocks
+the chain; this does not weaken that check, it only stops discarding results that were never
+even looked at. Applied identically to the forward and inverse trial handling (mirror logic). A
+`recovered_from_outer_timeout: true` field is stamped on the trial result whenever this recovery
+path is taken, so raw results stay auditable -- a reader can always tell a cleanly-reported
+success apart from one recovered this way.
+
+3 new tests added (recovery on a genuine pass, correctly-still-blocked on a genuine grading
+failure, and the symmetric inverse-trial case); all 24 tests in
+`tests/test_run_paper_s7_benchmark.py` pass, plus the full paper-repo suite (166 passed; 2
+pre-existing failures in `test_paper14_converter_bakeoff_demo.py` are unrelated -- a missing
+`docs_intel.insert_numbered_equation` attribute in the shared product repo, not touched by this
+fix). **Directly re-verified against the real chain above**: re-ran
+`grade_forward_trial_table_structural` against its actual `p0-forward/doc.docx` compared to its
+own pre-write `doc.docx.bak` -- returns `verdict: "pass"` (valid docx, marker table present
+exactly once, no original paragraph lost), confirming this specific real chain would now be
+recovered instead of misclassified as blocked. Committed to this repo (`09f1159`).
+
+**This means the near-zero treatment pass rates already published in paper-s8 and the
+Structural Ledger (1/26 equation, 1/26 table_structural, 0/26 caption) are now suspect and must
+NOT be treated as final.** They were computed by an evaluator with this exact defect, so an
+unknown number of the chains counted against treatment as "blocked" may, like this one, actually
+be genuine passes that were simply never graded. The honest next step is re-running the
+evaluator against the already-collected chain directories (a "blocked" chain with
+`docx_changed: true` on its forward or inverse pair can likely be re-graded directly from
+on-disk data already sitting under the E: run roots, without re-spending any live Claude CLI
+budget) before any of the currently-published numbers can be trusted as final.
+
 **The diagnosis, corrected and precisely pinned down 2026-09-06 (this was the third and final
 hypothesis -- the first two were tested directly and REFUTED, kept below for the record):**
 
@@ -802,6 +851,13 @@ hero stat card's "1/5" -> "1/6" families reaching confirmatory scale, the "Confi
 widened to cover all three render-gated families, and the stale "caption never run" sentence
 in "Still open" removed. All 6 implemented families now have a real, final, honestly-reported
 result in both public write-ups -- this sprint's confirmatory work is complete.
+
+**SUPERSEDED, 2026-09-09**: the "complete" framing directly above is no longer trustworthy. See
+the fifth bug in "In progress" above -- the evaluator that produced the 1/26, 1/26, 0/26
+treatment numbers this section describes had its own defect that discarded some genuinely
+correct chains as "blocked" without ever grading them. Neither `paper-s8-final-evidence-v1.md`
+nor the Structural Ledger has been re-checked against the fixed evaluator yet. Do not cite the
+numbers in this section as final until that re-check happens.
 
 ## If you are picking this up cold after a crash
 
