@@ -15,6 +15,7 @@ status changes; do not let it go stale the way other docs in this project have.
 | Section_reorder | 83.6% / 92.9% (N=55/56), **p=0.27, not significant** | 67.3% / 92.9% (N=55/56), **p=0.0015, significant** | The one confirmed, significant directional finding in this project. Combined v1+v2 corpora. Mechanism (compounding drift from repeated cycling) is a real 9-of-12 majority pattern, not exceptionless -- see paper-s8 section 2.4. |
 | Equation | 11/11 resolved (dev-slice, 12 docs; no larger control-arm corpus needed -- control never touches the render gate) | **1/26 (3.8%) resolved**, unchanged across three complete independent confirmatory passes (~25 real hours) after five real render-gate defects were fixed and every remaining hypothesis was tested and ruled out | Real, final, host-contention-limited result -- see full diagnosis below and paper-s8 section 2.5. NOT an open question anymore. |
 | Table_structural | 24/26 (92.3%) pass, full confirmatory scale, both directions | **1/26 (3.8%) resolved**, identical to equation across the same three passes | Same mechanism, same final number as equation -- paper-s8 section 2.6. NOT an open question anymore. |
+| Caption | **26/26 (100%) pass**, full confirmatory scale, both directions, independently graded -- cleanest control result of any render-gated family | **0/26 (0%) resolved per pass, 0/78 (0%) total**, unchanged across three complete independent confirmatory passes (~5 real hours) | Same mechanism as equation/table_structural (paper-s8 section 2.5), full account in section 2.8. Never run before this sprint (zero prior run directories); control arm added 2026-09-09 after finding `one_chain.py` was hardcoded to treatment-only. NOT an open question anymore -- this closes out all 6 implemented families. |
 
 Timing (K=1, v1 corpus only, not formally powered -- paper-s8 section 2.7): treatment is
 substantially faster for bibliography (46s vs 150s mean) and section_reorder (39s vs 175s
@@ -22,9 +23,11 @@ mean); a smaller, more variable gap for citation (117s vs 128s mean).
 
 ## In progress
 
-| Family | Control | Treatment | Status |
-|---|---|---|---|
-| Caption | **Never run -- gap found and fixed 2026-09-09** | **0/78 (0%) resolved, 3/3 passes complete, treatment-side confirmatory-final** | **Treatment: 3 complete, independent passes, all identical** -- 26/26 blocked each time (pass 3 ended 2026-09-09 02:00:14 local), 78 total real attempts, 0 successes, 0 skips throughout. Matches the exact standard of evidence (3 stable passes) already established for equation/table_structural. **Gap found before writing this up**: `one_chain.py` (the resilient orchestrator's per-chain script) is hardcoded to `arm="treatment"` -- confirmed via direct directory listing that caption's CONTROL arm had ZERO run directories anywhere, unlike equation/table_structural whose control sides were fully resolved in an earlier, separate pre-sprint run. Wrote `one_chain_control.py`/`resilient_finish_caption_control.sh` (same resilient per-chain pattern, `arm="control"`), verified with one test chain (`status: completed`, as expected since control never touches render_gate), then **launched the full 26-doc control-arm run** (`resilient_finish_caption_control1.log`, monitor `bblk0udax`) -- control doesn't hit the render-verification bottleneck at all, so this should complete quickly. Once done, write up caption's full result (both arms) in `paper-s8-final-evidence-v1.md` (new section, following the 2.5/2.6 structure) and republish the Structural Ledger -- the last remaining piece to fully close out this sprint. |
+**Nothing remains in progress.** All 6 implemented task families (bibliography, citation,
+section_reorder, equation, table_structural, caption) now have a real, honestly-reported
+confirmatory-scale result -- see the Complete table above. `paper-s8-final-evidence-v1.md`
+(section 2.8) and the Structural Ledger artifact were both updated and republished 2026-09-09
+to carry caption's final numbers, the last remaining piece of this sprint's confirmatory work.
 
 **The diagnosis, corrected and precisely pinned down 2026-09-06 (this was the third and final
 hypothesis -- the first two were tested directly and REFUTED, kept below for the record):**
@@ -696,6 +699,15 @@ the real product defects (profile-lock contention, the path-length crash, the ou
 fix), the defect-count stat card raised 18 -> 21, and the chain-count figure raised to 500+.
 Neither doc treats this as an open question anymore -- both report the real, final,
 host-contention-limited result.
+
+**Caption's final numbers followed 2026-09-09** (seventh update to paper-s8, commit
+`ffb4f4f`): new section 2.8 with the full account (control 26/26 100%, treatment 0/26 per
+pass / 0/78 total across three passes), plus consistency updates to the status header and
+sections 1/3/5/6/7. The Structural Ledger republished to match: new subhead 09/caption, the
+hero stat card's "1/5" -> "1/6" families reaching confirmatory scale, the "Confirmed" callout
+widened to cover all three render-gated families, and the stale "caption never run" sentence
+in "Still open" removed. All 6 implemented families now have a real, final, honestly-reported
+result in both public write-ups -- this sprint's confirmatory work is complete.
 
 ## If you are picking this up cold after a crash
 
