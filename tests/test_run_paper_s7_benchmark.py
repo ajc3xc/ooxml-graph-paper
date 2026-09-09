@@ -2,6 +2,7 @@
 only -- no real Claude CLI or Meridian import needed for these)."""
 from __future__ import annotations
 
+import shutil
 import sys
 import zipfile
 from pathlib import Path
@@ -10,6 +11,7 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools"))
 
+import run_paper_s7_benchmark  # noqa: E402
 from run_paper_s7_benchmark import (  # noqa: E402
     _build_pair_specs,
     _grade_forward,
@@ -269,3 +271,123 @@ def test_run_chain_is_resumable_for_a_not_applicable_combo(tmp_path: Path) -> No
 
     assert second == first
     assert first["chain_id"] == second["chain_id"]
+
+
+def _write_minimal_docx(path: Path, text: str = "No headings here.") -> None:
+    doc_xml = (
+        '<?xml version="1.0" encoding="UTF-8"?>'
+        '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">'
+        f'<w:body><w:p><w:r><w:t>{text}</w:t></w:r></w:p></w:body></w:document>'
+    ).encode("utf-8")
+    with zipfile.ZipFile(path, "w") as zf:
+        zf.writestr("word/document.xml", doc_xml)
+
+
+def _fake_trial_result(spec, chain_root: Path, *, timed_out: bool, returncode: int | None, docx_changed: bool, source_docx: Path) -> dict:
+    """Mirrors claude_pair_runner.run_trial's real return shape closely
+    enough to drive run_chain's control flow and audit_isolation, without
+    spawning a real `claude -p` subprocess."""
+    trial_root = chain_root / spec.trial_id
+    trial_root.mkdir(parents=True, exist_ok=True)
+    docx_in_trial = trial_root / "doc.docx"
+    shutil.copyfile(source_docx, docx_in_trial)
+    return {
+        "trial_id": spec.trial_id, "doc_label": spec.doc_label, "arm": spec.arm,
+        "direction": spec.direction, "family": spec.family, "pair_index": spec.pair_index,
+        "model": "sonnet", "started_at": "2026-09-09T00:00:00", "wall_time_seconds": 1.0,
+        "timed_out": timed_out, "returncode": returncode,
+        "input_hash_sha256": "input-hash",
+        "output_hash_sha256": "output-hash" if docx_changed else "input-hash",
+        "docx_changed": docx_changed, "trial_root": str(trial_root),
+        "output_docx_path": str(docx_in_trial), "cli_command_argv": [],
+        "claude_json_result": None, "stdout_tail": "", "stderr_tail": "",
+        "mcp_flake_retry_triggered": False,
+    }
+
+
+def test_run_chain_recovers_forward_trial_killed_by_outer_timeout_when_docx_changed_and_grades_pass(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """d1c4f7e2: found live (2026-09-09) that a real chain's forward CLI
+    process was killed by the harness's own outer subprocess timeout yet
+    left a genuinely correct, render-verified write on disk (docx_changed
+    was true, and the file itself graded as a real pass on direct
+    inspection). run_chain must recover this case instead of discarding it
+    as "blocked" just because the wrapping process never reported DONE."""
+    docx_path = tmp_path / "in.docx"
+    _write_minimal_docx(docx_path)
+    forward_output = tmp_path / "forward-output.docx"
+    _write_minimal_docx(forward_output)
+    inverse_output = tmp_path / "inverse-output.docx"
+    _write_minimal_docx(inverse_output)
+
+    def fake_run_trial(spec, chain_root, *, model):
+        if spec.direction == "forward":
+            return _fake_trial_result(spec, chain_root, timed_out=True, returncode=None, docx_changed=True, source_docx=forward_output)
+        return _fake_trial_result(spec, chain_root, timed_out=False, returncode=0, docx_changed=True, source_docx=inverse_output)
+
+    monkeypatch.setattr(run_paper_s7_benchmark, "run_trial", fake_run_trial)
+    monkeypatch.setattr(run_paper_s7_benchmark, "_grade_forward", lambda *a, **k: {"verdict": "pass", "checks": {}})
+    monkeypatch.setattr(run_paper_s7_benchmark, "_grade_inverse", lambda *a, **k: {"verdict": "pass", "checks": {}})
+
+    result = run_chain("bibliography", "doc-a", docx_path, "treatment", 1, "sonnet", tmp_path / "run-root", word_receipts_enabled=False)
+
+    assert result["status"] == "completed"
+    fwd_result = result["pairs"][0]["forward"]
+    assert fwd_result["recovered_from_outer_timeout"] is True
+    assert fwd_result["grading"]["verdict"] == "pass"
+
+
+def test_run_chain_does_not_recover_forward_trial_when_docx_changed_but_grading_fails(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Negative case for the same recovery path: a changed docx is only
+    evidence worth grading, not a free pass. If the file that was actually
+    left on disk genuinely fails grading, the chain must still end up
+    blocked -- this does not weaken the existing grading check."""
+    docx_path = tmp_path / "in.docx"
+    _write_minimal_docx(docx_path)
+    forward_output = tmp_path / "forward-output.docx"
+    _write_minimal_docx(forward_output)
+
+    def fake_run_trial(spec, chain_root, *, model):
+        assert spec.direction == "forward", "inverse must never run once the forward pair is blocked"
+        return _fake_trial_result(spec, chain_root, timed_out=True, returncode=None, docx_changed=True, source_docx=forward_output)
+
+    monkeypatch.setattr(run_paper_s7_benchmark, "run_trial", fake_run_trial)
+    monkeypatch.setattr(run_paper_s7_benchmark, "_grade_forward", lambda *a, **k: {"verdict": "fail", "reason": "simulated genuine grading failure"})
+
+    result = run_chain("bibliography", "doc-a", docx_path, "treatment", 1, "sonnet", tmp_path / "run-root", word_receipts_enabled=False)
+
+    assert result["status"] == "blocked"
+    fwd_result = result["pairs"][0]["forward"]
+    assert "recovered_from_outer_timeout" not in fwd_result
+
+
+def test_run_chain_recovers_inverse_trial_killed_by_outer_timeout_when_docx_changed_and_grades_pass(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Mirrors the forward-trial recovery test above for the inverse trial,
+    which needs the identical treatment (see d1c4f7e2 in run_chain)."""
+    docx_path = tmp_path / "in.docx"
+    _write_minimal_docx(docx_path)
+    forward_output = tmp_path / "forward-output.docx"
+    _write_minimal_docx(forward_output)
+    inverse_output = tmp_path / "inverse-output.docx"
+    _write_minimal_docx(inverse_output)
+
+    def fake_run_trial(spec, chain_root, *, model):
+        if spec.direction == "forward":
+            return _fake_trial_result(spec, chain_root, timed_out=False, returncode=0, docx_changed=True, source_docx=forward_output)
+        return _fake_trial_result(spec, chain_root, timed_out=True, returncode=None, docx_changed=True, source_docx=inverse_output)
+
+    monkeypatch.setattr(run_paper_s7_benchmark, "run_trial", fake_run_trial)
+    monkeypatch.setattr(run_paper_s7_benchmark, "_grade_forward", lambda *a, **k: {"verdict": "pass", "checks": {}})
+    monkeypatch.setattr(run_paper_s7_benchmark, "_grade_inverse", lambda *a, **k: {"verdict": "pass", "checks": {}})
+
+    result = run_chain("bibliography", "doc-a", docx_path, "treatment", 1, "sonnet", tmp_path / "run-root", word_receipts_enabled=False)
+
+    assert result["status"] == "completed"
+    inv_result = result["pairs"][0]["inverse"]
+    assert inv_result["recovered_from_outer_timeout"] is True
+    assert inv_result["grading"]["verdict"] == "pass"

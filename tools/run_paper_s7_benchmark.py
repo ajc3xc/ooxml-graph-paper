@@ -327,17 +327,48 @@ def run_chain(
         fwd_result = run_trial(forward_spec, chain_root, model=model)
         fwd_result["isolation_audit"] = audit_isolation(fwd_result)
         fwd_execution_ok = fwd_result.get("returncode") == 0 and not fwd_result.get("timed_out")
-        fwd_grading = (
-            _safe_grade(_grade_forward, family, Path(fwd_result["output_docx_path"]), paragraphs_before_this_pair, forward_spec, applicability)
-            if fwd_execution_ok else {"verdict": "not_run", "reason": "forward process did not complete"}
-        )
+        fwd_docx_changed = bool(fwd_result.get("docx_changed"))
+        if fwd_execution_ok:
+            fwd_grading = _safe_grade(_grade_forward, family, Path(fwd_result["output_docx_path"]), paragraphs_before_this_pair, forward_spec, applicability)
+        elif fwd_docx_changed:
+            # d1c4f7e2 -- a killed/non-zero-exit CLI process does not by
+            # itself mean the underlying render-verified write failed:
+            # found live, 2026-09-09, a real chain whose forward process
+            # was killed by the harness's OWN outer subprocess timeout
+            # (the agent never got to report "DONE") nonetheless left a
+            # genuinely correct, render-verified table insert on disk --
+            # confirmed directly, the exact expected marker text inside a
+            # real <w:tbl> element. insert_table/insert_equation/
+            # insert_caption's own render-verification gate is atomic: it
+            # restores the file from backup on ANY failure and only ever
+            # persists a change after a real backend successfully
+            # rendered it, so a changed docx is real, positive evidence
+            # the underlying task genuinely completed -- independent of
+            # whether the wrapping CLI process itself finished reporting
+            # before an outer timeout killed it. Grade it for real via
+            # the SAME exception-safe _safe_grade used for a clean exit;
+            # a genuinely corrupt/incomplete file still correctly fails
+            # grading on its own merits (see _safe_grade's own docstring)
+            # -- this does not skip or weaken that check, it only stops
+            # discarding a result that would otherwise never even be
+            # looked at.
+            fwd_grading = _safe_grade(_grade_forward, family, Path(fwd_result["output_docx_path"]), paragraphs_before_this_pair, forward_spec, applicability)
+        else:
+            fwd_grading = {"verdict": "not_run", "reason": "forward process did not complete"}
         fwd_result["grading"] = fwd_grading
-        if word_receipts_enabled and fwd_execution_ok:
+        fwd_task_completed = fwd_execution_ok or (fwd_docx_changed and fwd_grading.get("verdict") == "pass")
+        if not fwd_execution_ok and fwd_task_completed:
+            # Disclose the recovery explicitly -- a reader auditing raw
+            # results later must be able to tell a cleanly-reported
+            # success apart from one recovered this way, not just see
+            # "completed" with no trace of the outer timeout.
+            fwd_result["recovered_from_outer_timeout"] = True
+        if word_receipts_enabled and fwd_task_completed:
             receipts.append(_milestone_word_receipt(Path(fwd_result["output_docx_path"]), chain_root / "receipts" / f"p{pair_index}-forward", milestone="after_pair_forward"))
 
         pair_record: dict[str, Any] = {"pair_index": pair_index, "forward": fwd_result}
 
-        if not fwd_execution_ok:
+        if not fwd_task_completed:
             chain_status = "blocked"
             pairs.append(pair_record)
             break
@@ -398,20 +429,31 @@ def run_chain(
         inv_result = run_trial(inverse_spec, chain_root, model=model)
         inv_result["isolation_audit"] = audit_isolation(inv_result)
         inv_execution_ok = inv_result.get("returncode") == 0 and not inv_result.get("timed_out")
-        inv_grading = (
-            _safe_grade(_grade_inverse, family, Path(inv_result["output_docx_path"]), paragraphs_before_this_pair, inverse_spec)
-            if inv_execution_ok else {"verdict": "not_run", "reason": "inverse process did not complete"}
-        )
+        inv_docx_changed = bool(inv_result.get("docx_changed"))
+        if inv_execution_ok:
+            inv_grading = _safe_grade(_grade_inverse, family, Path(inv_result["output_docx_path"]), paragraphs_before_this_pair, inverse_spec)
+        elif inv_docx_changed:
+            # d1c4f7e2 -- same recovery as the forward trial above (see its
+            # comment for the full account): a killed outer process does
+            # not mean the render-verified write itself failed, and a
+            # changed docx is real positive evidence worth actually
+            # grading rather than discarding unseen.
+            inv_grading = _safe_grade(_grade_inverse, family, Path(inv_result["output_docx_path"]), paragraphs_before_this_pair, inverse_spec)
+        else:
+            inv_grading = {"verdict": "not_run", "reason": "inverse process did not complete"}
         inv_result["grading"] = inv_grading
-        if word_receipts_enabled and inv_execution_ok:
+        inv_task_completed = inv_execution_ok or (inv_docx_changed and inv_grading.get("verdict") == "pass")
+        if not inv_execution_ok and inv_task_completed:
+            inv_result["recovered_from_outer_timeout"] = True
+        if word_receipts_enabled and inv_task_completed:
             receipts.append(_milestone_word_receipt(Path(inv_result["output_docx_path"]), chain_root / "receipts" / f"p{pair_index}-inverse", milestone="after_pair_inverse"))
 
         pair_record["inverse"] = inv_result
         pairs.append(pair_record)
 
-        if not inv_execution_ok or inv_grading.get("verdict") != "pass":
+        if not inv_task_completed or inv_grading.get("verdict") != "pass":
             chain_status = "completed_with_failure"
-            current_input = Path(inv_result["output_docx_path"]) if inv_execution_ok else current_input
+            current_input = Path(inv_result["output_docx_path"]) if inv_task_completed else current_input
             continue
 
         current_input = Path(inv_result["output_docx_path"])
