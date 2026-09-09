@@ -902,8 +902,10 @@ this section describes had its own defect that discarded some genuinely correct 
 "blocked" without ever grading them. **Resolved same day**: a full sweep plus two targeted live
 inverse trials confirmed table_structural's real number is **3/26**, not 1/26; equation (1/26)
 and caption (0/26) are confirmed genuine and unaffected. `paper-s8-final-evidence-v1.md`
-section 2.6 and the Structural Ledger's table_structural subhead still need updating with the
-3/26 number and this account -- not yet done as of this checkpoint.
+(sections 0, 1, 2.6, 2.9/caption, 3, 5, 7 and its own fix-card list) and the Structural Ledger
+artifact (stat card, subheads 06/table_structural and 09/caption, 2 new fix cards for the
+Word-COM and evaluator defects, the closing "Confirmed" callout) have both been updated with
+the 3/26 number and this account -- done, same day.
 
 ## If you are picking this up cold after a crash
 
