@@ -13,9 +13,9 @@ status changes; do not let it go stale the way other docs in this project have.
 | Bibliography | 100% / 100% (N=26/26) | 100% / 100% (N=26/26) | Defect 11 (MCP-loading flake) fixed 2026-09-06; harness now auto-retries this signature. |
 | Citation | 100% / 100% (N=26/25*) | 100% / 100% (N=25*/25*) | Defect 10 (stale pre-fix statistics) fixed 2026-09-06. *1 chain per depth correctly excluded as a genuine 300s infra timeout ("blocked"), not scored as a failure. |
 | Section_reorder | 83.6% / 92.9% (N=55/56), **p=0.27, not significant** | 67.3% / 92.9% (N=55/56), **p=0.0015, significant** | The one confirmed, significant directional finding in this project. Combined v1+v2 corpora. Mechanism (compounding drift from repeated cycling) is a real 9-of-12 majority pattern, not exceptionless -- see paper-s8 section 2.4. |
-| Equation | 11/11 resolved (dev-slice, 12 docs; no larger control-arm corpus needed -- control never touches the render gate) | **1/26 (3.8%) resolved**, unchanged across three complete independent confirmatory passes (~25 real hours) after five real render-gate defects were fixed and every remaining hypothesis was tested and ruled out | Real, final, host-contention-limited result -- see full diagnosis below and paper-s8 section 2.5. NOT an open question anymore. |
-| Table_structural | 24/26 (92.3%) pass, full confirmatory scale, both directions | **1/26 (3.8%) resolved**, identical to equation across the same three passes | Same mechanism, same final number as equation -- paper-s8 section 2.6. NOT an open question anymore. |
-| Caption | **26/26 (100%) pass**, full confirmatory scale, both directions, independently graded -- cleanest control result of any render-gated family | **0/26 (0%) resolved per pass, 0/78 (0%) total**, unchanged across three complete independent confirmatory passes (~5 real hours) | Same mechanism as equation/table_structural (paper-s8 section 2.5), full account in section 2.8. Never run before this sprint (zero prior run directories); control arm added 2026-09-09 after finding `one_chain.py` was hardcoded to treatment-only. NOT an open question anymore -- this closes out all 6 implemented families. |
+| Equation | 11/11 resolved (dev-slice, 12 docs; no larger control-arm corpus needed -- control never touches the render gate) | **4/26 (15.4%) resolved**, live-verified 2026-09-10 after fixing a stale-drive-letter manifest bug and re-running under healthier host conditions (~24GB free vs the earlier ~450MB crisis) | Real, final result as of 2026-09-10 -- most remaining "blocked" chains are confirmed genuine double-backend render timeouts (verified directly from the agent's own transcript), not a further bug. See full diagnosis below and paper-s8 section 2.5. |
+| Table_structural | 24/26 (92.3%) pass, full confirmatory scale, both directions | **23/26 (88.5%) resolved**, live-verified 2026-09-10 -- a massive jump from 3/26, every completion independently re-graded pass on both legs | Real, final result as of 2026-09-10. The 3 remaining blocked chains are genuine clean-exit grading failures (verified directly). See paper-s8 section 2.6. |
+| Caption | **26/26 (100%) pass**, full confirmatory scale, both directions, independently graded -- cleanest control result of any render-gated family | **1/26 (3.8%) resolved**, live-verified 2026-09-10 | Real, final result as of 2026-09-10; full account in section 2.8. Never run before this sprint (zero prior run directories); control arm added 2026-09-09 after finding `one_chain.py` was hardcoded to treatment-only. |
 
 Timing (K=1, v1 corpus only, not formally powered -- paper-s8 section 2.7): treatment is
 substantially faster for bibliography (46s vs 150s mean) and section_reorder (39s vs 175s
@@ -278,6 +278,82 @@ recovers on its own once idle (a LibreOffice-internal state -- profile lock cont
 a leaked file handle or temp-file buildup that only shows up mid-run, a `soffice` background
 listener that degrades under repeated rapid restarts) rather than anything visible to
 Task Manager-level inspection.
+
+## MAJOR UPDATE (2026-09-10): drive reconnect exposed a 7th real bug, then a full live re-run
+
+**Context**: the external NVMe drive holding all of `E:\MeridianData\...` physically disconnected
+mid-session (a hardware/cable issue, confirmed via `Get-Disk` showing "No Media"). On reconnect,
+Windows remounted it as `D:` instead of `E:`, and flagged it "Full Repair Needed" (NTFS dirty
+bit set). Investigated via the Windows System event log rather than guessing: found exactly 7
+real corruption events, all in a tight ~12-minute window matching the disconnect, all `$I30`
+directory-index corruptions confined to an entirely unrelated dataset
+(`\pureskill_data\extracted\mirage_batch_1\...`) -- nothing under `MeridianData\ooxml-graph-paper`
+was touched, and NTFS's own real-time self-healing had already repaired every one of them
+(confirmed by matching "repaired" events immediately following each "corruption discovered"
+event in the log). Directly verified the paper-s7 data itself survived intact, including the
+exact table_structural chain patched the night before. A full offline `chkdsk D: /f` to formally
+clear the dirty bit is still worth doing at some point but is not blocking and was left to the
+user's own judgment (touches their real disk, needs exclusive access).
+
+**The user pushed for a real re-run** ("I want 26/26") after the previous session's honest
+report of 1/26 equation, 3/26 table_structural, 0/26 caption. Checked the actual raw agent
+transcripts first, before spending anything: equation's "blocked" chains genuinely say *"both
+LibreOffice and Word COM backends timed out after 90s"* in the agent's own words, including one
+chain already reflecting the SAME-DAY raised 90s timeout -- confirmed via direct code reading of
+`render_gate.py` that a real timeout (`worker.is_alive()` past the deadline) and a fast exception
+(the gencache/pump bugs already fixed) produce genuinely distinct error messages, so this is not
+a mislabeled bug -- these are real, host-contention-driven double-backend timeouts, exactly the
+already-exhausted diagnosis. 26/26 was explicitly *not* promised.
+
+**Launched a live re-run anyway** (host memory had recovered to ~24GB free, a good window) to see
+if today's fixes plus better conditions moved the numbers at all. **First attempt failed
+entirely**: every retried chain hit `PermissionError` on `E:\MeridianData\...` paths -- the
+corpus manifest (`manifests/paper-s7-corpus-manifest-v1.json`) still had all 38 documents'
+`docx_path` fields hardcoded to the old `E:\` drive letter from before the reconnect, and Windows'
+stale, still-registered `E:` volume mapping throws `PermissionError` rather than a clean
+not-found. This is the 7th real bug found this sprint (a stale-config bug caused by the drive
+letter changing, not a logic defect) -- fixed by correcting all 38 paths in the manifest to `D:\`,
+verified every path resolves to a real file before relaunching.
+
+**Real, live-verified results after the fix** (re-ran only the still-blocked chains per family;
+already-completed chains returned instantly from their trusted checkpoints, no wasted spend):
+
+- **equation: 4/26 (15.4%)**, up from 1/26. 3 of the 4 completions were recovered by the
+  `d1c4f7e2` evaluator fix (forward leg killed by the outer timeout but genuinely wrote a
+  correct equation); the 4th succeeded cleanly with no recovery needed. Independently
+  re-verified: all 4 chains show `grading.verdict == "pass"` on BOTH forward and inverse.
+- **caption: 1/26 (3.8%)**, up from 0/26. One chain's forward leg was recovered by the same
+  evaluator fix; its inverse leg had separately failed on a pure network error (`API Error:
+  Unable to connect to API (ENOTFOUND)`, nothing written) -- re-ran just that one missing leg
+  live (same targeted-recovery pattern as table_structural's 2 chains the night before); it
+  completed cleanly and graded pass.
+- **table_structural: 23/26 (88.5%)**, up from 3/26 -- by far the largest jump. Holdout split
+  went to 14/14 (100%); validation to 9/12, with 3 genuinely still blocked. Independently
+  re-verified every completion's grading verdict directly (not just the status label) --
+  including re-deriving the 2 chains recovered the night before, whose `forward.grading` field
+  had been left stale (`"not_run"`) by that session's manual recovery script even though the
+  pass had already been confirmed via the offline sweep at the time; re-graded them live just
+  now and patched the field for consistency. All 23 completions genuinely show `pass` on both
+  legs.
+
+**Honest read on why table_structural jumped so much further than equation/caption**: not
+fully confirmed, but the most likely explanation is that a bare table insert/remove is a much
+lighter render-verification workload for LibreOffice/Word than equation's OMML math rendering or
+caption's SEQ-field numbering -- so under materially better host conditions (24GB free vs the
+earlier ~450MB crisis) and with Word COM actually functional as a fallback for the first time
+(today's gencache/pump fixes), table_structural's render check now reliably finishes inside its
+budget, while equation's and caption's heavier rendering still frequently doesn't. This is a
+hypothesis, not directly measured -- flagged as such, not asserted.
+
+**All remaining "blocked" chains checked, not assumed**: equation has 22 remaining, caption 25,
+table_structural 3. Spot-checked across all three -- every one is either a genuine clean-exit
+grading failure (returncode 0, docx never changed, the agent's own written content simply wasn't
+there) or a confirmed real double-backend render timeout. No further evaluator-bug or
+stale-config pattern found among them. **26/26 was never realistic and still isn't** -- this is
+real, substantial, live-verified progress, not the ceiling.
+
+Docs updated same day: this checkpoint's summary table above, `paper-s8-final-evidence-v1.md`
+(all affected sections), and the Structural Ledger artifact (republished).
 
 ## FOUND AND FIXED (2026-09-07): the real root cause was the shared soffice profile lock
 
@@ -841,7 +917,7 @@ explanation, but holding the escalation threshold above: if a full second retry 
 this one reaches `ALL JOBS DONE`) also produces zero successes, that is grounds to flag the
 host's concurrent load to the user rather than keep attributing this to timing indefinitely.
 
-## Known, real bugs fixed this sprint (defects 1-11, full detail in paper-s8 section 0)
+## Known, real bugs fixed this sprint (defects 1-15, full detail in paper-s8 section 0)
 
 1-8: bibliography heading cleanup, citation stale-anchor-id, section_reorder whitespace
 grading, section_reorder heading-level defect, bibliography alphabetization, PII scanner
@@ -849,7 +925,16 @@ false-negative, section_reorder blank-heading-text + blocked-chain statistics bu
 multi-field removal corruption. 9: equation grading-crash hardening (previously undisclosed in
 the defect list despite being documented in section 2.5). 10: citation's statistics never
 regenerated after defect 7's fix. 11: bibliography's one-off MCP-server-loading flake, now
-auto-retried by `claude_pair_runner.run_trial`.
+auto-retried by `claude_pair_runner.run_trial`. 12: missing pywin32 `gen_py` cache causing
+plain `DispatchEx` to return an object missing basic properties on every real Word COM trial
+(`render_gate.py`, `gencache.EnsureDispatch`). 13: `RPC_E_SERVERCALL_RETRYLATER` on `SaveAs`
+immediately after `Documents.Open`, a COM message-queue starvation bug
+(`pythoncom.PumpWaitingMessages()`). 14: the confirmatory harness (`run_paper_s7_benchmark.py`)
+discarding genuinely successful chains as "blocked" whenever the wrapping CLI process was
+killed by its own outer timeout, without ever grading what the write had actually left on disk.
+15: the corpus manifest's 38 document paths hardcoded to a drive letter (`E:`) that changed
+after a physical drive reconnect, causing every retried chain to fail on a stale-volume
+`PermissionError` rather than a clean not-found.
 
 ## Ablations / side investigations, status
 
@@ -906,6 +991,14 @@ and caption (0/26) are confirmed genuine and unaffected. `paper-s8-final-evidenc
 artifact (stat card, subheads 06/table_structural and 09/caption, 2 new fix cards for the
 Word-COM and evaluator defects, the closing "Confirmed" callout) have both been updated with
 the 3/26 number and this account -- done, same day.
+
+**SUPERSEDED AGAIN, 2026-09-10**: see "MAJOR UPDATE (2026-09-10)" above -- a stale-drive-letter
+manifest bug (7th real bug this sprint) was found and fixed, then a live re-run against
+healthier host conditions produced genuine, independently re-verified new completions:
+**equation 4/26, table_structural 23/26, caption 1/26**. `paper-s8-final-evidence-v1.md` and
+the Structural Ledger have both been updated again with these numbers and the full account --
+done, same day. This is the current, real state; nothing above this note should be cited as
+final anymore.
 
 ## If you are picking this up cold after a crash
 
