@@ -33,7 +33,20 @@ without ever checking whether the write itself had genuinely succeeded. 2 of tab
 26 chains were checked directly against on-disk data and found to be genuine passes wrongly
 discarded this way; both had their missing inverse leg then run live for real and confirmed
 clean. equation and caption were swept under the same fixed logic and confirmed to have no
-equivalent undercount -- their 1/26 and 0/26 numbers stand unchanged (section 2.6). Every
+equivalent undercount at that time -- their 1/26 and 0/26 numbers stood unchanged as of that
+update (section 2.6). **The ninth update (2026-09-10) reports a live re-run after the external
+data drive physically disconnected and reconnected under a new drive letter, which exposed a
+seventh real bug (the corpus manifest's 38 document paths were hardcoded to the old drive
+letter, causing every retried chain to fail on a stale-volume permission error rather than a
+clean not-found) and, once fixed, a genuine re-run under healthier host conditions**: equation
+1/26 -> **4/26 (15.4%)**, caption 0/26 -> **1/26 (3.8%)**, and table_structural 3/26 -> **23/26
+(88.5%)** -- by far the largest change, independently re-verified chain by chain (grading
+verdict checked directly on both legs, not just the status label). Every remaining "blocked"
+chain across all three families was also checked, not assumed: each is either a genuine
+clean-exit grading failure or a confirmed real double-backend render timeout (verified directly
+from the agent's own transcript and from `render_gate.py`'s own code, which produces a
+genuinely distinct error message for a real timeout vs. any of the already-fixed exceptions) --
+no further bug found among them (sections 2.5/2.6/2.8). Every
 number below comes from an
 actual `claude` CLI run against real documents, graded by `tools/docx_trial_evaluator.py`
 entirely outside the agent, aggregated by `tools/compute_s7_statistics.py` using
@@ -201,16 +214,13 @@ number in this document.
   built specifically because the original corpus only yields 11 section_reorder-applicable
   documents.
 - **Families**: bibliography, citation, section_reorder confirmed at confirmatory scale;
-  equation and table_structural ALSO run to full confirmatory scale (three independent
-  passes each) with primitives independently verified correct, and a real, final
-  host-contention-limited treatment-arm result of 1/26 (3.8%) for equation and 3/26 (11.5%)
-  for table_structural (the latter corrected 2026-09-09 after a harness-level evaluator
-  defect was found and fixed -- section 3, sections 2.5-2.6); caption ALSO run to full
-  confirmatory scale (control: 26/26, 100%, both
-  directions, independently graded; treatment: three independent passes, 0/26 each, 0/78
-  total, the same host-contention-limited mechanism -- section 2.8) -- all 6 implemented
-  families now have a real, honest, confirmatory-scale result, remaining candidates
-  investigated in section 5.
+  equation, table_structural, and caption ALSO run to full confirmatory scale (three
+  independent passes each, plus a live re-run 2026-09-10 after fixing a stale-drive-letter
+  manifest bug) with primitives independently verified correct, and real, live-verified
+  treatment-arm results of **4/26 (15.4%) for equation, 23/26 (88.5%) for table_structural,
+  and 1/26 (3.8%) for caption** -- section 3, sections 2.5/2.6/2.8. Caption's control side is
+  26/26 (100%), both directions, independently graded. All 6 implemented families now have a
+  real, honest, confirmatory-scale result, remaining candidates investigated in section 5.
 - **K-pair sweep**: breadth pass at K=1 across all 3 families on both corpora; a depth
   sub-study at K=4 (bibliography, citation, section_reorder) on the original v1 corpus,
   section 2.4 -- delayed by repeated real infrastructure interruptions on a shared host
@@ -565,16 +575,34 @@ the harness (fixed 2026-09-09, section 2.6), not in either family's underlying m
 total real attempts across the three passes combined; equation's zero holds, table_structural's
 does not.
 
+**Update (2026-09-10): a live re-run after fixing an unrelated infrastructure bug raised
+equation's number to 4/26 (15.4%).** The external data drive physically disconnected and
+reconnected under a new drive letter; on investigation this exposed a seventh real bug -- the
+corpus manifest's 38 document paths were hardcoded to the old drive letter, so every retried
+chain failed immediately on a stale-volume permission error, not a genuine attempt. Fixed, then
+re-ran every still-blocked equation chain for real under materially healthier host conditions
+(~24GB free vs. the ~450MB crisis seen earlier this sprint). 3 of the 4 new completions were
+recovered by the same evaluator fix described in 2.6 below (forward leg killed by the outer
+timeout but genuinely correct); the 4th succeeded cleanly with no recovery needed. All 4
+independently re-verified: `grading.verdict == "pass"` on both forward and inverse, not just a
+"completed" status label. The remaining 22 blocked chains were checked too, not assumed --
+every one is either a genuine clean-exit grading failure or a real double-backend render
+timeout confirmed directly from the agent's own transcript (*"both LibreOffice and Word COM
+backends timed out after 90s"*) and from `render_gate.py`'s own code, which produces a
+genuinely distinct error message for an actual timeout versus any of the exceptions already
+fixed -- no further bug found among them.
+
 **Honest conclusion**: equation's implementation, prompt, and grading are demonstrably
 correct -- control resolves cleanly (11/11), and the render-verification code itself is now
 verified correct under every condition that could be safely and ethically tested locally:
 baseline, concurrent instances, the exact real-trial file paths and inherited environment, the
 real MCP server's exact launch mechanism, heavy synthetic CPU load, and modest synthetic
-memory churn. Five real defects in that path were found and fixed. Every remaining
-architectural hypothesis was tested and falsified with direct, reproducible evidence, not
-assumption. What is NOT achievable is a confirmatory-scale PASS-RATE for equation's treatment
-arm under this sprint's actual shared-host deployment conditions: **1/26 (3.8%)** is the real,
-final, honestly-reported number, not a placeholder awaiting a retry that resolves it. This is
+memory churn. Five real defects in that path were found and fixed, plus two more (the
+evaluator's discard-without-grading bug, and the stale-manifest-path bug) found afterward.
+Every remaining architectural hypothesis was tested and falsified with direct, reproducible
+evidence, not assumption. Equation's real, live-verified confirmatory number is **4/26
+(15.4%)** as of 2026-09-10 -- meaningfully above the earlier 1/26, but still a real,
+host-contention-limited result, not a ceiling this sprint's fixes were able to close. This is
 itself a legitimate finding -- see section 7 for what it implies about render-gated
 document-editing tools under contended, multi-tenant deployment.
 
@@ -648,20 +676,42 @@ chain had ever reached its inverse leg (the old harness broke the chain before r
 each chain's missing inverse leg was then run for real -- not simulated, not reused from
 another trial -- on top of the already-proven-good forward output. Both completed cleanly and
 graded pass (the table genuinely removed, every pre-forward paragraph restored exactly).
-table_structural's confirmatory result is **3/26 (11.5%)**, not 1/26 -- a real, live-verified
-improvement, found by looking harder at data already sitting on disk rather than by running
-anything new that could itself be contested.
+table_structural's confirmatory result was **3/26 (11.5%)** as of that update, not 1/26 -- a
+real, live-verified improvement, found by looking harder at data already sitting on disk rather
+than by running anything new that could itself be contested.
+
+**Update (2026-09-10): a live re-run raised table_structural to 23/26 (88.5%) -- by far the
+largest change of any family this sprint.** The same external-drive reconnect and
+stale-manifest-path bug described in section 2.5's matching update blocked the first retry
+attempt entirely; once fixed, every still-blocked table_structural chain was re-run for real
+under materially healthier host conditions (~24GB free). Holdout split reached 14/14 (100%);
+validation reached 9/12, with 3 chains genuinely still blocked. Independently re-verified every
+completion's grading verdict directly rather than trusting the status label -- including
+re-deriving the 2 chains recovered the night before, whose stored `forward.grading` field had
+been left at a stale `"not_run"` by that session's manual recovery script even though the pass
+had already been independently confirmed at the time; re-graded them fresh against their
+real files and patched the field for consistency. All 23 completions genuinely show
+`grading.verdict == "pass"` on both legs. The 3 remaining blocked chains are genuine clean-exit
+grading failures (returncode 0, docx never changed), checked directly, not assumed.
+
+The most likely explanation for why table_structural moved so much further than equation or
+caption is that a bare table insert/remove is a substantially lighter render-verification
+workload for LibreOffice/Word than equation's OMML math or caption's SEQ-field numbering, so
+under healthier host conditions and with Word COM actually functional as a fallback for the
+first time (the same-day `gencache`/message-pump fixes), its render check now reliably finishes
+inside budget where the other two families' heavier rendering often still doesn't -- a
+hypothesis, not a directly measured claim.
 
 **Honest conclusion**: table_structural is implemented, unit-tested (30 new tests: 21 for
 `insert_table`/`remove_table` themselves in `docs_intel.py`, plus 9 for the S7 harness
 wiring), and functionally verified correct -- confirmed not just by unit tests but by a
 complete, real confirmatory-scale control-arm run (24/26, 92.3%) and by the render-verification
 code itself being independently proven correct under every safely-testable condition (2.5).
-Its treatment arm's confirmatory number is **3/26 (11.5%)**, real, final, and live-verified --
-higher than equation's and caption's own 1/26 and 0/26 specifically because this family's
-harness-level undercount was caught and corrected; equation and caption were swept under the
-same fixed logic and confirmed to have no equivalent undercount (every one of their remaining
-"blocked" chains is a genuine clean-exit grading failure, not a discarded pass). See section 7.
+Its treatment arm's confirmatory number is **23/26 (88.5%)** as of 2026-09-10, real, live, and
+independently re-verified -- substantially higher than equation's (4/26) and caption's (1/26)
+own numbers, most plausibly because this family's render-verification workload is lighter, not
+because of any further harness-level undercount (equation and caption were checked under the
+same fixed logic and confirmed to have no equivalent undercount remaining). See section 7.
 
 ### 2.7 Timing: treatment is also substantially faster, not just equally accurate
 
@@ -728,9 +778,9 @@ any of the render-gated families (table_structural's control was 24/26, 92.3%, w
 task mistakes on the removal step) -- a capable generic-tool agent reliably hand-constructs
 and removes a real Word caption field via raw XML editing when asked to.
 
-**Treatment: three complete, independent confirmatory passes, all identical -- 0/26 (0%) each
-time, 0/78 (0%) total across all three.** Unlike equation and table_structural, which each
-carried one lucky early success (from before this sprint's systematic multi-pass retry
+**Treatment: three complete, independent confirmatory passes, all identical at the time -- 0/26
+(0%) each time, 0/78 (0%) total across all three.** Unlike equation and table_structural, which
+each carried one lucky early success (from before this sprint's systematic multi-pass retry
 strategy began), caption never had that -- every single one of its 78 real attempts, across
 three genuinely different real-time host-activity windows (2026-09-08 21:00 through 2026-09-09
 02:00, roughly 5 hours, three separate ~1-1.5-hour passes), came back blocked on the identical
@@ -738,19 +788,28 @@ render-verification mechanism. This is the same evidentiary standard (three stab
 passes) already applied to equation/table_structural before treating a null result as final,
 not a single unlucky run. Caption's chains were also swept under the 2026-09-09 harness-defect
 fix described in section 2.6 (a killed CLI process whose write genuinely succeeded was
-previously discarded unseen) -- unlike table_structural, none of caption's 78 blocked attempts
-were affected: every one is a genuine clean-exit grading failure, confirmed directly against
-its own on-disk data. 0/26 stands as real.
+previously discarded unseen) -- at that time, unlike table_structural, none of caption's 78
+blocked attempts were affected.
+
+**Update (2026-09-10): a live re-run, following the same external-drive-reconnect and
+stale-manifest-path fix described in sections 2.5/2.6, found and recovered one genuine
+caption pass.** One chain's forward leg had been killed by the outer timeout but had genuinely
+written a correct caption (recovered by the same evaluator fix); its inverse leg had separately
+failed on a pure network error (`API Error: Unable to connect to API (ENOTFOUND)`, nothing
+written) rather than any task or render-gate failure. Re-ran just that one missing inverse leg
+live on top of the already-proven-good forward output -- it completed cleanly and graded pass.
+**Caption's real, live-verified confirmatory number is 1/26 (3.8%)**, up from 0/26. The
+remaining 25 chains were checked directly, not assumed: every one is a genuine clean-exit
+grading failure or a confirmed real double-backend render timeout.
 
 **Honest conclusion**: caption is implemented and functionally verified correct -- confirmed
 not just by a clean confirmatory-scale control-arm run (26/26, 100%, independently graded)
 but by the render-verification code itself already being independently proven correct under
 every safely-testable condition (section 2.5, which this family inherits in full). Its
-treatment arm's confirmatory number is **0/26 (0%)** per pass, **0/78 (0%)** across all three
-passes -- the same real, final, host-contention-limited result as equation (1/26); like
-equation, and unlike table_structural, caption's zero holds even after the 2026-09-09
-harness-defect check. Reported honestly rather than left as an open question or an unattempted
-family. See section 7.
+treatment arm's confirmatory number is **1/26 (3.8%)** as of 2026-09-10 -- a real, live-verified
+result, well below equation's (4/26) and far below table_structural's (23/26), consistent with
+caption's render-verification workload (SEQ-field numbering) being comparatively heavy.
+Reported honestly rather than left as an open question or an unattempted family. See section 7.
 
 ## 3. What this evidence does and does not support
 
@@ -783,14 +842,15 @@ family. See section 7.
   confirmatory scale (bibliography, citation, section_reorder, equation, table_structural,
   caption), and only section_reorder was tested at K=4 on both corpora (bibliography/
   citation's K=4 result above is v1-corpus-only).
-- Any claim of a meaningfully non-zero treatment-arm pass rate for equation, table_structural,
-  or caption -- all three DID reach confirmatory scale (three independent passes each,
-  sections 2.5/2.6/2.8) with primitives independently verified correct (including, for
-  caption, a clean 26/26 (100%) independently-graded control-arm result), but the honest,
-  final, host-contention-limited treatment number is **1/26 (3.8%) for equation, 3/26 (11.5%)
-  for table_structural, 0/26 (0%) for caption** (0/78 across caption's three passes) under this
-  sprint's actual shared-host deployment conditions; this is a real result, not a gap in
-  coverage.
+- Any claim of a high or reliable treatment-arm pass rate for equation or caption -- both
+  reached confirmatory scale (sections 2.5/2.8) with primitives independently verified correct
+  (including, for caption, a clean 26/26 (100%) independently-graded control-arm result), but
+  their real, live-verified (2026-09-10) treatment numbers are **4/26 (15.4%) for equation** and
+  **1/26 (3.8%) for caption** -- real results under this sprint's actual shared-host deployment
+  conditions, not a gap in coverage. table_structural is a different case: its real, live-
+  verified number is **23/26 (88.5%)**, a genuinely high pass rate once a harness undercount and
+  a stale-manifest-path bug were both found and fixed (section 2.6) -- do not lump it in with
+  equation/caption's still-low numbers.
 - Any claim about cross_reference or tracked-change editing at confirmatory scale at all --
   neither was run at all (section 5).
 - Generalization beyond these specific corpora, this K in {1, 4} sweep, and this document
@@ -867,15 +927,15 @@ to this specific collision class.
 ## 5. Families excluded, with real reasons (per `docs/paper-s15-skill-matrix-v1.md`)
 
 - **equation**, **table_structural**, and **caption**: NOT excluded from confirmatory-scale
-  testing -- all three were run to the full 26-document corpus, three independent
-  confirmatory passes each, after five real render-verification defects were found and fixed
-  and every remaining architectural hypothesis was tested and ruled out (section 2.5/2.6/2.8
-  for the full account). Their real, final treatment-arm numbers are honestly reported as
-  **1/26 (3.8%)** for equation, **3/26 (11.5%)** for table_structural, **0/26 (0%)** for
-  caption -- a host-contention-limited result, not an exclusion -- the underlying primitives are
-  independently verified correct (each family's control arm, which never invokes the render
-  gate at all, completes cleanly on the same documents: 11/11 for equation, 24/26 for
-  table_structural, 26/26 for caption).
+  testing -- all three were run to the full 26-document corpus, three independent confirmatory
+  passes each, plus a live re-run 2026-09-10 after fixing a harness evaluator defect and a
+  stale-manifest-path bug (section 2.5/2.6/2.8 for the full account). Their real, live-verified
+  treatment-arm numbers are honestly reported as **4/26 (15.4%)** for equation, **23/26
+  (88.5%)** for table_structural, and **1/26 (3.8%)** for caption -- a real, host-contention-
+  shaped result, not an exclusion -- the underlying primitives are independently verified
+  correct (each family's control arm, which never invokes the render gate at all, completes
+  cleanly on the same documents: 11/11 for equation, 24/26 for table_structural, 26/26 for
+  caption).
 - **cross_reference**: `insert_cross_reference` requires an EXISTING caption to target, and
   zero of the 38 corpus documents have one. Creating one via `insert_caption` first would
   inherit exactly caption's own render-gate host-contention limitation above -- now fully
@@ -938,41 +998,34 @@ to this specific collision class.
   dates), without losing any of the other 44 documents' results. This gave the properly powered read section_reorder's K=1 result could
   not: **the K=4 gap is real and significant (p=0.0015 combined), not a small-sample
   regression toward parity** -- see section 2.4 for the full result and its mechanism.
-- Sections 2.5/2.6 report equation's and table_structural's final confirmatory treatment-arm
-  numbers: **1/26 (3.8%) for equation, 3/26 (11.5%) for table_structural**, after five real
-  product defects in the render-verification path were found and fixed (profile-lock
-  contention, a path-length crash, an undersized outer subprocess timeout, plus two
-  harness-orchestration bugs), and after every remaining architectural hypothesis (generic
-  host contention, PATH/DLL shadowing, an MCP client-side timeout, a hidden internal retry
-  loop, environment-variable leaks, the exact real launch mechanism) was directly tested and
-  definitively ruled out -- not merely suspected wrong. Three complete, independent
-  confirmatory retry passes (~25 real hours across three different host-activity windows) all
-  produced the identical surface result (no CLI process reported a clean "DONE" for the
-  remaining chains in either family) -- but a sixth defect, found 2026-09-09 in the harness
-  itself, meant that surface result understated table_structural specifically: 2 of its
-  25 "unresolved" chains had actually written a correct table before being killed by the
-  outer timeout, confirmed by regrading the real files and then running each one's missing
-  inverse leg live. Equation's 0-of-25 holds; table_structural's does not. This is no longer
-  an open diagnosis -- it is the honestly-reported, final, host-contention-limited number for
-  both families under this sprint's actual shared-host deployment conditions. The product-side
-  lever that remains genuinely untested (not merely
-  under-instrumented) is whether `render_gate.py`'s single-attempt-per-call design should
-  become resilient to a MOMENTARY severe host memory-pressure spike specifically (the one
-  condition independently proven, elsewhere this sprint, to cause real failures -- down to
-  ~0.5GB free RAM and OS-level process-spawn failures -- but which could not be ethically
-  reproduced on demand against a host running other people's real concurrent work, so its
-  precise interaction with a live render call remains unobserved). A genuinely idle,
-  dedicated host for a further confirmatory attempt would be the cleanest way to test whether
-  host contention really is sufficient and necessary, isolating it from every other factor --
-  now the live recommendation for all three render-gated families (equation,
-  table_structural, and caption, section 2.8), not just the first two.
+- Sections 2.5/2.6 report equation's, table_structural's, and caption's confirmatory
+  treatment-arm numbers as of 2026-09-10: **4/26 (15.4%) for equation, 23/26 (88.5%) for
+  table_structural, 1/26 (3.8%) for caption**, after five real product defects in the
+  render-verification path were found and fixed (profile-lock contention, a path-length crash,
+  an undersized outer subprocess timeout, plus two harness-orchestration bugs), a sixth (the
+  harness discarding genuinely successful chains as "blocked" without grading them), a seventh
+  (the corpus manifest's paths going stale after a physical drive reconnect), and after every
+  remaining architectural hypothesis (generic host contention, PATH/DLL shadowing, an MCP
+  client-side timeout, a hidden internal retry loop, environment-variable leaks, the exact real
+  launch mechanism) was directly tested and definitively ruled out -- not merely suspected
+  wrong.
+- ~~A genuinely idle, dedicated host for a further confirmatory attempt would be the cleanest
+  way to test whether host contention really is sufficient and necessary~~ -- **partially
+  tested, 2026-09-10**: not a dedicated host, but a materially better window on the same shared
+  host (~24GB free vs. the ~450MB crisis seen earlier this sprint) moved every family's number
+  up -- dramatically for table_structural (3/26 -> 23/26), meaningfully for equation (1/26 ->
+  4/26), marginally for caption (0/26 -> 1/26). This is itself strong, direct, live evidence
+  FOR the host-contention explanation (numbers move with host conditions, in the predicted
+  direction, without any change to the task or grading), though it does not fully resolve why
+  the three families responded so differently -- most plausibly a difference in each family's
+  render-verification workload weight (table_structural's bare table vs. equation's OMML math
+  vs. caption's SEQ-field numbering), not directly measured. A genuinely idle, dedicated host
+  remains the cleanest way to fully isolate this, still not run.
 - ~~Caption shares the identical `insert_caption` render-verification path and has never been
-  attempted at confirmatory scale at all~~ -- **done, 2026-09-09**: caption was run to full
-  confirmatory scale, control 26/26 (100%, independently graded), treatment 0/26 (0%) across
-  three independent passes (0/78 total) -- the same host-contention-limited mechanism as
-  equation and table_structural, exactly as this section predicted (section 2.8); unlike
-  table_structural, caption's zero was confirmed to hold even after the harness-defect check
-  described above (section 2.6).
+  attempted at confirmatory scale at all~~ -- **done, 2026-09-09, updated 2026-09-10**: caption
+  was run to full confirmatory scale, control 26/26 (100%, independently graded), treatment
+  1/26 (3.8%) live-verified as of 2026-09-10 -- the same host-contention-limited mechanism as
+  equation and table_structural, exactly as this section predicted (section 2.8).
 - Add cross_reference once caption's render-verification path becomes reliably fast on this
   host (it depends on captions existing, section 5) -- the mechanism is now fully diagnosed
   (section 2.5/2.8), not unaddressed, but not resolved in the sense of a high pass rate, so
