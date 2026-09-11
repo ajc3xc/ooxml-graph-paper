@@ -355,6 +355,42 @@ real, substantial, live-verified progress, not the ceiling.
 Docs updated same day: this checkpoint's summary table above, `paper-s8-final-evidence-v1.md`
 (all affected sections), and the Structural Ledger artifact (republished).
 
+**CORRECTION, same day: the spot-check above was incomplete -- a full, exhaustive bucketing of
+all 50 remaining blocked chains by exact failure signature (returncode, timed_out, docx_changed,
+grading verdict) found a THIRD signature, not two, and it's the majority of what's left.**
+
+```
+equation (22 blocked):          caption (25 blocked):
+  returncode=1,  not_run  -> 16    returncode=1,  not_run  -> 13
+  returncode=0,  fail     ->  4    returncode=0,  fail     ->  9
+  returncode=None(timeout)->  2    returncode=None(timeout)->  3
+table_structural (3 blocked): all returncode=0, fail (genuine, unaffected)
+```
+
+`returncode=1` is neither the render-gate timeout pattern nor a genuine clean-exit grading
+failure -- it means the `claude` CLI process itself errored out. Checked the raw
+`claude_json_result` directly for several: every one reads **`"result": "API Error: Unable to
+connect to API (UNKNOWN_CERTIFICATE_VERIFICATION_ERROR)"`, `"terminal_reason": "api_error"`**.
+The trial never got a working connection to the API at all -- not a capability finding, not a
+render-gate issue, a pure transient infrastructure failure. All 29 cluster tightly in real time
+(2026-09-10 07:53-08:17 UTC, a ~24-minute window) -- matching this exact session's own earlier
+network instability (the external drive's physical disconnect, the "connectivity problem"
+interruption, `uv_spawn` failures in this session's own shell tool). Confirmed the certificate
+chain verifies cleanly RIGHT NOW (`curl -sS https://api.anthropic.com/` -> `ssl_verify_result=0`)
+-- this is not a persistent, ongoing problem, just a bad window that happened to land during
+that batch.
+
+**This is the correct next actionable step, not a further guess**: these 29 chains were never
+genuinely attempted. Re-running them now, under confirmed-healthy network conditions, via
+`tools/run_paper_s7_benchmark.py --split {primary_holdout,validation} --families {equation,
+caption} --model sonnet --corpus-manifest D:\...\paper-s7-corpus-manifest-v1.json` against the
+SAME existing `--run-root`s (already-completed/already-blocked-for-other-reasons chains return
+instantly from checkpoint; only these 29 genuinely re-attempt). table_structural needs no
+equivalent re-run -- its 3 remaining blocked chains are all the genuine `returncode=0, fail`
+signature, none show this API-error pattern. In progress as of this checkpoint; results not yet
+known -- do not report a number until the actual re-run output is read and verified, per this
+project's own standing discipline.
+
 ## FOUND AND FIXED (2026-09-07): the real root cause was the shared soffice profile lock
 
 Read `render_gate.py`'s actual `_soffice_render` implementation directly rather than continuing
