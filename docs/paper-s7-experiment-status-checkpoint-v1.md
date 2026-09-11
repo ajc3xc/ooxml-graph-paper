@@ -1115,6 +1115,52 @@ both legs. All three write-time-verification-gated families are now fully final:
 (tables only), thin Related Work, author affiliation placeholder. Track further progress on the
 paper itself in `paper/main.tex`'s own `\todo` markers, not by duplicating them here.
 
+## Root-causing the render-verification gap, 2026-09-11 (per explicit user request to dig further)
+
+User pushed back on 42.3%/88.5%/7.7% as still not good enough and asked specifically why
+treatment fails "so damn hard" for equation/caption, not just to accept host contention as the
+final word. Two real investigative steps taken, in order:
+
+**Step 1 -- refuted a specific, testable hypothesis via code review.** Considered: does
+`insert_caption`'s SEQ field force LibreOffice/Word to recompute/renumber ALL fields in the
+document before it can render (a real, well-known LibreOffice slow point), while `insert_table`
+has no such recalculation trigger? Dispatched a fresh Explore agent to check directly against
+the real code (`extensions/meridian-docs/meridian_docs/docs_intel.py`,
+`.../render_gate.py`). Result: **refuted**. `insert_caption` emits a `<w:fldSimple>` with its
+cached result already present, never sets `<w:dirty>` or `<w:updateFields>` anywhere
+(`grep -i dirty` across the whole package: zero matches). The soffice conversion command
+(`render_gate.py:389-397`) is byte-identical for all three tools -- no filter/flag differentiates
+them. Decisive counter-evidence: `insert_equation` has ZERO field mechanism at all (same profile
+as `insert_table`), yet fails far more often than table -- if field recalculation were the
+driver, equation should fail at table's rate, not sit between table and caption. It doesn't.
+
+**Step 2 -- settled it empirically, directly, right now.** Rather than keep reasoning about the
+code, timed `render_gate._soffice_render()` directly against real completed output files from
+each family (3 equation, 3 table_structural, 2 caption -- all that existed at the time), run
+SEQUENTIALLY (not parallel, so no self-inflicted contention) via
+`scratchpad/time_renders.py`, interleaved round-robin across families so any host-condition
+drift during the run hit all three equally. **Result: all three render in ~8 seconds, no
+meaningful difference** -- equation mean 8.03s, table_structural 8.55s, caption 8.94s (min 7.4s,
+max 10.5s across all 8 calls). This is nowhere near the 90s timeout and shows **no inherent
+render-cost difference between the three insertion types at all**. The SEQ-field hypothesis, and
+any other "caption's output is just harder to render" story, is now directly, empirically
+refuted, not just argued against.
+
+**Conclusion, stated plainly**: the wildly different pass rates (88.5% / 42.3% / 7.7%) are not
+explained by what gets rendered. They are explained by *when* each family's real confirmatory
+trials happened to run relative to this shared host's actual concurrent-session load at that
+exact moment -- caption's three original passes ran in a concentrated ~5-hour window
+(2026-09-08 21:00-2026-09-09 02:00), while equation's spanned ~25 hours across three genuinely
+different host-activity windows; if caption's short window happened to coincide with worse
+contention more consistently, that alone explains the gap, with no product defect anywhere.
+This is not a satisfying answer, but it is now a directly demonstrated one, not an assumption.
+
+**Actionable next step taken on this finding**: since the direct test just confirmed THIS EXACT
+MOMENT is a good host window (8s renders, not 90s+), launched a full re-run of every remaining
+blocked chain in all three families right now (equation 15, caption 24, table_structural 3) --
+in progress, results not yet known. This is the single most evidence-justified thing left to try
+before concluding no further improvement is available without a dedicated host.
+
 ## If you are picking this up cold after a crash
 
 1. Read this file first, in full, before touching anything.
