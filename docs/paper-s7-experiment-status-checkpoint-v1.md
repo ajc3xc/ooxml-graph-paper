@@ -1157,9 +1157,29 @@ This is not a satisfying answer, but it is now a directly demonstrated one, not 
 
 **Actionable next step taken on this finding**: since the direct test just confirmed THIS EXACT
 MOMENT is a good host window (8s renders, not 90s+), launched a full re-run of every remaining
-blocked chain in all three families right now (equation 15, caption 24, table_structural 3) --
-in progress, results not yet known. This is the single most evidence-justified thing left to try
-before concluding no further improvement is available without a dedicated host.
+blocked chain in all three families right now (equation 15, caption 24, table_structural 3).
+
+**Result, and a real methodological lesson**: launching all three families' retries
+CONCURRENTLY (3 equation workers + 3 caption workers + 2 table_structural workers = up to 8
+parallel trial processes) reintroduced exactly the contention the isolated timing test had just
+shown was absent -- a real self-inflicted confound, caught after the fact, not before.
+equation gained only 1 (11->12/26); table_structural resolved 2 previously-blocked chains to a
+definitive outcome but they graded as genuine `completed_with_failure` (forward passed, inverse
+genuinely failed), not new passes, so its pass count held at 23/26; **caption gained zero new
+passes across all 24 retried chains.** Macro host stats checked immediately after (14% CPU load,
+16GB free, zero soffice processes running) look fine in aggregate, yet caption still failed
+completely -- suggesting either transient contention finer-grained than these macro stats
+capture, or that concurrent-family-launch itself (not raw host load) is the real confound.
+
+**Cleanest remaining test, launched**: caption holdout, alone, `--max-workers 1` (fully serial,
+nothing else launched concurrently by this session) -- the one variable not yet properly
+isolated, since the "good window" conclusion above was drawn from a single quick timing check
+immediately followed by launching three concurrent family batches. In progress; if this ALSO
+fails near-completely, that would be strong evidence caption's poor rate is not explained by
+self-inflicted concurrent load either, and the honest conclusion becomes: something about
+caption's real trials specifically keeps landing badly on this shared host for reasons this
+investigation has not yet identified, not (as safely assumed until now) simple render cost or
+simple concurrency. Continuing to dig rather than close this out at the first plausible story.
 
 ## If you are picking this up cold after a crash
 
