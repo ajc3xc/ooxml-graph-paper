@@ -13,9 +13,9 @@ status changes; do not let it go stale the way other docs in this project have.
 | Bibliography | 100% / 100% (N=26/26) | 100% / 100% (N=26/26) | Defect 11 (MCP-loading flake) fixed 2026-09-06; harness now auto-retries this signature. |
 | Citation | 100% / 100% (N=26/25*) | 100% / 100% (N=25*/25*) | Defect 10 (stale pre-fix statistics) fixed 2026-09-06. *1 chain per depth correctly excluded as a genuine 300s infra timeout ("blocked"), not scored as a failure. |
 | Section_reorder | 83.6% / 92.9% (N=55/56), **p=0.27, not significant** | 67.3% / 92.9% (N=55/56), **p=0.0015, significant** | The one confirmed, significant directional finding in this project. Combined v1+v2 corpora. Mechanism (compounding drift from repeated cycling) is a real 9-of-12 majority pattern, not exceptionless -- see paper-s8 section 2.4. |
-| Equation | 11/11 resolved (dev-slice, 12 docs; no larger control-arm corpus needed -- control never touches the render gate) | **4/26 (15.4%) resolved**, live-verified 2026-09-10 after fixing a stale-drive-letter manifest bug and re-running under healthier host conditions (~24GB free vs the earlier ~450MB crisis) | Real, final result as of 2026-09-10 -- most remaining "blocked" chains are confirmed genuine double-backend render timeouts (verified directly from the agent's own transcript), not a further bug. See full diagnosis below and paper-s8 section 2.5. |
-| Table_structural | 24/26 (92.3%) pass, full confirmatory scale, both directions | **23/26 (88.5%) resolved**, live-verified 2026-09-10 -- a massive jump from 3/26, every completion independently re-graded pass on both legs | Real, final result as of 2026-09-10. The 3 remaining blocked chains are genuine clean-exit grading failures (verified directly). See paper-s8 section 2.6. |
-| Caption | **26/26 (100%) pass**, full confirmatory scale, both directions, independently graded -- cleanest control result of any render-gated family | **1/26 (3.8%) resolved**, live-verified 2026-09-10 | Real, final result as of 2026-09-10; full account in section 2.8. Never run before this sprint (zero prior run directories); control arm added 2026-09-09 after finding `one_chain.py` was hardcoded to treatment-only. |
+| Equation | 10/11 passed, 11/11 resolved (dev-slice, 11 docs, NOT the same corpus as treatment -- a real, now-disclosed apples-to-oranges gap caught by the paper's own review pipeline) | **8/26 (30.8%) resolved**, live-verified 2026-09-10/11 after fixing the stale-drive-letter manifest bug (recovering 3) plus the certificate-error retry (recovering a further 4, of which 1 from a `BadZipFile` transient-read retry) | Still not fully final -- 4 documents hit a second, apparently-transient `BadZipFile` error reading the (independently verified valid) source file on retry; one more retry round in flight as of this line. See full diagnosis below and paper-s8 section 2.5. |
+| Table_structural | 24/26 (92.3%) pass, full confirmatory scale, both directions | **23/26 (88.5%) resolved**, live-verified 2026-09-10 -- a massive jump from 3/26, every completion independently re-graded pass on both legs. Real bootstrap CI [76.9,100]; paired sign-flip vs control (92.3%, CI [80.8,100]): **p=1.0, not significant** | Real, final result. The 3 remaining blocked chains are genuine clean-exit grading failures (verified directly). See paper-s8 section 2.6. |
+| Caption | **26/26 (100%) pass**, full confirmatory scale, both directions, independently graded -- cleanest control result of any render-gated family | **2/26 (7.7%) resolved**, live-verified 2026-09-11 after the certificate-error retry (holdout split recovered 1 additional chain beyond the earlier 1/26). Real bootstrap CI [0,19.2]; paired sign-flip vs control: **p<0.001** (see the paper's own interpretive note below on why this is NOT read as a second capability-level finding) | Real, final result; full account in section 2.8. |
 
 Timing (K=1, v1 corpus only, not formally powered -- paper-s8 section 2.7): treatment is
 substantially faster for bibliography (46s vs 150s mean) and section_reorder (39s vs 175s
@@ -1035,6 +1035,77 @@ healthier host conditions produced genuine, independently re-verified new comple
 the Structural Ledger have both been updated again with these numbers and the full account --
 done, same day. This is the current, real state; nothing above this note should be cited as
 final anymore.
+
+**SUPERSEDED AGAIN, 2026-09-10/11**: the certificate-error retry (see the "returncode=1" finding
+above) recovered further chains once it actually finished running: **equation 4/26 -> 8/26**
+(3 more from the manifest fix, 1 more from a follow-up `BadZipFile`-retry on 4 holdout documents
+whose source files independently verified as valid zips both before and after -- a second,
+apparently transient read error, still being chased for the last few documents as of this line),
+**caption 1/26 -> 2/26**. table_structural stays at 23/26 (no certificate-error chains existed
+in that family). The numbers directly above this note (4/26, 1/26) are themselves now stale;
+current real numbers are **equation 8/26 (30.8%, still not fully final), table_structural 23/26
+(88.5%, final), caption 2/26 (7.7%, final)**.
+
+## Preliminary manuscript started, 2026-09-10/11
+
+Per explicit user instruction ("get this as a preliminary paper... continue until fully done"),
+a real preliminary manuscript now exists at `paper/main.tex` in this repo (LaTeX, built with
+MiKTeX, `paper/build.ps1` + `paper/preflight.py` for the build/preflight-automation pattern from
+`C:\Users\13144\Documents\paper-review-toolkit`'s own handoff doc). Six verified, real citations
+(SWE-bench, GAIA, WebArena, Efron 1979 bootstrap, Nichols & Holmes 2002 permutation test,
+ECMA-376/ISO-29500) -- none fabricated, each confirmed via live web search before being added to
+`paper/refs.bib`, per that toolkit's own `CITATION_VERIFICATION.md` discipline.
+
+**Ran the toolkit's full 11-dimension PAT review pipeline** (`paper-review-toolkit/prompts/`,
+dispatched as a Workflow, ~967s, 12 subagents) against the draft. This caught real,
+verifiable numeric-integrity bugs in the draft, not just style issues -- each independently
+checked against the actual evidence docs/code before being accepted as real, then fixed:
+
+- Equation's control row conflated "11/11 resolved" with "11/11 passed" -- the real number is
+  **10/11 passed** (one genuine task-level failure), and control (an 11-document development
+  slice) is not even the same corpus as treatment (the 26-document confirmatory corpus) -- both
+  now disclosed in the paper via footnote, not silently fixed.
+- The Methods section claimed "Wilson or bootstrap" CIs; `tools/compute_s7_statistics.py`
+  actually implements only percentile bootstrap (confirmed by reading the code) -- fixed to
+  stop overclaiming a method never run.
+- Section-reorder's corpus arithmetic (11 v1-applicable + 48 v2 total = 59) didn't match the
+  reported n=55/56; the real reconciliation is 11 + 44 v2-\emph{applicable} (of 48) = 55, with
+  the 55-vs-56 control/treatment asymmetry explained by one 1.7MB document's control-arm chain
+  never finishing within the harness's 300s timeout -- all now disclosed via footnote, verified
+  against `docs/paper-s8-final-evidence-v1.md` directly.
+- The K=4 mechanism paragraph's "12 control chains" figure was silently scoped to the 48-doc v2
+  sub-corpus only, not the full 55/56 combined corpus the surrounding prose implied -- rescoped
+  explicitly; the source data's own 9+2=11-of-12 breakdown (one case not itemized in the
+  evidence record) is now disclosed as a genuine, unresolved gap rather than silently rounded
+  off.
+- table_structural's row had no CI or significance test at all (the review flagged this since
+  every other completed row has one) -- computed for real using this project's own
+  `graph_scorer.bootstrap_ci`/`paired_permutation_test` functions against the actual current
+  chain data: **92.3% vs 88.5%, p=1.0, not significant**.
+- Caption's real, computed significance (**p<0.001**, control 100% vs treatment 7.7%) is
+  genuinely significant by the same test as the K=4 headline finding -- added a dedicated
+  interpretive paragraph in the paper explaining why this is NOT counted as a second
+  capability-level finding (it measures verification-\emph{reliability} under contention, not
+  editing-\emph{correctness}; table_structural's control-comparable 88.5\% on the identical
+  verification mechanism is the direct evidence for that distinction).
+- The "confirmatory"/"preregistered" claims had no citation; both real preregistration lock
+  documents/commits were found and cited (`docs/paper-s7-protocol-v1.md`, commit `1061e0e`;
+  `docs/paper-s7-section-reorder-followup-protocol-v1.md`, commit `e813cd7`).
+
+Also applied: Abstract/Contributions rewritten with active-verb bullets and the headline K=4
+numbers stated explicitly; Methods converted from present-tense/passive to past-tense/active
+throughout; Limitations restructured with explicit signposting; several sentence-architecture
+and redundancy fixes. Full punch list (105 raw findings, de-duplicated) is in the workflow
+transcript if a fuller pass is wanted later; not committed as a separate file here to avoid
+bloating this repo with an artifact that will go stale as soon as the next edit pass happens --
+re-run the pipeline fresh against the current draft when that's next needed rather than trusting
+a saved punch list.
+
+**Still genuinely incomplete, by design (preliminary draft)**: no chosen venue, no figures yet
+(tables only), thin Related Work, author affiliation placeholder, and equation's number is not
+yet fully final (4 documents still being chased through a second transient-read-error retry).
+Track further progress on the paper itself in `paper/main.tex`'s own `\todo`/`\pending` markers,
+not by duplicating them here.
 
 ## If you are picking this up cold after a crash
 
