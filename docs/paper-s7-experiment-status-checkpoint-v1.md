@@ -13,7 +13,7 @@ status changes; do not let it go stale the way other docs in this project have.
 | Bibliography | 100% / 100% (N=26/26) | 100% / 100% (N=26/26) | Defect 11 (MCP-loading flake) fixed 2026-09-06; harness now auto-retries this signature. |
 | Citation | 100% / 100% (N=26/25*) | 100% / 100% (N=25*/25*) | Defect 10 (stale pre-fix statistics) fixed 2026-09-06. *1 chain per depth correctly excluded as a genuine 300s infra timeout ("blocked"), not scored as a failure. |
 | Section_reorder | 83.6% / 92.9% (N=55/56), **p=0.27, not significant** | 67.3% / 92.9% (N=55/56), **p=0.0015, significant** | The one confirmed, significant directional finding in this project. Combined v1+v2 corpora. Mechanism (compounding drift from repeated cycling) is a real 9-of-12 majority pattern, not exceptionless -- see paper-s8 section 2.4. |
-| Equation | 10/11 passed, 11/11 resolved (dev-slice, 11 docs, NOT the same corpus as treatment -- a real, now-disclosed apples-to-oranges gap caught by the paper's own review pipeline) | **8/26 (30.8%) resolved**, live-verified 2026-09-10/11 after fixing the stale-drive-letter manifest bug (recovering 3) plus the certificate-error retry (recovering a further 4, of which 1 from a `BadZipFile` transient-read retry) | Still not fully final -- 4 documents hit a second, apparently-transient `BadZipFile` error reading the (independently verified valid) source file on retry; one more retry round in flight as of this line. See full diagnosis below and paper-s8 section 2.5. |
+| Equation | 10/11 passed, 11/11 resolved (dev-slice, 11 docs, NOT the same corpus as treatment -- a real, now-disclosed apples-to-oranges gap caught by the paper's own review pipeline) | **11/26 (42.3%) resolved**, live-verified 2026-09-11, FINAL -- fixed the stale-drive-letter manifest bug (+3), the certificate-error retry (+4), then a second `BadZipFile` retry on the last 4 documents (+4 more, all resolved cleanly on retry -- confirmed transient, source files independently verified valid throughout). Real bootstrap CI [23.1,61.5]; not paired against control (different corpus, see above) | Real, final result. All 11 completions independently re-verified pass on both legs. See full diagnosis below and paper-s8 section 2.5. |
 | Table_structural | 24/26 (92.3%) pass, full confirmatory scale, both directions | **23/26 (88.5%) resolved**, live-verified 2026-09-10 -- a massive jump from 3/26, every completion independently re-graded pass on both legs. Real bootstrap CI [76.9,100]; paired sign-flip vs control (92.3%, CI [80.8,100]): **p=1.0, not significant** | Real, final result. The 3 remaining blocked chains are genuine clean-exit grading failures (verified directly). See paper-s8 section 2.6. |
 | Caption | **26/26 (100%) pass**, full confirmatory scale, both directions, independently graded -- cleanest control result of any render-gated family | **2/26 (7.7%) resolved**, live-verified 2026-09-11 after the certificate-error retry (holdout split recovered 1 additional chain beyond the earlier 1/26). Real bootstrap CI [0,19.2]; paired sign-flip vs control: **p<0.001** (see the paper's own interpretive note below on why this is NOT read as a second capability-level finding) | Real, final result; full account in section 2.8. |
 
@@ -1040,11 +1040,15 @@ final anymore.
 above) recovered further chains once it actually finished running: **equation 4/26 -> 8/26**
 (3 more from the manifest fix, 1 more from a follow-up `BadZipFile`-retry on 4 holdout documents
 whose source files independently verified as valid zips both before and after -- a second,
-apparently transient read error, still being chased for the last few documents as of this line),
-**caption 1/26 -> 2/26**. table_structural stays at 23/26 (no certificate-error chains existed
-in that family). The numbers directly above this note (4/26, 1/26) are themselves now stale;
-current real numbers are **equation 8/26 (30.8%, still not fully final), table_structural 23/26
-(88.5%, final), caption 2/26 (7.7%, final)**.
+apparently transient read error), **caption 1/26 -> 2/26**. table_structural stays at 23/26 (no
+certificate-error chains existed in that family).
+
+**FINAL, 2026-09-11**: the second `BadZipFile` retry on equation's last 4 documents completed
+cleanly (all 4 recovered, confirming the read error was indeed transient, not a real bug) --
+**equation 8/26 -> 11/26 (42.3%)**, all 11 completions independently re-verified pass on both
+legs. All three write-time-verification-gated families are now fully final and live-verified:
+**equation 11/26 (42.3%), table_structural 23/26 (88.5%), caption 2/26 (7.7%)**. Every number
+directly above this note is now stale; these are the real, final numbers.
 
 ## Preliminary manuscript started, 2026-09-10/11
 
@@ -1101,11 +1105,15 @@ bloating this repo with an artifact that will go stale as soon as the next edit 
 re-run the pipeline fresh against the current draft when that's next needed rather than trusting
 a saved punch list.
 
+**Update, 2026-09-11: equation's last 4 documents resolved cleanly** on the second
+`BadZipFile`-retry, confirming that error was genuinely transient -- equation's final,
+live-verified number is **11/26 (42.3%)**, all 11 completions independently re-verified pass on
+both legs. All three write-time-verification-gated families are now fully final: no more
+`\pending{}` markers remain anywhere in `paper/main.tex`.
+
 **Still genuinely incomplete, by design (preliminary draft)**: no chosen venue, no figures yet
-(tables only), thin Related Work, author affiliation placeholder, and equation's number is not
-yet fully final (4 documents still being chased through a second transient-read-error retry).
-Track further progress on the paper itself in `paper/main.tex`'s own `\todo`/`\pending` markers,
-not by duplicating them here.
+(tables only), thin Related Work, author affiliation placeholder. Track further progress on the
+paper itself in `paper/main.tex`'s own `\todo` markers, not by duplicating them here.
 
 ## If you are picking this up cold after a crash
 
