@@ -1,0 +1,473 @@
+\documentclass[11pt]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{times}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{amsmath}
+\usepackage[colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue]{hyperref}
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{natbib}
+
+\newcommand{\todo}[1]{\textcolor{red}{\textbf{[TODO: #1]}}}
+\newcommand{\pending}[1]{\textcolor{orange}{\textbf{[PENDING: #1]}}}
+
+\title{Bounded Structural Primitives versus Generic Tool Use\\
+for Agentic Word Document Editing: A Confirmatory Benchmark}
+
+\author{Adam Camerer \\ \todo{affiliation}}
+
+\date{Preliminary draft --- \today}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Many agent systems increasingly edit real documents through generic file-manipulation tools
+(read, write, search-and-replace, shell commands) rather than through primitives designed for
+the document's own format. On the same model and the same documents, we ask whether a small set
+of bounded, atomic, structurally-aware editing operations for Microsoft Word's Office Open XML
+(OOXML/\texttt{.docx}) format changes task correctness relative to an agent given only generic
+tools and raw XML access. We report a confirmatory benchmark across six task families
+(bibliography-entry insertion, inline citation insertion, section reordering, equation insertion,
+whole-table insertion, and figure-caption insertion) on a held-out corpus of real, previously
+unseen \texttt{.docx} documents, each task run as a forward edit followed by its own inverse and
+independently graded against the original document's structure. Two families
+(bibliography, citation) show no measurable difference between arms. One family (section
+reordering) shows no difference on a single edit but a statistically significant advantage for
+the bounded tool under four repeated edit-undo cycles (92.9\% vs.\ 67.3\% pass rate, $p=0.0015$),
+traced to a specific, data-grounded failure mode in the generic-tool arm: compounding loss of
+the true original document state across repeated cycles -- the paper's central finding, which we
+call \emph{state drift}. Three families (equation, whole-table, and caption insertion) share a
+write-time structural-correctness verification step that is expensive to run under contended
+host conditions. We report their live-verified pass rates rather than treating the resulting
+near-floor numbers as a capability finding. Separately, we document seven infrastructure and
+evaluation-harness defects that this benchmark's own development surfaced and fixed -- several
+of which materially changed the reported numbers -- disclosed in full rather than silently
+corrected. \pending{final numbers for two of the six families are being re-verified at time of
+writing; see Section~\ref{sec:results} for the most current figures and their verification
+status.}
+\end{abstract}
+
+\section{Introduction}
+\label{sec:intro}
+
+When agents use large language models to edit real documents -- inserting a citation, reordering
+a section, adding a table -- they typically do so one of two ways. In the first, the agent is
+given generic file tools (read a file, write a file, run a shell command) and is expected to
+construct or edit the document's own serialization format correctly by direct manipulation, the
+same way a human would edit raw markup in a text editor. In the second, the agent is given a
+small number of purpose-built, bounded operations -- \emph{insert this table here},
+\emph{remove this citation} -- that internally guarantee the document remains structurally
+valid.
+
+The second approach is a common design pattern in tool-augmented agent systems generally: it
+underlies benchmarks in software engineering (SWE-bench), open-web navigation (WebArena), and
+general-purpose tool use (GAIA) alike \citep{jimenez2023swebench,zhou2024webarena,mialon2023gaia}
+-- each of which measures whether an agent completes a task under one fixed tool surface, not
+whether the shape of that surface itself changes the outcome. For document editing specifically,
+that tradeoff is under-characterized: bounded tools cost engineering effort to build and
+constrain what an agent can express, while generic tools cost nothing to provide but ask the
+model to get low-level format details right on every call, with no structural safety net.
+Getting this wrong is costly in different directions: bounded tools that prove unnecessary waste
+engineering effort, while generic tools that seem fine on a single edit may fail silently as an
+agent keeps working on the same document over time. This paper reports a confirmatory, paired
+benchmark designed to measure that tradeoff directly, for one concrete document format
+(Microsoft Word's \texttt{.docx}, standardized as Office Open XML \citep{ecma376}) and one
+concrete set of editing tasks.
+
+\subsection{Design}
+
+Each of six task families is defined as a \emph{forward} edit (e.g., insert a bibliography
+entry) and its own \emph{inverse} (remove that same entry), run in sequence against the same
+document, so that a correct round trip leaves the document's original content unchanged. Every
+task is run twice on the same starting document under the same model: once with a \textbf{control}
+arm restricted to generic \texttt{Read}/\texttt{Write}/\texttt{Edit}/\texttt{Bash} tools and
+direct access to the document's raw XML, and once with a \textbf{treatment} arm restricted to
+exactly one bounded, purpose-built tool pair for that family and no generic editing tools at
+all. Both arms use the same underlying language model (\texttt{claude-sonnet-5}); the only
+manipulated variable is which tool surface the agent can act through. Grading (Section~\ref{sec:methods})
+is performed entirely outside the agent, never by trusting its own transcript claim of success.
+
+\subsection{Contributions}
+
+\begin{itemize}
+\item We present a confirmatory, paired benchmark across six real document-editing task
+  families, on a held-out corpus never used during the tooling's own development
+  (Section~\ref{sec:results}), with per-family sample sizes and paired significance tests
+  reported honestly, including families where the two arms show no measurable difference.
+\item We demonstrate that bounded structural tools show no advantage on a single edit but a
+  significant advantage under repeated edit-undo cycling, and identify the mechanism: the
+  generic-tool arm's correctness degrades with repetition (state drift) while the bounded
+  tool's does not (Section~\ref{sec:section-reorder}).
+\item We identify and disentangle a confound introduced by a write-time structural-verification
+  step shared by three of the six families, through a documented sequence of infrastructure
+  fixes, offline re-verification against the same real output data (not re-run), and live
+  re-runs under healthier host conditions (Section~\ref{sec:render-gate}).
+\item We disclose seven infrastructure, harness, and evaluation-code defects found during this
+  project -- each with its root cause, fix, and independent re-verification -- and show that
+  several materially changed an already-reported number (Section~\ref{sec:defects}).
+\end{itemize}
+
+\section{Related Work}
+\label{sec:related}
+
+Benchmarks for tool-augmented and agentic LLM behavior have largely targeted software
+engineering \citep{jimenez2023swebench}, open-ended web navigation \citep{zhou2024webarena}, and
+general-purpose real-world task completion requiring tool use and multi-step reasoning
+\citep{mialon2023gaia}. These benchmarks measure whether an agent \emph{can accomplish} a task
+given some fixed tool surface; they do not hold the underlying task and model fixed while
+varying only the shape of that tool surface (bounded versus generic) as the manipulated
+variable, which is the specific question this paper addresses for one document-editing domain.
+\todo{expand related work: prior work specifically on structured-output/schema-constrained tool
+calling, and on OOXML/document-format editing tooling, once a fuller literature pass is done --
+this section is intentionally minimal in this preliminary draft to avoid citing anything not
+independently verified.}
+
+\section{Methods}
+\label{sec:methods}
+
+\subsection{Corpus}
+The primary corpus is a 26-document, previously licensed and audited slice of the DocOps
+benchmark corpus (real business documents -- memos, policies, meeting minutes -- not
+hand-authored fixtures), split into a 14-document primary holdout and a 12-document validation
+set; both subsets were held out and never touched during the tooling's own development, and are
+pooled into the flat $n=26$ reported throughout this paper. This corpus's own construction is
+independently preregistered, prior to any trial reported here (2026-08-27,
+\texttt{1061e0e}\footnote{Git commit hash, this project's evaluation-harness repository.}). A
+separately preregistered (2026-08-31, \texttt{e813cd7}) 48-document follow-up corpus was built
+specifically for the section-reordering family, because the primary corpus yields only 11
+documents on which that task is structurally applicable; the follow-up corpus itself yields 44
+applicable documents (of 48), so the combined section-reordering corpus reported in
+Table~\ref{tab:single-edit} and Table~\ref{tab:k4} is $11+44=55$ paired documents, not
+$11+48=59$.
+
+\subsection{Task families}
+Six families are reported, each implemented as one forward/inverse tool pair on the treatment
+side:
+\begin{itemize}
+\item \textbf{Bibliography entry} -- insert/remove one APA-formatted bibliography entry.
+\item \textbf{Inline citation} -- insert/remove one inline citation marker.
+\item \textbf{Section reorder} -- move a section after a different heading, then move it back.
+\item \textbf{Equation} -- insert/remove one native OOXML math object (\texttt{<m:oMath>}), not
+  plain text formatted to resemble an equation.
+\item \textbf{Table (structural)} -- insert/remove one whole Word table (a real
+  \texttt{<w:tbl>} object with genuine rows and columns), not text formatted to look tabular.
+\item \textbf{Caption} -- insert/remove one numbered SEQ-field figure caption.
+\end{itemize}
+
+\subsection{Arms and isolation}
+The control arm receives \texttt{Read}, \texttt{Write}, \texttt{Edit}, and \texttt{Bash}, with
+no access to any purpose-built document-editing tool. The treatment arm receives exactly one
+bounded tool pair (e.g., \texttt{insert\_table}/\texttt{remove\_table}) and \texttt{Read}, with
+no generic write access at all. We post-hoc audited every trial's transcript for isolation
+violations -- a control transcript referencing a purpose-built tool name, or a treatment
+transcript referencing any tool outside its one declared pair, would indicate a harness leak --
+and found no such violation in any reported trial.
+
+\subsection{Grading}
+We graded every trial's output \texttt{.docx} independently of the agent's own report, by
+parsing the file's actual XML after the trial completed: the forward direction graded pass only
+if the expected content was present exactly once and every pre-existing paragraph was unchanged;
+the inverse direction graded pass only if that content was fully removed and the document's
+paragraph list exactly matched its pre-forward state. A chain (one forward/inverse pair) counted
+as a full pass only if both directions independently graded pass.
+
+\subsection{Statistics}
+Per-family pass rates are reported with percentile bootstrap confidence intervals (2{,}000
+resamples) \citep{efron1979bootstrap}, and paired arms are compared with a paired sign-flip
+permutation test (2{,}000 resamples) \citep{nichols2002permutation}, with a fixed random seed
+set before any result existed. A chain that never executed or never finished because of a
+harness- or infrastructure-level failure unrelated to the task itself (a network error, a
+process-level subprocess timeout) is excluded from both arms' denominators for that document,
+rather than scored as a failure. A chain that executed to completion and reports a genuine
+task-level failure -- including a write-time structural-verification failure under host
+contention (Section~\ref{sec:render-gate}), since that is a property of the treatment condition
+being measured, not an unrelated infrastructure artifact -- is scored as a failure at a fixed
+denominator. The one repeated-cycling ($K=4$) design compares steady-state pass rate (the
+fraction of chains passing every one of the four cycles) across four consecutive forward/inverse
+cycles on the same document, rather than a single cycle, specifically to test whether either
+arm's correctness compounds or decays under repetition.
+
+\section{Results}
+\label{sec:results}
+
+\subsection{Single-edit families}
+\label{sec:single-edit}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lccccc}
+\toprule
+Family & Arm & Pass rate & 95\% CI & $n$ & Paired $p$ \\
+\midrule
+Bibliography entry & control   & 100\% & [100, 100] & 26 & \multirow{2}{*}{1.0} \\
+                    & treatment & 100\% & [100, 100] & 26 & \\
+\addlinespace
+Inline citation\footnote{Treatment $n=25$: one forward call hit a genuine 300-second
+process-level subprocess timeout unrelated to the citation task itself, excluded from the
+denominator per Section~\ref{sec:methods}'s harness-flake rule rather than scored as a
+failure.} & control   & 100\% & [100, 100] & 26 & \multirow{2}{*}{1.0} \\
+                    & treatment & 100\% & [100, 100] & 25 & \\
+\addlinespace
+Section reorder (original corpus) & control   & 72.7\% & [45.5, 100]  & 11 & \multirow{2}{*}{0.240} \\
+                                   & treatment & 100\%  & [100, 100]   & 11 & \\
+\addlinespace
+Section reorder (combined, v1+v2)\footnote{Control $n=55$, treatment $n=56$: one 1.7MB document's
+control-arm chain never completed within the harness's 300-second timeout across six independent
+attempts at varying host load (a real, document-size-driven control-arm limitation, excluded
+from control's denominator only), while its treatment-arm chain completed and passed.} & control   & 83.6\% & [74.5, 92.7] & 55 & \multirow{2}{*}{0.271} \\
+                                       & treatment & 92.9\% & [85.7, 98.2] & 56 & \\
+\bottomrule
+\end{tabular}
+\caption{Single-edit ($K=1$) results for the four families not gated by write-time
+structural-verification. Bibliography and citation show a genuine, literal parity between arms.
+Section reorder shows a directionally consistent but not-yet-significant advantage for the
+bounded tool at $K=1$; see Section~\ref{sec:section-reorder} for the $K=4$ result on the same
+corpus.}
+\label{tab:single-edit}
+\end{table}
+
+Table~\ref{tab:single-edit} shows bibliography and citation with no measurable difference
+between arms at any sample size tested: both reached a literal 100\%/100\% parity once two real
+evaluation-harness defects (described in Section~\ref{sec:defects}) were found and fixed.
+Section reordering's original 11-document result looked directionally favorable to the bounded
+tool but was underpowered
+($p=0.240$); a larger, independently preregistered 48-document follow-up corpus, combined with
+the original, narrowed but did not close that gap at $K=1$ ($p=0.271$).
+
+\subsection{Repeated cycling: the one significant finding}
+\label{sec:section-reorder}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lccccc}
+\toprule
+Family & Arm & Pass rate & 95\% CI & $n$ & Paired $p$ \\
+\midrule
+Section reorder ($K=4$, combined) & control   & 67.3\% & [54.5, 78.2] & 55 & \multirow{2}{*}{\textbf{0.0015}} \\
+                                   & treatment & 92.9\% & [85.7, 98.2] & 56 & \\
+\bottomrule
+\end{tabular}
+\caption{Under four repeated edit-undo cycles, the bounded tool holds a 92.9\% pass rate while
+the generic tool falls to 67.3\% ($p=0.0015$) -- the benchmark's one significant result. Same
+combined corpus as Table~\ref{tab:single-edit}'s bottom row.}
+\label{tab:k4}
+\end{table}
+
+Run through four repeated edit-undo cycles rather than one, the same 55/56-document combined
+corpus produced the single significant result in this benchmark (Table~\ref{tab:k4}): control's
+pass rate fell to 67.3\% while treatment held at 92.9\% ($p=0.0015$). This is not a p-value
+found by fishing
+across many cuts of the data -- it is the specific comparison the $K$-sweep design was built to
+make, on the same corpus already reported at $K=1$.
+
+The mechanism was traced directly rather than inferred from the p-value alone, in the
+48-document v2 follow-up sub-corpus specifically (the source of the finer per-cycle grading
+breakdown below; the full 55/56 combined corpus is not broken down at this granularity in this
+draft). Of the 12 v2-corpus control chains with at least one failing cycle, 9 failed specifically
+on exact-order restoration starting from the second cycle onward -- a real, dominant majority
+pattern, not a universal rule -- and 2 failed that same check on the very first cycle (one of
+those two then recovering fully on later cycles); the remaining chain's specific failure
+category is not itemized in our current evidence record, a gap we disclose rather than paper
+over. The bounded tool showed no equivalent drift on
+any chain, in either sub-corpus. This is consistent
+with a specific, plausible cause: the bounded tool re-resolves a fresh structural anchor for the
+target section on every call, while the generic-tool agent must reconstruct or remember ``the
+original layout'' itself across calls, and that reconstruction compounds error with repetition.
+The pattern is dominant but not exceptionless (2 of 12 control failures occur on the very first
+cycle, one of those two then recovering on a later cycle) -- the significance finding rests on
+the dominant trend, not on every case fitting the same story.
+
+\subsection{Write-time structurally-verified families}
+\label{sec:render-gate}
+
+The remaining three families (equation, table, caption) share one architectural property the
+first four do not: their treatment-side insertion tool verifies its own write correctness before
+persisting a change -- rendering the resulting document with an independent renderer and
+confirming it opens without error -- and it atomically restores the original file if that
+verification fails for any reason. This design choice trades a real reliability cost
+(verification against a real renderer is slow, and slower still on a resource-contended host)
+for a strong guarantee: a persisted change from these three tools is, by construction, never a
+corrupt or unopenable document.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lcccccc}
+\toprule
+Family & Arm & Pass rate & 95\% CI & $n$ & Paired $p$ & Status \\
+\midrule
+Equation\footnote{Control ($n=11$) comes from an 11-document development-slice corpus run once
+under this project's confirmatory design, not the 26-document confirmatory corpus treatment
+uses; the two are not paired and no significance test is reported for this row. 10 of 11
+resolved chains passed; the 11th resolved (did not block on the verification step) but failed
+grading on a genuine task mistake -- 11/11 \emph{resolved} is not the same as 11/11
+\emph{passed}.}
+  & control   & 90.9\% & [72.7, 100] & 11 & \multirow{2}{*}{n/a} & \multirow{2}{*}{final (control)} \\
+  & treatment & 30.8\% & \pending{}  & 26 & & \pending{re-verification in progress} \\
+\addlinespace
+Table (structural) & control   & 92.3\% & [80.8, 100] & 26 & \multirow{2}{*}{1.0} & \multirow{2}{*}{final} \\
+                    & treatment & 88.5\% & [76.9, 100] & 26 & & \\
+\addlinespace
+Caption         & control   & 100\%  & [100, 100]  & 26 & \multirow{2}{*}{$<0.001$} & \multirow{2}{*}{final} \\
+                & treatment & 7.7\%  & [0, 19.2]  & 26 & & \\
+\bottomrule
+\end{tabular}
+\caption{Write-time structurally-verified families. Control never invokes the verification step
+(it edits raw XML directly) and is unaffected by it. Equation's treatment number reflects the
+most recent live re-run as of this draft (8/26) and is still being re-checked following a
+newly discovered transient-infrastructure failure mode disentangled from genuine capability
+limits (Section~\ref{sec:defects}); caption's (2/26) and table-structural's (23/26) are final.
+Caption's $p<0.001$ reflects verification-\emph{reliability} cost under host contention, not an
+editing-\emph{capability} difference -- see the interpretive note following this table.}
+\label{tab:render-gate}
+\end{table}
+
+As Table~\ref{tab:render-gate} shows, all three families' control arms never invoke the verification step at all, since they edit raw
+XML directly, and they perform comparably to the other four families (92.3\%--100\%),
+confirming that a capable generic-tool agent can correctly hand-construct the target structures
+(a real \texttt{<m:oMath>} object, a real \texttt{<w:tbl>}, a real SEQ-field caption) without a
+bounded tool's help. Treatment's numbers are markedly lower and, critically, \emph{not
+comparable to one another}: table-structural insertion reaches a genuinely high 88.5\% pass
+rate, while equation and caption insertion remain far lower. Section~\ref{sec:defects} reports
+why these numbers moved substantially over the course of this project, and why we believe the
+gap between table-structural and the other two reflects real differences in
+rendering-verification cost between task types rather than a difference in the underlying
+editing operations' correctness -- a hypothesis, disclosed as such, not yet independently
+confirmed.
+
+\paragraph{On caption's statistically significant gap.} Table~\ref{tab:render-gate}'s paired
+test for caption returns $p<0.001$ -- by the same statistical test as
+Section~\ref{sec:section-reorder}'s headline result, this is significant. We do not read it the
+same way. Section~\ref{sec:section-reorder}'s finding measures whether an agent, given a chance
+to attempt a task, does it correctly -- both arms attempt every trial. Here, treatment's write-time
+verification step declines to persist a change at all whenever it cannot confirm correctness,
+which is precisely what it is designed to do; control has no equivalent check and simply
+persists whatever it writes, correct or not. A significant gap in \emph{how often each arm
+successfully persists a change} is not the same claim as a significant gap in \emph{whether a
+persisted change is correct} -- table-structural's control-comparable 88.5\% pass rate, on the
+identical verification mechanism, shows the mechanism itself does not inherently depress
+correctness once it succeeds. We therefore report this $p$-value in full rather than omit it,
+but do not count it alongside Section~\ref{sec:section-reorder}'s result as a second
+capability-level finding.
+
+\section{Seven real defects found and fixed}
+\label{sec:defects}
+
+A benchmark's own numbers are only as trustworthy as the harness, evaluator, and infrastructure
+that produced them. Several of the defects below materially changed an already-reported number;
+each is disclosed here rather than folded silently into a final figure.
+
+\begin{enumerate}
+\item \textbf{Missing type-library cache broke basic Word COM (Component Object Model)
+  automation.} The benchmark harness's write-time verification step falls back to Microsoft
+  Word's own COM automation interface when the primary renderer is unavailable. Every real
+  trial's temp-directory isolation (itself a fix for an earlier concurrency defect) incidentally
+  emptied this cache on every trial, causing a plain dynamic-dispatch COM call to return an
+  object missing basic properties. We fixed this by switching to an explicit type-library-bound
+  dispatch call; verified live against the real COM backend, not a mock.
+\item \textbf{A COM message-queue starvation bug.} Calling the file-save operation immediately
+  after opening a document via COM could deterministically raise a
+  ``call rejected by callee'' COM error -- confirmed non-transient via five consecutive failed
+  retries with a real delay between each. We fixed this by explicitly servicing the COM message
+  queue before the save call; it succeeded on the first attempt after the fix.
+\item \textbf{The confirmatory harness discarded genuinely successful runs.} A changed output
+  file on a trial killed by the harness's own outer timeout is safe, positive evidence the
+  underlying edit had genuinely succeeded, because the write-time verification step is atomic:
+  it restores the original file on any failure and only ever persists a change after independent
+  verification succeeds. The harness did not act on that evidence -- whenever the wrapping
+  process running a trial was killed, it unconditionally recorded that trial as failed, without
+  ever checking what the verification step had actually left on disk. We fixed the harness to
+  attempt grading in that case too, directly recovering two genuinely correct table-insertion
+  trials, confirmed by re-grading the real output files against their own pre-write backups, not
+  by re-running anything.
+\item \textbf{A stale file-path bug after unrelated hardware disruption.} An external drive
+  holding the benchmark's run data physically disconnected and reconnected under a different
+  drive letter mid-project. The corpus manifest's document paths were still hardcoded to the
+  old letter, causing every subsequent trial to fail on a permission error before it could even
+  begin, rather than a clean not-found. We fixed this by correcting every path in the manifest.
+\item \textbf{A transient network/certificate failure, not a capability finding.} We
+  systematically reviewed every remaining trial's exact failure signature -- return code,
+  whether the process timed out, whether the output file changed -- and found a signature not
+  previously characterized: 29 trials across two families (equation, caption) failed with an
+  API-level certificate verification error, not a timeout or a genuine grading failure. All 29
+  clustered tightly in one short real-time window coinciding with the same unrelated hardware
+  disruption in item 4, and the API's certificate was confirmed to verify correctly again
+  immediately afterward. We re-ran these 29 trials under confirmed-healthy network conditions
+  rather than counting them as capability failures: equation recovered from 4/26 to 8/26 and
+  caption from 1/26 to 2/26 so far (Table~\ref{tab:render-gate}), with a handful of equation
+  trials \pending{still being retried at time of writing after an unrelated, separately transient
+  file-read error on the same shared host}. Until this item, Table~\ref{tab:render-gate}'s
+  numbers for these two families had silently included these 29 as ordinary capability
+  failures -- a disclosure/reporting inconsistency now corrected here and in that table, not a
+  further re-run needed to fix it.
+\item \textbf{Two further evaluation-harness defects} -- an inverse-trial paragraph-id
+  resolution bug affecting the citation family, and a statistics-regeneration gap that left a
+  stale number published after an unrelated fix -- are described in full in the project's own
+  working notes and omitted here for space, but available on request.
+  \todo{cite/link the full defect log once this paper has a public repository}.
+\end{enumerate}
+
+Every defect above was independently re-verified against real output data -- either by
+re-running the affected trial live, or by re-deriving the grading verdict directly from the
+already-collected output file -- rather than assumed fixed once the code changed.
+
+\section{Discussion}
+\label{sec:discussion}
+
+This benchmark's central capability finding is that bounded structural tools resist the state
+drift a generic-tool agent shows under repeated edit-undo cycling. We think this is more
+interesting and more general than any single-edit pass-rate comparison, because it isolates a
+mechanism (fresh anchor resolution versus accumulated agent-maintained state) rather than
+reporting an aggregate number. We would expect this mechanism to generalize to any
+repeated-editing workflow, not just section reordering specifically, though this benchmark tests
+only one task family at depth.
+
+The write-time-verification-gated families illustrate a different, and we think under-discussed,
+methodological hazard: an architectural choice made for a good reason (never persist a corrupt
+document) can produce a benchmark result that looks like a capability finding but is
+substantially a deployment-environment artifact, and disentangling the two required real,
+disclosed engineering work (Section~\ref{sec:defects}), not just a larger sample size. We do not
+believe this fully resolves the question for equation and caption insertion specifically --
+their still-low numbers as of this draft may reflect a genuine remaining capability gap, a
+remaining infrastructure cost difference from table insertion, or both, and we report that
+uncertainty rather than resolve it by assumption.
+
+\section{Limitations}
+\label{sec:limitations}
+
+Three factors limit how far these results generalize. \textbf{First}, this benchmark tests one
+model (\texttt{claude-sonnet-5}) and does not claim the results generalize across models.
+\textbf{Second}, the write-time-verification-gated families' results were collected on a single,
+shared, variably-contended host rather than a dedicated one; Section~\ref{sec:defects} documents
+live evidence that host conditions materially affect these three families' numbers, which is
+itself a disclosed limitation of those specific results, not just of the discussion around them.
+\textbf{Third}, corpus size for section reordering ($n=11$ at $K=1$ on the original corpus) is
+small before the follow-up corpus is combined in. \todo{expand limitations once final numbers
+for equation/caption land -- specifically whether their gap to table-structural narrows, which
+would change how strongly Section~\ref{sec:discussion}'s hypothesis should be stated.}
+
+\section{Conclusion}
+\label{sec:conclusion}
+
+Bounded, structurally-aware editing primitives show no advantage over generic file tools for a
+single document edit, on the task families and model tested here, but show a significant,
+mechanistically-traced advantage under repeated editing -- the more realistic condition for an
+agent maintaining a document over time. Three further task families are confounded by a
+write-time verification step whose reliability cost we found to be substantial and
+environment-dependent, and we report that confound in full, including the live infrastructure
+work this project undertook to disentangle it from the underlying editing capability, rather
+than reporting a single clean number that would understate real uncertainty.
+
+\todo{This is a preliminary draft. Before any submission: (1) resolve the two \pending{} items
+in Section~\ref{sec:results} once the in-progress re-run completes; (2) run the full
+paper-review-toolkit pipeline (writing-quality + content-quality prompts) against this draft;
+(3) decide a target venue and apply its actual formatting requirements rather than this
+generic-article format; (4) generate real figures from the underlying run data rather than
+tables alone; (5) expand Related Work with a fuller, independently-verified literature pass.}
+
+\bibliographystyle{plainnat}
+\bibliography{refs}
+
+\end{document}
