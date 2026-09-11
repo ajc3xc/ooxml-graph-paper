@@ -1181,6 +1181,42 @@ caption's real trials specifically keeps landing badly on this shared host for r
 investigation has not yet identified, not (as safely assumed until now) simple render cost or
 simple concurrency. Continuing to dig rather than close this out at the first plausible story.
 
+**Result: the isolated single-worker retry ALSO failed almost completely (13 of 14 still
+blocked)** -- ruling out self-inflicted concurrent-launch contention as the (or at least the
+only) explanation. But the investigation stopped here for a different, more concrete reason,
+found while trying to read the result: **the external drive holding all of this project's run
+data (`D:\MeridianData\...`) physically disconnected again, mid-check.** Confirmed multiple
+ways, not assumed from one flaky command: `Test-Path 'D:\'` -> `False`; `Get-Disk` no longer
+lists the drive at all (previously "ASMT ASM236X NVME", now simply absent, not even shown as
+offline); `Get-PnpDevice` shows it as `Status: Unknown`; the Windows System event log has real,
+contemporaneous disk-layer errors 30-60 minutes before this check (`Id 51`, "An error was
+detected on device \Device\Harddisk2\DR6 during a paging operation") and multiple `Id 153`
+"IO operation... was retried" entries on Disk 2 -- genuine hardware-level I/O trouble, not a
+software symptom.
+
+**This reframes a meaningful part of today's investigation.** This is the SAME drive that
+physically disconnected earlier this sprint (the E:->D: reassignment that motivated the
+stale-manifest-path fix, defect 7) -- this is now a *second*, independently observed disconnect
+of the same physical device. The most likely explanation for at least part of caption's poor
+rate, and possibly some of equation's/table_structural's earlier "render timed out" chains too:
+**a flaky physical connection on this specific external drive**, not a per-family render-cost
+difference (already ruled out empirically) and not proven self-inflicted contention (also just
+ruled out) but a genuine hardware reliability problem that intermittently stalls or drops I/O
+to the exact files render-verification needs to read, producing symptoms indistinguishable from
+"render backend timed out" from inside the harness. This does not retroactively invalidate the
+render-cost-parity finding above (that was measured while the drive was healthy) -- it adds a
+third, independent, physical failure mode alongside "genuine capability miss" and "shared-host
+CPU/scheduling contention," one that no code fix here can address.
+
+**Stopped further live retries at this point** -- with the drive currently inaccessible,
+launching more trials would just fail immediately on file access and produce noisy,
+uninterpretable data, not real signal. **User-actionable, not code-actionable**: worth checking
+this specific external drive's physical cable/port/enclosure given two independent disconnects
+this sprint plus real disk-layer retry errors in the event log; this investigation cannot fix a
+hardware connection from software. 26/26 is not a realistic target given three independent,
+real, demonstrated failure modes now on record (genuine task misses, host contention, and this
+drive's own reliability) -- reported plainly rather than promised.
+
 ## If you are picking this up cold after a crash
 
 1. Read this file first, in full, before touching anything.
