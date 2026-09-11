@@ -41,13 +41,13 @@ traced to a specific, data-grounded failure mode in the generic-tool arm: compou
 the true original document state across repeated cycles -- the paper's central finding, which we
 call \emph{state drift}. Three families (equation, whole-table, and caption insertion) share a
 write-time structural-correctness verification step that is expensive to run under contended
-host conditions. We report their live-verified pass rates rather than treating the resulting
-near-floor numbers as a capability finding. Separately, we document seven infrastructure and
-evaluation-harness defects that this benchmark's own development surfaced and fixed -- several
-of which materially changed the reported numbers -- disclosed in full rather than silently
-corrected. \pending{final numbers for two of the six families are being re-verified at time of
-writing; see Section~\ref{sec:results} for the most current figures and their verification
-status.}
+host conditions; we report their live-verified pass rates rather than treating them uniformly as
+a capability finding -- whole-table insertion reaches a genuinely high 88.5\%, while equation
+(42.3\%) and caption (7.7\%) remain far lower, a difference we attribute to task-dependent
+verification cost rather than a difference in editing correctness. Separately, we document seven
+infrastructure and evaluation-harness defects that this benchmark's own development surfaced and
+fixed -- several of which materially changed the reported numbers -- disclosed in full rather
+than silently corrected.
 \end{abstract}
 
 \section{Introduction}
@@ -305,7 +305,7 @@ resolved chains passed; the 11th resolved (did not block on the verification ste
 grading on a genuine task mistake -- 11/11 \emph{resolved} is not the same as 11/11
 \emph{passed}.}
   & control   & 90.9\% & [72.7, 100] & 11 & \multirow{2}{*}{n/a} & \multirow{2}{*}{final (control)} \\
-  & treatment & 30.8\% & \pending{}  & 26 & & \pending{re-verification in progress} \\
+  & treatment & 42.3\% & [23.1, 61.5] & 26 & & \multirow{2}{*}{final} \\
 \addlinespace
 Table (structural) & control   & 92.3\% & [80.8, 100] & 26 & \multirow{2}{*}{1.0} & \multirow{2}{*}{final} \\
                     & treatment & 88.5\% & [76.9, 100] & 26 & & \\
@@ -314,12 +314,11 @@ Caption         & control   & 100\%  & [100, 100]  & 26 & \multirow{2}{*}{$<0.00
                 & treatment & 7.7\%  & [0, 19.2]  & 26 & & \\
 \bottomrule
 \end{tabular}
-\caption{Write-time structurally-verified families. Control never invokes the verification step
-(it edits raw XML directly) and is unaffected by it. Equation's treatment number reflects the
-most recent live re-run as of this draft (8/26) and is still being re-checked following a
-newly discovered transient-infrastructure failure mode disentangled from genuine capability
-limits (Section~\ref{sec:defects}); caption's (2/26) and table-structural's (23/26) are final.
-Caption's $p<0.001$ reflects verification-\emph{reliability} cost under host contention, not an
+\caption{Write-time structurally-verified families, all rows now final and live-verified.
+Control never invokes the verification step (it edits raw XML directly) and is unaffected by
+it. Equation's treatment $n=26$ has no paired significance test because its control arm comes
+from a different, unpaired corpus (see footnote). Caption's $p<0.001$ reflects
+verification-\emph{reliability} cost under host contention, not an
 editing-\emph{capability} difference -- see the interpretive note following this table.}
 \label{tab:render-gate}
 \end{table}
@@ -395,13 +394,13 @@ each is disclosed here rather than folded silently into a final figure.
   clustered tightly in one short real-time window coinciding with the same unrelated hardware
   disruption in item 4, and the API's certificate was confirmed to verify correctly again
   immediately afterward. We re-ran these 29 trials under confirmed-healthy network conditions
-  rather than counting them as capability failures: equation recovered from 4/26 to 8/26 and
-  caption from 1/26 to 2/26 so far (Table~\ref{tab:render-gate}), with a handful of equation
-  trials \pending{still being retried at time of writing after an unrelated, separately transient
-  file-read error on the same shared host}. Until this item, Table~\ref{tab:render-gate}'s
-  numbers for these two families had silently included these 29 as ordinary capability
-  failures -- a disclosure/reporting inconsistency now corrected here and in that table, not a
-  further re-run needed to fix it.
+  rather than counting them as capability failures: equation recovered from 4/26 to 11/26 and
+  caption from 1/26 to 2/26 (Table~\ref{tab:render-gate}; four of equation's recoveries needed a
+  second retry after an unrelated, separately transient \texttt{BadZipFile} read error on the
+  same shared host reading an independently-verified-valid source file). Before this item,
+  Table~\ref{tab:render-gate}'s numbers for these two families had silently included these 29 as
+  ordinary capability failures -- a disclosure/reporting inconsistency corrected here and in
+  that table.
 \item \textbf{Two further evaluation-harness defects} -- an inverse-trial paragraph-id
   resolution bug affecting the citation family, and a statistics-regeneration gap that left a
   stale number published after an unrelated fix -- are described in full in the project's own
@@ -444,9 +443,14 @@ shared, variably-contended host rather than a dedicated one; Section~\ref{sec:de
 live evidence that host conditions materially affect these three families' numbers, which is
 itself a disclosed limitation of those specific results, not just of the discussion around them.
 \textbf{Third}, corpus size for section reordering ($n=11$ at $K=1$ on the original corpus) is
-small before the follow-up corpus is combined in. \todo{expand limitations once final numbers
-for equation/caption land -- specifically whether their gap to table-structural narrows, which
-would change how strongly Section~\ref{sec:discussion}'s hypothesis should be stated.}
+small before the follow-up corpus is combined in. \textbf{Fourth}, the render-verification-cost
+hypothesis in Section~\ref{sec:discussion} is only partially supported by the final numbers:
+equation's live-verified rate (42.3\%) moved substantially closer to table-structural's (88.5\%)
+once every genuinely recoverable trial was accounted for, consistent with the hypothesis, but
+caption's (7.7\%) did not move nearly as far -- so either caption's verification cost is
+genuinely much higher than equation's and table-structural's, or a real, still-uncharacterized
+capability gap exists for caption specifically. This benchmark cannot distinguish between those
+two explanations with the data collected here.
 
 \section{Conclusion}
 \label{sec:conclusion}
@@ -460,12 +464,12 @@ environment-dependent, and we report that confound in full, including the live i
 work this project undertook to disentangle it from the underlying editing capability, rather
 than reporting a single clean number that would understate real uncertainty.
 
-\todo{This is a preliminary draft. Before any submission: (1) resolve the two \pending{} items
-in Section~\ref{sec:results} once the in-progress re-run completes; (2) run the full
-paper-review-toolkit pipeline (writing-quality + content-quality prompts) against this draft;
-(3) decide a target venue and apply its actual formatting requirements rather than this
-generic-article format; (4) generate real figures from the underlying run data rather than
-tables alone; (5) expand Related Work with a fuller, independently-verified literature pass.}
+\todo{This is a preliminary draft. Before any submission: (1) re-run the full
+paper-review-toolkit pipeline (writing-quality + content-quality prompts) against this revision,
+since the previous pass's findings were applied against an earlier draft with different numbers;
+(2) decide a target venue and apply its actual formatting requirements rather than this
+generic-article format; (3) generate real figures from the underlying run data rather than
+tables alone; (4) expand Related Work with a fuller, independently-verified literature pass.}
 
 \bibliographystyle{plainnat}
 \bibliography{refs}
