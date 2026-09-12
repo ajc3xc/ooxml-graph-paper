@@ -1269,6 +1269,20 @@ failures), and disentangling genuine capability limits from infrastructure noise
 checking each new batch of "blocked" chains freshly rather than trusting an earlier
 classification to still hold after further live retries have run.
 
+**Update: an actual session crash interrupted both of the retries above with zero progress made**
+(confirmed directly: chain counts were byte-identical to before the retries were launched).
+Verified drive (`Test-Path 'D:\'` -> `True`) and network (clean TLS) were healthy, then relaunched
+both fresh with 2 workers each. **Equation's retry completed and resolved the question
+cleanly**: every one of equation's 14 remaining blocked chains -- including the specific ones
+that previously showed the spurious network-error signature -- got a genuine fresh attempt this
+time, and every one now shows a real "render verification timed out on both backends" message,
+not a network error. **Equation's confirmed, final, fully-clean number is 12/26 (46.2%)**,
+bootstrap CI [26.9, 65.4] -- unchanged in count from before this retry round, but now with full
+confidence that none of the remaining failures are recoverable infrastructure artifacts; they
+are genuine render-verification timeouts under host contention, end of story for this family.
+Caption's equivalent retry is still in progress (holdout split done, no change: still 1/14
+completed; validation split running).
+
 ## If you are picking this up cold after a crash
 
 1. Read this file first, in full, before touching anything.
