@@ -10,3 +10,5 @@ renders/
 model-cache/
 .meridian-outputs-cache/
 *.log
+.env
+*.env
