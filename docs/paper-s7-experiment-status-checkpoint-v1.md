@@ -1280,8 +1280,22 @@ not a network error. **Equation's confirmed, final, fully-clean number is 12/26 
 bootstrap CI [26.9, 65.4] -- unchanged in count from before this retry round, but now with full
 confidence that none of the remaining failures are recoverable infrastructure artifacts; they
 are genuine render-verification timeouts under host contention, end of story for this family.
-Caption's equivalent retry is still in progress (holdout split done, no change: still 1/14
-completed; validation split running).
+Caption's equivalent retry has now also completed, with the same clean resolution: **no
+network-error chains remain anywhere in caption's data either**. Every one of caption's 24
+remaining blocked chains now shows a genuine render-verification timeout message (a handful
+phrased "times out" rather than "timed out," initially miscounted as a third bucket by a
+keyword-matching slip, manually re-checked and confirmed genuine). **Caption's confirmed, final,
+fully-clean number stays 2/26 (7.7%)** -- unchanged in count, exactly like equation, now with the
+same full confidence that nothing recoverable remains in either family's data.
+
+**This closes out the network-contamination investigation with a clear, honest answer**: the
+wave of pure network errors found earlier was real and did need retrying (skipping it would have
+been sloppy), but retrying it did not change either family's headline number -- it only
+converted "blocked, ambiguous reason" into "blocked, confirmed genuine reason" for the same set
+of chains. equation (46.2%) and caption (7.7%) both stand as real, final, fully-verified numbers.
+table_structural (96.2%) remains the standout, statistically indistinguishable from its own
+control. `paper/main.tex` already carries these exact numbers; no further paper update needed
+from this round.
 
 ## If you are picking this up cold after a crash
 
