@@ -1238,7 +1238,36 @@ Drive came back on its own (confirmed `Test-Path 'D:\'` -> `True`). Two concrete
 up from 23/26 -- bootstrap CI [88.5, 100] (control: 24/26, 92.3\%, CI [80.8, 100]), paired
 sign-flip **p=1.0, still not significant**. Every one of the 25 passes directly re-verified
 (`grading.verdict == "pass"` on both legs, not just the status label). `paper/main.tex` and this
-checkpoint both need updating with this number -- not yet done as of this line.
+checkpoint have both been updated with this number.
+
+## Major refinement, 2026-09-12: much of the remaining "blocked" data was actually contaminated by pure network errors, not render timeouts or capability misses
+
+While checking table_structural's DNS-error recovery for an equivalent pattern in equation's
+remaining 14 blocked chains, found something important: **12 of equation's 14 blocked chains,
+and 11 of caption's currently-blocked chains, show a pure `API Error: Unable to connect to API`
+(mostly `ENOTFOUND`, one `ECONNRESET`) on the FORWARD leg itself** -- the CLI never got far
+enough to attempt a tool call at all. This directly contradicts the earlier "all clean-exit
+failures show a genuine render-timeout message" finding from before this session's concurrent
+3-family retry -- that finding was real and correctly quoted AT THE TIME, but the concurrent
+retry's own checkpoints overwrote much of that data with fresh attempts, and a large fraction of
+those fresh attempts hit a wave of pure network failures instead. One caption chain
+(`atomic__word_008_policy_conflict`) also showed a distinct, already-documented flake: the
+treatment arm's MCP server failed to load entirely (`"I don't have access to the insert_caption
+tool or any file-editing tool..."`), the same signature already fixed with an auto-retry for
+bibliography earlier this sprint.
+
+**This means a meaningful, previously uncounted fraction of equation's and caption's remaining
+failures are not render timeouts or capability misses at all -- they are pure infrastructure
+flakes that never even reached the task.** Confirmed the network is healthy right now
+(`curl https://api.anthropic.com/` -> clean TLS, 0.23s) and launched a fresh retry of equation's
+remaining chains; caption's already-running isolated single-worker retry should catch its own
+network-error chains as it works through them sequentially. Both in progress, results not yet
+known. This refines, but does not replace, the earlier drive/contention findings -- multiple
+real, independent infrastructure issues have been layered on this host throughout this
+investigation (certificate errors, a physically disconnecting drive, and now also plain DNS
+failures), and disentangling genuine capability limits from infrastructure noise has required
+checking each new batch of "blocked" chains freshly rather than trusting an earlier
+classification to still hold after further live retries have run.
 
 ## If you are picking this up cold after a crash
 
