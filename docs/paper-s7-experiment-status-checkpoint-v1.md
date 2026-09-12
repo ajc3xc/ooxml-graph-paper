@@ -1217,6 +1217,29 @@ hardware connection from software. 26/26 is not a realistic target given three i
 real, demonstrated failure modes now on record (genuine task misses, host contention, and this
 drive's own reliability) -- reported plainly rather than promised.
 
+## Update, 2026-09-12: the drive reconnected -- table_structural is now 25/26 (96.2%)
+
+Drive came back on its own (confirmed `Test-Path 'D:\'` -> `True`). Two concrete follow-ups:
+
+1. **Retried caption's remaining chains, single-worker, isolated**, now that the drive is
+   confirmed stable -- in progress at time of writing, results not yet known.
+2. **Separately, found and fixed 2 more genuinely recoverable table_structural chains** while
+   examining table_structural's 2 `completed_with_failure` chains from the earlier concurrent
+   retry round (`atomic__word_010_image_layout_se`, `atomic__word_011_theme_transfer_`, both in
+   the validation split, not holdout -- corrected a path error while doing this). Both had a
+   forward leg that genuinely succeeded (`docx_changed: true`, `grading: pass`) but an inverse
+   leg that failed on a pure network DNS error (`API Error: Unable to connect to API
+   (ENOTFOUND)`) before the CLI could even attempt a tool call -- never reached the render gate
+   at all, nothing to do with rendering or contention. Re-ran just the missing inverse leg on
+   top of the already-proven-good forward output for both (same targeted-recovery pattern used
+   throughout this sprint, not a full chain re-run): both completed cleanly and graded pass.
+
+**table_structural's real, live-verified, independently re-derived number is now 25/26 (96.2%)**,
+up from 23/26 -- bootstrap CI [88.5, 100] (control: 24/26, 92.3\%, CI [80.8, 100]), paired
+sign-flip **p=1.0, still not significant**. Every one of the 25 passes directly re-verified
+(`grading.verdict == "pass"` on both legs, not just the status label). `paper/main.tex` and this
+checkpoint both need updating with this number -- not yet done as of this line.
+
 ## If you are picking this up cold after a crash
 
 1. Read this file first, in full, before touching anything.
