@@ -42,7 +42,7 @@ the true original document state across repeated cycles -- the paper's central f
 call \emph{state drift}. Three families (equation, whole-table, and caption insertion) share a
 write-time structural-correctness verification step that is expensive to run under contended
 host conditions; we report their live-verified pass rates rather than treating them uniformly as
-a capability finding -- whole-table insertion reaches a genuinely high 88.5\%, while equation
+a capability finding -- whole-table insertion reaches a genuinely high 96.2\%, while equation
 (46.2\%) and caption (7.7\%) remain far lower. We directly tested and rejected the hypothesis
 that this gap reflects a difference in how expensive each family is to render-verify (a
 controlled, isolated timing test found no such difference); the honest attribution is a mix of
@@ -312,7 +312,7 @@ grading on a genuine task mistake -- 11/11 \emph{resolved} is not the same as 11
   & treatment & 46.2\% & [26.9, 65.4] & 26 & & \multirow{2}{*}{final} \\
 \addlinespace
 Table (structural) & control   & 92.3\% & [80.8, 100] & 26 & \multirow{2}{*}{1.0} & \multirow{2}{*}{final} \\
-                    & treatment & 88.5\% & [76.9, 100] & 26 & & \\
+                    & treatment & 96.2\% & [88.5, 100] & 26 & & \\
 \addlinespace
 Caption         & control   & 100\%  & [100, 100]  & 26 & \multirow{2}{*}{$<0.001$} & \multirow{2}{*}{final} \\
                 & treatment & 7.7\%  & [0, 19.2]  & 26 & & \\
@@ -331,9 +331,10 @@ As Table~\ref{tab:render-gate} shows, all three families' control arms never inv
 XML directly, and they perform comparably to the other four families (92.3\%--100\%),
 confirming that a capable generic-tool agent can correctly hand-construct the target structures
 (a real \texttt{<m:oMath>} object, a real \texttt{<w:tbl>}, a real SEQ-field caption) without a
-bounded tool's help. Treatment's numbers are markedly lower and, critically, \emph{not
-comparable to one another}: table-structural insertion reaches a genuinely high 88.5\% pass
-rate, while equation and caption insertion remain far lower. Section~\ref{sec:defects} reports
+bounded tool's help. Treatment's numbers are markedly lower for two of the three and, critically,
+\emph{not comparable to one another}: table-structural insertion reaches 96.2\% -- statistically
+indistinguishable from its own control (92.3\%, paired $p=1.0$) -- while equation and caption
+insertion remain far lower. Section~\ref{sec:defects} reports
 why these numbers moved substantially over the course of this project.
 
 We initially suspected this gap reflected a real difference in rendering-verification cost
@@ -364,9 +365,10 @@ verification step declines to persist a change at all whenever it cannot confirm
 which is precisely what it is designed to do; control has no equivalent check and simply
 persists whatever it writes, correct or not. A significant gap in \emph{how often each arm
 successfully persists a change} is not the same claim as a significant gap in \emph{whether a
-persisted change is correct} -- table-structural's control-comparable 88.5\% pass rate, on the
-identical verification mechanism, shows the mechanism itself does not inherently depress
-correctness once it succeeds. We therefore report this $p$-value in full rather than omit it,
+persisted change is correct} -- table-structural's 96.2\% pass rate, statistically
+indistinguishable from its own control on the identical verification mechanism, shows the
+mechanism itself does not inherently depress correctness once it succeeds. We therefore report
+this $p$-value in full rather than omit it,
 but do not count it alongside Section~\ref{sec:section-reorder}'s result as a second
 capability-level finding.
 
