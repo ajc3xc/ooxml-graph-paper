@@ -46,9 +46,11 @@ a capability finding -- whole-table insertion reaches a genuinely high 96.2\%, w
 (46.2\%) and caption (7.7\%) remain far lower. We directly tested and rejected the hypothesis
 that this gap reflects a difference in how expensive each family is to render-verify (a
 controlled, isolated timing test found no such difference); the honest attribution is a mix of
-shared-host scheduling contention and a physically unreliable storage device on our own test
-host, neither of which is a property of the editing operations themselves. Separately, we
-document seven
+shared-host scheduling contention (directly traced in part to an unrelated, legitimate,
+CPU-and-memory-heavy background workload on our own test host), a physically unreliable storage
+device on that same host, and confirmed pure network failures, none of which is a property of
+the editing operations themselves. Separately, we
+document eight
 infrastructure and evaluation-harness defects that this benchmark's own development surfaced and
 fixed -- several of which materially changed the reported numbers -- disclosed in full rather
 than silently corrected.
@@ -109,7 +111,7 @@ is performed entirely outside the agent, never by trusting its own transcript cl
   step shared by three of the six families, through a documented sequence of infrastructure
   fixes, offline re-verification against the same real output data (not re-run), and live
   re-runs under healthier host conditions (Section~\ref{sec:render-gate}).
-\item We disclose seven infrastructure, harness, and evaluation-code defects found during this
+\item We disclose eight infrastructure, harness, and evaluation-code defects found during this
   project -- each with its root cause, fix, and independent re-verification -- and show that
   several materially changed an already-reported number (Section~\ref{sec:defects}).
 \end{itemize}
@@ -372,7 +374,7 @@ this $p$-value in full rather than omit it,
 but do not count it alongside Section~\ref{sec:section-reorder}'s result as a second
 capability-level finding.
 
-\section{Seven real defects found and fixed}
+\section{Eight real defects found and fixed}
 \label{sec:defects}
 
 A benchmark's own numbers are only as trustworthy as the harness, evaluator, and infrastructure
@@ -427,6 +429,20 @@ each is disclosed here rather than folded silently into a final figure.
   stale number published after an unrelated fix -- are described in full in the project's own
   working notes and omitted here for space, but available on request.
   \todo{cite/link the full defect log once this paper has a public repository}.
+\item \textbf{Sequential backend fallback could cost more time than the harness's own outer
+  budget allowed.} The write-time verification step's two backends (Section~\ref{sec:render-gate})
+  were tried sequentially, each with its own retry-bounded 90-second timeout -- discovering that
+  both failed could cost up to their combined worst case (approximately 360 seconds), over half
+  the harness's 600-second outer per-trial timeout. We fixed this by racing both backends
+  concurrently instead, so discovering a double failure costs at most the slower of the two
+  (approximately 180 seconds) rather than their sum. We are explicit that this changes latency
+  under contention, not the underlying success probability: directly investigating this host's
+  resource consumption while implementing this fix found a large, unrelated, CPU- and
+  memory-heavy background workload (423\% CPU, 11.3GB resident memory) genuinely needed by its
+  owner and left running -- both backends are starved by the same real resource shortage
+  regardless of whether they are raced or chained, so this fix stops trials from being silently
+  killed by the outer timeout mid-verification, but does not raise equation's or caption's pass
+  rate.
 \end{enumerate}
 
 Every defect above was independently re-verified against real output data -- either by
