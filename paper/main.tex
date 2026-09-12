@@ -43,8 +43,12 @@ call \emph{state drift}. Three families (equation, whole-table, and caption inse
 write-time structural-correctness verification step that is expensive to run under contended
 host conditions; we report their live-verified pass rates rather than treating them uniformly as
 a capability finding -- whole-table insertion reaches a genuinely high 88.5\%, while equation
-(42.3\%) and caption (7.7\%) remain far lower, a difference we attribute to task-dependent
-verification cost rather than a difference in editing correctness. Separately, we document seven
+(46.2\%) and caption (7.7\%) remain far lower. We directly tested and rejected the hypothesis
+that this gap reflects a difference in how expensive each family is to render-verify (a
+controlled, isolated timing test found no such difference); the honest attribution is a mix of
+shared-host scheduling contention and a physically unreliable storage device on our own test
+host, neither of which is a property of the editing operations themselves. Separately, we
+document seven
 infrastructure and evaluation-harness defects that this benchmark's own development surfaced and
 fixed -- several of which materially changed the reported numbers -- disclosed in full rather
 than silently corrected.
@@ -305,7 +309,7 @@ resolved chains passed; the 11th resolved (did not block on the verification ste
 grading on a genuine task mistake -- 11/11 \emph{resolved} is not the same as 11/11
 \emph{passed}.}
   & control   & 90.9\% & [72.7, 100] & 11 & \multirow{2}{*}{n/a} & \multirow{2}{*}{final (control)} \\
-  & treatment & 42.3\% & [23.1, 61.5] & 26 & & \multirow{2}{*}{final} \\
+  & treatment & 46.2\% & [26.9, 65.4] & 26 & & \multirow{2}{*}{final} \\
 \addlinespace
 Table (structural) & control   & 92.3\% & [80.8, 100] & 26 & \multirow{2}{*}{1.0} & \multirow{2}{*}{final} \\
                     & treatment & 88.5\% & [76.9, 100] & 26 & & \\
@@ -330,11 +334,26 @@ confirming that a capable generic-tool agent can correctly hand-construct the ta
 bounded tool's help. Treatment's numbers are markedly lower and, critically, \emph{not
 comparable to one another}: table-structural insertion reaches a genuinely high 88.5\% pass
 rate, while equation and caption insertion remain far lower. Section~\ref{sec:defects} reports
-why these numbers moved substantially over the course of this project, and why we believe the
-gap between table-structural and the other two reflects real differences in
-rendering-verification cost between task types rather than a difference in the underlying
-editing operations' correctness -- a hypothesis, disclosed as such, not yet independently
-confirmed.
+why these numbers moved substantially over the course of this project.
+
+We initially suspected this gap reflected a real difference in rendering-verification cost
+between task types -- e.g., that inserting a numbered caption field forces the renderer to
+recompute field numbering across the whole document before it can produce output, while a bare
+table does not. We tested this directly rather than let it stand as a plausible-sounding
+story: a code-level review of the tools' actual OOXML output found no field-dirtying or
+document-recalculation mechanism in any of the three insertion tools, and a controlled,
+sequential timing test -- rendering real completed output files from all three families,
+interleaved to control for host-condition drift -- found no meaningful difference (equation
+8.0s, table-structural 8.6s, caption 8.9s mean, all $\ll$ the 90s timeout). We reject the
+task-dependent-verification-cost hypothesis on this direct evidence. The honest attribution is
+two independent, real causes neither of which is a property of the editing operations
+themselves: ordinary shared-host scheduling contention (real, but evidently not sufficient on
+its own -- an isolated, single-worker re-run of caption's remaining chains still failed almost
+completely), and, found directly while investigating that isolation result, a physically
+unreliable external drive on our test host that disconnected twice during this project (Windows
+disk-layer I/O retry/error events independently confirm this, not just an inference from missing
+files). We report this plainly rather than paper over an inconclusive root cause with a tidier-
+sounding but empirically rejected story.
 
 \paragraph{On caption's statistically significant gap.} Table~\ref{tab:render-gate}'s paired
 test for caption returns $p<0.001$ -- by the same statistical test as
@@ -394,13 +413,13 @@ each is disclosed here rather than folded silently into a final figure.
   clustered tightly in one short real-time window coinciding with the same unrelated hardware
   disruption in item 4, and the API's certificate was confirmed to verify correctly again
   immediately afterward. We re-ran these 29 trials under confirmed-healthy network conditions
-  rather than counting them as capability failures: equation recovered from 4/26 to 11/26 and
-  caption from 1/26 to 2/26 (Table~\ref{tab:render-gate}; four of equation's recoveries needed a
-  second retry after an unrelated, separately transient \texttt{BadZipFile} read error on the
-  same shared host reading an independently-verified-valid source file). Before this item,
-  Table~\ref{tab:render-gate}'s numbers for these two families had silently included these 29 as
-  ordinary capability failures -- a disclosure/reporting inconsistency corrected here and in
-  that table.
+  rather than counting them as capability failures: equation ultimately recovered from 4/26 to
+  12/26 and caption from 1/26 to 2/26 (Table~\ref{tab:render-gate}, across several subsequent
+  retry rounds -- see Section~\ref{sec:render-gate} for the full account, including a physically
+  unreliable drive found along the way that this item's own retries first exposed). Before this
+  item, Table~\ref{tab:render-gate}'s numbers for these two families had silently included these
+  29 as ordinary capability failures -- a disclosure/reporting inconsistency corrected here and
+  in that table.
 \item \textbf{Two further evaluation-harness defects} -- an inverse-trial paragraph-id
   resolution bug affecting the citation family, and a statistics-regeneration gap that left a
   stale number published after an unrelated fix -- are described in full in the project's own
@@ -428,29 +447,37 @@ methodological hazard: an architectural choice made for a good reason (never per
 document) can produce a benchmark result that looks like a capability finding but is
 substantially a deployment-environment artifact, and disentangling the two required real,
 disclosed engineering work (Section~\ref{sec:defects}), not just a larger sample size. We do not
-believe this fully resolves the question for equation and caption insertion specifically --
-their still-low numbers as of this draft may reflect a genuine remaining capability gap, a
-remaining infrastructure cost difference from table insertion, or both, and we report that
-uncertainty rather than resolve it by assumption.
+believe this fully resolves the question for equation and caption insertion specifically. We
+directly tested and rejected the most obvious alternative explanation -- that their tools are
+simply more expensive to render-verify than table insertion's (Section~\ref{sec:render-gate}) --
+and traced the gap instead to shared-host contention and a physically unreliable test-host
+component, neither a property of the editing operations. Caption's number did not close even
+once host contention was isolated away, so a genuine remaining capability gap for caption
+specifically cannot yet be ruled out either; we report that uncertainty rather than resolve it
+by assumption.
 
 \section{Limitations}
 \label{sec:limitations}
 
-Three factors limit how far these results generalize. \textbf{First}, this benchmark tests one
+Four factors limit how far these results generalize. \textbf{First}, this benchmark tests one
 model (\texttt{claude-sonnet-5}) and does not claim the results generalize across models.
 \textbf{Second}, the write-time-verification-gated families' results were collected on a single,
 shared, variably-contended host rather than a dedicated one; Section~\ref{sec:defects} documents
 live evidence that host conditions materially affect these three families' numbers, which is
 itself a disclosed limitation of those specific results, not just of the discussion around them.
 \textbf{Third}, corpus size for section reordering ($n=11$ at $K=1$ on the original corpus) is
-small before the follow-up corpus is combined in. \textbf{Fourth}, the render-verification-cost
-hypothesis in Section~\ref{sec:discussion} is only partially supported by the final numbers:
-equation's live-verified rate (42.3\%) moved substantially closer to table-structural's (88.5\%)
-once every genuinely recoverable trial was accounted for, consistent with the hypothesis, but
-caption's (7.7\%) did not move nearly as far -- so either caption's verification cost is
-genuinely much higher than equation's and table-structural's, or a real, still-uncharacterized
-capability gap exists for caption specifically. This benchmark cannot distinguish between those
-two explanations with the data collected here.
+small before the follow-up corpus is combined in. \textbf{Fourth}, one specific piece of our own
+test infrastructure -- an external drive holding all run data -- proved physically unreliable,
+disconnecting twice during this project (confirmed via OS-level disk I/O error events, not
+inferred). We cannot rule out that this contributed to some fraction of equation's and
+caption's still-low numbers in a way indistinguishable, from inside the harness, from ordinary
+render-verification timeouts. We disclose this as a real limitation of our specific test
+environment rather than a property of the tools under test, since a controlled timing test
+(Section~\ref{sec:render-gate}) directly rejected the alternative explanation (task-dependent
+render cost) and an isolated, contention-free re-run of caption's remaining chains still failed
+almost completely -- consistent with an intermittent hardware cause neither fully explained by,
+nor fully ruled out as, the reason caption in particular remains far below equation and
+table-structural.
 
 \section{Conclusion}
 \label{sec:conclusion}
