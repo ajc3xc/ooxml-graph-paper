@@ -1325,6 +1325,52 @@ genuinely a recoverable network artifact (the table_structural one, already retr
 resolved to a confirmed genuine stall). The other 38 are real, confirmed capability/contention
 limits -- not bugs retrying can fix.
 
+## Root cause of the contention, found directly, 2026-09-12: a SLAM training job, not other Claude sessions
+
+User asked directly what's actually consuming resources during these failures. Checked the top
+memory consumers on the host: `vmmemWSL` (the WSL2 VM) alone was using **8.8GB** -- over a
+quarter of total host RAM. Investigated what was actually running inside it (`wsl -d Ubuntu --
+ps aux --sort=-%mem`) rather than assuming it was idle cache: a process
+`./build/slam_trainer configs/release/kinect_convert_kinect_nfov_30_bestwindow_trackingfix.yaml`
+was running at **423% CPU** (4+ cores pegged) and **11.3GB RSS**. This is the user's own active,
+important robotics/SLAM training job -- confirmed with the user directly, left running,
+untouched. This is very likely the dominant real cause of the render-verification timeouts
+throughout this whole investigation: not other concurrent Claude Code sessions primarily, but
+one specific, legitimate, CPU-and-memory-heavy training workload sharing this exact machine, and
+it is not going away.
+
+**Implemented and shipped the one real remaining code-level lever**: `render_gate.py`'s
+`check_render_capability` tried its two backends (soffice, Word COM) sequentially, each with its
+own retry-bounded 90s timeout -- up to ~360s combined just to discover both fail, more than half
+the harness's 600s outer per-trial budget. Changed to race both backends concurrently (first
+genuine success wins); explicitly reasoned through, and disclosed to the user, that this changes
+LATENCY under contention, not the underlying success PROBABILITY (both backends are starved by
+the same host resource shortage, so racing doesn't make either intrinsically more likely to
+succeed) -- it only stops a trial from being silently killed by the outer timeout mid
+second-backend-attempt. Implemented (`_attempt_backend_with_retries` extracted, raced via
+`ThreadPoolExecutor` with explicit non-blocking shutdown -- NOT a `with` block, whose `__exit__`
+would otherwise re-block regardless of an earlier `wait=False` call, a real bug caught and fixed
+during implementation before it ever shipped). Live-verified against real backends (15.16s,
+correct winner/fallback_from reporting). Full extension suite: 1149 passed, 3 failed only in the
+full-suite run and passed cleanly in isolation (real-backend-dependent tests hitting the same
+host contention this whole change is about, not a regression from it). Replaced the one test
+that asserted the now-intentionally-changed sequential invariant; added a race-condition test
+and a still-works-with-one-failure regression test. Committed to `repository`
+(`fa73dcf4`), isolated-hunk reviewed first (`git status --short` showed only the 2 intended
+files).
+
+**Honest bottom line on what this does and doesn't fix**: this improves diagnostic quality
+(fewer silent outer-timeout kills, more graceful "both backends failed" reports) but is NOT
+expected to raise equation's or caption's pass rate, since the root cause -- a confirmed,
+staying, resource-heavy training job sharing this host -- is not something any code change here
+can address. The two things that would actually move these numbers are (1) reduced concurrent
+load on this specific host, which the user has confirmed they cannot do right now, or (2)
+running this specific batch on a separate, dedicated machine (the user has floated a small
+remote RunPod instance, ~2 vCPUs, as a fallback if needed) -- not yet pursued, pending the
+user's call on whether current numbers are good enough or this escalation is worth the setup
+cost (installing LibreOffice/Word, the Meridian MCP server, Claude Code CLI, and the corpus data
+fresh on a remote box).
+
 ## If you are picking this up cold after a crash
 
 1. Read this file first, in full, before touching anything.
