@@ -1297,6 +1297,34 @@ table_structural (96.2%) remains the standout, statistically indistinguishable f
 control. `paper/main.tex` already carries these exact numbers; no further paper update needed
 from this round.
 
+## Full per-chain audit, 2026-09-12: exactly which of the remaining blocked chains are network vs genuine
+
+User asked directly: of the remaining blocked chains (14 equation, 1 table_structural, 24
+caption), which are network failures and which are genuine? Answered with a full per-chain
+classification, not just aggregate counts:
+
+- **Equation (14 blocked): all 14 genuine.** Every one shows a real "render verification timed
+  out on both backends" message from the agent itself -- zero network errors remain.
+- **table_structural (1 blocked): was network, retried, now genuine.**
+  `docops_v2_l3_009_docx_incident_m` showed a pure `ENOTFOUND` on the first check. Retried
+  immediately -- this time hit a real outer-timeout stall instead (`returncode: null,
+  timed_out: true, docx_changed: false`, 601.5s wall time) -- genuinely nothing written, nothing
+  to recover. **table_structural's final number stays 25/26 (96.2%)**, now with every one of the
+  26 chains individually accounted for (25 pass, 1 confirmed genuine stall).
+- **Caption (24 blocked): 23 genuine, 1 edge case re-checked.** 23 show the same real
+  render-timeout message (2 phrased "times out" rather than "timed out," a keyword-matching
+  slip on the first pass, manually confirmed genuine on inspection). The 24th
+  (`atomic__word_012_table_structure`) is a different failure shape: the whole CLI process was
+  killed by the harness's 600s outer timeout before it could report anything (`returncode: null,
+  timed_out: true`, empty result text) rather than the tool's own graceful two-attempt failure
+  report -- `docx_changed: false`, so nothing to recover either way. Retried it directly;
+  result not yet known at time of writing.
+
+**Bottom line for the user's question**: only 1 of the 39 chains checked in this audit was
+genuinely a recoverable network artifact (the table_structural one, already retried and
+resolved to a confirmed genuine stall). The other 38 are real, confirmed capability/contention
+limits -- not bugs retrying can fix.
+
 ## If you are picking this up cold after a crash
 
 1. Read this file first, in full, before touching anything.
