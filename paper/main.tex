@@ -40,17 +40,17 @@ the bounded tool under four repeated edit-undo cycles (92.9\% vs.\ 67.3\% pass r
 traced to a specific, data-grounded failure mode in the generic-tool arm: compounding loss of
 the true original document state across repeated cycles -- the paper's central finding, which we
 call \emph{state drift}. Three families (equation, whole-table, and caption insertion) share a
-write-time structural-correctness verification step that is expensive to run under contended
-host conditions; we report their live-verified pass rates rather than treating them uniformly as
-a capability finding -- whole-table insertion reaches a genuinely high 96.2\%, while equation
-(46.2\%) and caption (7.7\%) remain far lower. We directly tested and rejected the hypothesis
-that this gap reflects a difference in how expensive each family is to render-verify (a
-controlled, isolated timing test found no such difference); the honest attribution is a mix of
-shared-host scheduling contention (directly traced in part to an unrelated, legitimate,
-CPU-and-memory-heavy background workload on our own test host), a physically unreliable storage
-device on that same host, and confirmed pure network failures, none of which is a property of
-the editing operations themselves. Separately, we
-document eight
+write-time structural-correctness verification step; on a shared, variably-contended host, two of
+the three reported markedly lower pass rates (equation 46.2\%, caption 7.7\%) while whole-table
+reached 96.2\%. We treated this as a hypothesis rather than a finding and tested it directly: a
+controlled, isolated timing test first rejected task-dependent render cost as the explanation,
+and a full confirmatory re-run of the identical benchmark -- same model, same corpus, same
+code -- on a dedicated, single-tenant cloud host closed the gap completely, all three families
+reaching 100\% pass for both arms. The original numbers were a deployment-environment artifact
+(shared-host scheduling contention, a physically unreliable storage device, and confirmed network
+failures), not an editing-capability limitation, and we report both the original and the
+confirmatory numbers rather than replacing one with the other silently. Separately, we
+document nine
 infrastructure and evaluation-harness defects that this benchmark's own development surfaced and
 fixed -- several of which materially changed the reported numbers -- disclosed in full rather
 than silently corrected.
@@ -107,11 +107,12 @@ is performed entirely outside the agent, never by trusting its own transcript cl
   significant advantage under repeated edit-undo cycling, and identify the mechanism: the
   generic-tool arm's correctness degrades with repetition (state drift) while the bounded
   tool's does not (Section~\ref{sec:section-reorder}).
-\item We identify and disentangle a confound introduced by a write-time structural-verification
-  step shared by three of the six families, through a documented sequence of infrastructure
-  fixes, offline re-verification against the same real output data (not re-run), and live
-  re-runs under healthier host conditions (Section~\ref{sec:render-gate}).
-\item We disclose eight infrastructure, harness, and evaluation-code defects found during this
+\item We identify a confound introduced by a write-time structural-verification step shared by
+  three of the six families, and resolve it with a controlled confirmatory re-run of the
+  identical benchmark on a dedicated, single-tenant host, which closes the gap completely and
+  confirms the confound was a deployment-environment artifact, not a capability limitation
+  (Section~\ref{sec:render-gate}).
+\item We disclose nine infrastructure, harness, and evaluation-code defects found during this
   project -- each with its root cause, fix, and independent re-verification -- and show that
   several materially changed an already-reported number (Section~\ref{sec:defects}).
 \end{itemize}
@@ -195,6 +196,27 @@ denominator. The one repeated-cycling ($K=4$) design compares steady-state pass 
 fraction of chains passing every one of the four cycles) across four consecutive forward/inverse
 cycles on the same document, rather than a single cycle, specifically to test whether either
 arm's correctness compounds or decays under repetition.
+
+\subsection{Confirmatory re-run environment}
+\label{sec:methods-rerun}
+The three write-time-verification-gated families (Section~\ref{sec:render-gate}) were originally
+run on a shared Windows host also used for other concurrent work, and their pass rates were
+markedly lower for two of the three. To test whether that reflected the editing operations
+themselves or the host, we re-ran the identical benchmark -- unchanged model, corpus, harness,
+and grading code -- on a dedicated, single-tenant cloud CPU instance (4 dedicated vCPUs, no other
+tenant or process competing for the same physical resources). Two environment differences were
+necessary and are disclosed here rather than left implicit. First, the instance runs Linux, so
+the write-time verification step's Microsoft Word COM backend (Windows-only) is unavailable; only
+its LibreOffice/\texttt{soffice} backend runs. This does not change what is being measured: an
+audit of every persisted chain result across the original host's full run history found the
+Word COM backend never won the two-backend race on its own in any recorded successful chain (it
+only ever appears in failure records where both backends failed together), so a
+LibreOffice-only environment is evaluating the same effective verification path the original run
+already relied on almost exclusively, not a different one. Second, the CLI executing each trial
+refuses to run with permission checks bypassed when invoked as the root user, a restriction the
+original host (a non-root desktop account) never triggered; we created a dedicated non-root
+account on the instance for this reason, verified functionally, and re-ran the affected trials
+that had failed instantly under root before this was found.
 
 \section{Results}
 \label{sec:results}
@@ -310,22 +332,23 @@ uses; the two are not paired and no significance test is reported for this row. 
 resolved chains passed; the 11th resolved (did not block on the verification step) but failed
 grading on a genuine task mistake -- 11/11 \emph{resolved} is not the same as 11/11
 \emph{passed}.}
-  & control   & 90.9\% & [72.7, 100] & 11 & \multirow{2}{*}{n/a} & \multirow{2}{*}{final (control)} \\
-  & treatment & 46.2\% & [26.9, 65.4] & 26 & & \multirow{2}{*}{final} \\
+  & control   & 90.9\% & [72.7, 100] & 11 & \multirow{2}{*}{n/a} & \multirow{2}{*}{original (shared host)} \\
+  & treatment & 46.2\% & [26.9, 65.4] & 26 & & \\
 \addlinespace
-Table (structural) & control   & 92.3\% & [80.8, 100] & 26 & \multirow{2}{*}{1.0} & \multirow{2}{*}{final} \\
+Table (structural) & control   & 92.3\% & [80.8, 100] & 26 & \multirow{2}{*}{1.0} & \multirow{2}{*}{original (shared host)} \\
                     & treatment & 96.2\% & [88.5, 100] & 26 & & \\
 \addlinespace
-Caption         & control   & 100\%  & [100, 100]  & 26 & \multirow{2}{*}{$<0.001$} & \multirow{2}{*}{final} \\
+Caption         & control   & 100\%  & [100, 100]  & 26 & \multirow{2}{*}{$<0.001$} & \multirow{2}{*}{original (shared host)} \\
                 & treatment & 7.7\%  & [0, 19.2]  & 26 & & \\
 \bottomrule
 \end{tabular}
-\caption{Write-time structurally-verified families, all rows now final and live-verified.
-Control never invokes the verification step (it edits raw XML directly) and is unaffected by
-it. Equation's treatment $n=26$ has no paired significance test because its control arm comes
-from a different, unpaired corpus (see footnote). Caption's $p<0.001$ reflects
-verification-\emph{reliability} cost under host contention, not an
-editing-\emph{capability} difference -- see the interpretive note following this table.}
+\caption{Write-time structurally-verified families as originally measured, on a shared,
+variably-contended host. Control never invokes the verification step (it edits raw XML
+directly) and is unaffected by host contention. Equation's treatment $n=26$ has no paired
+significance test here because its control arm comes from a different, unpaired corpus (see
+footnote) -- resolved in Table~\ref{tab:render-gate-clean}, which pairs both on the same corpus.
+Superseded by the confirmatory re-run in Table~\ref{tab:render-gate-clean}; retained here as the
+evidence for that re-run's causal claim, not as a final number.}
 \label{tab:render-gate}
 \end{table}
 
@@ -348,33 +371,70 @@ document-recalculation mechanism in any of the three insertion tools, and a cont
 sequential timing test -- rendering real completed output files from all three families,
 interleaved to control for host-condition drift -- found no meaningful difference (equation
 8.0s, table-structural 8.6s, caption 8.9s mean, all $\ll$ the 90s timeout). We reject the
-task-dependent-verification-cost hypothesis on this direct evidence. The honest attribution is
-two independent, real causes neither of which is a property of the editing operations
-themselves: ordinary shared-host scheduling contention (real, but evidently not sufficient on
-its own -- an isolated, single-worker re-run of caption's remaining chains still failed almost
-completely), and, found directly while investigating that isolation result, a physically
-unreliable external drive on our test host that disconnected twice during this project (Windows
-disk-layer I/O retry/error events independently confirm this, not just an inference from missing
-files). We report this plainly rather than paper over an inconclusive root cause with a tidier-
-sounding but empirically rejected story.
+task-dependent-verification-cost hypothesis on this direct evidence. Our working attribution at
+that point was two independent, real causes neither of which is a property of the editing
+operations themselves: ordinary shared-host scheduling contention (real, but evidently not
+sufficient on its own -- an isolated, single-worker re-run of caption's remaining chains still
+failed almost completely), and, found directly while investigating that isolation result, a
+physically unreliable external drive on our test host that disconnected twice during this project
+(Windows disk-layer I/O retry/error events independently confirm this, not just an inference from
+missing files). Rather than leave this as an inference from indirect evidence, we tested it
+directly with a controlled re-run (Section~\ref{sec:methods-rerun}).
 
-\paragraph{On caption's statistically significant gap.} Table~\ref{tab:render-gate}'s paired
-test for caption returns $p<0.001$ -- by the same statistical test as
-Section~\ref{sec:section-reorder}'s headline result, this is significant. We do not read it the
-same way. Section~\ref{sec:section-reorder}'s finding measures whether an agent, given a chance
-to attempt a task, does it correctly -- both arms attempt every trial. Here, treatment's write-time
-verification step declines to persist a change at all whenever it cannot confirm correctness,
-which is precisely what it is designed to do; control has no equivalent check and simply
-persists whatever it writes, correct or not. A significant gap in \emph{how often each arm
-successfully persists a change} is not the same claim as a significant gap in \emph{whether a
-persisted change is correct} -- table-structural's 96.2\% pass rate, statistically
-indistinguishable from its own control on the identical verification mechanism, shows the
-mechanism itself does not inherently depress correctness once it succeeds. We therefore report
-this $p$-value in full rather than omit it,
-but do not count it alongside Section~\ref{sec:section-reorder}'s result as a second
-capability-level finding.
+\begin{table}[h]
+\centering
+\begin{tabular}{lcccccc}
+\toprule
+Family & Arm & Pass rate & 95\% CI & $n$ & Paired $p$ & Status \\
+\midrule
+Equation            & control   & 100\% & [100, 100] & 26 & \multirow{2}{*}{1.0} & \multirow{2}{*}{confirmatory (dedicated host)} \\
+                    & treatment & 100\% & [100, 100] & 26 & & \\
+\addlinespace
+Table (structural)  & control   & 100\% & [100, 100] & 26 & \multirow{2}{*}{1.0} & \multirow{2}{*}{confirmatory (dedicated host)} \\
+                    & treatment & 100\% & [100, 100] & 26 & & \\
+\addlinespace
+Caption             & control   & 100\% & [100, 100] & 26 & \multirow{2}{*}{1.0} & \multirow{2}{*}{confirmatory (dedicated host)} \\
+                    & treatment & 100\% & [100, 100] & 26 & & \\
+\bottomrule
+\end{tabular}
+\caption{The identical benchmark -- same model, same 26-document corpus, same harness and
+grading code -- re-run on a dedicated, single-tenant host (Section~\ref{sec:methods-rerun}). All
+three families close completely: every one of the 156 chains (3 families $\times$ 2 arms
+$\times$ 26 documents) independently graded pass, with real, varied per-trial wall times (e.g.\
+caption forward trials ranged 14.7--237.8s, not a uniform or short-circuited artifact) confirming
+this is a live re-run, not a re-derivation from cached data. Equation's control here uses the
+same 26-document corpus as treatment, so unlike Table~\ref{tab:render-gate} a paired test is
+reported for all three families.}
+\label{tab:render-gate-clean}
+\end{table}
 
-\section{Eight real defects found and fixed}
+Table~\ref{tab:render-gate-clean} is the direct test of the host-contention hypothesis, not
+another indirect argument for it: identical model, corpus, harness, and grading code, on a
+dedicated single-tenant host instead of a shared, contended one. The gap closes completely.
+Equation rises from 46.2\% to 100\%; caption rises from 7.7\% to 100\%; table-structural, already
+statistically indistinguishable from its control at 96.2\%, also reaches 100\%. All three arms
+now match their own controls exactly ($p=1.0$ throughout). We read this as confirmation, not
+mere consistency with the hypothesis: the original gap in Table~\ref{tab:render-gate} was a
+deployment-environment artifact of the specific shared host these three families' write-time
+verification step happened to be sensitive to, not a limitation of the bounded editing operations
+themselves. We report both tables rather than replacing Table~\ref{tab:render-gate} with
+Table~\ref{tab:render-gate-clean}, because the contrast between them is itself the evidence for
+this section's causal claim, not an inconvenient earlier draft to discard.
+
+\paragraph{On caption's originally significant gap.} Table~\ref{tab:render-gate}'s paired test
+for caption returned $p<0.001$ on the original host -- by the same statistical test as
+Section~\ref{sec:section-reorder}'s headline result, that was significant. We argued at the time
+that it should not be read the same way: Section~\ref{sec:section-reorder}'s finding measures
+whether an agent, given a chance to attempt a task, does it correctly, while here treatment's
+write-time verification step declines to persist a change at all whenever it cannot confirm
+correctness under the host conditions of the moment, which is a gap in \emph{how often the arm
+successfully persists a change}, not in \emph{whether a persisted change is correct}. The
+confirmatory re-run settles this distinction empirically rather than leaving it as an argued
+interpretation: on a dedicated host, caption's treatment reaches the identical 100\% as its
+control ($p=1.0$), exactly as the verification-reliability reading predicted and the
+capability-limitation reading did not.
+
+\section{Nine real defects found and fixed}
 \label{sec:defects}
 
 A benchmark's own numbers are only as trustworthy as the harness, evaluator, and infrastructure
@@ -443,6 +503,19 @@ each is disclosed here rather than folded silently into a final figure.
   regardless of whether they are raced or chained, so this fix stops trials from being silently
   killed by the outer timeout mid-verification, but does not raise equation's or caption's pass
   rate.
+\item \textbf{The confirmatory re-run's CLI silently refused every trial identically, and the
+  failure signature was checked directly rather than assumed.} The first attempt at the
+  dedicated-host confirmatory re-run (Section~\ref{sec:methods-rerun}) reported every one of 156
+  chains as blocked, each in well under one second -- fast and uniform enough that we
+  distrusted an infrastructure explanation on sight (a real host- or network-level failure is
+  rarely both instant and perfectly uniform across three unrelated task families and both arms).
+  Inspecting one chain's raw process output directly rather than guessing found the actual cause:
+  the CLI invoked by every trial refuses to bypass its own permission checks when run as the
+  root user, a deliberate safety restriction, and the cloud instance's default account is root.
+  We fixed this by creating a dedicated non-root account for the re-run, verified functionally
+  before re-running anything at scale, and confirmed the fix by re-inspecting individual trials'
+  wall time and grading output (not merely their exit status) for realistic, varied values before
+  trusting the run's aggregate numbers.
 \end{enumerate}
 
 Every defect above was independently re-verified against real output data -- either by
@@ -464,38 +537,40 @@ The write-time-verification-gated families illustrate a different, and we think 
 methodological hazard: an architectural choice made for a good reason (never persist a corrupt
 document) can produce a benchmark result that looks like a capability finding but is
 substantially a deployment-environment artifact, and disentangling the two required real,
-disclosed engineering work (Section~\ref{sec:defects}), not just a larger sample size. We do not
-believe this fully resolves the question for equation and caption insertion specifically. We
-directly tested and rejected the most obvious alternative explanation -- that their tools are
-simply more expensive to render-verify than table insertion's (Section~\ref{sec:render-gate}) --
-and traced the gap instead to shared-host contention and a physically unreliable test-host
-component, neither a property of the editing operations. Caption's number did not close even
-once host contention was isolated away, so a genuine remaining capability gap for caption
-specifically cannot yet be ruled out either; we report that uncertainty rather than resolve it
-by assumption.
+disclosed engineering work (Section~\ref{sec:defects}) and, ultimately, a controlled confirmatory
+re-run (Section~\ref{sec:methods-rerun}), not just a larger sample size or a more careful
+argument. We did not stop at rejecting the most obvious alternative explanation -- that these
+tools are simply more expensive to render-verify than table insertion's -- and then rest on an
+inferred attribution to shared-host contention and a physically unreliable test-host component.
+We tested that attribution directly, by re-running the identical benchmark on a dedicated,
+single-tenant host, and the gap closed completely for both equation and caption
+(Table~\ref{tab:render-gate-clean}). We think the general lesson generalizes past this specific
+benchmark: a write-time verification step's reported reliability is only as meaningful as the
+host it was measured on, and a benchmark result that looks like a capability finding is worth
+testing against a change of deployment environment before it is reported as one.
 
 \section{Limitations}
 \label{sec:limitations}
 
 Four factors limit how far these results generalize. \textbf{First}, this benchmark tests one
 model (\texttt{claude-sonnet-5}) and does not claim the results generalize across models.
-\textbf{Second}, the write-time-verification-gated families' results were collected on a single,
-shared, variably-contended host rather than a dedicated one; Section~\ref{sec:defects} documents
-live evidence that host conditions materially affect these three families' numbers, which is
-itself a disclosed limitation of those specific results, not just of the discussion around them.
+\textbf{Second}, the write-time-verification-gated families' originally-reported numbers
+(Table~\ref{tab:render-gate}) were collected on a single, shared, variably-contended host rather
+than a dedicated one, and that host condition materially depressed two of the three families'
+numbers -- confirmed, not merely argued, by the confirmatory re-run in
+Table~\ref{tab:render-gate-clean}, which closes the gap completely on a dedicated host. We
+therefore treat Table~\ref{tab:render-gate-clean} as the load-bearing result for these three
+families and Table~\ref{tab:render-gate} as evidence for the host-contention claim rather than as
+a competing final number. This resolution does not extend past this specific verification
+mechanism: we make no claim that shared-host contention is never a genuine factor for other
+write-time-verification designs, only that it fully explains the gap observed here.
 \textbf{Third}, corpus size for section reordering ($n=11$ at $K=1$ on the original corpus) is
 small before the follow-up corpus is combined in. \textbf{Fourth}, one specific piece of our own
 test infrastructure -- an external drive holding all run data -- proved physically unreliable,
 disconnecting twice during this project (confirmed via OS-level disk I/O error events, not
-inferred). We cannot rule out that this contributed to some fraction of equation's and
-caption's still-low numbers in a way indistinguishable, from inside the harness, from ordinary
-render-verification timeouts. We disclose this as a real limitation of our specific test
-environment rather than a property of the tools under test, since a controlled timing test
-(Section~\ref{sec:render-gate}) directly rejected the alternative explanation (task-dependent
-render cost) and an isolated, contention-free re-run of caption's remaining chains still failed
-almost completely -- consistent with an intermittent hardware cause neither fully explained by,
-nor fully ruled out as, the reason caption in particular remains far below equation and
-table-structural.
+inferred); this remains a real defect in our original test environment (Section~\ref{sec:defects}),
+though the confirmatory re-run's clean result means it is no longer load-bearing for any number
+in this paper's final reporting.
 
 \section{Conclusion}
 \label{sec:conclusion}
@@ -503,11 +578,14 @@ table-structural.
 Bounded, structurally-aware editing primitives show no advantage over generic file tools for a
 single document edit, on the task families and model tested here, but show a significant,
 mechanistically-traced advantage under repeated editing -- the more realistic condition for an
-agent maintaining a document over time. Three further task families are confounded by a
-write-time verification step whose reliability cost we found to be substantial and
-environment-dependent, and we report that confound in full, including the live infrastructure
-work this project undertook to disentangle it from the underlying editing capability, rather
-than reporting a single clean number that would understate real uncertainty.
+agent maintaining a document over time. Three further task families were initially confounded by
+a write-time verification step whose reliability cost proved substantial and
+environment-dependent; a controlled confirmatory re-run on a dedicated, single-tenant host
+resolved that confound completely, closing all three families to 100\% pass for both arms and
+confirming the original gap was a deployment-environment artifact rather than an editing-capability
+limitation. We report both the original and confirmatory numbers, and the live infrastructure
+work connecting them, rather than reporting a single clean number that would understate how much
+of this benchmark's own execution environment turned out to matter.
 
 \todo{This is a preliminary draft. Before any submission: (1) re-run the full
 paper-review-toolkit pipeline (writing-quality + content-quality prompts) against this revision,
