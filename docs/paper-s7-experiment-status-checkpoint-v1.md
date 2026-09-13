@@ -1455,13 +1455,29 @@ for the network volume was the only real spend gate. Pod should be terminated on
 data has been independently spot-checked and archived (not yet done as of this checkpoint --
 see next steps).
 
-**Next steps**: (1) retrieve/archive the full run output (`/workspace/runs/paper-s7-clean-rerun/`
-on the pod) to local/durable storage; (2) terminate the RunPod pod and network volume once
-archived, per standing cost discipline; (3) consider whether the now-resolved equation/caption
-confound changes anything about the K=4 section-reorder finding's framing as "the paper's central
-finding" (it doesn't need to change -- state drift remains the only finding that is a genuine,
-mechanistically-traced capability difference between arms; equation/table_structural/caption now
-all show zero capability difference under clean conditions, same as bibliography/citation).
+**Update, same session, ~2.5 hours later**: pod `n21gmu55ehvkq6` (the one that ran the benchmark)
+vanished entirely a SECOND time -- same failure mode as the first occurrence (not EXITED, just
+gone from the account; cause still unknown). This is now a confirmed recurring pattern on this
+account, not a one-off: **treat every RunPod pod on this account as liable to disappear without
+warning, and retrieve anything that matters off a pod the moment work on it finishes, not
+"later."** The network volume survived intact both times -- this is the one thing to actually
+trust for durability here. Recreated a pod attached to the same volume purely to retrieve
+results (no need to reinstall node/soffice/claude-cli for a pure retrieval task), confirmed all
+156 `chain-result.json` files were present and untouched, archived the essential result files
+(`chain-result.json`, `slice-manifest.json`, the computed statistics file, and the run log --
+explicitly excluding the bulky per-trial `scratch/` Claude-session directories and the `.docx`
+files themselves, ~6MB total instead of the full run tree) via `scp` to
+`D:\MeridianData\ooxml-graph-paper\runs\paper-s7-clean-rerun-runpod\`, verified the archive
+extracts to all 156 files locally, then terminated both the pod and the network volume (both
+confirmed 204 via the REST API). Total RunPod spend for this entire exercise: well under $1.
+
+**Next steps**: (1) ~~retrieve/archive the full run output~~ -- done, see above; (2)
+~~terminate the RunPod pod and network volume~~ -- done, see above; (3) consider whether the
+now-resolved equation/caption confound changes anything about the K=4 section-reorder finding's
+framing as "the paper's central finding" (it doesn't need to change -- state drift remains the
+only finding that is a genuine, mechanistically-traced capability difference between arms;
+equation/table_structural/caption now all show zero capability difference under clean
+conditions, same as bibliography/citation). This RunPod work is now fully closed out.
 
 ## If you are picking this up cold after a crash
 
