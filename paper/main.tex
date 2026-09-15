@@ -165,6 +165,41 @@ the treatment side:
 \item \textbf{Caption} -- insert/remove one numbered SEQ-field figure caption.
 \end{itemize}
 
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[
+  box/.style={draw, rounded corners, align=center, minimum height=0.9cm, minimum width=4.2cm, font=\small},
+  branch/.style={draw, rounded corners, align=center, minimum height=1.35cm, minimum width=4.6cm, font=\small},
+  arr/.style={-{Latex[length=2.2mm]}},
+  lbl/.style={font=\scriptsize}
+]
+\node[box] (agent) at (0, 6) {Agent (Claude)};
+\node[box] (mcp) at (0, 4) {Meridian Docs MCP server};
+
+\node[branch] (direct) at (-3.0, 1.6)
+  {\textbf{Direct XML edit}\\[3pt]
+   \footnotesize Bibliography, citation,\\[-1pt]
+   \footnotesize section reorder};
+\node[branch] (gated) at (3.0, 1.6)
+  {\textbf{Render-gate write-verify}\\[1pt]
+   \footnotesize (Figure~\ref{fig:rendergate-arch})\\[3pt]
+   \footnotesize Equation, table, caption};
+
+\node[box] (docx) at (0, -0.7) {Persisted \texttt{.docx}};
+
+\draw[arr] (agent) -- node[lbl, right] {calls one bounded tool} (mcp);
+\draw[arr] (mcp) -- (direct);
+\draw[arr] (mcp) -- (gated);
+\draw[arr] (direct) -- (docx);
+\draw[arr] (gated) -- (docx);
+\end{tikzpicture}
+\caption{Meridian Docs' overall functional architecture. Three families write raw XML directly
+with no verification step; the other three route through the write-time render-gate verification
+flow detailed in Figure~\ref{fig:rendergate-arch}. This split is exactly the property that
+Section~\ref{sec:render-gate} shows produces markedly different reliability behavior.}
+\label{fig:architecture}
+\end{figure}
+
 \subsection{Arms and isolation}
 The control arm receives \texttt{Read}, \texttt{Write}, \texttt{Edit}, and \texttt{Bash}, with
 no access to any purpose-built document-editing tool. The treatment arm receives exactly one
