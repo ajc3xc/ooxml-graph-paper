@@ -1,0 +1,1462 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1"><style>:root{color-scheme:light}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>OOXML Paper Review</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600;8..60,700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+  :root {
+    --ground: #f2f4f6;
+    --surface: #ffffff;
+    --surface-2: #eaedf1;
+    --ink: #1b2430;
+    --ink-dim: #5a6472;
+    --ink-faint: #8b93a0;
+    --line: #d7dce2;
+    --line-strong: #b9c1ca;
+    --accent: #1c3f66;
+    --accent-ink: #ffffff;
+    --accent-soft: #e4ecf4;
+    --mark: #f3b62e;
+    --mark-ink: #4a3400;
+    --mark-soft: #fdf1d3;
+    --suggest: #c2483c;
+    --suggest-soft: #f8e3e0;
+    --resolved: #3f8f5f;
+    --resolved-soft: #e2f2e7;
+    --shadow: 0 1px 2px rgba(20,30,45,.06), 0 8px 24px -12px rgba(20,30,45,.18);
+    --radius: 10px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #14181f;
+      --surface: #1b212b;
+      --surface-2: #232a35;
+      --ink: #e7eaee;
+      --ink-dim: #a6afbc;
+      --ink-faint: #6f7885;
+      --line: #313a47;
+      --line-strong: #414c5c;
+      --accent: #6fa0d6;
+      --accent-ink: #0c1620;
+      --accent-soft: #223142;
+      --mark: #e6ac2b;
+      --mark-ink: #2a1e00;
+      --mark-soft: #3a2f10;
+      --suggest: #e08277;
+      --suggest-soft: #3a201d;
+      --resolved: #6cc48d;
+      --resolved-soft: #1b3324;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px -12px rgba(0,0,0,.5);
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground: #14181f;
+    --surface: #1b212b;
+    --surface-2: #232a35;
+    --ink: #e7eaee;
+    --ink-dim: #a6afbc;
+    --ink-faint: #6f7885;
+    --line: #313a47;
+    --line-strong: #414c5c;
+    --accent: #6fa0d6;
+    --accent-ink: #0c1620;
+    --accent-soft: #223142;
+    --mark: #e6ac2b;
+    --mark-ink: #2a1e00;
+    --mark-soft: #3a2f10;
+    --suggest: #e08277;
+    --suggest-soft: #3a201d;
+    --resolved: #6cc48d;
+    --resolved-soft: #1b3324;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px -12px rgba(0,0,0,.5);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    background: var(--ground);
+    color: var(--ink);
+    font-family: 'IBM Plex Sans', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  ::selection { background: var(--mark); color: var(--mark-ink); }
+
+  .app { display: grid; grid-template-columns: 220px minmax(0,1fr) 340px; min-height: 100vh; }
+  @media (max-width: 1100px) { .app { grid-template-columns: 1fr; } .nav, .rail { display: none; } }
+
+  /* ---------- left nav ---------- */
+  .nav {
+    border-right: 1px solid var(--line);
+    padding: 22px 14px;
+    position: sticky; top: 0; height: 100vh; overflow-y: auto;
+  }
+  .nav-title { font-family: 'IBM Plex Mono'; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-faint); margin: 0 0 4px 8px; }
+  .nav-doc { font-weight: 600; font-size: 14px; margin: 0 0 18px 8px; line-height: 1.35; }
+  .nav-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 1px; }
+  .nav-list a {
+    display: block; padding: 6px 8px; border-radius: 6px; font-size: 13px;
+    color: var(--ink-dim); text-decoration: none; line-height: 1.3;
+  }
+  .nav-list a:hover { background: var(--surface-2); color: var(--ink); }
+  .nav-stats { margin-top: 20px; padding: 12px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); }
+  .nav-stats-row { display: flex; justify-content: space-between; font-size: 12px; padding: 3px 0; color: var(--ink-dim); }
+  .nav-stats-row b { color: var(--ink); font-family: 'IBM Plex Mono'; font-variant-numeric: tabular-nums; }
+
+  /* ---------- center column ---------- */
+  .doc { padding: 48px 0 120px; }
+  .doc-inner { max-width: 700px; margin: 0 auto; padding: 0 40px 0 64px; position: relative; }
+  .doc-head { margin-bottom: 40px; }
+  .doc-kicker { font-family: 'IBM Plex Mono'; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); margin: 0 0 10px; }
+  .doc-title { font-family: 'Source Serif 4'; font-weight: 600; font-size: 27px; line-height: 1.28; margin: 0 0 14px; text-wrap: balance; }
+  .doc-authors { font-size: 13.5px; color: var(--ink-dim); margin: 0; }
+
+  h2.sec { font-family: 'Source Serif 4'; font-weight: 600; font-size: 20px; margin: 46px 0 4px; padding-top: 2px; border-top: 1px solid var(--line); padding-top: 20px; }
+  h3.sub { font-family: 'Source Serif 4'; font-weight: 600; font-style: italic; font-size: 16.5px; margin: 28px 0 2px; color: var(--ink); }
+
+  .block { position: relative; margin: 15px 0; padding: 3px 0 3px 26px; border-radius: 6px; border-left: 3px solid transparent; }
+  .block:hover { background: var(--surface); }
+  .block:hover .lineno { color: var(--ink-faint); }
+  .block:hover .add-note { opacity: 1; }
+  .block.edited { border-left-color: var(--accent); background: var(--accent-soft); }
+  .block.edited .lineno { color: var(--accent); }
+  /* Headers reuse .block's hover/edited/reviewed machinery but have no lineno
+     gutter and must keep their own h2.sec/h3.sub margins, not .block's. */
+  .block.header-block { margin: 0; padding: 0 0 0 26px; }
+  .block.header-block h2.sec, .block.header-block h3.sub { margin-left: 0; }
+  .lineno {
+    position: absolute; left: -34px; top: 5px; width: 26px; text-align: right;
+    font-family: 'IBM Plex Mono'; font-size: 10px; color: transparent; user-select: none;
+  }
+  p.body-text {
+    font-family: 'Source Serif 4'; font-size: 16.5px; line-height: 1.68; color: var(--ink);
+    margin: 0; cursor: text; border-radius: 4px; padding: 2px 4px; margin-left: -4px;
+    outline: none; transition: box-shadow .12s;
+  }
+  p.body-text:hover { box-shadow: 0 0 0 1px var(--line-strong) inset; }
+  p.body-text:focus { box-shadow: 0 0 0 2px var(--accent) inset; background: var(--surface); }
+  p.body-text cite { font-style: normal; color: var(--ink-faint); font-size: 12.5px; font-family: 'IBM Plex Sans'; }
+  p.body-text i { font-style: italic; }
+  p.body-text b { font-weight: 600; }
+  .edited-chip {
+    position: absolute; right: -4px; top: -8px; font-family: 'IBM Plex Mono'; font-size: 9px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: .04em; background: var(--accent); color: var(--accent-ink);
+    padding: 2px 6px; border-radius: 4px; display: none;
+  }
+  .block.edited .edited-chip { display: inline-block; }
+  .diff-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 11px 12px; }
+  .diff-section { font-family: 'IBM Plex Mono'; font-size: 9.5px; text-transform: uppercase; letter-spacing: .04em; color: var(--ink-faint); margin: 0 0 8px; }
+  .diff-old, .diff-new {
+    font-family: 'Source Serif 4'; font-size: 13px; line-height: 1.5; padding: 6px 8px; border-radius: 6px; margin-bottom: 6px;
+  }
+  .diff-old { background: var(--suggest-soft); color: var(--ink-dim); text-decoration: line-through; text-decoration-color: var(--suggest); }
+  .diff-new { background: var(--resolved-soft); color: var(--ink); }
+  .diff-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; }
+  .diff-revert { font-family: 'IBM Plex Sans'; font-size: 11px; font-weight: 600; color: var(--suggest); background: none; border: none; cursor: pointer; padding: 0; }
+
+  .add-note {
+    opacity: 0; position: absolute; right: -4px; top: 2px;
+    width: 22px; height: 22px; border-radius: 50%; border: 1px solid var(--line-strong);
+    background: var(--surface); color: var(--ink-dim); cursor: pointer; font-size: 13px;
+    display: flex; align-items: center; justify-content: center; transition: opacity .12s;
+  }
+  .add-note:hover { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+
+  mark.note-mark {
+    background: var(--mark-soft); color: inherit; border-bottom: 2px solid var(--mark);
+    padding: 0 1px; cursor: pointer; border-radius: 2px;
+  }
+  mark.note-mark.suggestion { background: var(--suggest-soft); border-bottom-color: var(--suggest); }
+  mark.note-mark.resolved { background: transparent; border-bottom: 2px dotted var(--resolved); opacity: .75; }
+
+  .figblock, .tabblock {
+    border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface);
+    padding: 14px 16px; margin: 15px 0;
+  }
+  .figblock-label, .tabblock-label { font-family: 'IBM Plex Mono'; font-size: 11px; font-weight: 600; color: var(--accent); text-transform: uppercase; letter-spacing: .04em; }
+  .figblock-cap, .tabblock-cap { font-family: 'Source Serif 4'; font-size: 14.5px; line-height: 1.55; margin-top: 6px; color: var(--ink-dim); }
+  .figblock img { max-width: 100%; border-radius: 6px; margin-top: 10px; border: 1px solid var(--line); }
+  table.mini { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 12.5px; font-family: 'IBM Plex Mono'; }
+  table.mini th, table.mini td { text-align: left; padding: 4px 8px; border-bottom: 1px solid var(--line); }
+  table.mini th { color: var(--ink-faint); font-weight: 500; text-transform: uppercase; font-size: 10px; letter-spacing: .04em; }
+
+  /* ---------- selection pill (does not steal focus - a plain select+backspace stays a plain select+backspace) ---------- */
+  .select-pill {
+    position: fixed; z-index: 61; display: none; font-family: 'IBM Plex Sans'; font-size: 12px; font-weight: 600;
+    background: var(--accent); color: var(--accent-ink); border: none; border-radius: 999px; padding: 6px 12px;
+    cursor: pointer; box-shadow: var(--shadow);
+  }
+  .select-pill.show { display: block; }
+
+  /* ---------- selection popover ---------- */
+  .popover {
+    position: fixed; z-index: 60; width: 300px; background: var(--surface); border: 1px solid var(--line-strong);
+    border-radius: var(--radius); box-shadow: var(--shadow); padding: 12px; display: none;
+  }
+  .popover.show { display: block; }
+  .popover-quote {
+    font-family: 'Source Serif 4'; font-style: italic; font-size: 13px; color: var(--ink-dim);
+    border-left: 2px solid var(--mark); padding: 2px 0 2px 10px; margin-bottom: 10px; max-height: 70px; overflow-y: auto;
+  }
+  .type-toggle { display: flex; gap: 6px; margin-bottom: 8px; }
+  .type-toggle button {
+    flex: 1; padding: 6px 4px; font-family: 'IBM Plex Sans'; font-size: 12px; font-weight: 500;
+    border: 1px solid var(--line-strong); background: var(--surface); color: var(--ink-dim); border-radius: 7px; cursor: pointer;
+  }
+  .type-toggle button.active { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+  .popover textarea {
+    width: 100%; font-family: 'IBM Plex Sans'; font-size: 13px; border: 1px solid var(--line-strong);
+    border-radius: 7px; padding: 8px; resize: vertical; min-height: 56px; background: var(--ground); color: var(--ink);
+  }
+  .popover textarea + textarea { margin-top: 6px; }
+  .popover-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 10px; }
+  .btn { font-family: 'IBM Plex Sans'; font-size: 12.5px; font-weight: 600; padding: 7px 14px; border-radius: 7px; cursor: pointer; border: 1px solid transparent; }
+  .btn-ghost { background: transparent; color: var(--ink-dim); border-color: var(--line-strong); }
+  .btn-ghost:hover { background: var(--surface-2); }
+  .btn-primary { background: var(--accent); color: var(--accent-ink); }
+  .btn-primary:hover { filter: brightness(1.08); }
+
+  /* ---------- right rail ---------- */
+  .rail { border-left: 1px solid var(--line); padding: 22px 18px; position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; }
+  .rail-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 4px; }
+  .rail-title { font-weight: 600; font-size: 14px; margin: 0; }
+  .rail-count { font-family: 'IBM Plex Mono'; font-size: 12px; color: var(--ink-faint); }
+  .rail-sub { font-size: 12px; color: var(--ink-faint); margin: 0 0 14px; }
+  .tab-row { display: flex; gap: 4px; margin-bottom: 12px; background: var(--surface-2); padding: 3px; border-radius: 9px; }
+  .tab {
+    flex: 1; font-family: 'IBM Plex Sans'; font-size: 12.5px; font-weight: 600; padding: 7px 8px;
+    border: none; border-radius: 7px; background: transparent; color: var(--ink-dim); cursor: pointer;
+  }
+  .tab.active { background: var(--surface); color: var(--ink); box-shadow: 0 1px 2px rgba(20,30,45,.08); }
+  .tab-count { font-family: 'IBM Plex Mono'; font-weight: 500; color: var(--accent); }
+  .filter-row { display: flex; gap: 6px; margin-bottom: 14px; }
+  .chip {
+    font-family: 'IBM Plex Sans'; font-size: 11.5px; font-weight: 500; padding: 5px 10px; border-radius: 999px;
+    border: 1px solid var(--line-strong); background: var(--surface); color: var(--ink-dim); cursor: pointer;
+  }
+  .chip.active { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+  .notes-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding-right: 2px; }
+  .note-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 11px 12px; cursor: pointer; }
+  .note-card:hover { border-color: var(--line-strong); }
+  .note-card.resolved { opacity: .55; }
+  .note-card-top { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; }
+  .note-badge { font-family: 'IBM Plex Mono'; font-size: 9.5px; text-transform: uppercase; letter-spacing: .04em; padding: 2px 6px; border-radius: 4px; font-weight: 600; }
+  .note-badge.comment { background: var(--mark-soft); color: var(--mark-ink); }
+  .note-badge.suggestion { background: var(--suggest-soft); color: var(--suggest); }
+  .note-badge.resolved-badge { background: var(--resolved-soft); color: var(--resolved); }
+  .note-badge.new-badge { background: var(--accent); color: var(--accent-ink); margin-left: 4px; }
+  .note-section { font-family: 'IBM Plex Mono'; font-size: 10.5px; color: var(--ink-faint); }
+  .note-quote { font-family: 'Source Serif 4'; font-style: italic; font-size: 12.5px; color: var(--ink-dim); border-left: 2px solid var(--line-strong); padding-left: 8px; margin: 0 0 6px; line-height: 1.4; }
+  .note-body { font-size: 13px; line-height: 1.45; margin: 0; }
+  .note-suggest { font-size: 12.5px; margin: 6px 0 0; padding: 6px 8px; background: var(--suggest-soft); border-radius: 6px; color: var(--ink); }
+  .note-suggest b { color: var(--suggest); font-size: 10.5px; text-transform: uppercase; letter-spacing: .03em; display: block; margin-bottom: 2px; }
+  .note-foot { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; }
+  .note-time { font-family: 'IBM Plex Mono'; font-size: 10px; color: var(--ink-faint); }
+  .note-foot-actions { display: flex; align-items: center; gap: 12px; }
+  .note-resolve { font-family: 'IBM Plex Sans'; font-size: 11px; font-weight: 600; color: var(--accent); background: none; border: none; cursor: pointer; padding: 0; }
+  .note-edit-btn { font-family: 'IBM Plex Sans'; font-size: 11px; font-weight: 600; color: var(--ink-dim); background: none; border: none; cursor: pointer; padding: 0; }
+  .note-edit-btn:hover { color: var(--accent); }
+  .note-delete-btn { font-family: 'IBM Plex Sans'; font-size: 11px; font-weight: 600; color: var(--ink-faint); background: none; border: none; cursor: pointer; padding: 0; }
+  .note-delete-btn:hover { color: var(--suggest); }
+  .note-delete-btn.confirm-armed { color: var(--suggest); font-weight: 700; }
+  .note-edit-form { background: var(--surface); border: 1px solid var(--accent); border-radius: var(--radius); padding: 11px 12px; }
+  .note-edit-form textarea {
+    width: 100%; font-family: 'IBM Plex Sans'; font-size: 13px; border: 1px solid var(--line-strong);
+    border-radius: 7px; padding: 8px; resize: vertical; min-height: 52px; background: var(--ground); color: var(--ink);
+    margin-top: 8px;
+  }
+  .note-edit-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 10px; }
+  .empty-state { text-align: center; padding: 40px 12px; color: var(--ink-faint); font-size: 13px; }
+  .toast {
+    position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%) translateY(20px); opacity: 0;
+    background: var(--ink); color: var(--ground); font-family: 'IBM Plex Sans'; font-size: 13px; font-weight: 500;
+    padding: 10px 18px; border-radius: 999px; box-shadow: var(--shadow); transition: all .25s; pointer-events: none; z-index: 80;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .flash { animation: flashbg .9s ease; }
+  @keyframes flashbg { 0%{ box-shadow: 0 0 0 2px var(--line-strong) inset; } 100%{ box-shadow: 0 0 0 2px transparent inset; } }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; animation: none !important; } }
+
+  /* ---------- review dot + keyboard-current ---------- */
+  .review-dot {
+    position: absolute; left: -14px; top: 10px; width: 6px; height: 6px; border-radius: 50%;
+    background: transparent; transition: background .15s;
+  }
+  .block.reviewed .review-dot { background: var(--resolved); }
+  .block.kbd-current { background: var(--accent-soft); box-shadow: 0 0 0 1px var(--accent) inset; }
+
+  /* ---------- per-block toolbar (hover-revealed icon buttons) ---------- */
+  .block-toolbar { position: absolute; right: -4px; top: 2px; display: flex; gap: 4px; opacity: 0; transition: opacity .12s; }
+  .block:hover .block-toolbar { opacity: 1; }
+  .block-toolbar button {
+    width: 22px; height: 22px; border-radius: 50%; border: 1px solid var(--line-strong);
+    background: var(--surface); color: var(--ink-dim); cursor: pointer; font-size: 12px;
+    display: flex; align-items: center; justify-content: center; transition: all .12s; padding: 0;
+  }
+  .block-toolbar button:hover { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+  .mark-read.active { background: var(--resolved); color: var(--accent-ink); border-color: var(--resolved); }
+
+  /* ---------- subtle sub-tools row: LaTeX source / view-change toggles ---------- */
+  .block-subtools { display: flex; gap: 14px; margin: 2px 0 0 -4px; }
+  .subtool-btn {
+    font-family: 'IBM Plex Mono'; font-size: 10.5px; letter-spacing: .01em; color: var(--ink-faint);
+    background: none; border: none; cursor: pointer; padding: 2px 4px; display: none; align-items: center; gap: 4px;
+  }
+  .subtool-btn:hover { color: var(--accent); }
+  .src-toggle { display: inline-flex; }
+  .block.edited .view-diff-btn { display: inline-flex; }
+
+  /* ---------- raw LaTeX source panel ---------- */
+  .latex-src {
+    margin: 6px -4px 4px; background: var(--surface-2); border: 1px solid var(--line); border-radius: 8px;
+    overflow: hidden;
+  }
+  .latex-src-head {
+    display: flex; justify-content: space-between; align-items: center; padding: 6px 10px;
+    font-family: 'IBM Plex Mono'; font-size: 10px; text-transform: uppercase; letter-spacing: .05em;
+    color: var(--ink-faint); border-bottom: 1px solid var(--line);
+  }
+  .src-copy {
+    font-family: 'IBM Plex Sans'; font-size: 10.5px; font-weight: 600; color: var(--accent);
+    background: none; border: none; cursor: pointer; padding: 0;
+  }
+  .latex-src pre {
+    margin: 0; padding: 10px 12px; font-family: 'IBM Plex Mono'; font-size: 12px; line-height: 1.55;
+    color: var(--ink-dim); white-space: pre-wrap; word-break: break-word; max-height: 260px; overflow-y: auto;
+  }
+
+  /* ---------- inline word-level diff (track-changes style) ---------- */
+  .inline-diff, .diff-inline {
+    font-family: 'Source Serif 4'; font-size: 13.5px; line-height: 1.6; color: var(--ink);
+  }
+  .inline-diff { margin: 6px -4px 4px; padding: 8px 10px; background: var(--surface-2); border-radius: 8px; border: 1px solid var(--line); }
+  del.wd-del, ins.wd-ins { text-decoration: none; }
+  del.wd-del { color: var(--suggest); background: var(--suggest-soft); text-decoration: line-through; text-decoration-color: var(--suggest); border-radius: 2px; padding: 0 1px; }
+  ins.wd-ins { color: var(--resolved); background: var(--resolved-soft); text-decoration: underline; text-decoration-color: var(--resolved); border-radius: 2px; padding: 0 1px; }
+
+  /* ---------- progress indicator (nav) ---------- */
+  .nav-progress { margin-top: 16px; }
+  .nav-progress-row { display: flex; justify-content: space-between; font-size: 12px; color: var(--ink-dim); margin-bottom: 6px; }
+  .nav-progress-row b { color: var(--ink); font-family: 'IBM Plex Mono'; font-variant-numeric: tabular-nums; }
+  .progress-track { height: 6px; border-radius: 999px; background: var(--surface-2); overflow: hidden; }
+  .progress-fill { height: 100%; background: var(--accent); border-radius: 999px; transition: width .25s ease; width: 0%; }
+  .kbd-hint {
+    margin-top: 14px; width: 100%; font-family: 'IBM Plex Mono'; font-size: 10.5px; letter-spacing: .01em;
+    color: var(--ink-faint); background: var(--surface); border: 1px solid var(--line); border-radius: 7px;
+    padding: 7px 9px; cursor: pointer; text-align: left;
+  }
+  .kbd-hint:hover { color: var(--accent); border-color: var(--accent); }
+
+  /* ---------- summary tab ---------- */
+  .summary-counts { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+  .summary-chip {
+    font-family: 'IBM Plex Mono'; font-size: 11px; padding: 4px 8px; border-radius: 999px;
+    background: var(--surface-2); color: var(--ink-dim); border: 1px solid var(--line);
+  }
+  .summary-chip b { color: var(--ink); font-weight: 600; }
+  .summary-item-type {
+    font-family: 'IBM Plex Mono'; font-size: 9.5px; text-transform: uppercase; letter-spacing: .04em;
+    padding: 2px 6px; border-radius: 4px; font-weight: 600;
+  }
+  .summary-item-type.edit { background: var(--accent-soft); color: var(--accent); }
+
+  /* ---------- keyboard-shortcuts modal ---------- */
+  .modal-backdrop {
+    position: fixed; inset: 0; background: rgba(10,14,20,.45); z-index: 90;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .modal-backdrop[hidden] { display: none; }
+  .modal-card {
+    width: 320px; background: var(--surface); border: 1px solid var(--line-strong); border-radius: var(--radius);
+    box-shadow: var(--shadow); padding: 18px 20px;
+  }
+  .modal-card h3 { margin: 0 0 12px; font-size: 15px; font-family: 'Source Serif 4'; font-weight: 600; }
+  .modal-card ul { list-style: none; margin: 0 0 14px; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+  .modal-card li { display: flex; justify-content: space-between; align-items: center; font-size: 12.5px; color: var(--ink-dim); }
+  .modal-card kbd {
+    font-family: 'IBM Plex Mono'; font-size: 11px; background: var(--surface-2); border: 1px solid var(--line-strong);
+    border-bottom-width: 2px; border-radius: 4px; padding: 2px 6px; color: var(--ink);
+  }
+</style>
+
+<div class="app">
+  <nav class="nav">
+    <p class="nav-title">Manuscript</p>
+    <p class="nav-doc" id="navDocTitle"></p>
+    <ul class="nav-list" id="navList"></ul>
+    <div class="nav-progress">
+      <div class="nav-progress-row"><span>Reviewed</span><b id="progressLabel">0 / 0</b></div>
+      <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+    </div>
+    <div class="nav-stats">
+      <div class="nav-stats-row"><span>Open notes</span><b id="statOpen">0</b></div>
+      <div class="nav-stats-row"><span>Resolved</span><b id="statResolved">0</b></div>
+      <div class="nav-stats-row"><span>Suggestions</span><b id="statSuggest">0</b></div>
+    </div>
+    <button class="kbd-hint" id="kbdHintBtn" type="button">&#8984; j/k move &middot; e edit &middot; c comment &middot; ? help</button>
+  </nav>
+
+  <main class="doc">
+    <div class="doc-inner" id="docInner">
+      <div class="doc-head">
+        <p class="doc-kicker" id="metaKicker" data-textsrc="meta-kicker" contenteditable="true" spellcheck="true"></p>
+        <h1 class="doc-title" id="metaTitle" data-textsrc="meta-title" contenteditable="true" spellcheck="true"></h1>
+        <p class="doc-authors" id="metaAuthors" data-textsrc="meta-authors" contenteditable="true" spellcheck="true"></p>
+      </div>
+      <!-- blocks injected by JS -->
+    </div>
+  </main>
+
+  <aside class="rail">
+    <div class="rail-head"><p class="rail-title">Margin notes</p><span class="rail-count" id="railCount">0</span></div>
+    <p class="rail-sub">Click into any paragraph to edit it directly, or select text to leave a comment. Press <b>?</b> for keyboard shortcuts.</p>
+    <div class="tab-row">
+      <button class="tab active" data-tab="notes">Notes</button>
+      <button class="tab" data-tab="edits">Edits <span id="editsCount" class="tab-count"></span></button>
+      <button class="tab" data-tab="summary">Summary</button>
+    </div>
+    <div class="filter-row" id="notesFilterRow">
+      <button class="chip active" data-filter="open">Open</button>
+      <button class="chip" data-filter="all">All</button>
+      <button class="chip" data-filter="resolved">Resolved</button>
+    </div>
+    <div class="notes-list" id="notesList"></div>
+    <div class="notes-list" id="editsList" style="display:none"></div>
+    <div class="notes-list" id="summaryList" style="display:none"></div>
+  </aside>
+</div>
+
+<div class="modal-backdrop" id="shortcutsModal" hidden>
+  <div class="modal-card">
+    <h3>Keyboard shortcuts</h3>
+    <ul>
+      <li><span>Next / previous paragraph</span><span><kbd>j</kbd> / <kbd>k</kbd></span></li>
+      <li><span>Next / previous paragraph</span><span><kbd>&darr;</kbd> / <kbd>&uarr;</kbd></span></li>
+      <li><span>Edit current paragraph</span><kbd>e</kbd></li>
+      <li><span>Comment on current paragraph</span><kbd>c</kbd></li>
+      <li><span>Close / exit editing</span><kbd>Esc</kbd></li>
+      <li><span>Toggle this panel</span><kbd>?</kbd></li>
+    </ul>
+    <button class="btn btn-primary" id="shortcutsClose" style="width:100%">Got it</button>
+  </div>
+</div>
+
+<button type="button" class="select-pill" id="selectPill">Comment</button>
+
+<div class="popover" id="popover">
+  <div class="popover-quote" id="popQuote"></div>
+  <div class="type-toggle">
+    <button type="button" class="active" data-type="comment" id="btnTypeComment">Comment</button>
+    <button type="button" data-type="suggestion" id="btnTypeSuggestion">Suggest edit</button>
+  </div>
+  <textarea id="popComment" placeholder="What's the issue?"></textarea>
+  <textarea id="popSuggest" placeholder="Replacement text&hellip;" style="display:none"></textarea>
+  <div class="popover-actions">
+    <button class="btn btn-ghost" id="popCancel">Cancel</button>
+    <button class="btn btn-primary" id="popSave">Save note</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ---------------------------------------------------------------------------
+// Content model: the manuscript, chunked into addressable blocks. Each
+// paragraph block's id is a stable, human-readable key (section-topic) so a
+// saved note can be traced back to the exact spot in main_plos.tex later.
+// ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
+// Per-paper metadata. `id` must be a short, stable, filesystem/URL-safe slug
+// unique per paper instance -- it namespaces this instance's localStorage
+// key so two generalized copies of this tool (e.g. one per paper) opened in
+// the same browser never read/write each other's notes.
+// ---------------------------------------------------------------------------
+
+const META = {
+  id: 'ooxml-graph-paper',
+  kicker: 'Working draft · confirmatory benchmark',
+  title: 'Bounded Structural Primitives versus Generic Tool Use for Agentic Word Document Editing: A Confirmatory Benchmark',
+  authors: 'Adam Camerer',
+  sourceFile: 'main.tex',
+};
+document.getElementById('navDocTitle').textContent = META.title;
+document.getElementById('metaKicker').textContent = META.kicker;
+document.getElementById('metaTitle').textContent = META.title;
+document.getElementById('metaAuthors').innerHTML = META.authors;
+
+const CITES = {
+  jimenez2023swebench: 'Jimenez et al. 2023', zhou2024webarena: 'Zhou et al. 2024',
+  mialon2023gaia: 'Mialon et al. 2023', ecma376: 'ECMA International 2016',
+  efron1979bootstrap: 'Efron 1979', nichols2002permutation: 'Nichols & Holmes 2002',
+};
+function cite(...keys) {
+  return ` <cite contenteditable="false">(${keys.map(k => CITES[k] || k).join('; ')})</cite>`;
+}
+
+const SECTIONS = [
+  { id: 'front', label: 'Title & abstract' },
+  { id: 'intro', label: 'Introduction' },
+  { id: 'related', label: 'Related work' },
+  { id: 'methods', label: 'Methods' },
+  { id: 'results', label: 'Results' },
+  { id: 'defects', label: 'Nine real defects' },
+  { id: 'discussion', label: 'Discussion' },
+  { id: 'limitations', label: 'Limitations' },
+  { id: 'conclusion', label: 'Conclusion' },
+];
+
+const DOC = [
+{ id: 'abstract', tex: `Many agent systems increasingly edit real documents through generic file-manipulation tools (read, write, search-and-replace, shell commands) rather than through primitives designed for the document's own format. On the same model and the same documents, we ask whether a small set of bounded, atomic, structurally-aware editing operations for Microsoft Word's Office Open XML (OOXML/\\texttt{.docx}) format changes task correctness relative to an agent given only generic tools and raw XML access. We report a confirmatory benchmark across six task families (bibliography-entry insertion, inline citation insertion, section reordering, equation insertion, whole-table insertion, and figure-caption insertion) on a held-out corpus of real, previously unseen \\texttt{.docx} documents, each task run as a forward edit followed by its own inverse and independently graded against the original document's structure. Two families (bibliography, citation) show no measurable difference between arms. One family (section reordering) shows no difference on a single edit but a statistically significant advantage for the bounded tool under four repeated edit-undo cycles (92.9% vs. 67.3% pass rate, $p=0.0015$), traced to a specific, data-grounded failure mode in the generic-tool arm: compounding loss of the true original document state across repeated cycles -- the paper's central finding, which we call \\emph{state drift}. Three families (equation, whole-table, and caption insertion) share a write-time structural-correctness verification step; on a shared, variably-contended host, two of the three reported markedly lower pass rates (equation 46.2%, caption 7.7%) while whole-table reached 96.2%. We treated this as a hypothesis rather than a finding and tested it directly: a controlled, isolated timing test first rejected task-dependent render cost as the explanation, and a full confirmatory re-run of the identical benchmark -- same model, same corpus, same code -- on a dedicated, single-tenant cloud host closed the gap completely, all three families reaching 100% pass for both arms. The original numbers were a deployment-environment artifact (shared-host scheduling contention, a physically unreliable storage device, and confirmed network failures), not an editing-capability limitation, and we report both the original and the confirmatory numbers rather than replacing one with the other silently. Separately, we document nine infrastructure and evaluation-harness defects that this benchmark's own development surfaced and fixed -- several of which materially changed the reported numbers -- disclosed in full rather than silently corrected.`, section: 'front', h2: 'Abstract', text: `Many agent systems increasingly edit real documents through generic file-manipulation tools (read, write, search-and-replace, shell commands) rather than through primitives designed for the document's own format. On the same model and the same documents, we ask whether a small set of bounded, atomic, structurally-aware editing operations for Microsoft Word's Office Open XML (OOXML/<code>.docx</code>) format changes task correctness relative to an agent given only generic tools and raw XML access. We report a confirmatory benchmark across six task families (bibliography-entry insertion, inline citation insertion, section reordering, equation insertion, whole-table insertion, and figure-caption insertion) on a held-out corpus of real, previously unseen <code>.docx</code> documents, each task run as a forward edit followed by its own inverse and independently graded against the original document's structure. Two families (bibliography, citation) show no measurable difference between arms. One family (section reordering) shows no difference on a single edit but a statistically significant advantage for the bounded tool under four repeated edit-undo cycles (92.9% vs. 67.3% pass rate, p=0.0015), traced to a specific, data-grounded failure mode in the generic-tool arm: compounding loss of the true original document state across repeated cycles &ndash; the paper's central finding, which we call <em>state drift</em>. Three families (equation, whole-table, and caption insertion) share a write-time structural-correctness verification step; on a shared, variably-contended host, two of the three reported markedly lower pass rates (equation 46.2%, caption 7.7%) while whole-table reached 96.2%. We treated this as a hypothesis rather than a finding and tested it directly: a controlled, isolated timing test first rejected task-dependent render cost as the explanation, and a full confirmatory re-run of the identical benchmark &ndash; same model, same corpus, same code &ndash; on a dedicated, single-tenant cloud host closed the gap completely, all three families reaching 100% pass for both arms. The original numbers were a deployment-environment artifact (shared-host scheduling contention, a physically unreliable storage device, and confirmed network failures), not an editing-capability limitation, and we report both the original and the confirmatory numbers rather than replacing one with the other silently. Separately, we document nine infrastructure and evaluation-harness defects that this benchmark's own development surfaced and fixed &ndash; several of which materially changed the reported numbers &ndash; disclosed in full rather than silently corrected.` },
+{ id: 'intro-1', tex: `When agents use large language models to edit real documents -- inserting a citation, reordering a section, adding a table -- they typically do so one of two ways. In the first, the agent is given generic file tools (read a file, write a file, run a shell command) and is expected to construct or edit the document's own serialization format correctly by direct manipulation, the same way a human would edit raw markup in a text editor. In the second, the agent is given a small number of purpose-built, bounded operations -- \\emph{insert this table here}, \\emph{remove this citation} -- that internally guarantee the document remains structurally valid.`, section: 'intro', h2: 'Introduction', text: `When agents use large language models to edit real documents &ndash; inserting a citation, reordering a section, adding a table &ndash; they typically do so one of two ways. In the first, the agent is given generic file tools (read a file, write a file, run a shell command) and is expected to construct or edit the document's own serialization format correctly by direct manipulation, the same way a human would edit raw markup in a text editor. In the second, the agent is given a small number of purpose-built, bounded operations &ndash; <em>insert this table here</em>, <em>remove this citation</em> &ndash; that internally guarantee the document remains structurally valid.` },
+{ id: 'intro-2', tex: `The second approach is a common design pattern in tool-augmented agent systems generally: it underlies benchmarks in software engineering (SWE-bench), open-web navigation (WebArena), and general-purpose tool use (GAIA) alike \\citep{jimenez2023swebench,zhou2024webarena,mialon2023gaia} -- each of which measures whether an agent completes a task under one fixed tool surface, not whether the shape of that surface itself changes the outcome. For document editing specifically, that tradeoff is under-characterized: bounded tools cost engineering effort to build and constrain what an agent can express, while generic tools cost nothing to provide but ask the model to get low-level format details right on every call, with no structural safety net. Getting this wrong is costly in different directions: bounded tools that prove unnecessary waste engineering effort, while generic tools that seem fine on a single edit may fail silently as an agent keeps working on the same document over time. This paper reports a confirmatory, paired benchmark designed to measure that tradeoff directly, for one concrete document format (Microsoft Word's \\texttt{.docx}, standardized as Office Open XML \\citep{ecma376}) and one concrete set of editing tasks.`, section: 'intro', text: `The second approach is a common design pattern in tool-augmented agent systems generally: it underlies benchmarks in software engineering (SWE-bench), open-web navigation (WebArena), and general-purpose tool use (GAIA) alike ${cite('jimenez2023swebench','zhou2024webarena','mialon2023gaia')} &ndash; each of which measures whether an agent completes a task under one fixed tool surface, not whether the shape of that surface itself changes the outcome. For document editing specifically, that tradeoff is under-characterized: bounded tools cost engineering effort to build and constrain what an agent can express, while generic tools cost nothing to provide but ask the model to get low-level format details right on every call, with no structural safety net. Getting this wrong is costly in different directions: bounded tools that prove unnecessary waste engineering effort, while generic tools that seem fine on a single edit may fail silently as an agent keeps working on the same document over time. This paper reports a confirmatory, paired benchmark designed to measure that tradeoff directly, for one concrete document format (Microsoft Word's <code>.docx</code>, standardized as Office Open XML ${cite('ecma376')}) and one concrete set of editing tasks.` },
+{ id: 'intro-design', tex: `Each of six task families is defined as a \\emph{forward} edit (e.g., insert a bibliography entry) and its own \\emph{inverse} (remove that same entry), run in sequence against the same document, so that a correct round trip leaves the document's original content unchanged. Every task is run twice on the same starting document under the same model: once with a \\textbf{control} arm restricted to generic \\texttt{Read}/\\texttt{Write}/\\texttt{Edit}/\\texttt{Bash} tools and direct access to the document's raw XML, and once with a \\textbf{treatment} arm restricted to exactly one bounded, purpose-built tool pair for that family and no generic editing tools at all. Both arms use the same underlying language model (\\texttt{claude-sonnet-5}); the only manipulated variable is which tool surface the agent can act through. Grading is performed entirely outside the agent, never by trusting its own transcript claim of success.`, section: 'intro', h3: 'Design', text: `Each of six task families is defined as a <em>forward</em> edit (e.g., insert a bibliography entry) and its own <em>inverse</em> (remove that same entry), run in sequence against the same document, so that a correct round trip leaves the document's original content unchanged. Every task is run twice on the same starting document under the same model: once with a <strong>control</strong> arm restricted to generic <code>Read</code>/<code>Write</code>/<code>Edit</code>/<code>Bash</code> tools and direct access to the document's raw XML, and once with a <strong>treatment</strong> arm restricted to exactly one bounded, purpose-built tool pair for that family and no generic editing tools at all. Both arms use the same underlying language model (<code>claude-sonnet-5</code>); the only manipulated variable is which tool surface the agent can act through. Grading is performed entirely outside the agent, never by trusting its own transcript claim of success.` },
+{ id: 'intro-contrib', tex: `This paper's contributions: (1) a confirmatory, paired benchmark across six real document-editing task families, on a held-out corpus never used during the tooling's own development, with per-family sample sizes and paired significance tests reported honestly, including families where the two arms show no measurable difference. (2) A demonstration that bounded structural tools show no advantage on a single edit but a significant advantage under repeated edit-undo cycling, with the mechanism identified: the generic-tool arm's correctness degrades with repetition (state drift) while the bounded tool's does not. (3) Identification of a confound introduced by a write-time structural-verification step shared by three of the six families, resolved with a controlled confirmatory re-run of the identical benchmark on a dedicated, single-tenant host, which closes the gap completely and confirms the confound was a deployment-environment artifact, not a capability limitation. (4) Disclosure of nine infrastructure, harness, and evaluation-code defects found during this project -- each with its root cause, fix, and independent re-verification -- showing that several materially changed an already-reported number.`, section: 'intro', h3: 'Contributions', text: `This paper's contributions: (1) a confirmatory, paired benchmark across six real document-editing task families, on a held-out corpus never used during the tooling's own development, with per-family sample sizes and paired significance tests reported honestly, including families where the two arms show no measurable difference. (2) A demonstration that bounded structural tools show no advantage on a single edit but a significant advantage under repeated edit-undo cycling, with the mechanism identified: the generic-tool arm's correctness degrades with repetition (state drift) while the bounded tool's does not. (3) Identification of a confound introduced by a write-time structural-verification step shared by three of the six families, resolved with a controlled confirmatory re-run of the identical benchmark on a dedicated, single-tenant host, which closes the gap completely and confirms the confound was a deployment-environment artifact, not a capability limitation. (4) Disclosure of nine infrastructure, harness, and evaluation-code defects found during this project &ndash; each with its root cause, fix, and independent re-verification &ndash; showing that several materially changed an already-reported number.` },
+{ id: 'related-1', tex: `Benchmarks for tool-augmented and agentic LLM behavior have largely targeted software engineering \\citep{jimenez2023swebench}, open-ended web navigation \\citep{zhou2024webarena}, and general-purpose real-world task completion requiring tool use and multi-step reasoning \\citep{mialon2023gaia}. These benchmarks measure whether an agent \\emph{can accomplish} a task given some fixed tool surface; they do not hold the underlying task and model fixed while varying only the shape of that tool surface (bounded versus generic) as the manipulated variable, which is the specific question this paper addresses for one document-editing domain. \\todo{expand related work: prior work specifically on structured-output/schema-constrained tool calling, and on OOXML/document-format editing tooling, once a fuller literature pass is done -- this section is intentionally minimal in this preliminary draft to avoid citing anything not independently verified.}`, section: 'related', h2: 'Related Work', text: `Benchmarks for tool-augmented and agentic LLM behavior have largely targeted software engineering ${cite('jimenez2023swebench')}, open-ended web navigation ${cite('zhou2024webarena')}, and general-purpose real-world task completion requiring tool use and multi-step reasoning ${cite('mialon2023gaia')}. These benchmarks measure whether an agent <em>can accomplish</em> a task given some fixed tool surface; they do not hold the underlying task and model fixed while varying only the shape of that tool surface (bounded versus generic) as the manipulated variable, which is the specific question this paper addresses for one document-editing domain. <span class="editorial-flag">[TODO: expand related work: prior work specifically on structured-output/schema-constrained tool calling, and on OOXML/document-format editing tooling, once a fuller literature pass is done &ndash; this section is intentionally minimal in this preliminary draft to avoid citing anything not independently verified.]</span>` },
+{ id: 'methods-corpus-fn1', tex: `[footnote] Git commit hash, this project's evaluation-harness repository.`, section: 'methods', text: `<span class="footnote-block">Footnote: Git commit hash, this project's evaluation-harness repository.</span>` },
+{ id: 'methods-corpus', tex: `The primary corpus is a 26-document, previously licensed and audited slice of the DocOps benchmark corpus (real business documents -- memos, policies, meeting minutes -- not hand-authored fixtures), split into a 14-document primary holdout and a 12-document validation set; both subsets were held out and never touched during the tooling's own development, and are pooled into the flat $n=26$ reported throughout this paper. This corpus's own construction is independently preregistered, prior to any trial reported here (2026-08-27, \\texttt{1061e0e}, see footnote). A separately preregistered (2026-08-31, \\texttt{e813cd7}) 48-document follow-up corpus was built specifically for the section-reordering family, because the primary corpus yields only 11 documents on which that task is structurally applicable; the follow-up corpus itself yields 44 applicable documents (of 48), so the combined section-reordering corpus reported in Table 1 and Table 2 is $11+44=55$ paired documents, not $11+48=59$.`, section: 'methods', h2: 'Methods', h3: 'Corpus', text: `The primary corpus is a 26-document, previously licensed and audited slice of the DocOps benchmark corpus (real business documents &ndash; memos, policies, meeting minutes &ndash; not hand-authored fixtures), split into a 14-document primary holdout and a 12-document validation set; both subsets were held out and never touched during the tooling's own development, and are pooled into the flat n=26 reported throughout this paper. This corpus's own construction is independently preregistered, prior to any trial reported here (2026-08-27, <code>1061e0e</code>, see footnote). A separately preregistered (2026-08-31, <code>e813cd7</code>) 48-document follow-up corpus was built specifically for the section-reordering family, because the primary corpus yields only 11 documents on which that task is structurally applicable; the follow-up corpus itself yields 44 applicable documents (of 48), so the combined section-reordering corpus reported in Table 1 and Table 2 is 11+44=55 paired documents, not 11+48=59.` },
+{ id: 'methods-families', tex: `Six families are reported, each implemented as one forward/inverse tool pair on the treatment side: \\textbf{Bibliography entry} -- insert/remove one APA-formatted bibliography entry. \\textbf{Inline citation} -- insert/remove one inline citation marker. \\textbf{Section reorder} -- move a section after a different heading, then move it back. \\textbf{Equation} -- insert/remove one native OOXML math object (\\texttt{<m:oMath>}), not plain text formatted to resemble an equation. \\textbf{Table (structural)} -- insert/remove one whole Word table (a real \\texttt{<w:tbl>} object with genuine rows and columns), not text formatted to look tabular. \\textbf{Caption} -- insert/remove one numbered SEQ-field figure caption.`, section: 'methods', h3: 'Task families', text: `Six families are reported, each implemented as one forward/inverse tool pair on the treatment side: <strong>Bibliography entry</strong> &ndash; insert/remove one APA-formatted bibliography entry. <strong>Inline citation</strong> &ndash; insert/remove one inline citation marker. <strong>Section reorder</strong> &ndash; move a section after a different heading, then move it back. <strong>Equation</strong> &ndash; insert/remove one native OOXML math object (<code><m:oMath></code>), not plain text formatted to resemble an equation. <strong>Table (structural)</strong> &ndash; insert/remove one whole Word table (a real <code><w:tbl></code> object with genuine rows and columns), not text formatted to look tabular. <strong>Caption</strong> &ndash; insert/remove one numbered SEQ-field figure caption.` },
+{ id: 'methods-arms', tex: `The control arm receives \\texttt{Read}, \\texttt{Write}, \\texttt{Edit}, and \\texttt{Bash}, with no access to any purpose-built document-editing tool. The treatment arm receives exactly one bounded tool pair (e.g., \\texttt{insert\\_table}/\\texttt{remove\\_table}) and \\texttt{Read}, with no generic write access at all. We post-hoc audited every trial's transcript for isolation violations -- a control transcript referencing a purpose-built tool name, or a treatment transcript referencing any tool outside its one declared pair, would indicate a harness leak -- and found no such violation in any reported trial.`, section: 'methods', h3: 'Arms and isolation', text: `The control arm receives <code>Read</code>, <code>Write</code>, <code>Edit</code>, and <code>Bash</code>, with no access to any purpose-built document-editing tool. The treatment arm receives exactly one bounded tool pair (e.g., <code>insert_table</code>/<code>remove_table</code>) and <code>Read</code>, with no generic write access at all. We post-hoc audited every trial's transcript for isolation violations &ndash; a control transcript referencing a purpose-built tool name, or a treatment transcript referencing any tool outside its one declared pair, would indicate a harness leak &ndash; and found no such violation in any reported trial.` },
+{ id: 'methods-grading', tex: `We graded every trial's output \\texttt{.docx} independently of the agent's own report, by parsing the file's actual XML after the trial completed: the forward direction graded pass only if the expected content was present exactly once and every pre-existing paragraph was unchanged; the inverse direction graded pass only if that content was fully removed and the document's paragraph list exactly matched its pre-forward state. A chain (one forward/inverse pair) counted as a full pass only if both directions independently graded pass.`, section: 'methods', h3: 'Grading', text: `We graded every trial's output <code>.docx</code> independently of the agent's own report, by parsing the file's actual XML after the trial completed: the forward direction graded pass only if the expected content was present exactly once and every pre-existing paragraph was unchanged; the inverse direction graded pass only if that content was fully removed and the document's paragraph list exactly matched its pre-forward state. A chain (one forward/inverse pair) counted as a full pass only if both directions independently graded pass.` },
+{ id: 'methods-stats', tex: `Per-family pass rates are reported with percentile bootstrap confidence intervals (2,000 resamples) \\citep{efron1979bootstrap}, and paired arms are compared with a paired sign-flip permutation test (2,000 resamples) \\citep{nichols2002permutation}, with a fixed random seed set before any result existed. A chain that never executed or never finished because of a harness- or infrastructure-level failure unrelated to the task itself (a network error, a process-level subprocess timeout) is excluded from both arms' denominators for that document, rather than scored as a failure. A chain that executed to completion and reports a genuine task-level failure -- including a write-time structural-verification failure under host contention, since that is a property of the treatment condition being measured, not an unrelated infrastructure artifact -- is scored as a failure at a fixed denominator. The one repeated-cycling ($K=4$) design compares steady-state pass rate (the fraction of chains passing every one of the four cycles) across four consecutive forward/inverse cycles on the same document, rather than a single cycle, specifically to test whether either arm's correctness compounds or decays under repetition.`, section: 'methods', h3: 'Statistics', text: `Per-family pass rates are reported with percentile bootstrap confidence intervals (2,000 resamples) ${cite('efron1979bootstrap')}, and paired arms are compared with a paired sign-flip permutation test (2,000 resamples) ${cite('nichols2002permutation')}, with a fixed random seed set before any result existed. A chain that never executed or never finished because of a harness- or infrastructure-level failure unrelated to the task itself (a network error, a process-level subprocess timeout) is excluded from both arms' denominators for that document, rather than scored as a failure. A chain that executed to completion and reports a genuine task-level failure &ndash; including a write-time structural-verification failure under host contention, since that is a property of the treatment condition being measured, not an unrelated infrastructure artifact &ndash; is scored as a failure at a fixed denominator. The one repeated-cycling (K=4) design compares steady-state pass rate (the fraction of chains passing every one of the four cycles) across four consecutive forward/inverse cycles on the same document, rather than a single cycle, specifically to test whether either arm's correctness compounds or decays under repetition.` },
+{ id: 'methods-rerun', tex: `The three write-time-verification-gated families were originally run on a shared Windows host also used for other concurrent work, and their pass rates were markedly lower for two of the three. To test whether that reflected the editing operations themselves or the host, we re-ran the identical benchmark -- unchanged model, corpus, harness, and grading code -- on a dedicated, single-tenant cloud CPU instance (4 dedicated vCPUs, no other tenant or process competing for the same physical resources). Two environment differences were necessary and are disclosed here rather than left implicit. First, the instance runs Linux, so the write-time verification step's Microsoft Word COM backend (Windows-only) is unavailable; only its LibreOffice/\\texttt{soffice} backend runs. This does not change what is being measured: an audit of every persisted chain result across the original host's full run history found the Word COM backend never won the two-backend race on its own in any recorded successful chain (it only ever appears in failure records where both backends failed together), so a LibreOffice-only environment is evaluating the same effective verification path the original run already relied on almost exclusively, not a different one. Second, the CLI executing each trial refuses to run with permission checks bypassed when invoked as the root user, a restriction the original host (a non-root desktop account) never triggered; we created a dedicated non-root account on the instance for this reason, verified functionally, and re-ran the affected trials that had failed instantly under root before this was found.`, section: 'methods', h3: 'Confirmatory re-run environment', text: `The three write-time-verification-gated families were originally run on a shared Windows host also used for other concurrent work, and their pass rates were markedly lower for two of the three. To test whether that reflected the editing operations themselves or the host, we re-ran the identical benchmark &ndash; unchanged model, corpus, harness, and grading code &ndash; on a dedicated, single-tenant cloud CPU instance (4 dedicated vCPUs, no other tenant or process competing for the same physical resources). Two environment differences were necessary and are disclosed here rather than left implicit. First, the instance runs Linux, so the write-time verification step's Microsoft Word COM backend (Windows-only) is unavailable; only its LibreOffice/<code>soffice</code> backend runs. This does not change what is being measured: an audit of every persisted chain result across the original host's full run history found the Word COM backend never won the two-backend race on its own in any recorded successful chain (it only ever appears in failure records where both backends failed together), so a LibreOffice-only environment is evaluating the same effective verification path the original run already relied on almost exclusively, not a different one. Second, the CLI executing each trial refuses to run with permission checks bypassed when invoked as the root user, a restriction the original host (a non-root desktop account) never triggered; we created a dedicated non-root account on the instance for this reason, verified functionally, and re-ran the affected trials that had failed instantly under root before this was found.` },
+{ id: 'results-intro-implicit', tex: `Single-edit ($K=1$) results for the four families not gated by write-time structural-verification. Bibliography and citation show a genuine, literal parity between arms. Section reorder shows a directionally consistent but not-yet-significant advantage for the bounded tool at $K=1$.`, section: 'results', h2: 'Results', h3: 'Single-edit families', text: `Single-edit (K=1) results for the four families not gated by write-time structural-verification. Bibliography and citation show a genuine, literal parity between arms. Section reorder shows a directionally consistent but not-yet-significant advantage for the bounded tool at K=1.` },
+{ id: 'tab-single-edit', section: 'results', type: 'table', label: 'Table 1', caption: `Single-edit (K=1) results for the four families not gated by write-time structural-verification. Bibliography and citation show a genuine, literal parity between arms. Section reorder shows a directionally consistent but not-yet-significant advantage for the bounded tool at K=1; see the repeated-cycling subsection for the K=4 result on the same corpus.`, headers: ["Family", "Arm", "Pass rate", "95% CI", "n", "Paired p"], rows: [["Bibliography entry", "control", "100%", "[100, 100]", "26", "1.0"], ["Bibliography entry", "treatment", "100%", "[100, 100]", "26", ""], ["Inline citation *", "control", "100%", "[100, 100]", "26", "1.0"], ["Inline citation *", "treatment", "100%", "[100, 100]", "25", ""], ["Section reorder (original corpus)", "control", "72.7%", "[45.5, 100]", "11", "0.240"], ["Section reorder (original corpus)", "treatment", "100%", "[100, 100]", "11", ""], ["Section reorder (combined, v1+v2) **", "control", "83.6%", "[74.5, 92.7]", "55", "0.271"], ["Section reorder (combined, v1+v2) **", "treatment", "92.9%", "[85.7, 98.2]", "56", ""]] },
+{ id: 'tab-single-edit-fn1', tex: `[footnote] Inline citation treatment n=25: one forward call hit a genuine 300-second process-level subprocess timeout unrelated to the citation task itself, excluded from the denominator per the harness-flake rule rather than scored as a failure.`, section: 'results', text: `<span class="footnote-block">Footnote: Inline citation treatment n=25: one forward call hit a genuine 300-second process-level subprocess timeout unrelated to the citation task itself, excluded from the denominator per the harness-flake rule rather than scored as a failure.</span>` },
+{ id: 'tab-single-edit-fn2', tex: `[footnote] Section reorder combined control n=55, treatment n=56: one 1.7MB document's control-arm chain never completed within the harness's 300-second timeout across six independent attempts at varying host load (a real, document-size-driven control-arm limitation, excluded from control's denominator only), while its treatment-arm chain completed and passed.`, section: 'results', text: `<span class="footnote-block">Footnote: Section reorder combined control n=55, treatment n=56: one 1.7MB document's control-arm chain never completed within the harness's 300-second timeout across six independent attempts at varying host load (a real, document-size-driven control-arm limitation, excluded from control's denominator only), while its treatment-arm chain completed and passed.</span>` },
+{ id: 'results-single-edit-discuss', tex: `Table 1 shows bibliography and citation with no measurable difference between arms at any sample size tested: both reached a literal 100%/100% parity once two real evaluation-harness defects (described below) were found and fixed. Section reordering's original 11-document result looked directionally favorable to the bounded tool but was underpowered ($p=0.240$); a larger, independently preregistered 48-document follow-up corpus, combined with the original, narrowed but did not close that gap at $K=1$ ($p=0.271$).`, section: 'results', text: `Table 1 shows bibliography and citation with no measurable difference between arms at any sample size tested: both reached a literal 100%/100% parity once two real evaluation-harness defects (described below) were found and fixed. Section reordering's original 11-document result looked directionally favorable to the bounded tool but was underpowered (p=0.240); a larger, independently preregistered 48-document follow-up corpus, combined with the original, narrowed but did not close that gap at K=1 (p=0.271).` },
+{ id: 'tab-k4', section: 'results', type: 'table', label: 'Table 2', caption: `Under four repeated edit-undo cycles, the bounded tool holds a 92.9% pass rate while the generic tool falls to 67.3% (p=0.0015) &ndash; the benchmark's one significant result. Same combined corpus as Table 1's bottom row.`, headers: ["Family", "Arm", "Pass rate", "95% CI", "n", "Paired p"], rows: [["Section reorder (K=4, combined)", "control", "67.3%", "[54.5, 78.2]", "55", "0.0015"], ["Section reorder (K=4, combined)", "treatment", "92.9%", "[85.7, 98.2]", "56", ""]] },
+{ id: 'results-k4-1', tex: `Run through four repeated edit-undo cycles rather than one, the same 55/56-document combined corpus produced the single significant result in this benchmark (Table 2): control's pass rate fell to 67.3% while treatment held at 92.9% ($p=0.0015$). This is not a p-value found by fishing across many cuts of the data -- it is the specific comparison the $K$-sweep design was built to make, on the same corpus already reported at $K=1$.`, section: 'results', h3: 'Repeated cycling: the one significant finding', text: `Run through four repeated edit-undo cycles rather than one, the same 55/56-document combined corpus produced the single significant result in this benchmark (Table 2): control's pass rate fell to 67.3% while treatment held at 92.9% (p=0.0015). This is not a p-value found by fishing across many cuts of the data &ndash; it is the specific comparison the K-sweep design was built to make, on the same corpus already reported at K=1.` },
+{ id: 'results-k4-2', tex: `The mechanism was traced directly rather than inferred from the p-value alone, in the 48-document v2 follow-up sub-corpus specifically (the source of the finer per-cycle grading breakdown below; the full 55/56 combined corpus is not broken down at this granularity in this draft). Of the 12 v2-corpus control chains with at least one failing cycle, 9 failed specifically on exact-order restoration starting from the second cycle onward -- a real, dominant majority pattern, not a universal rule -- and 2 failed that same check on the very first cycle (one of those two then recovering fully on later cycles); the remaining chain's specific failure category is not itemized in our current evidence record, a gap we disclose rather than paper over. The bounded tool showed no equivalent drift on any chain, in either sub-corpus. This is consistent with a specific, plausible cause: the bounded tool re-resolves a fresh structural anchor for the target section on every call, while the generic-tool agent must reconstruct or remember "the original layout" itself across calls, and that reconstruction compounds error with repetition. The pattern is dominant but not exceptionless (2 of 12 control failures occur on the very first cycle, one of those two then recovering on a later cycle) -- the significance finding rests on the dominant trend, not on every case fitting the same story.`, section: 'results', text: `The mechanism was traced directly rather than inferred from the p-value alone, in the 48-document v2 follow-up sub-corpus specifically (the source of the finer per-cycle grading breakdown below; the full 55/56 combined corpus is not broken down at this granularity in this draft). Of the 12 v2-corpus control chains with at least one failing cycle, 9 failed specifically on exact-order restoration starting from the second cycle onward &ndash; a real, dominant majority pattern, not a universal rule &ndash; and 2 failed that same check on the very first cycle (one of those two then recovering fully on later cycles); the remaining chain's specific failure category is not itemized in our current evidence record, a gap we disclose rather than paper over. The bounded tool showed no equivalent drift on any chain, in either sub-corpus. This is consistent with a specific, plausible cause: the bounded tool re-resolves a fresh structural anchor for the target section on every call, while the generic-tool agent must reconstruct or remember "the original layout" itself across calls, and that reconstruction compounds error with repetition. The pattern is dominant but not exceptionless (2 of 12 control failures occur on the very first cycle, one of those two then recovering on a later cycle) &ndash; the significance finding rests on the dominant trend, not on every case fitting the same story.` },
+{ id: 'results-rendergate-1', tex: `The remaining three families (equation, table, caption) share one architectural property the first four do not: their treatment-side insertion tool verifies its own write correctness before persisting a change -- rendering the resulting document with an independent renderer and confirming it opens without error -- and it atomically restores the original file if that verification fails for any reason. This design choice trades a real reliability cost (verification against a real renderer is slow, and slower still on a resource-contended host) for a strong guarantee: a persisted change from these three tools is, by construction, never a corrupt or unopenable document.`, section: 'results', h3: 'Write-time structurally-verified families', text: `The remaining three families (equation, table, caption) share one architectural property the first four do not: their treatment-side insertion tool verifies its own write correctness before persisting a change &ndash; rendering the resulting document with an independent renderer and confirming it opens without error &ndash; and it atomically restores the original file if that verification fails for any reason. This design choice trades a real reliability cost (verification against a real renderer is slow, and slower still on a resource-contended host) for a strong guarantee: a persisted change from these three tools is, by construction, never a corrupt or unopenable document.` },
+{ id: 'tab-render-gate', section: 'results', type: 'table', label: 'Table 3', caption: `Write-time structurally-verified families as originally measured, on a shared, variably-contended host. Control never invokes the verification step (it edits raw XML directly) and is unaffected by host contention. Equation's treatment n=26 has no paired significance test here because its control arm comes from a different, unpaired corpus (see footnote) &ndash; resolved in Table 4, which pairs both on the same corpus. Superseded by the confirmatory re-run in Table 4; retained here as the evidence for that re-run's causal claim, not as a final number.`, headers: ["Family", "Arm", "Pass rate", "95% CI", "n", "Paired p", "Status"], rows: [["Equation *", "control", "90.9%", "[72.7, 100]", "11", "n/a", "original (shared host)"], ["Equation *", "treatment", "46.2%", "[26.9, 65.4]", "26", "", ""], ["Table (structural)", "control", "92.3%", "[80.8, 100]", "26", "1.0", "original (shared host)"], ["Table (structural)", "treatment", "96.2%", "[88.5, 100]", "26", "", ""], ["Caption", "control", "100%", "[100, 100]", "26", "<0.001", "original (shared host)"], ["Caption", "treatment", "7.7%", "[0, 19.2]", "26", "", ""]] },
+{ id: 'tab-render-gate-fn1', tex: `[footnote] Equation control (n=11) comes from an 11-document development-slice corpus run once under this project's confirmatory design, not the 26-document confirmatory corpus treatment uses; the two are not paired and no significance test is reported for this row. 10 of 11 resolved chains passed; the 11th resolved (did not block on the verification step) but failed grading on a genuine task mistake -- 11/11 resolved is not the same as 11/11 passed.`, section: 'results', text: `<span class="footnote-block">Footnote: Equation control (n=11) comes from an 11-document development-slice corpus run once under this project's confirmatory design, not the 26-document confirmatory corpus treatment uses; the two are not paired and no significance test is reported for this row. 10 of 11 resolved chains passed; the 11th resolved (did not block on the verification step) but failed grading on a genuine task mistake &ndash; 11/11 resolved is not the same as 11/11 passed.</span>` },
+{ id: 'results-rendergate-2', tex: `As Table 3 shows, all three families' control arms never invoke the verification step at all, since they edit raw XML directly, and they perform comparably to the other four families (92.3%--100%), confirming that a capable generic-tool agent can correctly hand-construct the target structures (a real <m:oMath> object, a real <w:tbl>, a real SEQ-field caption) without a bounded tool's help. Treatment's numbers are markedly lower for two of the three and, critically, \\emph{not comparable to one another}: table-structural insertion reaches 96.2% -- statistically indistinguishable from its own control (92.3%, paired $p=1.0$) -- while equation and caption insertion remain far lower.`, section: 'results', text: `As Table 3 shows, all three families' control arms never invoke the verification step at all, since they edit raw XML directly, and they perform comparably to the other four families (92.3%&ndash;100%), confirming that a capable generic-tool agent can correctly hand-construct the target structures (a real <m:oMath> object, a real <w:tbl>, a real SEQ-field caption) without a bounded tool's help. Treatment's numbers are markedly lower for two of the three and, critically, <em>not comparable to one another</em>: table-structural insertion reaches 96.2% &ndash; statistically indistinguishable from its own control (92.3%, paired p=1.0) &ndash; while equation and caption insertion remain far lower.` },
+{ id: 'results-rendergate-3', tex: `We initially suspected this gap reflected a real difference in rendering-verification cost between task types -- e.g., that inserting a numbered caption field forces the renderer to recompute field numbering across the whole document before it can produce output, while a bare table does not. We tested this directly rather than let it stand as a plausible-sounding story: a code-level review of the tools' actual OOXML output found no field-dirtying or document-recalculation mechanism in any of the three insertion tools, and a controlled, sequential timing test -- rendering real completed output files from all three families, interleaved to control for host-condition drift -- found no meaningful difference (equation 8.0s, table-structural 8.6s, caption 8.9s mean, all much less than the 90s timeout). We reject the task-dependent-verification-cost hypothesis on this direct evidence. Our working attribution at that point was two independent, real causes neither of which is a property of the editing operations themselves: ordinary shared-host scheduling contention (real, but evidently not sufficient on its own -- an isolated, single-worker re-run of caption's remaining chains still failed almost completely), and, found directly while investigating that isolation result, a physically unreliable external drive on our test host that disconnected twice during this project (Windows disk-layer I/O retry/error events independently confirm this, not just an inference from missing files). Rather than leave this as an inference from indirect evidence, we tested it directly with a controlled re-run.`, section: 'results', text: `We initially suspected this gap reflected a real difference in rendering-verification cost between task types &ndash; e.g., that inserting a numbered caption field forces the renderer to recompute field numbering across the whole document before it can produce output, while a bare table does not. We tested this directly rather than let it stand as a plausible-sounding story: a code-level review of the tools' actual OOXML output found no field-dirtying or document-recalculation mechanism in any of the three insertion tools, and a controlled, sequential timing test &ndash; rendering real completed output files from all three families, interleaved to control for host-condition drift &ndash; found no meaningful difference (equation 8.0s, table-structural 8.6s, caption 8.9s mean, all much less than the 90s timeout). We reject the task-dependent-verification-cost hypothesis on this direct evidence. Our working attribution at that point was two independent, real causes neither of which is a property of the editing operations themselves: ordinary shared-host scheduling contention (real, but evidently not sufficient on its own &ndash; an isolated, single-worker re-run of caption's remaining chains still failed almost completely), and, found directly while investigating that isolation result, a physically unreliable external drive on our test host that disconnected twice during this project (Windows disk-layer I/O retry/error events independently confirm this, not just an inference from missing files). Rather than leave this as an inference from indirect evidence, we tested it directly with a controlled re-run.` },
+{ id: 'tab-render-gate-clean', section: 'results', type: 'table', label: 'Table 4', caption: `The identical benchmark &ndash; same model, same 26-document corpus, same harness and grading code &ndash; re-run on a dedicated, single-tenant host. All three families close completely: every one of the 156 chains (3 families x 2 arms x 26 documents) independently graded pass, with real, varied per-trial wall times (e.g. caption forward trials ranged 14.7&ndash;237.8s, not a uniform or short-circuited artifact) confirming this is a live re-run, not a re-derivation from cached data. Equation's control here uses the same 26-document corpus as treatment, so unlike Table 3 a paired test is reported for all three families.`, headers: ["Family", "Arm", "Pass rate", "95% CI", "n", "Paired p", "Status"], rows: [["Equation", "control", "100%", "[100, 100]", "26", "1.0", "confirmatory (dedicated host)"], ["Equation", "treatment", "100%", "[100, 100]", "26", "", ""], ["Table (structural)", "control", "100%", "[100, 100]", "26", "1.0", "confirmatory (dedicated host)"], ["Table (structural)", "treatment", "100%", "[100, 100]", "26", "", ""], ["Caption", "control", "100%", "[100, 100]", "26", "1.0", "confirmatory (dedicated host)"], ["Caption", "treatment", "100%", "[100, 100]", "26", "", ""]] },
+{ id: 'results-rendergate-4', tex: `Table 4 is the direct test of the host-contention hypothesis, not another indirect argument for it: identical model, corpus, harness, and grading code, on a dedicated single-tenant host instead of a shared, contended one. The gap closes completely. Equation rises from 46.2% to 100%; caption rises from 7.7% to 100%; table-structural, already statistically indistinguishable from its control at 96.2%, also reaches 100%. All three arms now match their own controls exactly ($p=1.0$ throughout). We read this as confirmation, not mere consistency with the hypothesis: the original gap in Table 3 was a deployment-environment artifact of the specific shared host these three families' write-time verification step happened to be sensitive to, not a limitation of the bounded editing operations themselves. We report both tables rather than replacing Table 3 with Table 4, because the contrast between them is itself the evidence for this section's causal claim, not an inconvenient earlier draft to discard.`, section: 'results', text: `Table 4 is the direct test of the host-contention hypothesis, not another indirect argument for it: identical model, corpus, harness, and grading code, on a dedicated single-tenant host instead of a shared, contended one. The gap closes completely. Equation rises from 46.2% to 100%; caption rises from 7.7% to 100%; table-structural, already statistically indistinguishable from its control at 96.2%, also reaches 100%. All three arms now match their own controls exactly (p=1.0 throughout). We read this as confirmation, not mere consistency with the hypothesis: the original gap in Table 3 was a deployment-environment artifact of the specific shared host these three families' write-time verification step happened to be sensitive to, not a limitation of the bounded editing operations themselves. We report both tables rather than replacing Table 3 with Table 4, because the contrast between them is itself the evidence for this section's causal claim, not an inconvenient earlier draft to discard.` },
+{ id: 'results-caption-paragraph', tex: `\\textbf{On caption's originally significant gap.} Table 3's paired test for caption returned $p<0.001$ on the original host -- by the same statistical test as the repeated-cycling section's headline result, that was significant. We argued at the time that it should not be read the same way: the repeated-cycling finding measures whether an agent, given a chance to attempt a task, does it correctly, while here treatment's write-time verification step declines to persist a change at all whenever it cannot confirm correctness under the host conditions of the moment, which is a gap in \\emph{how often the arm successfully persists a change}, not in \\emph{whether a persisted change is correct}. The confirmatory re-run settles this distinction empirically rather than leaving it as an argued interpretation: on a dedicated host, caption's treatment reaches the identical 100% as its control ($p=1.0$), exactly as the verification-reliability reading predicted and the capability-limitation reading did not.`, section: 'results', text: `<strong>On caption's originally significant gap.</strong> Table 3's paired test for caption returned p<0.001 on the original host &ndash; by the same statistical test as the repeated-cycling section's headline result, that was significant. We argued at the time that it should not be read the same way: the repeated-cycling finding measures whether an agent, given a chance to attempt a task, does it correctly, while here treatment's write-time verification step declines to persist a change at all whenever it cannot confirm correctness under the host conditions of the moment, which is a gap in <em>how often the arm successfully persists a change</em>, not in <em>whether a persisted change is correct</em>. The confirmatory re-run settles this distinction empirically rather than leaving it as an argued interpretation: on a dedicated host, caption's treatment reaches the identical 100% as its control (p=1.0), exactly as the verification-reliability reading predicted and the capability-limitation reading did not.` },
+{ id: 'defects-intro', tex: `A benchmark's own numbers are only as trustworthy as the harness, evaluator, and infrastructure that produced them. Several of the defects below materially changed an already-reported number; each is disclosed here rather than folded silently into a final figure.`, section: 'defects', h2: 'Nine real defects found and fixed', text: `A benchmark's own numbers are only as trustworthy as the harness, evaluator, and infrastructure that produced them. Several of the defects below materially changed an already-reported number; each is disclosed here rather than folded silently into a final figure.` },
+{ id: 'defect-1', tex: `\\textbf{Defect 1: Missing type-library cache broke basic Word COM (Component Object Model) automation.} The benchmark harness's write-time verification step falls back to Microsoft Word's own COM automation interface when the primary renderer is unavailable. Every real trial's temp-directory isolation (itself a fix for an earlier concurrency defect) incidentally emptied this cache on every trial, causing a plain dynamic-dispatch COM call to return an object missing basic properties. We fixed this by switching to an explicit type-library-bound dispatch call; verified live against the real COM backend, not a mock.`, section: 'defects', text: `<strong>Defect 1: Missing type-library cache broke basic Word COM (Component Object Model) automation.</strong> The benchmark harness's write-time verification step falls back to Microsoft Word's own COM automation interface when the primary renderer is unavailable. Every real trial's temp-directory isolation (itself a fix for an earlier concurrency defect) incidentally emptied this cache on every trial, causing a plain dynamic-dispatch COM call to return an object missing basic properties. We fixed this by switching to an explicit type-library-bound dispatch call; verified live against the real COM backend, not a mock.` },
+{ id: 'defect-2', tex: `\\textbf{Defect 2: A COM message-queue starvation bug.} Calling the file-save operation immediately after opening a document via COM could deterministically raise a "call rejected by callee" COM error -- confirmed non-transient via five consecutive failed retries with a real delay between each. We fixed this by explicitly servicing the COM message queue before the save call; it succeeded on the first attempt after the fix.`, section: 'defects', text: `<strong>Defect 2: A COM message-queue starvation bug.</strong> Calling the file-save operation immediately after opening a document via COM could deterministically raise a "call rejected by callee" COM error &ndash; confirmed non-transient via five consecutive failed retries with a real delay between each. We fixed this by explicitly servicing the COM message queue before the save call; it succeeded on the first attempt after the fix.` },
+{ id: 'defect-3', tex: `\\textbf{Defect 3: The confirmatory harness discarded genuinely successful runs.} A changed output file on a trial killed by the harness's own outer timeout is safe, positive evidence the underlying edit had genuinely succeeded, because the write-time verification step is atomic: it restores the original file on any failure and only ever persists a change after independent verification succeeds. The harness did not act on that evidence -- whenever the wrapping process running a trial was killed, it unconditionally recorded that trial as failed, without ever checking what the verification step had actually left on disk. We fixed the harness to attempt grading in that case too, directly recovering two genuinely correct table-insertion trials, confirmed by re-grading the real output files against their own pre-write backups, not by re-running anything.`, section: 'defects', text: `<strong>Defect 3: The confirmatory harness discarded genuinely successful runs.</strong> A changed output file on a trial killed by the harness's own outer timeout is safe, positive evidence the underlying edit had genuinely succeeded, because the write-time verification step is atomic: it restores the original file on any failure and only ever persists a change after independent verification succeeds. The harness did not act on that evidence &ndash; whenever the wrapping process running a trial was killed, it unconditionally recorded that trial as failed, without ever checking what the verification step had actually left on disk. We fixed the harness to attempt grading in that case too, directly recovering two genuinely correct table-insertion trials, confirmed by re-grading the real output files against their own pre-write backups, not by re-running anything.` },
+{ id: 'defect-4', tex: `\\textbf{Defect 4: A stale file-path bug after unrelated hardware disruption.} An external drive holding the benchmark's run data physically disconnected and reconnected under a different drive letter mid-project. The corpus manifest's document paths were still hardcoded to the old letter, causing every subsequent trial to fail on a permission error before it could even begin, rather than a clean not-found. We fixed this by correcting every path in the manifest.`, section: 'defects', text: `<strong>Defect 4: A stale file-path bug after unrelated hardware disruption.</strong> An external drive holding the benchmark's run data physically disconnected and reconnected under a different drive letter mid-project. The corpus manifest's document paths were still hardcoded to the old letter, causing every subsequent trial to fail on a permission error before it could even begin, rather than a clean not-found. We fixed this by correcting every path in the manifest.` },
+{ id: 'defect-5', tex: `\\textbf{Defect 5: A transient network/certificate failure, not a capability finding.} We systematically reviewed every remaining trial's exact failure signature -- return code, whether the process timed out, whether the output file changed -- and found a signature not previously characterized: 29 trials across two families (equation, caption) failed with an API-level certificate verification error, not a timeout or a genuine grading failure. All 29 clustered tightly in one short real-time window coinciding with the same unrelated hardware disruption in defect 4, and the API's certificate was confirmed to verify correctly again immediately afterward. We re-ran these 29 trials under confirmed-healthy network conditions rather than counting them as capability failures: equation ultimately recovered from 4/26 to 12/26 and caption from 1/26 to 2/26 (Table 3, across several subsequent retry rounds). Before this item, Table 3's numbers for these two families had silently included these 29 as ordinary capability failures -- a disclosure/reporting inconsistency corrected here and in that table.`, section: 'defects', text: `<strong>Defect 5: A transient network/certificate failure, not a capability finding.</strong> We systematically reviewed every remaining trial's exact failure signature &ndash; return code, whether the process timed out, whether the output file changed &ndash; and found a signature not previously characterized: 29 trials across two families (equation, caption) failed with an API-level certificate verification error, not a timeout or a genuine grading failure. All 29 clustered tightly in one short real-time window coinciding with the same unrelated hardware disruption in defect 4, and the API's certificate was confirmed to verify correctly again immediately afterward. We re-ran these 29 trials under confirmed-healthy network conditions rather than counting them as capability failures: equation ultimately recovered from 4/26 to 12/26 and caption from 1/26 to 2/26 (Table 3, across several subsequent retry rounds). Before this item, Table 3's numbers for these two families had silently included these 29 as ordinary capability failures &ndash; a disclosure/reporting inconsistency corrected here and in that table.` },
+{ id: 'defect-6', tex: `\\textbf{Defect 6: Two further evaluation-harness defects.} An inverse-trial paragraph-id resolution bug affecting the citation family, and a statistics-regeneration gap that left a stale number published after an unrelated fix -- are described in full in the project's own working notes and omitted here for space, but available on request. \\todo{cite/link the full defect log once this paper has a public repository}.`, section: 'defects', text: `<strong>Defect 6: Two further evaluation-harness defects.</strong> An inverse-trial paragraph-id resolution bug affecting the citation family, and a statistics-regeneration gap that left a stale number published after an unrelated fix &ndash; are described in full in the project's own working notes and omitted here for space, but available on request. <span class="editorial-flag">[TODO: cite/link the full defect log once this paper has a public repository]</span>.` },
+{ id: 'defect-7', tex: `\\textbf{Defect 7: Sequential backend fallback could cost more time than the harness's own outer budget allowed.} The write-time verification step's two backends were tried sequentially, each with its own retry-bounded 90-second timeout -- discovering that both failed could cost up to their combined worst case (approximately 360 seconds), over half the harness's 600-second outer per-trial timeout. We fixed this by racing both backends concurrently instead, so discovering a double failure costs at most the slower of the two (approximately 180 seconds) rather than their sum. We are explicit that this changes latency under contention, not the underlying success probability: directly investigating this host's resource consumption while implementing this fix found a large, unrelated, CPU- and memory-heavy background workload (423% CPU, 11.3GB resident memory) genuinely needed by its owner and left running -- both backends are starved by the same real resource shortage regardless of whether they are raced or chained, so this fix stops trials from being silently killed by the outer timeout mid-verification, but does not raise equation's or caption's pass rate.`, section: 'defects', text: `<strong>Defect 7: Sequential backend fallback could cost more time than the harness's own outer budget allowed.</strong> The write-time verification step's two backends were tried sequentially, each with its own retry-bounded 90-second timeout &ndash; discovering that both failed could cost up to their combined worst case (approximately 360 seconds), over half the harness's 600-second outer per-trial timeout. We fixed this by racing both backends concurrently instead, so discovering a double failure costs at most the slower of the two (approximately 180 seconds) rather than their sum. We are explicit that this changes latency under contention, not the underlying success probability: directly investigating this host's resource consumption while implementing this fix found a large, unrelated, CPU- and memory-heavy background workload (423% CPU, 11.3GB resident memory) genuinely needed by its owner and left running &ndash; both backends are starved by the same real resource shortage regardless of whether they are raced or chained, so this fix stops trials from being silently killed by the outer timeout mid-verification, but does not raise equation's or caption's pass rate.` },
+{ id: 'defect-8', tex: `\\textbf{Defect 8: The confirmatory re-run's CLI silently refused every trial identically, and the failure signature was checked directly rather than assumed.} The first attempt at the dedicated-host confirmatory re-run reported every one of 156 chains as blocked, each in well under one second -- fast and uniform enough that we distrusted an infrastructure explanation on sight (a real host- or network-level failure is rarely both instant and perfectly uniform across three unrelated task families and both arms). Inspecting one chain's raw process output directly rather than guessing found the actual cause: the CLI invoked by every trial refuses to bypass its own permission checks when run as the root user, a deliberate safety restriction, and the cloud instance's default account is root. We fixed this by creating a dedicated non-root account for the re-run, verified functionally before re-running anything at scale, and confirmed the fix by re-inspecting individual trials' wall time and grading output (not merely their exit status) for realistic, varied values before trusting the run's aggregate numbers.`, section: 'defects', text: `<strong>Defect 8: The confirmatory re-run's CLI silently refused every trial identically, and the failure signature was checked directly rather than assumed.</strong> The first attempt at the dedicated-host confirmatory re-run reported every one of 156 chains as blocked, each in well under one second &ndash; fast and uniform enough that we distrusted an infrastructure explanation on sight (a real host- or network-level failure is rarely both instant and perfectly uniform across three unrelated task families and both arms). Inspecting one chain's raw process output directly rather than guessing found the actual cause: the CLI invoked by every trial refuses to bypass its own permission checks when run as the root user, a deliberate safety restriction, and the cloud instance's default account is root. We fixed this by creating a dedicated non-root account for the re-run, verified functionally before re-running anything at scale, and confirmed the fix by re-inspecting individual trials' wall time and grading output (not merely their exit status) for realistic, varied values before trusting the run's aggregate numbers.` },
+{ id: 'defects-note-numbering', tex: `[footnote] This is the 8th item in the enumerated defect list; a 9th (the root-user CLI restriction found while provisioning the confirmatory re-run's cloud host) follows as its own item, matching the paper's 'Nine real defects' section title.`, section: 'defects', text: `<span class="footnote-block">Footnote: This is the 8th item in the enumerated defect list; a 9th (the root-user CLI restriction found while provisioning the confirmatory re-run's cloud host) follows as its own item, matching the paper's 'Nine real defects' section title.</span>` },
+{ id: 'defect-9', tex: `\\textbf{Defect 9: Root-user CLI restriction discovered during confirmatory re-run provisioning.} Setting up the dedicated cloud host used for the confirmatory re-run surfaced the same CLI restriction as defect 8 above during initial provisioning, before the benchmark harness itself was even reached: the cloud provider's default container account is root, and the CLI used to drive each trial refuses to bypass permission checks under root by design. This is listed as its own item because it was found and fixed at the infrastructure- provisioning layer (creating a non-root account as part of the environment setup script) independently of, and prior to, the harness-level manifestation described in defect 8; both trace to the same underlying CLI restriction, encountered twice at two different layers of the same re-run effort.`, section: 'defects', text: `<strong>Defect 9: Root-user CLI restriction discovered during confirmatory re-run provisioning.</strong> Setting up the dedicated cloud host used for the confirmatory re-run surfaced the same CLI restriction as defect 8 above during initial provisioning, before the benchmark harness itself was even reached: the cloud provider's default container account is root, and the CLI used to drive each trial refuses to bypass permission checks under root by design. This is listed as its own item because it was found and fixed at the infrastructure- provisioning layer (creating a non-root account as part of the environment setup script) independently of, and prior to, the harness-level manifestation described in defect 8; both trace to the same underlying CLI restriction, encountered twice at two different layers of the same re-run effort.` },
+{ id: 'defects-outro', tex: `Every defect above was independently re-verified against real output data -- either by re-running the affected trial live, or by re-deriving the grading verdict directly from the already-collected output file -- rather than assumed fixed once the code changed.`, section: 'defects', text: `Every defect above was independently re-verified against real output data &ndash; either by re-running the affected trial live, or by re-deriving the grading verdict directly from the already-collected output file &ndash; rather than assumed fixed once the code changed.` },
+{ id: 'discussion-1', tex: `This benchmark's central capability finding is that bounded structural tools resist the state drift a generic-tool agent shows under repeated edit-undo cycling. We think this is more interesting and more general than any single-edit pass-rate comparison, because it isolates a mechanism (fresh anchor resolution versus accumulated agent-maintained state) rather than reporting an aggregate number. We would expect this mechanism to generalize to any repeated-editing workflow, not just section reordering specifically, though this benchmark tests only one task family at depth.`, section: 'discussion', h2: 'Discussion', text: `This benchmark's central capability finding is that bounded structural tools resist the state drift a generic-tool agent shows under repeated edit-undo cycling. We think this is more interesting and more general than any single-edit pass-rate comparison, because it isolates a mechanism (fresh anchor resolution versus accumulated agent-maintained state) rather than reporting an aggregate number. We would expect this mechanism to generalize to any repeated-editing workflow, not just section reordering specifically, though this benchmark tests only one task family at depth.` },
+{ id: 'discussion-2', tex: `The write-time-verification-gated families illustrate a different, and we think under-discussed, methodological hazard: an architectural choice made for a good reason (never persist a corrupt document) can produce a benchmark result that looks like a capability finding but is substantially a deployment-environment artifact, and disentangling the two required real, disclosed engineering work and, ultimately, a controlled confirmatory re-run, not just a larger sample size or a more careful argument. We did not stop at rejecting the most obvious alternative explanation -- that these tools are simply more expensive to render-verify than table insertion's -- and then rest on an inferred attribution to shared-host contention and a physically unreliable test-host component. We tested that attribution directly, by re-running the identical benchmark on a dedicated, single-tenant host, and the gap closed completely for both equation and caption (Table 4). We think the general lesson generalizes past this specific benchmark: a write-time verification step's reported reliability is only as meaningful as the host it was measured on, and a benchmark result that looks like a capability finding is worth testing against a change of deployment environment before it is reported as one.`, section: 'discussion', text: `The write-time-verification-gated families illustrate a different, and we think under-discussed, methodological hazard: an architectural choice made for a good reason (never persist a corrupt document) can produce a benchmark result that looks like a capability finding but is substantially a deployment-environment artifact, and disentangling the two required real, disclosed engineering work and, ultimately, a controlled confirmatory re-run, not just a larger sample size or a more careful argument. We did not stop at rejecting the most obvious alternative explanation &ndash; that these tools are simply more expensive to render-verify than table insertion's &ndash; and then rest on an inferred attribution to shared-host contention and a physically unreliable test-host component. We tested that attribution directly, by re-running the identical benchmark on a dedicated, single-tenant host, and the gap closed completely for both equation and caption (Table 4). We think the general lesson generalizes past this specific benchmark: a write-time verification step's reported reliability is only as meaningful as the host it was measured on, and a benchmark result that looks like a capability finding is worth testing against a change of deployment environment before it is reported as one.` },
+{ id: 'limitations-1', tex: `Four factors limit how far these results generalize. \\textbf{First}, this benchmark tests one model (\\texttt{claude-sonnet-5}) and does not claim the results generalize across models. \\textbf{Second}, the write-time-verification-gated families' originally-reported numbers (Table 3) were collected on a single, shared, variably-contended host rather than a dedicated one, and that host condition materially depressed two of the three families' numbers -- confirmed, not merely argued, by the confirmatory re-run in Table 4, which closes the gap completely on a dedicated host. We therefore treat Table 4 as the load-bearing result for these three families and Table 3 as evidence for the host-contention claim rather than as a competing final number. This resolution does not extend past this specific verification mechanism: we make no claim that shared-host contention is never a genuine factor for other write-time-verification designs, only that it fully explains the gap observed here. \\textbf{Third}, corpus size for section reordering ($n=11$ at $K=1$ on the original corpus) is small before the follow-up corpus is combined in. \\textbf{Fourth}, one specific piece of our own test infrastructure -- an external drive holding all run data -- proved physically unreliable, disconnecting twice during this project (confirmed via OS-level disk I/O error events, not inferred); this remains a real defect in our original test environment, though the confirmatory re-run's clean result means it is no longer load-bearing for any number in this paper's final reporting.`, section: 'limitations', h2: 'Limitations', text: `Four factors limit how far these results generalize. <strong>First</strong>, this benchmark tests one model (<code>claude-sonnet-5</code>) and does not claim the results generalize across models. <strong>Second</strong>, the write-time-verification-gated families' originally-reported numbers (Table 3) were collected on a single, shared, variably-contended host rather than a dedicated one, and that host condition materially depressed two of the three families' numbers &ndash; confirmed, not merely argued, by the confirmatory re-run in Table 4, which closes the gap completely on a dedicated host. We therefore treat Table 4 as the load-bearing result for these three families and Table 3 as evidence for the host-contention claim rather than as a competing final number. This resolution does not extend past this specific verification mechanism: we make no claim that shared-host contention is never a genuine factor for other write-time-verification designs, only that it fully explains the gap observed here. <strong>Third</strong>, corpus size for section reordering (n=11 at K=1 on the original corpus) is small before the follow-up corpus is combined in. <strong>Fourth</strong>, one specific piece of our own test infrastructure &ndash; an external drive holding all run data &ndash; proved physically unreliable, disconnecting twice during this project (confirmed via OS-level disk I/O error events, not inferred); this remains a real defect in our original test environment, though the confirmatory re-run's clean result means it is no longer load-bearing for any number in this paper's final reporting.` },
+{ id: 'conclusion-1', tex: `Bounded, structurally-aware editing primitives show no advantage over generic file tools for a single document edit, on the task families and model tested here, but show a significant, mechanistically-traced advantage under repeated editing -- the more realistic condition for an agent maintaining a document over time. Three further task families were initially confounded by a write-time verification step whose reliability cost proved substantial and environment-dependent; a controlled confirmatory re-run on a dedicated, single-tenant host resolved that confound completely, closing all three families to 100% pass for both arms and confirming the original gap was a deployment-environment artifact rather than an editing-capability limitation. We report both the original and confirmatory numbers, and the live infrastructure work connecting them, rather than reporting a single clean number that would understate how much of this benchmark's own execution environment turned out to matter. \\todo{This is a preliminary draft. Before any submission: (1) re-run the full paper-review-toolkit pipeline (writing-quality + content-quality prompts) against this revision, since the previous pass's findings were applied against an earlier draft with different numbers; (2) decide a target venue and apply its actual formatting requirements rather than this generic-article format; (3) generate real figures from the underlying run data rather than tables alone; (4) expand Related Work with a fuller, independently-verified literature pass.}`, section: 'conclusion', h2: 'Conclusion', text: `Bounded, structurally-aware editing primitives show no advantage over generic file tools for a single document edit, on the task families and model tested here, but show a significant, mechanistically-traced advantage under repeated editing &ndash; the more realistic condition for an agent maintaining a document over time. Three further task families were initially confounded by a write-time verification step whose reliability cost proved substantial and environment-dependent; a controlled confirmatory re-run on a dedicated, single-tenant host resolved that confound completely, closing all three families to 100% pass for both arms and confirming the original gap was a deployment-environment artifact rather than an editing-capability limitation. We report both the original and confirmatory numbers, and the live infrastructure work connecting them, rather than reporting a single clean number that would understate how much of this benchmark's own execution environment turned out to matter. <span class="editorial-flag">[TODO: This is a preliminary draft. Before any submission: (1) re-run the full paper-review-toolkit pipeline (writing-quality + content-quality prompts) against this revision, since the previous pass's findings were applied against an earlier draft with different numbers; (2) decide a target venue and apply its actual formatting requirements rather than this generic-article format; (3) generate real figures from the underlying run data rather than tables alone; (4) expand Related Work with a fuller, independently-verified literature pass.]</span>` },
+{ id: 'references-note', tex: `The full bibliography is maintained in refs.bib, synced from a dedicated Zotero collection (see tools/zotero_sync.py) rather than shown as a block here -- reference-list formatting isn't prose a reviewer comments on paragraph-by-paragraph the way the rest of this draft is.`, section: 'conclusion', h3: 'References', text: `The full bibliography is maintained in refs.bib, synced from a dedicated Zotero collection (see tools/zotero_sync.py) rather than shown as a block here &ndash; reference-list formatting isn't prose a reviewer comments on paragraph-by-paragraph the way the rest of this draft is.` }
+];
+
+
+// Paragraph (non-figure, non-table) block ids, in document order. This is the
+// denominator for the "N of M paragraphs reviewed" progress indicator and the
+// ordered list keyboard navigation (j/k) steps through.
+const PARA_IDS = DOC.filter(b => !b.type).map(b => b.id);
+
+// ---------------------------------------------------------------------------
+// Word-level diff (LCS-based), used for real inline track-changes rendering
+// instead of separate before/after blocks. Self-contained, no library.
+// ---------------------------------------------------------------------------
+function tokenizeWords(s) {
+  return (s || '').match(/\s+|[^\s]+/g) || [];
+}
+function wordDiffOps(oldStr, newStr) {
+  const a = tokenizeWords(oldStr), b = tokenizeWords(newStr);
+  const n = a.length, m = b.length;
+  const dp = new Array(n + 1);
+  for (let i = 0; i <= n; i++) dp[i] = new Uint32Array(m + 1);
+  for (let i = n - 1; i >= 0; i--) {
+    for (let j = m - 1; j >= 0; j--) {
+      dp[i][j] = a[i] === b[j] ? dp[i+1][j+1] + 1 : Math.max(dp[i+1][j], dp[i][j+1]);
+    }
+  }
+  const ops = [];
+  let i = 0, j = 0;
+  while (i < n && j < m) {
+    if (a[i] === b[j]) { ops.push({ type: 'equal', text: a[i] }); i++; j++; }
+    else if (dp[i+1][j] >= dp[i][j+1]) { ops.push({ type: 'del', text: a[i] }); i++; }
+    else { ops.push({ type: 'ins', text: b[j] }); j++; }
+  }
+  while (i < n) { ops.push({ type: 'del', text: a[i] }); i++; }
+  while (j < m) { ops.push({ type: 'ins', text: b[j] }); j++; }
+  const merged = [];
+  ops.forEach(op => {
+    const last = merged[merged.length - 1];
+    if (last && last.type === op.type) last.text += op.text;
+    else merged.push({ type: op.type, text: op.text });
+  });
+  return merged;
+}
+function renderWordDiff(oldStr, newStr) {
+  return wordDiffOps(oldStr, newStr).map(op => {
+    const t = escapeHtml(op.text);
+    if (op.type === 'del') return `<del class="wd-del">${t}</del>`;
+    if (op.type === 'ins') return `<ins class="wd-ins">${t}</ins>`;
+    return t;
+  }).join('');
+}
+
+// ---------------------------------------------------------------------------
+// Render
+// ---------------------------------------------------------------------------
+const docInner = document.getElementById('docInner');
+let originalText = {}; // blockId -> original plain text (from DOM), for diffing/comparison
+let originalHTML = {}; // blockId -> original raw markup (italics/citations), for reverting
+const navList = document.getElementById('navList');
+
+// Title/kicker/authors are editable via the same generic [data-textsrc]
+// mechanism as any paragraph -- register their originals here so saveEdit's
+// diff/revert logic works for them too. The nav sidebar's title is a
+// read-only mirror of the main title (editing it separately would let the
+// two drift out of sync), kept in sync live on every keystroke rather than
+// only after the debounced save.
+['meta-kicker', 'meta-title', 'meta-authors'].forEach(id => {
+  const el = document.querySelector(`[data-textsrc="${id}"]`);
+  if (el) { originalHTML[id] = el.innerHTML; originalText[id] = el.textContent.trim(); }
+});
+document.getElementById('metaTitle').addEventListener('input', (e) => {
+  document.getElementById('navDocTitle').textContent = e.target.textContent;
+});
+
+SECTIONS.forEach(s => {
+  const li = document.createElement('li');
+  li.innerHTML = `<a href="#sec-${s.id}">${s.label}</a>`;
+  navList.appendChild(li);
+});
+
+let seenSections = new Set();
+DOC.forEach((block, i) => {
+  if (!seenSections.has(block.section)) {
+    seenSections.add(block.section);
+  }
+  const anchor = !document.getElementById('sec-' + block.section) ? `<div id="sec-${block.section}" style="position:relative;top:-12px"></div>` : '';
+  let html = anchor;
+  if (block.h2 || block.h3) {
+    const level = block.h2 ? 'h2' : 'h3';
+    const cls = block.h2 ? 'sec' : 'sub';
+    const headerText = block.h2 || block.h3;
+    const hdrId = 'h:' + block.id;
+    html += `<div class="block header-block" data-block="${hdrId}">
+      <span class="review-dot" title="Reviewed"></span>
+      <span class="edited-chip">Edited</span>
+      <${level} class="${cls}" data-textsrc="${hdrId}" contenteditable="true" spellcheck="true">${escapeHtml(headerText)}</${level}>
+      <div class="block-toolbar">
+        <button class="mark-read" data-markread="${hdrId}" title="Mark as reviewed" type="button">&#10003;</button>
+        <button class="add-note" title="Comment on this heading" data-wholeblock="${hdrId}" type="button">+</button>
+      </div>
+      <div class="block-subtools">
+        <button class="subtool-btn view-diff-btn" data-diffblock="${hdrId}" type="button">&#9685; Show change</button>
+      </div>
+      <div class="inline-diff" data-diffpanel="${hdrId}" hidden></div>
+    </div>`;
+    docInner.insertAdjacentHTML('beforeend', html);
+    html = '';
+    originalHTML[hdrId] = headerText;
+    originalText[hdrId] = document.querySelector(`[data-textsrc="${hdrId}"]`).textContent.trim();
+    // A header-only block (no separate `text`/`type` on the same object) has
+    // nothing left to render below -- falling through renders a bogus extra
+    // paragraph whose body is the literal string "undefined" (block.text is
+    // JS undefined). Stop here for that case; a block combining a header with
+    // real body content on the same object still falls through correctly.
+    if (block.text === undefined && block.type === undefined) return;
+  }
+
+  if (block.type === 'figure') {
+    const labelId = 'label:' + block.id;
+    html += `<div class="figblock" data-block="${block.id}">
+      <span class="figblock-label" data-textsrc="${labelId}" contenteditable="true" spellcheck="true">${block.label}</span>
+      <div class="figblock-cap" data-textsrc="${block.id}" contenteditable="true" spellcheck="true">${block.caption}</div>
+      <img src="${block.img}" alt="${block.label}" loading="lazy" />
+    </div>`;
+    docInner.insertAdjacentHTML('beforeend', html);
+    originalHTML[block.id] = block.caption;
+    originalText[block.id] = document.querySelector(`[data-textsrc="${block.id}"]`).textContent.trim();
+    // Label ("Fig 3") gets the same generic data-textsrc treatment as the
+    // caption -- reviewers occasionally need to renumber a figure during
+    // review, and every other piece of block-tied text (header/caption/
+    // body/meta) is already editable this way, so a static, unrenamable
+    // label would be an asymmetric gap.
+    originalHTML[labelId] = block.label;
+    originalText[labelId] = document.querySelector(`[data-textsrc="${labelId}"]`).textContent.trim();
+    return;
+  }
+  if (block.type === 'table') {
+    let rowsHtml = block.rows.map(r => `<tr>${r.map(c=>`<td>${c}</td>`).join('')}</tr>`).join('');
+    const labelId = 'label:' + block.id;
+    html += `<div class="tabblock" data-block="${block.id}">
+      <span class="tabblock-label" data-textsrc="${labelId}" contenteditable="true" spellcheck="true">${block.label}</span>
+      <div class="tabblock-cap" data-textsrc="${block.id}" contenteditable="true" spellcheck="true">${block.caption}</div>
+      <table class="mini"><thead><tr>${block.headers.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${rowsHtml}</tbody></table>
+    </div>`;
+    docInner.insertAdjacentHTML('beforeend', html);
+    originalHTML[block.id] = block.caption;
+    originalText[block.id] = document.querySelector(`[data-textsrc="${block.id}"]`).textContent.trim();
+    // See figure branch above: label gets the same treatment as caption.
+    // Table CELLS/headers (<td>/<th>) are deliberately left non-editable --
+    // they hold tabular data mirrored from the paper's result tables, not
+    // free-form prose, and the block model here has no per-cell id to hang
+    // a diff/revert/originalText baseline off of. Retyping a number in
+    // place with no tracked "original" to diff against or revert to would
+    // be silently lossy, unlike every other editable surface in this tool.
+    originalHTML[labelId] = block.label;
+    originalText[labelId] = document.querySelector(`[data-textsrc="${labelId}"]`).textContent.trim();
+    return;
+  }
+
+  originalHTML[block.id] = block.text;
+  const srcToggle = block.tex ? `<button class="subtool-btn src-toggle" data-srctarget="${block.id}" type="button">&lt;/&gt; LaTeX source</button>` : '';
+  const srcPanel = block.tex ? `<div class="latex-src" data-srcpanel="${block.id}" hidden>
+      <div class="latex-src-head"><span>Raw LaTeX &mdash; ${META.sourceFile}</span><button class="src-copy" data-srccopy="${block.id}" type="button">Copy</button></div>
+      <pre>${escapeHtml(block.tex)}</pre>
+    </div>` : '';
+  html += `<div class="block" data-block="${block.id}">
+    <span class="lineno">${i+1}</span>
+    <span class="review-dot" title="Reviewed"></span>
+    <span class="edited-chip">Edited</span>
+    <p class="body-text" data-textsrc="${block.id}" contenteditable="true" spellcheck="true">${block.text}</p>
+    <div class="block-toolbar">
+      <button class="mark-read" data-markread="${block.id}" title="Mark as reviewed" type="button">&#10003;</button>
+      <button class="add-note" title="Comment on this paragraph" data-wholeblock="${block.id}" type="button">+</button>
+    </div>
+    <div class="block-subtools">
+      ${srcToggle}
+      <button class="subtool-btn view-diff-btn" data-diffblock="${block.id}" type="button">&#9685; Show change</button>
+    </div>
+    ${srcPanel}
+    <div class="inline-diff" data-diffpanel="${block.id}" hidden></div>
+  </div>`;
+  docInner.insertAdjacentHTML('beforeend', html);
+  originalText[block.id] = document.querySelector(`[data-textsrc="${block.id}"]`).textContent.trim();
+});
+
+document.querySelectorAll('[data-textsrc][contenteditable]').forEach(el => {
+  el.addEventListener('input', () => onParagraphInput(el));
+});
+
+// ---------------------------------------------------------------------------
+// DB + state
+// ---------------------------------------------------------------------------
+let db = null;
+let notes = [];
+let edits = {};        // blockId -> { block_id, original, edited, updated_at }
+let reviewedMap = {};  // blockId -> { block_id, reviewed_at } -- explicit "mark as read" state
+let editSaveTimers = {};
+let currentFilter = 'open';
+let currentTab = 'notes';
+let pendingSelection = null; // { blockId, quotedText }
+let popType = 'comment';
+let currentFocusIndex = -1; // index into PARA_IDS for j/k keyboard navigation
+let editingNoteId = null; // id of the comment/suggestion currently being edited inline, or null
+
+// ---------------------------------------------------------------------------
+// Local (non-Artifact) persistence. When `db` is unavailable (this file
+// opened directly in a browser rather than run as a Claude Artifact),
+// edits/notes/reviewed-marks are kept in localStorage instead of only
+// living in memory for the current tab -- otherwise every "not connected"
+// session would lose all review work on refresh. Per-browser only, not
+// synced across devices, namespaced by META.id so multiple generalized
+// copies of this tool don't collide in the same browser's storage.
+// ---------------------------------------------------------------------------
+const LOCAL_STORE_KEY = 'marginNotesLocal:' + META.id;
+function persistLocal() {
+  try {
+    localStorage.setItem(LOCAL_STORE_KEY, JSON.stringify({ edits, notes, reviewedMap }));
+  } catch (e) { /* storage unavailable or full -- local-only convenience, fail silent */ }
+}
+function loadLocal() {
+  try {
+    const raw = localStorage.getItem(LOCAL_STORE_KEY);
+    if (!raw) return;
+    const parsed = JSON.parse(raw);
+    edits = parsed.edits || {};
+    notes = parsed.notes || [];
+    reviewedMap = parsed.reviewedMap || {};
+  } catch (e) { /* corrupt or unavailable -- start fresh rather than crash */ }
+}
+
+// "New" badge for comments/suggestions created since the last time this
+// reviewer had the page open. Per-browser (localStorage), not synced across
+// devices -- fine for a single-reviewer tool. Captured once at load time so
+// items created earlier in *this* visit don't lose their badge mid-session;
+// updated to now only once we've actually shown the current set as "new".
+const NOTES_LAST_SEEN_KEY = 'marginNotesLastSeenAt';
+let VIEWED_BEFORE = 0;
+try { VIEWED_BEFORE = Number(localStorage.getItem(NOTES_LAST_SEEN_KEY)) || 0; } catch (e) {}
+try { localStorage.setItem(NOTES_LAST_SEEN_KEY, String(Date.now())); } catch (e) {}
+
+function plainTextOf(blockId) {
+  const el = document.querySelector(`[data-textsrc="${blockId}"]`);
+  return el ? el.textContent : '';
+}
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 1900);
+}
+
+function onParagraphInput(el) {
+  const blockId = el.dataset.textsrc;
+  clearTimeout(editSaveTimers[blockId]);
+  editSaveTimers[blockId] = setTimeout(() => saveEdit(blockId, el), 800);
+}
+
+async function saveEdit(blockId, el) {
+  const newText = el.textContent.trim();
+  const original = originalText[blockId];
+  const blockEl = document.querySelector(`[data-block="${blockId}"]`);
+  if (newText === original) {
+    if (db) { try { await db.collection('edits').doc(blockId).delete(); } catch (e) {} }
+    else {
+      delete edits[blockId]; renderEdits(); persistLocal();
+      const panel = document.querySelector(`[data-diffpanel="${blockId}"]`);
+      if (panel) panel.innerHTML = '';
+    }
+    if (blockEl) blockEl.classList.remove('edited');
+    return;
+  }
+  const record = { block_id: blockId, original, edited: newText, updated_at: Date.now() };
+  if (db) {
+    try { await db.collection('edits').doc(blockId).set(record); }
+    catch (e) { toast('Could not save edit - try again'); return; }
+  } else {
+    edits[blockId] = record; renderEdits(); applyEdits(); persistLocal();
+  }
+  if (blockEl) blockEl.classList.add('edited');
+  toast('Edit saved');
+}
+
+function applyEdits() {
+  Object.entries(edits).forEach(([blockId, e]) => {
+    const el = document.querySelector(`[data-textsrc="${blockId}"]`);
+    const blockEl = document.querySelector(`[data-block="${blockId}"]`);
+    if (el && document.activeElement !== el && el.textContent.trim() !== e.edited) {
+      el.textContent = e.edited;
+    }
+    if (blockEl) blockEl.classList.add('edited');
+    const panel = document.querySelector(`[data-diffpanel="${blockId}"]`);
+    if (panel) panel.innerHTML = renderWordDiff(e.original, e.edited);
+  });
+  renderProgress();
+}
+
+function renderEdits() {
+  const list = document.getElementById('editsList');
+  const items = Object.entries(edits).sort((a,b) => (b[1].updated_at||0) - (a[1].updated_at||0));
+  document.getElementById('editsCount').textContent = items.length ? items.length : '';
+  if (!items.length) {
+    list.innerHTML = `<div class="empty-state">No direct edits yet &mdash; click into any paragraph and start typing.</div>`;
+  } else {
+    list.innerHTML = items.map(([blockId, e]) => `
+      <div class="diff-card" data-goto="${blockId}">
+        <p class="diff-section">${blockId}</p>
+        <p class="diff-inline">${renderWordDiff(e.original, e.edited)}</p>
+        <div class="diff-actions">
+          <span class="note-time">${fmtTime(e.updated_at)}</span>
+          <button class="diff-revert" data-revert="${blockId}">Revert to original</button>
+        </div>
+      </div>
+    `).join('');
+  }
+  renderProgress();
+  renderSummary();
+}
+
+async function initDb() {
+  try {
+    db = await claude.use('db');
+  } catch (e) { db = null; }
+  if (!db) {
+    loadLocal();
+    applyEdits(); renderEdits(); renderNotes(); applyReviewed();
+    renderProgress();
+    toast('Working locally — saved in this browser only');
+    return;
+  }
+  db.collection('edits').onSnapshot(snap => {
+    edits = {};
+    snap.docs.filter(d => d.exists).forEach(d => { edits[d.id] = d.data(); });
+    applyEdits();
+    renderEdits();
+  }, (err) => {
+    console.error('edits subscription error', err);
+    toast('Lost connection to edit storage');
+  });
+  db.collection('comments').onSnapshot(snap => {
+    notes = snap.docs
+      .filter(d => d.exists)
+      .map(d => ({ ...d.data(), id: d.id }))
+      .sort((a,b) => (b.created_at||0) - (a.created_at||0));
+    renderNotes();
+    applyHighlights();
+  }, (err) => {
+    console.error('comments subscription error', err);
+    toast('Lost connection to notes storage');
+  });
+  db.collection('reviewed').onSnapshot(snap => {
+    reviewedMap = {};
+    snap.docs.filter(d => d.exists).forEach(d => { reviewedMap[d.id] = d.data(); });
+    applyReviewed();
+  }, (err) => {
+    console.error('reviewed subscription error', err);
+  });
+}
+
+function renderStats() {
+  const open = notes.filter(n => n.status !== 'resolved').length;
+  const resolved = notes.filter(n => n.status === 'resolved').length;
+  const sugg = notes.filter(n => n.type === 'suggestion').length;
+  document.getElementById('statOpen').textContent = open;
+  document.getElementById('statResolved').textContent = resolved;
+  document.getElementById('statSuggest').textContent = sugg;
+  document.getElementById('railCount').textContent = notes.length;
+}
+
+// A paragraph counts as reviewed once it has a comment/suggestion, a saved
+// edit, or an explicit "mark as read" -- whichever comes first.
+function reviewedBlockIds() {
+  const touched = new Set();
+  notes.forEach(n => touched.add(n.block_id));
+  Object.keys(edits).forEach(id => touched.add(id));
+  Object.keys(reviewedMap).forEach(id => touched.add(id));
+  return touched;
+}
+
+function renderProgress() {
+  const touched = reviewedBlockIds();
+  const done = PARA_IDS.filter(id => touched.has(id)).length;
+  const total = PARA_IDS.length;
+  const label = document.getElementById('progressLabel');
+  const fill = document.getElementById('progressFill');
+  if (label) label.textContent = `${done} / ${total}`;
+  if (fill) fill.style.width = (total ? Math.round((done / total) * 100) : 0) + '%';
+  // Keep each paragraph's persistent review-dot in sync too -- a block counts
+  // as reviewed (and lights its dot) via a comment or edit, not only an
+  // explicit mark-as-read, so this has to run wherever progress is recomputed.
+  document.querySelectorAll('.block[data-block]').forEach(blockEl => {
+    blockEl.classList.toggle('reviewed', touched.has(blockEl.dataset.block));
+  });
+}
+
+function applyReviewed() {
+  document.querySelectorAll('.mark-read').forEach(btn => {
+    const id = btn.dataset.markread;
+    btn.classList.toggle('active', !!reviewedMap[id]);
+  });
+  renderProgress();
+}
+
+function renderSummary() {
+  const list = document.getElementById('summaryList');
+  if (!list) return;
+  const openN = notes.filter(n => n.status !== 'resolved' && n.type !== 'suggestion').length;
+  const suggN = notes.filter(n => n.type === 'suggestion').length;
+  const resolvedN = notes.filter(n => n.status === 'resolved').length;
+  const editN = Object.keys(edits).length;
+  const countsHtml = `<div class="summary-counts">
+    <span class="summary-chip"><b>${notes.length}</b> comment${notes.length===1?'':'s'}</span>
+    <span class="summary-chip"><b>${suggN}</b> suggestion${suggN===1?'':'s'}</span>
+    <span class="summary-chip"><b>${resolvedN}</b> resolved</span>
+    <span class="summary-chip"><b>${editN}</b> edit${editN===1?'':'s'}</span>
+  </div>`;
+
+  const noteItems = notes.map(n => ({
+    ts: n.updated_at || n.created_at || 0,
+    html: `<div class="note-card ${n.status === 'resolved' ? 'resolved' : ''}" data-goto="${n.block_id}">
+      <div class="note-card-top">
+        <span class="note-badge ${n.status === 'resolved' ? 'resolved-badge' : n.type}">${n.status === 'resolved' ? 'Resolved' : (n.type === 'suggestion' ? 'Suggestion' : 'Comment')}</span>
+        <span class="note-section">${n.block_id}</span>
+      </div>
+      ${n.quoted_text ? `<blockquote class="note-quote">&ldquo;${escapeHtml(n.quoted_text)}&rdquo;</blockquote>` : ''}
+      <p class="note-body">${escapeHtml(n.comment || '')}</p>
+      ${n.suggestion ? `<div class="note-suggest"><b>Suggested text</b>${escapeHtml(n.suggestion)}</div>` : ''}
+      <span class="note-time">${n.updated_at && n.updated_at !== n.created_at ? 'edited ' : ''}${fmtTime(n.updated_at || n.created_at)}</span>
+    </div>`
+  }));
+  const editItems = Object.entries(edits).map(([blockId, e]) => ({
+    ts: e.updated_at || 0,
+    html: `<div class="diff-card" data-goto="${blockId}">
+      <p class="diff-section"><span class="summary-item-type edit">Edit</span> &nbsp;${blockId}</p>
+      <p class="diff-inline">${renderWordDiff(e.original, e.edited)}</p>
+      <span class="note-time">${fmtTime(e.updated_at)}</span>
+    </div>`
+  }));
+  const items = noteItems.concat(editItems).sort((a, b) => b.ts - a.ts);
+
+  if (!items.length) {
+    list.innerHTML = countsHtml + `<div class="empty-state">Nothing to summarize yet &mdash; comments and edits will show up here as you review.</div>`;
+    return;
+  }
+  list.innerHTML = countsHtml + items.map(x => x.html).join('');
+}
+
+function fmtTime(ts) {
+  if (!ts) return '';
+  const d = new Date(ts);
+  return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) + ' ' + d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+}
+
+function renderNotes() {
+  renderStats();
+  renderProgress();
+  renderSummary();
+  const list = document.getElementById('notesList');
+  let filtered = notes;
+  if (currentFilter === 'open') filtered = notes.filter(n => n.status !== 'resolved');
+  if (currentFilter === 'resolved') filtered = notes.filter(n => n.status === 'resolved');
+
+  if (!filtered.length) {
+    list.innerHTML = `<div class="empty-state">${currentFilter === 'resolved' ? 'Nothing resolved yet.' : 'No notes yet &mdash; select text in the manuscript to leave one.'}</div>`;
+    return;
+  }
+  list.innerHTML = filtered.map(n => {
+    const badge = n.status === 'resolved' ? `<span class="note-badge resolved-badge">Resolved</span>` : `<span class="note-badge ${n.type}">${n.type === 'suggestion' ? 'Suggestion' : 'Comment'}</span>`;
+    const newBadge = (n.created_at || 0) > VIEWED_BEFORE ? `<span class="note-badge new-badge">New</span>` : '';
+    const quote = n.quoted_text ? `<blockquote class="note-quote">&ldquo;${escapeHtml(n.quoted_text)}&rdquo;</blockquote>` : '';
+    if (editingNoteId === n.id) {
+      return `<div class="note-edit-form" data-editing-id="${n.id}">
+        <div class="note-card-top">${badge}<span class="note-section">${n.block_id}</span></div>
+        ${quote}
+        <textarea data-field="comment" placeholder="What's the issue?">${escapeHtml(n.comment || '')}</textarea>
+        ${n.type === 'suggestion' ? `<textarea data-field="suggestion" placeholder="Replacement text&hellip;">${escapeHtml(n.suggestion || '')}</textarea>` : ''}
+        <div class="note-edit-actions">
+          <button class="btn btn-ghost" data-cancel-edit="${n.id}">Cancel</button>
+          <button class="btn btn-primary" data-save-edit="${n.id}">Save</button>
+        </div>
+      </div>`;
+    }
+    const suggest = n.suggestion ? `<div class="note-suggest"><b>Suggested text</b>${escapeHtml(n.suggestion)}</div>` : '';
+    const edited = n.updated_at && n.updated_at !== n.created_at;
+    return `<div class="note-card ${n.status === 'resolved' ? 'resolved' : ''}" data-goto="${n.block_id}" data-id="${n.id}">
+      <div class="note-card-top">${badge}${newBadge}<span class="note-section">${n.block_id}</span></div>
+      ${quote}
+      <p class="note-body">${escapeHtml(n.comment || '')}</p>
+      ${suggest}
+      <div class="note-foot">
+        <span class="note-time">${edited ? 'edited ' : ''}${fmtTime(n.updated_at || n.created_at)}</span>
+        <span class="note-foot-actions">
+          <button class="note-edit-btn" data-edit="${n.id}">Edit</button>
+          ${n.status !== 'resolved' ? `<button class="note-resolve" data-resolve="${n.id}">Mark resolved</button>` : ''}
+          <button class="note-delete-btn" data-delete="${n.id}" title="Delete permanently">Delete</button>
+        </span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function escapeHtml(s) {
+  return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function applyHighlights() {
+  document.querySelectorAll('mark.note-mark').forEach(m => {
+    const parent = m.parentNode;
+    parent.replaceChild(document.createTextNode(m.textContent), m);
+    parent.normalize();
+  });
+  const active = notes.filter(n => n.quoted_text);
+  active.forEach(n => {
+    const el = document.querySelector(`[data-textsrc="${n.block_id}"]`);
+    if (!el) return;
+    highlightIn(el, n.quoted_text, n.type, n.status, n.id);
+  });
+}
+
+function highlightIn(el, text, type, status, noteId) {
+  const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+  let node;
+  while ((node = walker.nextNode())) {
+    const idx = node.textContent.indexOf(text);
+    if (idx === -1) continue;
+    const range = document.createRange();
+    range.setStart(node, idx);
+    range.setEnd(node, idx + text.length);
+    const mark = document.createElement('mark');
+    mark.className = 'note-mark' + (status === 'resolved' ? ' resolved' : (type === 'suggestion' ? ' suggestion' : ''));
+    mark.dataset.noteId = noteId;
+    try { range.surroundContents(mark); } catch (e) {}
+    break;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Selection popover
+// ---------------------------------------------------------------------------
+const popover = document.getElementById('popover');
+
+// Selecting text inside an editable paragraph is ambiguous: it might mean
+// "I want to comment on this" or it might just mean "I'm about to backspace/
+// retype this." Auto-opening the full popover (and focusing its textarea)
+// used to hijack every such selection, eating the next keystroke instead of
+// letting a plain select+backspace behave like a plain select+backspace. So
+// a selection now only ever shows a small, non-focus-stealing pill; opening
+// the actual comment popover is a deliberate click on that pill.
+const selectPill = document.getElementById('selectPill');
+let pillSelection = null; // { blockId, quotedText, rect }
+
+function hideSelectPill() {
+  selectPill.classList.remove('show');
+  pillSelection = null;
+}
+function showSelectPill(rect) {
+  selectPill.style.top = Math.max(8, rect.top - 38) + 'px';
+  selectPill.style.left = Math.max(8, Math.min(rect.left, window.innerWidth - 120)) + 'px';
+  selectPill.classList.add('show');
+}
+
+document.addEventListener('mouseup', (e) => {
+  if (popover.contains(e.target) || selectPill.contains(e.target) || popover.classList.contains('show')) return;
+  setTimeout(() => {
+    const sel = window.getSelection();
+    if (!sel || sel.isCollapsed || !sel.toString().trim()) { hideSelectPill(); return; }
+    const anchorNode = sel.anchorNode;
+    const blockEl = anchorNode && anchorNode.parentElement && anchorNode.parentElement.closest('[data-textsrc]');
+    if (!blockEl) { hideSelectPill(); return; }
+    const quoted = sel.toString().trim();
+    if (quoted.length < 2) { hideSelectPill(); return; }
+    pillSelection = { blockId: blockEl.dataset.textsrc, quotedText: quoted, rect: sel.getRangeAt(0).getBoundingClientRect() };
+    showSelectPill(pillSelection.rect);
+  }, 5);
+});
+
+// Selection collapsing (e.g. the user pressed Backspace/Delete and the
+// selected text is now gone, or they just clicked to move the caret) means
+// there's nothing left to comment on - drop the pill rather than leave it
+// pointing at text that no longer exists.
+document.addEventListener('selectionchange', () => {
+  if (!pillSelection) return;
+  const sel = window.getSelection();
+  if (!sel || sel.isCollapsed || !sel.toString().trim()) hideSelectPill();
+});
+document.addEventListener('mousedown', (e) => {
+  if (pillSelection && !selectPill.contains(e.target)) hideSelectPill();
+});
+selectPill.addEventListener('mousedown', (e) => e.preventDefault()); // don't let the click collapse the live selection
+selectPill.addEventListener('click', () => {
+  if (!pillSelection) return;
+  pendingSelection = { blockId: pillSelection.blockId, quotedText: pillSelection.quotedText };
+  const rect = pillSelection.rect;
+  hideSelectPill();
+  openPopover(rect);
+});
+
+document.querySelectorAll('.add-note').forEach(btn => {
+  btn.addEventListener('click', (e) => {
+    // Use currentTarget (the button the listener is bound to), not target --
+    // target is whatever element the click actually landed on, which is only
+    // guaranteed to be the button itself for a bare-text button with no
+    // child icon/span. Matches the closest()-based delegation used for every
+    // other block-toolbar action below.
+    const blockId = e.currentTarget.dataset.wholeblock;
+    pendingSelection = { blockId, quotedText: null };
+    const rect = e.currentTarget.getBoundingClientRect();
+    openPopover(rect);
+  });
+});
+
+function openPopover(rect) {
+  document.getElementById('popQuote').textContent = pendingSelection.quotedText ? `“${pendingSelection.quotedText.slice(0,220)}${pendingSelection.quotedText.length>220?'…':''}”` : 'General note on this paragraph';
+  document.getElementById('popComment').value = '';
+  document.getElementById('popSuggest').value = '';
+  setPopType('comment');
+  popover.classList.add('show');
+  const top = Math.min(rect.bottom + 8, window.innerHeight - 260);
+  let left = Math.max(12, Math.min(rect.left, window.innerWidth - 316));
+  popover.style.top = top + 'px';
+  popover.style.left = left + 'px';
+  document.getElementById('popComment').focus();
+}
+function closePopover() {
+  popover.classList.remove('show');
+  pendingSelection = null;
+  window.getSelection().removeAllRanges();
+}
+function setPopType(t) {
+  popType = t;
+  document.getElementById('btnTypeComment').classList.toggle('active', t === 'comment');
+  document.getElementById('btnTypeSuggestion').classList.toggle('active', t === 'suggestion');
+  document.getElementById('popSuggest').style.display = t === 'suggestion' ? 'block' : 'none';
+}
+document.getElementById('btnTypeComment').onclick = () => setPopType('comment');
+document.getElementById('btnTypeSuggestion').onclick = () => setPopType('suggestion');
+document.getElementById('popCancel').onclick = closePopover;
+
+document.getElementById('popSave').onclick = async () => {
+  const comment = document.getElementById('popComment').value.trim();
+  const suggestion = document.getElementById('popSuggest').value.trim();
+  if (!comment) { toast('Write a note first'); return; }
+  if (!pendingSelection) return;
+  const id = 'c_' + Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+  const doc = {
+    id, block_id: pendingSelection.blockId, quoted_text: pendingSelection.quotedText,
+    comment, suggestion: popType === 'suggestion' ? suggestion : '', type: popType,
+    status: 'open', created_at: Date.now(),
+  };
+  if (db) {
+    try { await db.collection('comments').doc(id).set(doc); }
+    catch (e) { toast('Could not save &mdash; try again'); return; }
+  } else {
+    notes.unshift(doc); renderNotes(); persistLocal();
+  }
+  toast('Note saved');
+  closePopover();
+};
+
+function scrollToBlock(blockId) {
+  const blockEl = document.querySelector(`[data-block="${blockId}"]`);
+  if (blockEl) {
+    blockEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    blockEl.classList.add('flash');
+    setTimeout(() => blockEl.classList.remove('flash'), 900);
+  }
+}
+
+let pendingDeleteId = null;
+let pendingDeleteTimer = null;
+document.getElementById('notesList').addEventListener('click', async (e) => {
+  // Delegated on the list container, so every lookup below goes through
+  // closest() rather than reading e.target.dataset directly -- e.target is
+  // whichever element the click actually hit, which is only guaranteed to
+  // be the action button itself if that button has no child markup. Matches
+  // the closest()-based pattern already used for .mark-read/.src-toggle/
+  // .src-copy/.view-diff-btn in the docInner handler below.
+  const deleteBtn = e.target.closest('[data-delete]');
+  const deleteId = deleteBtn && deleteBtn.dataset.delete;
+  if (deleteId) {
+    e.stopPropagation();
+    if (pendingDeleteId !== deleteId) {
+      // Artifact pages run sandboxed and can't rely on window.confirm() being
+      // available, so this is a click-twice arm/confirm instead of a dialog.
+      pendingDeleteId = deleteId;
+      clearTimeout(pendingDeleteTimer);
+      pendingDeleteTimer = setTimeout(() => { pendingDeleteId = null; renderNotes(); }, 8000);
+      deleteBtn.textContent = 'Confirm delete?';
+      deleteBtn.classList.add('confirm-armed');
+      return;
+    }
+    clearTimeout(pendingDeleteTimer);
+    pendingDeleteId = null;
+    if (db) { try { await db.collection('comments').doc(deleteId).delete(); } catch (err) { toast('Could not delete &mdash; try again'); return; } }
+    else { notes = notes.filter(x => x.id !== deleteId); renderNotes(); persistLocal(); }
+    toast('Note deleted');
+    return;
+  }
+  const resolveBtn = e.target.closest('[data-resolve]');
+  const resolveId = resolveBtn && resolveBtn.dataset.resolve;
+  if (resolveId) {
+    e.stopPropagation();
+    if (db) { try { await db.collection('comments').doc(resolveId).update({ status: 'resolved' }); } catch (err) {} }
+    else { const n = notes.find(x=>x.id===resolveId); if (n) n.status='resolved'; renderNotes(); persistLocal(); }
+    return;
+  }
+  const editBtn = e.target.closest('[data-edit]');
+  const editId = editBtn && editBtn.dataset.edit;
+  if (editId) {
+    e.stopPropagation();
+    editingNoteId = editId;
+    renderNotes();
+    return;
+  }
+  const cancelBtn = e.target.closest('[data-cancel-edit]');
+  const cancelId = cancelBtn && cancelBtn.dataset.cancelEdit;
+  if (cancelId) {
+    e.stopPropagation();
+    editingNoteId = null;
+    renderNotes();
+    return;
+  }
+  const saveBtn = e.target.closest('[data-save-edit]');
+  const saveId = saveBtn && saveBtn.dataset.saveEdit;
+  if (saveId) {
+    e.stopPropagation();
+    const form = e.target.closest('.note-edit-form');
+    const commentEl = form && form.querySelector('[data-field="comment"]');
+    const suggestEl = form && form.querySelector('[data-field="suggestion"]');
+    const newComment = commentEl ? commentEl.value.trim() : '';
+    if (!newComment) { toast('Comment cannot be empty'); return; }
+    const patch = { comment: newComment, updated_at: Date.now() };
+    if (suggestEl) patch.suggestion = suggestEl.value.trim();
+    if (db) {
+      try { await db.collection('comments').doc(saveId).update(patch); }
+      catch (err) { toast('Could not save &mdash; try again'); return; }
+    } else {
+      const n = notes.find(x => x.id === saveId);
+      if (n) Object.assign(n, patch);
+      persistLocal();
+    }
+    editingNoteId = null;
+    renderNotes();
+    toast('Comment updated');
+    return;
+  }
+  const card = e.target.closest('.note-card');
+  if (card && card.dataset.goto) scrollToBlock(card.dataset.goto);
+});
+
+document.querySelectorAll('.filter-row .chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    document.querySelectorAll('.filter-row .chip').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+    currentFilter = chip.dataset.filter;
+    renderNotes();
+  });
+});
+
+document.querySelectorAll('.tab-row .tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab-row .tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    currentTab = tab.dataset.tab;
+    document.getElementById('notesFilterRow').style.display = currentTab === 'notes' ? 'flex' : 'none';
+    document.getElementById('notesList').style.display = currentTab === 'notes' ? 'flex' : 'none';
+    document.getElementById('editsList').style.display = currentTab === 'edits' ? 'flex' : 'none';
+    document.getElementById('summaryList').style.display = currentTab === 'summary' ? 'flex' : 'none';
+  });
+});
+
+document.getElementById('editsList').addEventListener('click', async (e) => {
+  const revertBtn = e.target.closest('[data-revert]');
+  const revertId = revertBtn && revertBtn.dataset.revert;
+  if (revertId) {
+    e.stopPropagation();
+    const el = document.querySelector(`[data-textsrc="${revertId}"]`);
+    if (el && originalHTML[revertId] !== undefined) el.innerHTML = originalHTML[revertId];
+    const blockEl = document.querySelector(`[data-block="${revertId}"]`);
+    if (blockEl) blockEl.classList.remove('edited');
+    if (db) { try { await db.collection('edits').doc(revertId).delete(); } catch (err) {} }
+    else {
+      delete edits[revertId]; renderEdits(); persistLocal();
+      const panel = document.querySelector(`[data-diffpanel="${revertId}"]`);
+      if (panel) panel.innerHTML = '';
+    }
+    toast('Reverted to original');
+    return;
+  }
+  const card = e.target.closest('.diff-card');
+  if (card) scrollToBlock(card.dataset.goto);
+});
+
+document.getElementById('summaryList').addEventListener('click', (e) => {
+  const card = e.target.closest('.note-card, .diff-card');
+  if (card) scrollToBlock(card.dataset.goto);
+});
+
+// ---------------------------------------------------------------------------
+// Per-block toolbar: mark-as-read, LaTeX source toggle, inline change toggle
+// ---------------------------------------------------------------------------
+docInner.addEventListener('click', async (e) => {
+  const markBtn = e.target.closest('.mark-read');
+  if (markBtn) {
+    const blockId = markBtn.dataset.markread;
+    const isOn = markBtn.classList.contains('active');
+    if (db) {
+      try {
+        if (isOn) await db.collection('reviewed').doc(blockId).delete();
+        else await db.collection('reviewed').doc(blockId).set({ block_id: blockId, reviewed_at: Date.now() });
+      } catch (err) { toast('Could not update review status'); }
+    } else {
+      if (isOn) delete reviewedMap[blockId];
+      else reviewedMap[blockId] = { block_id: blockId, reviewed_at: Date.now() };
+      applyReviewed(); persistLocal();
+    }
+    return;
+  }
+  const srcBtn = e.target.closest('.src-toggle');
+  if (srcBtn) {
+    const panel = document.querySelector(`[data-srcpanel="${srcBtn.dataset.srctarget}"]`);
+    if (panel) panel.hidden = !panel.hidden;
+    return;
+  }
+  const copyBtn = e.target.closest('.src-copy');
+  if (copyBtn) {
+    const pre = copyBtn.closest('.latex-src').querySelector('pre');
+    const text = pre ? pre.textContent : '';
+    try {
+      await navigator.clipboard.writeText(text);
+      toast('LaTeX source copied');
+    } catch (err) { toast('Could not copy - select the text manually'); }
+    return;
+  }
+  const diffBtn = e.target.closest('.view-diff-btn');
+  if (diffBtn) {
+    const panel = document.querySelector(`[data-diffpanel="${diffBtn.dataset.diffblock}"]`);
+    if (panel) {
+      panel.hidden = !panel.hidden;
+      diffBtn.innerHTML = panel.hidden ? '&#9685; Show change' : '&#9685; Hide change';
+    }
+    return;
+  }
+});
+
+// ---------------------------------------------------------------------------
+// Keyboard navigation: j/k (or arrows) move between paragraphs, e edits the
+// current one, c opens a comment on it, ? toggles the shortcuts help.
+// ---------------------------------------------------------------------------
+const shortcutsModal = document.getElementById('shortcutsModal');
+function openShortcuts() { shortcutsModal.hidden = false; }
+function closeShortcuts() { shortcutsModal.hidden = true; }
+document.getElementById('kbdHintBtn').addEventListener('click', openShortcuts);
+document.getElementById('shortcutsClose').addEventListener('click', closeShortcuts);
+shortcutsModal.addEventListener('click', (e) => { if (e.target === shortcutsModal) closeShortcuts(); });
+
+function moveFocus(delta) {
+  if (!PARA_IDS.length) return;
+  currentFocusIndex = Math.max(0, Math.min(PARA_IDS.length - 1, currentFocusIndex + delta));
+  const blockEl = document.querySelector(`[data-block="${PARA_IDS[currentFocusIndex]}"]`);
+  if (blockEl) {
+    blockEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    document.querySelectorAll('.block.kbd-current').forEach(b => b.classList.remove('kbd-current'));
+    blockEl.classList.add('kbd-current');
+  }
+}
+function currentParaId() {
+  if (currentFocusIndex < 0) moveFocus(1);
+  return PARA_IDS[currentFocusIndex];
+}
+function enterEditModeOnCurrent() {
+  const id = currentParaId();
+  const el = document.querySelector(`[data-textsrc="${id}"]`);
+  if (!el) return;
+  el.focus();
+  const range = document.createRange();
+  range.selectNodeContents(el);
+  range.collapse(false);
+  const sel = window.getSelection();
+  sel.removeAllRanges();
+  sel.addRange(range);
+}
+function openCommentOnCurrent() {
+  const id = currentParaId();
+  const blockEl = document.querySelector(`[data-block="${id}"]`);
+  const btn = blockEl && blockEl.querySelector('.add-note');
+  if (btn) btn.click();
+}
+
+document.addEventListener('keydown', (e) => {
+  if (!shortcutsModal.hidden && e.key !== 'Escape' && e.key !== '?') return;
+  const target = e.target;
+  const isTyping = target && (target.isContentEditable || target.tagName === 'TEXTAREA' || target.tagName === 'INPUT');
+  if (e.key === 'Escape') {
+    if (!shortcutsModal.hidden) { closeShortcuts(); return; }
+    if (popover.classList.contains('show')) { closePopover(); return; }
+    if (pillSelection) { hideSelectPill(); return; }
+    if (document.activeElement && document.activeElement.isContentEditable) document.activeElement.blur();
+    return;
+  }
+  if (isTyping || popover.classList.contains('show')) return;
+  if (e.key === 'j' || e.key === 'ArrowDown') { e.preventDefault(); moveFocus(1); }
+  else if (e.key === 'k' || e.key === 'ArrowUp') { e.preventDefault(); moveFocus(-1); }
+  else if (e.key === 'e') { e.preventDefault(); enterEditModeOnCurrent(); }
+  else if (e.key === 'c') { e.preventDefault(); openCommentOnCurrent(); }
+  else if (e.key === '?') { e.preventDefault(); shortcutsModal.hidden ? openShortcuts() : closeShortcuts(); }
+});
+
+initDb();
+renderProgress();
+</script>
+
