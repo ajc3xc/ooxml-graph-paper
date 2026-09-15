@@ -9,6 +9,8 @@
 \usepackage{xcolor}
 \usepackage{graphicx}
 \usepackage{natbib}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes.geometric}
 
 \newcommand{\todo}[1]{\textcolor{red}{\textbf{[TODO: #1]}}}
 \newcommand{\pending}[1]{\textcolor{orange}{\textbf{[PENDING: #1]}}}
@@ -26,10 +28,10 @@ for Agentic Word Document Editing: A Confirmatory Benchmark}
 \begin{abstract}
 Many agent systems increasingly edit real documents through generic file-manipulation tools
 (read, write, search-and-replace, shell commands) rather than through primitives designed for
-the document's own format. On the same model and the same documents, we ask whether a small set
-of bounded, atomic, structurally-aware editing operations for Microsoft Word's Office Open XML
-(OOXML/\texttt{.docx}) format changes task correctness relative to an agent given only generic
-tools and raw XML access. We report a confirmatory benchmark across six task families
+the document's own format. On the same model and the same documents, we ask whether Meridian
+Docs -- a small set of bounded, atomic, structurally-aware editing operations for Microsoft
+Word's Office Open XML (OOXML/\texttt{.docx}) format -- changes task correctness relative to an
+agent given only generic tools and raw XML access. We report a confirmatory benchmark across six task families
 (bibliography-entry insertion, inline citation insertion, section reordering, equation insertion,
 whole-table insertion, and figure-caption insertion) on a held-out corpus of real, previously
 unseen \texttt{.docx} documents, each task run as a forward edit followed by its own inverse and
@@ -38,8 +40,7 @@ independently graded against the original document's structure. Two families
 reordering) shows no difference on a single edit but a statistically significant advantage for
 the bounded tool under four repeated edit-undo cycles (92.9\% vs.\ 67.3\% pass rate, $p=0.0015$),
 traced to a specific, data-grounded failure mode in the generic-tool arm: compounding loss of
-the true original document state across repeated cycles -- the paper's central finding, which we
-call \emph{state drift}. Three families (equation, whole-table, and caption insertion) share a
+the true original document state across repeated cycles, a pattern we call \emph{state drift}. Three families (equation, whole-table, and caption insertion) share a
 write-time structural-correctness verification step; on a shared, variably-contended host, two of
 the three reported markedly lower pass rates (equation 46.2\%, caption 7.7\%) while whole-table
 reached 96.2\%. We treated this as a hypothesis rather than a finding and tested it directly: a
@@ -151,8 +152,8 @@ Table~\ref{tab:single-edit} and Table~\ref{tab:k4} is $11+44=55$ paired document
 $11+48=59$.
 
 \subsection{Task families}
-Six families are reported, each implemented as one forward/inverse tool pair on the treatment
-side:
+Six families are reported, each implemented as one forward/inverse tool pair in Meridian Docs on
+the treatment side:
 \begin{itemize}
 \item \textbf{Bibliography entry} -- insert/remove one APA-formatted bibliography entry.
 \item \textbf{Inline citation} -- insert/remove one inline citation marker.
@@ -279,8 +280,8 @@ Section reorder ($K=4$, combined) & control   & 67.3\% & [54.5, 78.2] & 55 & \mu
 \bottomrule
 \end{tabular}
 \caption{Under four repeated edit-undo cycles, the bounded tool holds a 92.9\% pass rate while
-the generic tool falls to 67.3\% ($p=0.0015$) -- the benchmark's one significant result. Same
-combined corpus as Table~\ref{tab:single-edit}'s bottom row.}
+the generic tool falls to 67.3\% ($p=0.0015$). Same combined corpus as Table~\ref{tab:single-edit}'s
+bottom row.}
 \label{tab:k4}
 \end{table}
 
@@ -308,6 +309,20 @@ The pattern is dominant but not exceptionless (2 of 12 control failures occur on
 cycle, one of those two then recovering on a later cycle) -- the significance finding rests on
 the dominant trend, not on every case fitting the same story.
 
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.85\textwidth]{figures/fig-single-edit-forest.pdf}
+\caption{Pass rate and 95\% CI by arm for the four families not gated by write-time
+structural-verification (Table~\ref{tab:single-edit}, Table~\ref{tab:k4}). Bibliography and
+citation show literal overlap; section reorder's confidence intervals narrow but still overlap at
+$K=1$ and separate cleanly at $K=4$, the benchmark's one significant single-family comparison.}
+\label{fig:single-edit}
+\end{figure}
+
+Figure~\ref{fig:single-edit} shows this pattern directly: three of the four comparisons show
+near-total overlap between arms, while section reorder's confidence intervals separate cleanly
+only once cycling reaches $K=4$.
+
 \subsection{Write-time structurally-verified families}
 \label{sec:render-gate}
 
@@ -319,6 +334,40 @@ verification fails for any reason. This design choice trades a real reliability 
 (verification against a real renderer is slow, and slower still on a resource-contended host)
 for a strong guarantee: a persisted change from these three tools is, by construction, never a
 corrupt or unopenable document.
+
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[
+  node distance=0.55cm and 1.0cm,
+  box/.style={draw, rounded corners, align=center, minimum height=0.9cm, minimum width=2.5cm, font=\small},
+  decision/.style={draw, diamond, aspect=2.2, align=center, font=\small, inner sep=1pt},
+  arr/.style={-{Latex[length=2mm]}},
+  lbl/.style={font=\scriptsize, midway}
+]
+\node[box] (call) {Agent calls bounded\\tool (e.g. \texttt{insert\_table})};
+\node[box, below=of call] (edit) {Apply structural edit\\to in-memory OOXML};
+\node[decision, below=0.65cm of edit] (verify) {Independent\\renderer opens\\result cleanly?};
+\node[box, below left=0.7cm and -0.3cm of verify] (fail) {Atomically restore\\original file};
+\node[box, below right=0.7cm and -0.3cm of verify] (ok) {Persist change\\to \texttt{.docx}};
+\node[box, below=1.3cm of verify] (ret) {Return result to agent};
+
+\draw[arr] (call) -- (edit);
+\draw[arr] (edit) -- (verify);
+\draw[arr] (verify) -- node[lbl, above left=-1pt and -4pt] {no} (fail);
+\draw[arr] (verify) -- node[lbl, above right=-1pt and -4pt] {yes} (ok);
+\draw[arr] (fail) |- (ret);
+\draw[arr] (ok) |- (ret);
+\end{tikzpicture}
+\caption{Meridian Docs' write-time verification flow, shared by the equation, table-structural,
+and caption insertion tools (Section~\ref{sec:render-gate}). Control-arm edits bypass this path
+entirely -- they write raw XML directly, with no independent render-verification step.}
+\label{fig:rendergate-arch}
+\end{figure}
+
+Figure~\ref{fig:rendergate-arch} shows this flow. The verification step itself races two
+independent renderer backends concurrently (Section~\ref{sec:defects}, defect 7) rather than
+trying one after the other, purely to bound worst-case latency under contention -- the pass/fail
+decision is unaffected by which backend answers first.
 
 \begin{table}[h]
 \centering
@@ -362,24 +411,22 @@ indistinguishable from its own control (92.3\%, paired $p=1.0$) -- while equatio
 insertion remain far lower. Section~\ref{sec:defects} reports
 why these numbers moved substantially over the course of this project.
 
-We initially suspected this gap reflected a real difference in rendering-verification cost
-between task types -- e.g., that inserting a numbered caption field forces the renderer to
-recompute field numbering across the whole document before it can produce output, while a bare
-table does not. We tested this directly rather than let it stand as a plausible-sounding
-story: a code-level review of the tools' actual OOXML output found no field-dirtying or
-document-recalculation mechanism in any of the three insertion tools, and a controlled,
-sequential timing test -- rendering real completed output files from all three families,
-interleaved to control for host-condition drift -- found no meaningful difference (equation
-8.0s, table-structural 8.6s, caption 8.9s mean, all $\ll$ the 90s timeout). We reject the
-task-dependent-verification-cost hypothesis on this direct evidence. Our working attribution at
-that point was two independent, real causes neither of which is a property of the editing
-operations themselves: ordinary shared-host scheduling contention (real, but evidently not
-sufficient on its own -- an isolated, single-worker re-run of caption's remaining chains still
-failed almost completely), and, found directly while investigating that isolation result, a
-physically unreliable external drive on our test host that disconnected twice during this project
-(Windows disk-layer I/O retry/error events independently confirm this, not just an inference from
-missing files). Rather than leave this as an inference from indirect evidence, we tested it
-directly with a controlled re-run (Section~\ref{sec:methods-rerun}).
+A plausible alternative explanation is that this gap reflects a real difference in
+rendering-verification cost between task types -- e.g., that inserting a numbered caption field
+forces the renderer to recompute field numbering across the whole document before it can produce
+output, while a bare table does not. We tested this directly: a code-level review of the tools'
+actual OOXML output found no field-dirtying or document-recalculation mechanism in any of the
+three insertion tools, and a controlled, sequential timing test -- rendering real completed
+output files from all three families, interleaved to control for host-condition drift -- found no
+meaningful difference (equation 8.0s, table-structural 8.6s, caption 8.9s mean, all $\ll$ the 90s
+timeout). We reject the task-dependent-verification-cost hypothesis on this direct evidence, and
+attribute the gap instead to two independent causes, neither a property of the editing operations
+themselves: ordinary shared-host scheduling contention (evidently not sufficient alone -- an
+isolated, single-worker re-run of caption's remaining chains still failed almost completely), and
+a physically unreliable external drive on the test host that disconnected twice during this
+project (confirmed via Windows disk-layer I/O retry/error events, not inferred from missing files
+alone). Section~\ref{sec:methods-rerun} tests this attribution directly with a controlled re-run
+rather than resting on it as an inference from indirect evidence.
 
 \begin{table}[h]
 \centering
@@ -421,25 +468,34 @@ themselves. We report both tables rather than replacing Table~\ref{tab:render-ga
 Table~\ref{tab:render-gate-clean}, because the contrast between them is itself the evidence for
 this section's causal claim, not an inconvenient earlier draft to discard.
 
-\paragraph{On caption's originally significant gap.} Table~\ref{tab:render-gate}'s paired test
-for caption returned $p<0.001$ on the original host -- by the same statistical test as
-Section~\ref{sec:section-reorder}'s headline result, that was significant. We argued at the time
-that it should not be read the same way: Section~\ref{sec:section-reorder}'s finding measures
-whether an agent, given a chance to attempt a task, does it correctly, while here treatment's
-write-time verification step declines to persist a change at all whenever it cannot confirm
-correctness under the host conditions of the moment, which is a gap in \emph{how often the arm
-successfully persists a change}, not in \emph{whether a persisted change is correct}. The
-confirmatory re-run settles this distinction empirically rather than leaving it as an argued
-interpretation: on a dedicated host, caption's treatment reaches the identical 100\% as its
-control ($p=1.0$), exactly as the verification-reliability reading predicted and the
-capability-limitation reading did not.
+\begin{figure}[h]
+\centering
+\includegraphics[width=\textwidth]{figures/fig-rendergate-dumbbell.pdf}
+\caption{Control and treatment pass rates for the three write-time-verified families, original
+contended host versus confirmatory dedicated host. The gap for equation and caption -- large on
+the original host -- closes completely on the dedicated host; table-structural, already close on
+the original host, closes the remainder.}
+\label{fig:rendergate}
+\end{figure}
+
+\paragraph{Interpreting caption's originally significant gap.} Table~\ref{tab:render-gate}'s
+paired test for caption returned $p<0.001$ on the original host, significant by the same test as
+Section~\ref{sec:section-reorder}'s headline result. We do not read the two the same way.
+Section~\ref{sec:section-reorder}'s finding measures whether an agent, given a chance to attempt a
+task, does it correctly; here, treatment's write-time verification step instead declines to
+persist a change at all whenever it cannot confirm correctness under the host conditions of the
+moment, which is a gap in \emph{how often the arm successfully persists a change}, not in
+\emph{whether a persisted change is correct}. This distinction makes a specific, falsifiable
+prediction: removing host contention should close the gap. It does -- on a dedicated host,
+caption's treatment reaches the identical 100\% as its control ($p=1.0$), confirming the
+verification-reliability reading over a capability-limitation one.
 
 \section{Nine real defects found and fixed}
 \label{sec:defects}
 
-A benchmark's own numbers are only as trustworthy as the harness, evaluator, and infrastructure
-that produced them. Several of the defects below materially changed an already-reported number;
-each is disclosed here rather than folded silently into a final figure.
+The reported numbers depend on the harness, evaluator, and infrastructure that produced them, and
+several of the defects below materially changed an already-reported number. We disclose each
+rather than fold it silently into a final figure.
 
 \begin{enumerate}
 \item \textbf{Missing type-library cache broke basic Word COM (Component Object Model)
@@ -526,28 +582,26 @@ already-collected output file -- rather than assumed fixed once the code changed
 \label{sec:discussion}
 
 This benchmark's central capability finding is that bounded structural tools resist the state
-drift a generic-tool agent shows under repeated edit-undo cycling. We think this is more
-interesting and more general than any single-edit pass-rate comparison, because it isolates a
-mechanism (fresh anchor resolution versus accumulated agent-maintained state) rather than
-reporting an aggregate number. We would expect this mechanism to generalize to any
-repeated-editing workflow, not just section reordering specifically, though this benchmark tests
-only one task family at depth.
+drift a generic-tool agent shows under repeated edit-undo cycling. This result is more
+informative than any single-edit pass-rate comparison, because it isolates a mechanism -- fresh
+anchor resolution versus accumulated agent-maintained state -- rather than reporting an aggregate
+number. We expect this mechanism to generalize to any repeated-editing workflow, not just section
+reordering specifically, though this benchmark tests only one task family at depth.
 
-The write-time-verification-gated families illustrate a different, and we think under-discussed,
-methodological hazard: an architectural choice made for a good reason (never persist a corrupt
-document) can produce a benchmark result that looks like a capability finding but is
-substantially a deployment-environment artifact, and disentangling the two required real,
-disclosed engineering work (Section~\ref{sec:defects}) and, ultimately, a controlled confirmatory
-re-run (Section~\ref{sec:methods-rerun}), not just a larger sample size or a more careful
-argument. We did not stop at rejecting the most obvious alternative explanation -- that these
-tools are simply more expensive to render-verify than table insertion's -- and then rest on an
-inferred attribution to shared-host contention and a physically unreliable test-host component.
-We tested that attribution directly, by re-running the identical benchmark on a dedicated,
-single-tenant host, and the gap closed completely for both equation and caption
-(Table~\ref{tab:render-gate-clean}). We think the general lesson generalizes past this specific
-benchmark: a write-time verification step's reported reliability is only as meaningful as the
-host it was measured on, and a benchmark result that looks like a capability finding is worth
-testing against a change of deployment environment before it is reported as one.
+The write-time-verification-gated families illustrate a different, under-discussed methodological
+hazard: an architectural choice made for a good reason (never persist a corrupt document) can
+produce a benchmark result that looks like a capability finding but is substantially a
+deployment-environment artifact. Disentangling the two required real, disclosed engineering work
+(Section~\ref{sec:defects}) and a controlled confirmatory re-run (Section~\ref{sec:methods-rerun}),
+not just a larger sample size or a more careful argument. Rejecting the most obvious alternative
+explanation -- that these tools are simply more expensive to render-verify than table
+insertion's -- was not sufficient on its own; the attribution to shared-host contention and a
+physically unreliable test-host component required a direct test, not an inference. Re-running
+the identical benchmark on a dedicated, single-tenant host closed the gap completely for both
+equation and caption (Table~\ref{tab:render-gate-clean}). The general lesson extends past this
+specific benchmark: a write-time verification step's reported reliability is only as meaningful
+as the host it was measured on, and a benchmark result that looks like a capability finding is
+worth testing against a change of deployment environment before it is reported as one.
 
 \section{Limitations}
 \label{sec:limitations}
@@ -575,8 +629,8 @@ in this paper's final reporting.
 \section{Conclusion}
 \label{sec:conclusion}
 
-Bounded, structurally-aware editing primitives show no advantage over generic file tools for a
-single document edit, on the task families and model tested here, but show a significant,
+Bounded, structurally-aware editing primitives like Meridian Docs show no advantage over generic
+file tools for a single document edit, on the task families and model tested here, but show a significant,
 mechanistically-traced advantage under repeated editing -- the more realistic condition for an
 agent maintaining a document over time. Three further task families were initially confounded by
 a write-time verification step whose reliability cost proved substantial and
@@ -591,8 +645,8 @@ of this benchmark's own execution environment turned out to matter.
 paper-review-toolkit pipeline (writing-quality + content-quality prompts) against this revision,
 since the previous pass's findings were applied against an earlier draft with different numbers;
 (2) decide a target venue and apply its actual formatting requirements rather than this
-generic-article format; (3) generate real figures from the underlying run data rather than
-tables alone; (4) expand Related Work with a fuller, independently-verified literature pass.}
+generic-article format; (3) expand Related Work with a fuller, independently-verified literature
+pass.}
 
 \bibliographystyle{plainnat}
 \bibliography{refs}

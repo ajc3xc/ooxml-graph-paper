@@ -5,6 +5,7 @@
 *.bbl-SAVE-ERROR
 *.blg
 *.pdf
+!figures/*.pdf
 *.fls
 *.fdb_latexmk
 *.synctex.gz
