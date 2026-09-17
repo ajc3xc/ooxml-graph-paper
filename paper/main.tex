@@ -169,40 +169,48 @@ the treatment side:
 \centering
 \begin{tikzpicture}[
   box/.style={draw, rounded corners, align=center, minimum height=0.9cm, minimum width=5.4cm, font=\small},
+  dbox/.style={draw, dashed, rounded corners, align=center, minimum height=0.9cm, minimum width=5.4cm, font=\small},
   decision/.style={draw, diamond, aspect=3, align=center, font=\small, inner sep=2pt},
   branch/.style={draw, rounded corners, align=center, minimum height=1.05cm, minimum width=4.6cm, font=\small},
   arr/.style={-{Latex[length=2.2mm]}},
   lbl/.style={font=\scriptsize}
 ]
-\node[box] (agent) at (0, 8.2) {Agent (Claude)};
-\node[box] (mcp) at (0, 6.6) {Meridian Docs MCP server};
-\node[box] (edit) at (0, 5.0) {Apply that family's structural edit\\\footnotesize (shared save/lock path, all six families)};
-\node[decision] (needsgate) at (0, 3.0) {Family needs\\render verification?};
+\node[box] (agent) at (0, 10.4) {Agent (Claude)};
+\node[dbox] (discover) at (0, 8.8) {Discover target: \texttt{document\_outline},\\\texttt{locate\_anchor} (re-parses file fresh)};
+\node[box] (mcp) at (0, 7.2) {Meridian Docs MCP server};
+\node[box] (edit) at (0, 5.6) {Apply that family's structural edit\\\footnotesize (shared save/lock path, all six families)};
+\node[decision] (needsgate) at (0, 3.6) {Family needs\\render verification?};
 
-\node[branch] (direct) at (-3.4, 0.9)
+\node[branch] (direct) at (-3.4, 1.5)
   {\textbf{No} -- already persisted\\
    \footnotesize Bibliography, citation,\\[-1pt]
    \footnotesize section reorder};
-\node[branch] (gated) at (3.4, 0.9)
+\node[branch] (gated) at (3.4, 1.5)
   {\textbf{Yes} -- render-gate verify,\\
    \footnotesize then persist or rollback (Figure~\ref{fig:rendergate-arch})\\[-1pt]
    \footnotesize Equation, table, caption};
 
-\node[box] (docx) at (0, -1.4) {Persisted \texttt{.docx}};
+\node[box] (docx) at (0, -0.8) {Persisted \texttt{.docx}};
 
-\draw[arr] (agent) -- (mcp);
-\draw[arr] (mcp) -- node[lbl, right] {calls one bounded tool} (edit);
+\draw[arr] (agent) -- node[lbl, right] {locate the target} (discover);
+\draw[arr] (discover) -- node[lbl, right] {calls one bounded tool} (mcp);
+\draw[arr] (mcp) -- (edit);
 \draw[arr] (edit) -- (needsgate);
 \draw[arr] (needsgate) -- node[lbl, above left=-2pt and -4pt] {no} (direct);
 \draw[arr] (needsgate) -- node[lbl, above right=-2pt and -4pt] {yes} (gated);
 \draw[arr] (direct) -- (docx);
 \draw[arr] (gated) -- (docx);
+
+\node[lbl, align=left, text width=4.2cm, gray] (note) at (6.0, 8.8) {not exercised in this\\benchmark -- target is\\pre-resolved at\\corpus-build time};
+\draw[gray, -{Latex[length=1.6mm]}] (note.west) -- (discover.east);
 \end{tikzpicture}
-\caption{Meridian Docs' overall functional architecture. Editing is a shared step for all six
-families; render-gate verification is a sequential, conditional step layered on \emph{after} the
-edit, only for the three structural families, detailed in Figure~\ref{fig:rendergate-arch} --
-not an independent alternative path chosen from the start. This split is exactly the property
-that Section~\ref{sec:render-gate} shows produces markedly different reliability behavior.}
+\caption{Meridian Docs' overall functional architecture, including the discovery step a real
+deployment needs and this benchmark's harness bypasses (Section~\ref{sec:methods}). Editing
+itself is a shared step for all six families; render-gate verification is a sequential,
+conditional step layered on \emph{after} the edit, only for the three structural families,
+detailed in Figure~\ref{fig:rendergate-arch} -- not an independent alternative path chosen from
+the start. This split is exactly the property that Section~\ref{sec:render-gate} shows produces
+markedly different reliability behavior.}
 \label{fig:architecture}
 \end{figure}
 
