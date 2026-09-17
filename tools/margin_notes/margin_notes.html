@@ -719,8 +719,17 @@ DOC.forEach((block, i) => {
   const srcToggle = block.tex ? `<button class="subtool-btn src-toggle" data-srctarget="${block.id}" type="button">&lt;/&gt; LaTeX source</button>` : '';
   const srcPanel = block.tex ? `<div class="latex-src" data-srcpanel="${block.id}" hidden>
       <div class="latex-src-head"><span>Raw LaTeX &mdash; ${META.sourceFile}</span><button class="src-copy" data-srccopy="${block.id}" type="button">Copy</button></div>
-      <pre>${escapeHtml(block.tex)}</pre>
+      <pre data-textsrc="${block.id}">${escapeHtml(block.tex)}</pre>
     </div>` : '';
+  // The <pre> above deliberately reuses the SAME data-textsrc id as the
+  // rendered paragraph below, not a separate "src:"-prefixed one. Selection-
+  // to-comment resolves via closest('[data-textsrc]') from wherever the user
+  // actually selected (so a selection inside <pre> correctly finds THIS
+  // element), while every other lookup (saveEdit, applyEdits, plainTextOf)
+  // uses a global querySelector-by-id and always finds the rendered <p>
+  // first in DOM order -- so sharing the id lets source-view selections
+  // produce a real comment (previously: none at all, closest() had nothing
+  // to match) without it ever becoming editable (no contenteditable here).
   html += `<div class="block" data-block="${block.id}">
     <span class="lineno">${i+1}</span>
     <span class="review-dot" title="Reviewed"></span>
