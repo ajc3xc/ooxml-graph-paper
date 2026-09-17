@@ -65,8 +65,20 @@ function splitTopLevelElements(s) {
 const elements = splitTopLevelElements(inner);
 console.log('found', elements.length, 'top-level DOC elements');
 
-const LARGE_THRESHOLD = 200000;    // elements bigger than this get raw-text-split
-const SMALL_GROUP_TARGET = 180000; // target size for grouped small-element chunks
+// Lowered from the sibling project's 200000/180000 defaults: the small-group flush
+// check runs AFTER adding an element, so a buffer sitting just under the target that
+// then absorbs one more medium-sized element can overshoot by that element's whole
+// size before flushing. The sibling project's content was a few 300KB-1.2MB images
+// (all individually over LARGE_THRESHOLD, so this never bit it); this project's
+// figures are multiple 25-170KB images -- exactly the size that fits BELOW
+// LARGE_THRESHOLD (skipping the safe dedicated-chunk path) but is still big enough to
+// blow well past a target hit mid-addition. Confirmed empirically: the old defaults
+// produced a 309KB chunk file here. Lowering both fixes it: elements over 60KB (every
+// figure, none of which need PART_SIZE's multi-part splitting -- all are under it)
+// get their own dedicated chunk; the small-group target leaves enough headroom that
+// even a same-size addition right at the limit can't push a chunk file over ~250KB.
+const LARGE_THRESHOLD = 60000;     // elements bigger than this get raw-text-split
+const SMALL_GROUP_TARGET = 120000; // target size for grouped small-element chunks
 const PART_SIZE = 220000;          // size of each raw-text part for large elements
 // All thresholds stay comfortably under the empirically-confirmed
 // ~300KB-safe / 500KB-fails publish boundary.

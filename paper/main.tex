@@ -356,6 +356,42 @@ the dominant trend, not on every case fitting the same story.
 
 \begin{figure}[h]
 \centering
+\begin{tikzpicture}[
+  cyc/.style={draw, circle, minimum size=1.05cm, font=\small},
+  rowlab/.style={font=\small, align=right, text width=2.5cm},
+  sublab/.style={font=\scriptsize, align=right, text width=2.5cm, text=gray},
+  arr/.style={-{Latex[length=1.8mm]}},
+  timearr/.style={-{Latex[length=1.6mm]}, gray, dashed},
+]
+\node[rowlab] (tlabel) at (-2.2, 2.2) {Treatment};
+\node[sublab] (tsub) at (-2.2, 1.75) {fresh anchor\\each cycle};
+\node[cyc] (t1) at (0.5, 2.2) {C1};
+\node[cyc] (t2) at (2.5, 2.2) {C2};
+\node[cyc] (t3) at (4.5, 2.2) {C3};
+\node[cyc] (t4) at (6.5, 2.2) {C4};
+\draw[timearr] (t1) -- (t2);
+\draw[timearr] (t2) -- (t3);
+\draw[timearr] (t3) -- (t4);
+
+\node[rowlab] (clabel) at (-2.2, 0) {Control};
+\node[sublab] (csub) at (-2.2, -0.45) {file state\\carried forward};
+\node[cyc] (c1) at (0.5, 0) {C1};
+\node[cyc] (c2) at (2.5, 0) {C2};
+\node[cyc] (c3) at (4.5, 0) {C3};
+\node[cyc] (c4) at (6.5, 0) {C4};
+\draw[arr] (c1) -- (c2);
+\draw[arr] (c2) -- (c3);
+\draw[arr] (c3) -- (c4);
+\end{tikzpicture}
+\caption{The mechanism behind Table~\ref{tab:k4}'s result. Treatment re-resolves its target by
+a stable structural id fresh each cycle (dashed: no real dependency between cycles). Control has
+no such anchor, so each cycle's unverified edit builds on whatever the previous cycle actually
+left in the file (solid: a real dependency an undetected mistake can cross).}
+\label{fig:drift-mechanism}
+\end{figure}
+
+\begin{figure}[h]
+\centering
 \includegraphics[width=0.85\textwidth]{figures/fig-single-edit-forest.pdf}
 \caption{Pass rate and 95\% CI by arm for the four families not gated by write-time
 structural-verification (Table~\ref{tab:single-edit}, Table~\ref{tab:k4}). Bibliography and
@@ -651,7 +687,7 @@ worth testing against a change of deployment environment before it is reported a
 \section{Limitations}
 \label{sec:limitations}
 
-Four factors limit how far these results generalize. \textbf{First}, this benchmark tests one
+Five factors limit how far these results generalize. \textbf{First}, this benchmark tests one
 model (\texttt{claude-sonnet-5}) and does not claim the results generalize across models.
 \textbf{Second}, the write-time-verification-gated families' originally-reported numbers
 (Table~\ref{tab:render-gate}) were collected on a single, shared, variably-contended host rather
@@ -669,7 +705,16 @@ test infrastructure -- an external drive holding all run data -- proved physical
 disconnecting twice during this project (confirmed via OS-level disk I/O error events, not
 inferred); this remains a real defect in our original test environment (Section~\ref{sec:defects}),
 though the confirmatory re-run's clean result means it is no longer load-bearing for any number
-in this paper's final reporting.
+in this paper's final reporting. \textbf{Fifth}, this benchmark exercises 11 of Meridian Docs'
+86 registered tools, across the six families reported here; the remaining tools -- other editing
+operations, and read-only structural/indexing tools including \texttt{locate\_anchor} and
+\texttt{index\_document} -- are outside this benchmark's scope, and we do not claim these
+results generalize to the full tool surface. Relatedly, every trial reported here receives its
+target anchor pre-resolved at corpus-build time (Section~\ref{sec:methods}); the live
+anchor-resolution tools' own reliability under real, uncontrolled use is a real question this
+benchmark does not measure -- their content-derived synthetic ids are explicitly documented as
+shifting if an earlier paragraph with the same text is edited, inserted, or removed elsewhere in
+the document.
 
 \section{Conclusion}
 \label{sec:conclusion}
