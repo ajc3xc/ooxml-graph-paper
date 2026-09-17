@@ -187,7 +187,7 @@ the treatment side:
    \footnotesize section reorder};
 \node[branch] (gated) at (3.4, 1.5)
   {\textbf{Yes} -- render-gate verify,\\
-   \footnotesize then persist or rollback (Figure~\ref{fig:rendergate-arch})\\[-1pt]
+   \footnotesize then persist or rollback\\[-1pt]
    \footnotesize Equation, table, caption};
 
 \node[box] (docx) at (0, -0.8) {Persisted \texttt{.docx}};
@@ -200,12 +200,9 @@ the treatment side:
 \draw[arr] (needsgate) -- node[lbl, above right=-2pt and -4pt] {yes} (gated);
 \draw[arr] (direct) -- (docx);
 \draw[arr] (gated) -- (docx);
-
-\node[lbl, align=left, text width=4.2cm, gray] (note) at (6.0, 8.8) {not exercised in this\\benchmark -- target is\\pre-resolved at\\corpus-build time};
-\draw[gray, -{Latex[length=1.6mm]}] (note.west) -- (discover.east);
 \end{tikzpicture}
 \caption{Meridian Docs' overall functional architecture, including the discovery step a real
-deployment needs and this benchmark's harness bypasses (Section~\ref{sec:methods}). Editing
+deployment needs (this benchmark's harness bypasses it -- Section~\ref{sec:methods}). Editing
 itself is a shared step for all six families; render-gate verification is a sequential,
 conditional step layered on \emph{after} the edit, only for the three structural families,
 detailed in Figure~\ref{fig:rendergate-arch} -- not an independent alternative path chosen from
@@ -217,8 +214,9 @@ markedly different reliability behavior.}
 \subsection{Arms and isolation}
 The control arm receives \texttt{Read}, \texttt{Write}, \texttt{Edit}, and \texttt{Bash}, with
 no access to any purpose-built document-editing tool. The treatment arm receives exactly one
-bounded tool pair (e.g., \texttt{insert\_table}/\texttt{remove\_table}) and \texttt{Read}, with
-no generic write access at all. We post-hoc audited every trial's transcript for isolation
+bounded tool pair and \texttt{Read}, with no generic write access at all -- for the
+table-structural family, for example, \texttt{insert\_table} and \texttt{remove\_table}. We
+post-hoc audited every trial's transcript for isolation
 violations -- a control transcript referencing a purpose-built tool name, or a treatment
 transcript referencing any tool outside its one declared pair, would indicate a harness leak --
 and found no such violation in any reported trial. Neither arm's tool set includes a
@@ -226,6 +224,22 @@ structure-discovery tool (e.g., \texttt{locate\_anchor}, \texttt{document\_outli
 anchor for each forward edit is resolved once, at corpus-build time, and supplied directly in the
 trial's prompt, so indexing/discovery-tool availability is not part of what this benchmark
 measures -- only editing correctness given a target that is already known.
+
+Discovery and editing share the same tool surface deliberately, not incidentally:
+\texttt{locate\_anchor} and \texttt{document\_outline} return the same identifier format
+(\texttt{w14:paraId}, or a content-derived fallback for paragraphs without one) that the editing
+tools themselves accept as a target, so a call to one composes directly with a call to the
+other. Leaving discovery to the agent's own reading instead, as the control arm does, means
+locating a target by prose/structural interpretation rather than by a structurally valid id --
+exactly the fragile targeting this benchmark's state-drift finding
+(Figure~\ref{fig:drift-mechanism}) traces the control arm's failures to. Nor does staying correct
+across edits require any scheduled reindexing: \texttt{locate\_anchor} keeps no persistent index
+at all, re-parsing the live file fresh on every call, and the native \texttt{w14:paraId}
+identifier itself is not an externally-maintained index but an attribute OOXML stores directly on
+each paragraph, persisting automatically through ordinary saves. A separate part of Meridian
+Docs, \texttt{index\_document}, does maintain a persisted index for broader search/outline
+features outside this benchmark's scope; it handles staleness by content-hash/mtime detection
+that fails closed on a mismatch, not a fixed reindexing schedule.
 
 \subsection{Grading}
 We graded every trial's output \texttt{.docx} independently of the agent's own report, by
@@ -695,8 +709,8 @@ worth testing against a change of deployment environment before it is reported a
 \section{Limitations}
 \label{sec:limitations}
 
-Five factors limit how far these results generalize. \textbf{First}, this benchmark tests one
-model (\texttt{claude-sonnet-5}) and does not claim the results generalize across models.
+Five factors limit how far these results generalize. \textbf{First}, this benchmark tests only
+the \texttt{claude-sonnet-5} model and does not claim the results generalize across models.
 \textbf{Second}, the write-time-verification-gated families' originally-reported numbers
 (Table~\ref{tab:render-gate}) were collected on a single, shared, variably-contended host rather
 than a dedicated one, and that host condition materially depressed two of the three families'
