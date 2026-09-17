@@ -754,6 +754,22 @@ limitation. We report both the original and confirmatory numbers, and the live i
 work connecting them, rather than reporting a single clean number that would understate how much
 of this benchmark's own execution environment turned out to matter.
 
+\textbf{Future work.} Whether audit-style tools like \texttt{audit\_document} and
+\texttt{audit\_equation\_style} (Section~\ref{sec:limitations}) help an agent bring a document
+into compliance with a target venue's formatting guidelines is a natural next question, but not
+one this benchmark's methodology can answer as-is: unlike the six families reported here,
+guideline compliance has no single deterministic ground truth. Grading it would need a rubric
+built from two sources together -- a venue's own published guidelines for its unambiguous rules
+(margins, citation style), and a real accepted paper from that venue to resolve the guidelines'
+vaguer clauses -- evaluated with the same treatment-versus-control design used throughout this
+paper, not an ablation in place of one. A small, exploratory pilot along these lines already
+exists: four fixtures, \texttt{audit\_equation\_style} versus generic tools, reported in full in
+our internal notes rather than here. Both arms matched on three hand-authored fixtures, but the
+one real, organically-occurring document tested surfaced a genuine, previously-unknown bug in the
+audit tool itself that only the unbounded control arm caught. Too small a sample to support any
+claim -- but a concrete argument for running this at confirmatory scale, not a reason to treat the
+question as settled either way.
+
 \todo{This is a preliminary draft. Before any submission: (1) re-run the full
 paper-review-toolkit pipeline (writing-quality + content-quality prompts) against this revision,
 since the previous pass's findings were applied against an earlier draft with different numbers;
