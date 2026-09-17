@@ -729,11 +729,12 @@ inferred); this remains a real defect in our original test environment (Section~
 though the confirmatory re-run's clean result means it is no longer load-bearing for any number
 in this paper's final reporting. \textbf{Fifth}, this benchmark exercises 11 of Meridian Docs'
 86 registered tools, across the six families reported here; the remaining tools -- other editing
-operations, and read-only structural/indexing tools including \texttt{locate\_anchor} and
-\texttt{index\_document} -- are outside this benchmark's scope, and we do not claim these
-results generalize to the full tool surface. Relatedly, every trial reported here receives its
-target anchor pre-resolved at corpus-build time (Section~\ref{sec:methods}); the live
-anchor-resolution tools' own reliability under real, uncontrolled use is a real question this
+operations, format/style-compliance audit tools such as \texttt{audit\_document} and
+\texttt{audit\_equation\_style}, and read-only structural/indexing tools including
+\texttt{locate\_anchor} and \texttt{index\_document} -- are outside this benchmark's scope, and we
+do not claim these results generalize to the full tool surface. Relatedly, every trial reported
+here receives its target anchor pre-resolved at corpus-build time (Section~\ref{sec:methods});
+the live anchor-resolution tools' own reliability under real, uncontrolled use is a real question this
 benchmark does not measure -- their content-derived synthetic ids are explicitly documented as
 shifting if an earlier paragraph with the same text is edited, inserted, or removed elsewhere in
 the document.
