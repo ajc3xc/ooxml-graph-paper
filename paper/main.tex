@@ -727,8 +727,7 @@ rather than fold it silently into a final figure.
 \item \textbf{Two further evaluation-harness defects} -- an inverse-trial paragraph-id
   resolution bug affecting the citation family, and a statistics-regeneration gap that left a
   stale number published after an unrelated fix -- are described in full in the project's own
-  working notes and omitted here for space, but available on request.
-  \todo{cite/link the full defect log once this paper has a public repository}.
+  working notes (\texttt{docs/} in the repository below) and omitted here for space.
 \item \textbf{Sequential backend fallback could cost more time than the harness's own outer
   budget allowed.} The write-time verification step's two backends (Section~\ref{sec:render-gate})
   were tried sequentially, each with its own retry-bounded 90-second timeout -- discovering that
@@ -852,12 +851,11 @@ analysis (Section~\ref{sec:methods}); a genuinely slow but correct chain on eith
 principle be misclassified as an infrastructure exclusion rather than allowed to finish.
 
 \subsection{Artifact availability}
-This benchmark's harness, evaluator, statistics code, and corpus manifests all exist in a private
-git repository; none of it is publicly released as of this draft.
-\pending{decide, before submission: what gets released (harness/evaluator code, statistics code,
-corpus manifests -- not the licensed DocOps documents themselves), under what license, and hosted
-where, then update this statement and Section~\ref{sec:defects}'s item 6 with the real link
-rather than leaving both as a placeholder.}
+This benchmark's harness, evaluator, statistics code, and corpus manifests are publicly available
+at \url{https://github.com/ajc3xc/ooxml-graph-paper} under the MIT license. The underlying
+\texttt{.docx} corpus documents themselves are a licensed slice of the DocOps benchmark corpus
+and are not redistributed; the released manifests identify which documents were used (by hash)
+without including their content.
 
 \section{Conclusion}
 \label{sec:conclusion}
@@ -892,14 +890,11 @@ question as settled either way.
 
 \todo{This is a preliminary draft. Before any submission: (1) re-run a full writing-quality and
 content-quality review against this revision, since the most recent pass (which added the
-research questions, the Clopper-Pearson defect/fix, the artifact-availability note, and the
+research questions, the Clopper-Pearson defect/fix, the artifact-availability link, and the
 expanded Related Work below) has not itself been re-reviewed; (2) decide a target venue --
 ACM REP (the Conference on Reproducibility and Replicability) is the leading candidate given
 this paper's confirmatory framing and defect-disclosure emphasis, per its own CFP -- and convert
-from this generic-article format to that venue's actual template and page limit; (3) resolve
-Section~\ref{sec:limitations}'s pending artifact-availability decision (what gets released,
-under what license, hosted where) and update that section and defect 6's citation with the real
-link.}
+from this generic-article format to that venue's actual template and page limit.}
 
 \bibliographystyle{plainnat}
 \bibliography{refs}
