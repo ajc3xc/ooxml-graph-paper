@@ -29,8 +29,9 @@ for Agentic Word Document Editing: A Confirmatory Benchmark}
 Many agent systems increasingly edit real documents through generic file-manipulation tools
 (read, write, search-and-replace, shell commands) rather than through primitives designed for
 the document's own format. On the same model and the same documents, we ask whether Meridian
-Docs -- a small set of bounded, atomic, structurally-aware editing operations for Microsoft
-Word's Office Open XML (OOXML/\texttt{.docx}) format -- changes task correctness relative to an
+Docs' document-editing tools -- a bounded, atomic, structurally-aware subset of that package's
+much larger MCP tool surface (Section~\ref{sec:limitations}), for Microsoft Word's Office Open
+XML (OOXML/\texttt{.docx}) format -- change task correctness relative to an
 agent given only generic tools and raw XML access. We report a confirmatory benchmark across six task families
 (bibliography-entry insertion, inline citation insertion, section reordering, equation insertion,
 table-structural insertion, and figure-caption insertion) on a held-out corpus of real, previously
@@ -40,7 +41,8 @@ independently graded against the original document's structure. Two families
 reordering) shows no difference on a single edit but a statistically significant advantage for
 the bounded tool under four repeated edit-undo cycles (92.9\% vs.\ 67.3\% pass rate, $p=0.0015$),
 traced to a specific, data-grounded failure mode in the generic-tool arm: compounding loss of
-the true original document state across repeated cycles, a pattern we call \emph{state drift}. Three families (equation, table-structural, and caption insertion) share a
+the true original document state across repeated cycles, a pattern consistent with \emph{state
+drift} as described in agentic-LLM settings \citep{wu2026dualanchoring}. Three families (equation, table-structural, and caption insertion) share a
 write-time structural-correctness verification step; on a shared, variably-contended host, two of
 the three reported markedly lower pass rates (equation 46.2\%, caption 7.7\%) while table-structural
 reached 96.2\%. We treated this as a hypothesis rather than a finding and tested it directly: a
@@ -170,12 +172,17 @@ itself.
 
 \subsection{Corpus}
 The primary corpus is a 26-document, previously licensed and audited slice of the DocOps
-benchmark corpus (real business documents -- memos, policies, meeting minutes -- not
-hand-authored fixtures), split into a 14-document primary holdout and a 12-document validation
-set; both subsets were held out and never touched during the tooling's own development, and are
-pooled into the flat $n=26$ reported throughout this paper. This corpus's own construction is
-independently preregistered, prior to any trial reported here (2026-08-27,
-\texttt{1061e0e}\footnote{Git commit hash, this project's evaluation-harness repository.}). A
+benchmark corpus (real, unmodified business records such as internal memos, written policies,
+and meeting minutes, not hand-authored fixtures), split into a 14-document primary holdout and a
+12-document validation set, pooled into the flat $n=26$ reported throughout this paper. This
+corpus's own construction is independently preregistered, prior to any trial reported
+here.\footnote{2026-08-27, commit \texttt{1061e0e}, this project's evaluation-harness repository.}
+Neither subset was used to design the tooling's original feature set, but several defects
+(Section~\ref{sec:defects}) were subsequently found by observing this corpus's own trial outcomes
+during the benchmark's execution and fixed directly in the tooling, with every affected chain then
+independently re-run and re-graded rather than assumed fixed. We disclose this iterative
+debug-and-rerun cycle in full (Section~\ref{sec:defects}, Section~\ref{sec:limitations}) rather
+than describe either subset as a blind holdout in the machine-learning sense -- it is not one. A
 separately preregistered (2026-08-31, \texttt{e813cd7}) 48-document follow-up corpus was built
 specifically for the section-reordering family, because the primary corpus yields only 11
 documents on which that task is structurally applicable; the follow-up corpus itself yields 44
@@ -189,9 +196,18 @@ the treatment side:
 \begin{itemize}
 \item \textbf{Bibliography entry} -- insert/remove one APA-formatted bibliography entry.
 \item \textbf{Inline citation} -- insert/remove one inline citation marker.
-\item \textbf{Section reorder} -- move a section after a different heading, then move it back.
+\item \textbf{Section reorder} -- move a section after a different heading, then move it
+  back.\footnote{The destination heading is validated at two layers: \texttt{move\_section}
+  rejects any destination whose index falls inside the moved section's own body range (bounded by
+  the next heading at the same or shallower level), so a heading that is structurally a child of
+  the section being moved is always refused; the benchmark's own destination-picker independently
+  requires a same-or-shallower-level heading when constructing each trial, so that case is never
+  even proposed to either arm.}
 \item \textbf{Equation} -- insert/remove one native OOXML math object (\texttt{<m:oMath>}), not
-  plain text formatted to resemble an equation.
+  plain text formatted to resemble an equation.\footnote{A separate, unmerged prototype for
+  LaTeX-OMML round-trip fidelity and notation-style auditing exists for a different,
+  journal-specific conversion use case; it shares no code with the tool exercised here and is out
+  of scope for this benchmark.}
 \item \textbf{Table (structural)} -- insert/remove one whole Word table (a real
   \texttt{<w:tbl>} object with genuine rows and columns), not text formatted to look tabular.
 \item \textbf{Caption} -- insert/remove one numbered SEQ-field figure caption.
@@ -297,7 +313,11 @@ report it and its p-value directly rather than adjusting it for tests it was nev
 with. A chain that never executed or never finished because of a
 harness- or infrastructure-level failure unrelated to the task itself (a network error, a
 process-level subprocess timeout) is excluded from both arms' denominators for that document,
-rather than scored as a failure. A chain that executed to completion and reports a genuine
+rather than scored as a failure. This per-trial subprocess timeout is 300 seconds (600 seconds for
+the render-gated families, Section~\ref{sec:defects} defect 7); neither value was derived from an
+expected-task-duration analysis -- 300s was an uninstrumented initial choice and 600s a reactive
+doubling to survive a specific host-contention episode -- which we note as a limitation
+(Section~\ref{sec:limitations}) rather than a principled budget. A chain that executed to completion and reports a genuine
 task-level failure -- including a write-time structural-verification failure under host
 contention (Section~\ref{sec:render-gate}), since that is a property of the treatment condition
 being measured, not an unrelated infrastructure artifact -- is scored as a failure at a fixed
@@ -481,6 +501,17 @@ verification fails for any reason. This design choice trades a real reliability 
 (verification against a real renderer is slow, and slower still on a resource-contended host)
 for a strong guarantee: a persisted change from these three tools is, by construction, never a
 corrupt or unopenable document.
+
+This split tracks OOXML synthesis risk, not edit importance: equation, table, and caption
+insertion each construct a brand-new, schema-fragile structure from scratch -- a foreign-namespace
+\texttt{<m:oMath>} tree, a \texttt{<w:tbl>} grid whose child element order OOXML validates
+strictly, or a SEQ-numbered field wrapped in a document-unique bookmark pair -- where a structural
+re-parse can confirm the result is well-formed XML but not that Word will actually open it.
+Bibliography and citation insertion instead append or create only plain runs or an
+already-proven complex-field idiom onto an already-valid paragraph, and section reordering
+relocates already-valid elements without synthesizing any new XML shape at all: none of the other
+three families introduces a genuinely novel structural risk, so they are gated with structural
+verification alone, or not at all, rather than paying render-gate's latency cost.
 
 \begin{figure}[h]
 \centering
@@ -724,7 +755,9 @@ rather than fold it silently into a final figure.
   We fixed this by creating a dedicated non-root account for the re-run, verified functionally
   before re-running anything at scale, and confirmed the fix by re-inspecting individual trials'
   wall time and grading output (not merely their exit status) for realistic, varied values before
-  trusting the run's aggregate numbers.
+  trusting the run's aggregate numbers. This defect's exposure is a clean, fully-counted bound, not
+  an open-ended risk: exactly 156 of 156 attempted chains failed this way before the fix, all 156
+  were re-run after it, and none failed partially or silently in between.
 \item \textbf{Every reported 100\%/0\% confidence interval was a bootstrap artifact.}
   \texttt{graph\_scorer.py}'s \texttt{bootstrap\_ci} function resamples only from the observed
   per-document pass/fail values; when every value is identical (a literal 100\% or 0\% observed
@@ -776,7 +809,7 @@ worth testing against a change of deployment environment before it is reported a
 \section{Limitations and threats to validity}
 \label{sec:limitations}
 
-Five factors limit how far these results generalize. \textbf{First}, this benchmark tests only
+Seven factors limit generalization. \textbf{First}, this benchmark tests only
 the \texttt{claude-sonnet-5} model and does not claim the results generalize across models.
 \textbf{Second}, the write-time-verification-gated families' originally-reported numbers
 (Table~\ref{tab:render-gate}) were collected on a single, shared, variably-contended host rather
@@ -804,7 +837,19 @@ here receives its target anchor pre-resolved at corpus-build time (Section~\ref{
 the live anchor-resolution tools' own reliability under real, uncontrolled use is a real question this
 benchmark does not measure -- their content-derived synthetic ids are explicitly documented as
 shifting if an earlier paragraph with the same text is edited, inserted, or removed elsewhere in
-the document.
+the document. \textbf{Sixth}, this corpus is not a blind holdout in the machine-learning sense:
+several defects (Section~\ref{sec:defects}) were found by observing trial outcomes on this same
+26-document corpus during the benchmark's own execution, then fixed directly in the tooling and
+the affected chains re-run (Section~\ref{sec:methods}). We mitigate, but do not eliminate, the
+resulting risk in two ways that distinguish this from conditioning a statistical model on its own
+test set: every fix targets a deterministic code defect (a wrong file path, a schema-invalid
+element order), not the underlying language model's prompts, weights, or grading criteria, which
+never varied; and every fix was independently re-verified against real re-run data rather than
+assumed effective. We do not claim these numbers estimate performance on documents this tooling
+has never previously encountered in any form. \textbf{Seventh}, the per-trial subprocess timeout
+(300s, 600s for the render-gated families) was not derived from an expected-task-duration
+analysis (Section~\ref{sec:methods}); a genuinely slow but correct chain on either arm could in
+principle be misclassified as an infrastructure exclusion rather than allowed to finish.
 
 \subsection{Artifact availability}
 This benchmark's harness, evaluator, statistics code, and corpus manifests all exist in a private
