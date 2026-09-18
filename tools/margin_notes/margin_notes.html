@@ -158,6 +158,9 @@
     display: flex; align-items: center; justify-content: center; transition: opacity .12s;
   }
   .add-note:hover { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+  /* .block already reveals .add-note on hover (below); figure/table blocks need
+     the same rule since they don't share the .block class. */
+  .figblock:hover .add-note, .tabblock:hover .add-note { opacity: 1; }
 
   mark.note-mark {
     background: var(--mark-soft); color: inherit; border-bottom: 2px solid var(--mark);
@@ -166,7 +169,25 @@
   mark.note-mark.suggestion { background: var(--suggest-soft); border-bottom-color: var(--suggest); }
   mark.note-mark.resolved { background: transparent; border-bottom: 2px dotted var(--resolved); opacity: .75; }
 
+  /* A note with no selected text (created via the "+" button) has no specific
+     substring to wrap in a <mark>, so the whole block gets the same soft-fill
+     treatment instead -- "the line is highlighted" either way. The pin badge,
+     not the tinted background, is the click target for opening the note, so
+     this never intercepts a normal click-to-position-cursor edit. */
+  .block.has-note, .figblock.has-note, .tabblock.has-note { background: var(--mark-soft); }
+  .block.has-note-suggestion, .figblock.has-note-suggestion, .tabblock.has-note-suggestion { background: var(--suggest-soft); }
+  .block.has-note-resolved, .figblock.has-note-resolved, .tabblock.has-note-resolved { background: transparent; }
+  .note-pin {
+    position: absolute; right: -6px; top: -8px; width: 20px; height: 20px; border-radius: 50%;
+    border: none; background: var(--mark); color: var(--mark-ink); cursor: pointer; font-size: 11px;
+    display: flex; align-items: center; justify-content: center; z-index: 2; line-height: 1;
+  }
+  .note-pin.suggestion { background: var(--suggest); color: var(--accent-ink); }
+  .note-pin.resolved { background: var(--resolved); color: var(--accent-ink); opacity: .8; }
+  .note-pin + .note-pin { right: 16px; }
+
   .figblock, .tabblock {
+    position: relative;
     border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface);
     padding: 14px 16px; margin: 15px 0;
   }
@@ -705,10 +726,20 @@ DOC.forEach((block, i) => {
     html += `<div class="tabblock" data-block="${block.id}">
       <span class="tabblock-label" data-textsrc="${labelId}" contenteditable="true" spellcheck="true">${block.label}</span>
       <div class="tabblock-cap" data-textsrc="${block.id}" contenteditable="true" spellcheck="true">${block.caption}</div>
-      <table class="mini"><thead><tr>${block.headers.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${rowsHtml}</tbody></table>
+      <div class="tabblock-table" data-textsrc="${block.id}">
+        <table class="mini"><thead><tr>${block.headers.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${rowsHtml}</tbody></table>
+      </div>
+      <button class="add-note" title="Comment on this table" data-wholeblock="${block.id}" type="button">+</button>
     </div>`;
     docInner.insertAdjacentHTML('beforeend', html);
     originalHTML[block.id] = block.caption;
+    // querySelector matches the FIRST element carrying this data-textsrc value,
+    // which is the caption div above -- the .tabblock-table div deliberately
+    // reuses the same id (same pattern as the LaTeX <pre> source panel earlier
+    // in this file) purely so a text selection inside a cell resolves to a
+    // real block via closest('[data-textsrc]') and can be commented on; it is
+    // not contenteditable, so originalText/originalHTML tracking for this id
+    // still only ever concerns the caption.
     originalText[block.id] = document.querySelector(`[data-textsrc="${block.id}"]`).textContent.trim();
     // See figure branch above: label gets the same treatment as caption.
     // Table CELLS/headers (<td>/<th>) are deliberately left non-editable --
@@ -717,6 +748,8 @@ DOC.forEach((block, i) => {
     // a diff/revert/originalText baseline off of. Retyping a number in
     // place with no tracked "original" to diff against or revert to would
     // be silently lossy, unlike every other editable surface in this tool.
+    // Commenting (this block) carries none of that risk -- it never mutates a
+    // cell -- so it's enabled even though editing stays off.
     originalHTML[labelId] = block.label;
     originalText[labelId] = document.querySelector(`[data-textsrc="${labelId}"]`).textContent.trim();
     return;
@@ -897,7 +930,7 @@ async function initDb() {
   } catch (e) { db = null; }
   if (!db) {
     loadLocal();
-    applyEdits(); renderEdits(); renderNotes(); applyReviewed();
+    applyEdits(); renderEdits(); renderNotes(); applyHighlights(); applyReviewed();
     renderProgress();
     toast('Working locally — saved in this browser only');
     return;
@@ -1083,15 +1116,38 @@ function applyHighlights() {
     parent.replaceChild(document.createTextNode(m.textContent), m);
     parent.normalize();
   });
-  const active = notes.filter(n => n.quoted_text);
-  active.forEach(n => {
+  document.querySelectorAll('.note-pin').forEach(p => p.remove());
+  document.querySelectorAll('.has-note, .has-note-suggestion, .has-note-resolved').forEach(el =>
+    el.classList.remove('has-note', 'has-note-suggestion', 'has-note-resolved'));
+
+  notes.forEach(n => {
     const el = document.querySelector(`[data-textsrc="${n.block_id}"]`);
     if (!el) return;
-    highlightIn(el, n.quoted_text, n.type, n.status, n.id);
+    if (n.quoted_text) {
+      highlightIn(el, n.quoted_text, n.type, n.status, n.id, n.comment);
+      return;
+    }
+    // Whole-block note (created via "+", no text selection): there's no
+    // specific substring to wrap in a <mark>, so the containing block gets
+    // the same soft-fill treatment as a real highlight instead -- "the line
+    // is highlighted" either way, not sometimes-highlighted/sometimes-not.
+    // A small pin badge, not the tinted background, is the click target for
+    // opening the note (see the docInner click handler below), so this never
+    // intercepts a normal click-to-position-cursor edit inside the block.
+    const container = el.closest('.block, .figblock, .tabblock') || el;
+    const cls = n.status === 'resolved' ? 'has-note-resolved' : (n.type === 'suggestion' ? 'has-note-suggestion' : 'has-note');
+    container.classList.add(cls);
+    const pin = document.createElement('button');
+    pin.type = 'button';
+    pin.className = 'note-pin' + (n.status === 'resolved' ? ' resolved' : (n.type === 'suggestion' ? ' suggestion' : ''));
+    pin.dataset.noteId = n.id;
+    pin.title = n.comment ? n.comment.slice(0, 160) : 'Open note';
+    pin.textContent = '•';
+    container.appendChild(pin);
   });
 }
 
-function highlightIn(el, text, type, status, noteId) {
+function highlightIn(el, text, type, status, noteId, comment) {
   const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
   let node;
   while ((node = walker.nextNode())) {
@@ -1103,6 +1159,7 @@ function highlightIn(el, text, type, status, noteId) {
     const mark = document.createElement('mark');
     mark.className = 'note-mark' + (status === 'resolved' ? ' resolved' : (type === 'suggestion' ? ' suggestion' : ''));
     mark.dataset.noteId = noteId;
+    if (comment) mark.title = comment.slice(0, 160);
     try { range.surroundContents(mark); } catch (e) {}
     break;
   }
@@ -1225,11 +1282,39 @@ document.getElementById('popSave').onclick = async () => {
     try { await db.collection('comments').doc(id).set(doc); }
     catch (e) { toast('Could not save &mdash; try again'); return; }
   } else {
-    notes.unshift(doc); renderNotes(); persistLocal();
+    // Local (no-db) mode has no onSnapshot listener to react to this write,
+    // unlike the db-connected path below -- so this is the one place that
+    // must re-apply highlights itself after a mutation, matching what the
+    // live listener does automatically for every other note change.
+    notes.unshift(doc); renderNotes(); applyHighlights(); persistLocal();
   }
   toast('Note saved');
   closePopover();
 };
+
+// Clicking an existing highlight (a text-range <mark> or a whole-block pin)
+// jumps to the Notes tab and opens that note's edit form directly, so a
+// reviewer can modify or resolve a note from where it's anchored in the
+// manuscript, not only by scanning the sidebar list for it.
+function openNoteFromHighlight(noteId) {
+  if (currentTab !== 'notes') {
+    const tabBtn = document.querySelector('.tab-row .tab[data-tab="notes"]');
+    if (tabBtn) tabBtn.click();
+  }
+  editingNoteId = noteId;
+  renderNotes();
+  requestAnimationFrame(() => {
+    const card = document.querySelector(`[data-editing-id="${noteId}"]`) || document.querySelector(`.note-card[data-id="${noteId}"]`);
+    if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  });
+}
+docInner.addEventListener('click', (e) => {
+  const target = e.target.closest('mark.note-mark, .note-pin');
+  if (!target) return;
+  e.preventDefault();
+  e.stopPropagation();
+  openNoteFromHighlight(target.dataset.noteId);
+});
 
 function scrollToBlock(blockId) {
   const blockEl = document.querySelector(`[data-block="${blockId}"]`);
@@ -1266,7 +1351,7 @@ document.getElementById('notesList').addEventListener('click', async (e) => {
     clearTimeout(pendingDeleteTimer);
     pendingDeleteId = null;
     if (db) { try { await db.collection('comments').doc(deleteId).delete(); } catch (err) { toast('Could not delete &mdash; try again'); return; } }
-    else { notes = notes.filter(x => x.id !== deleteId); renderNotes(); persistLocal(); }
+    else { notes = notes.filter(x => x.id !== deleteId); renderNotes(); applyHighlights(); persistLocal(); }
     toast('Note deleted');
     return;
   }
@@ -1275,7 +1360,7 @@ document.getElementById('notesList').addEventListener('click', async (e) => {
   if (resolveId) {
     e.stopPropagation();
     if (db) { try { await db.collection('comments').doc(resolveId).update({ status: 'resolved' }); } catch (err) {} }
-    else { const n = notes.find(x=>x.id===resolveId); if (n) n.status='resolved'; renderNotes(); persistLocal(); }
+    else { const n = notes.find(x=>x.id===resolveId); if (n) n.status='resolved'; renderNotes(); applyHighlights(); persistLocal(); }
     return;
   }
   const editBtn = e.target.closest('[data-edit]');
@@ -1311,6 +1396,7 @@ document.getElementById('notesList').addEventListener('click', async (e) => {
     } else {
       const n = notes.find(x => x.id === saveId);
       if (n) Object.assign(n, patch);
+      applyHighlights();
       persistLocal();
     }
     editingNoteId = null;
