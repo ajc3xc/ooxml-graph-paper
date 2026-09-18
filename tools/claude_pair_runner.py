@@ -108,7 +108,25 @@ _PAPER_PYTHON = sys.executable
 # Code sessions sharing this host -- the whole agent process (model turns + tool
 # round trips + render-gate checks) plausibly needs more than 300s of real
 # wall-clock time under that contention, even with no single step broken.
-_TIMEOUT_SECONDS = 600.0
+#
+# Raised 600s -> 900s 2026-09-18, this time from actual wall-clock evidence
+# instead of a reactive doubling: aggregating wall_time_seconds across all 643
+# chain-result.json files under runs/ (2460 forward+inverse trials, 2409 that
+# completed without hitting either ceiling) gives p99=388.8s and max=574.8s for
+# the two render-gated families (equation, caption) combined -- but that max
+# sits right at the old 600s ceiling because the data is right-censored: 46
+# trials hit their contemporaneous timeout outright (300s pre-09-07, 600s
+# after), and 37 of those hit the *current* 600s ceiling as recently as
+# 2026-09-12 (25 table_structural, 11 equation, 1 caption). So 600s is still
+# provably insufficient for a real fraction of genuine, uncorrupted attempts
+# right now -- this is not a hypothetical. 900s (1.5x, matching this project's
+# own prior evidence-based soffice 60s->90s raise) clears the observed
+# successful max with headroom instead of sitting exactly on it. It is still
+# not a true derived percentile -- the right-censoring means the real tail
+# beyond 600s is unobserved -- so this remains a reasoned, evidence-informed
+# interim value pending a validation run with enough headroom to observe
+# genuine completion times past the old ceiling, not a closed derivation.
+_TIMEOUT_SECONDS = 900.0
 
 # See the retry logic in run_trial (PAPER-S8 defect 11): these phrases are
 # how the agent itself describes a treatment session where --mcp-config's

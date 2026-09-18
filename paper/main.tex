@@ -322,11 +322,24 @@ recompute from raw data, so we name the gap rather than silently report only the
 A chain that never executed or never finished because of a
 harness- or infrastructure-level failure unrelated to the task itself (a network error, a
 process-level subprocess timeout) is excluded from both arms' denominators for that document,
-rather than scored as a failure. This per-trial subprocess timeout is 300 seconds (600 seconds for
-the render-gated families, Section~\ref{sec:defects} defect 7); neither value was derived from an
-expected-task-duration analysis -- 300s was an uninstrumented initial choice and 600s a reactive
-doubling to survive a specific host-contention episode -- which we note as a limitation
-(Section~\ref{sec:limitations}) rather than a principled budget. A chain that executed to completion and reports a genuine
+rather than scored as a failure. This is a single global per-trial subprocess timeout applied to
+every family, not a per-family budget; it started at 300 seconds (an uninstrumented initial
+choice) and was raised to 600 seconds on 2026-09-07 as a reactive doubling to survive a specific
+host-contention episode (Section~\ref{sec:defects} defect 7) -- so families whose trials ran before
+that date saw the 300s ceiling and families run afterward, predominantly the render-gated ones,
+saw 600s, but this was an artifact of when each family's trials happened to run, not a deliberate
+per-family design. We have since derived an evidence-informed value from the corpus's own recorded
+wall-clock times: aggregating \texttt{wall\_time\_seconds} across all 643 recorded chain results
+(2409 of 2460 trials that completed without hitting either ceiling) gives a 99th-percentile
+completion time of 388.8s and an observed maximum of 574.8s for the two render-gated families
+combined, right at the old 600s ceiling -- and 37 render-gated trials genuinely hit that ceiling as
+recently as 2026-09-12, confirming 600s was still insufficient for a real fraction of correct,
+non-infrastructure-failing attempts. Because the successful-trial data is right-censored at
+whatever ceiling was in effect when each trial ran, this cannot be treated as a closed percentile
+derivation; the current value, 900 seconds, is a reasoned evidence-informed raise (1.5x, matching
+this project's own earlier evidence-based soffice-timeout raise) that clears the observed maximum
+with headroom rather than sitting on it, not a value derived from an uncensored expected-duration
+analysis. A chain that executed to completion and reports a genuine
 task-level failure -- including a write-time structural-verification failure under host
 contention (Section~\ref{sec:render-gate}), since that is a property of the treatment condition
 being measured, not an unrelated infrastructure artifact -- is scored as a failure at a fixed
@@ -859,9 +872,13 @@ element order), not the underlying language model's prompts, weights, or grading
 never varied; and every fix was independently re-verified against real re-run data rather than
 assumed effective. We do not claim these numbers estimate performance on documents this tooling
 has never previously encountered in any form. \textbf{Seventh}, the per-trial subprocess timeout
-(300s, 600s for the render-gated families) was not derived from an expected-task-duration
-analysis (Section~\ref{sec:methods}); a genuinely slow but correct chain on either arm could in
-principle be misclassified as an infrastructure exclusion rather than allowed to finish.
+was raised twice, from 300s to 600s and now to 900s (Section~\ref{sec:methods}), and the final
+raise is evidence-informed rather than arbitrary -- but the evidence behind it is right-censored at
+whatever ceiling was in effect when each trial ran, so it is not a closed expected-task-duration
+derivation; a genuinely slow but correct chain on either arm could in principle still be
+misclassified as an infrastructure exclusion rather than allowed to finish, and confirming the
+900s ceiling clears the true tail (not just the previously-observed, censored one) needs a
+validation run with headroom above it that this draft does not report.
 
 \subsection{Artifact availability}
 This benchmark's harness, evaluator, statistics code, and corpus manifests are publicly available
