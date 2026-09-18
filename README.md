@@ -1,30 +1,50 @@
 # OOXML-Graph Paper
 
-This is the paper subproject under `meridian-build`. It evaluates native DOCX/OOXML/OMML structure against document-parser and document-AI baselines.
+Source, harness, and evaluation code for **"Bounded Structural Primitives versus Generic Tool
+Use for Agentic Word Document Editing: A Confirmatory Benchmark"** (`paper/main.tex`) — a
+confirmatory benchmark comparing Meridian Docs' bounded, atomic document-editing tools against
+a generic Claude agent restricted to raw file/XML access, on the same model, across six real
+`.docx` editing task families.
 
-## Local execution layout
+The paper is the primary artifact in this repository. See `paper/main.tex` for the full
+methodology, results, ten disclosed infrastructure/harness defects, and limitations.
 
-- Source, Pixi project, manifests, and tests: this directory on the local C: drive.
-- Large data, renders, model caches, run outputs, and logs: `E:\MeridianData\ooxml-graph-paper`.
-- OneDrive/synced locations are reference-only. Do not place experiment artifacts there.
+## What's in this repo
 
-## Current checkpoint — 2026-08-26
+- `paper/` — the LaTeX source, figures, and bibliography for the paper itself.
+- `tools/` — the benchmark harness (trial runner, statistics, grading/evaluator code) and the
+  `margin_notes` review tool used to collect and act on editorial feedback during drafting.
+- `tests/` — unit tests for the statistics and grading code.
+- `docs/` — working notes from the project's own development: defect writeups, corpus-audit
+  records, and intermediate result snapshots referenced throughout the paper.
 
-- The local machine has Pixi and an NVIDIA GeForce RTX 3080 with 20,480 MiB VRAM.
-- The Meridian repository already contains DocBank scoring support at `packages/docparse/docparse/docbank_scoring.py` and synthetic tests at `tests/test_docbank_scoring.py`.
-- No paired DOCX/OOXML graph corpus is present locally, and no final benchmark or GPU baseline has been launched.
-- ReadingBank remains a useful Word-derived layout context source, but its full raw package is not staged and its public derived material is not native OOXML graph gold.
-- The first executable benchmark wave must use a small approved paired DOCX/OOXML/Word-render gold set; DocBank/ReadingBank are separate context tracks, not substitutes for that gold.
-- A real Meridian equation-to-Word render probe has passed locally; semantic OMML hardening and retained receipts remain open.
+## What's not in this repo
 
-## Repository boundary
+The underlying `.docx` corpus (a licensed slice of the DocOps benchmark corpus) is not included
+and is not licensed for redistribution — see the paper's Limitations/Artifact-availability
+section for what's released versus what remains restricted. Raw run data, renders, and model
+caches are excluded via `.gitignore` and were never committed.
 
-This folder is the paper subproject: planning docs, benchmark harnesses, manifests, and local experiment metadata. Product implementation and regression tests are in the parent repository at `C:\Users\13144\Documents\Meridian\repository`, especially `extensions/meridian-docs`. Do not add product patches here or treat an empty local test collection as product coverage.
+## Building the paper
 
-## Guardrails
+```powershell
+cd paper
+.\build.ps1
+```
 
-1. Freeze the comparator, graph schema, split policy, and provenance manifest before downloading a large corpus.
-2. Start with official indexes/preview samples and a small smoke slice.
-3. Run native OOXML parsing and scoring locally; use the RTX 3080 only for explicitly selected GPU baselines.
-4. Every run must record dataset revision, code revision, model revision, hardware, environment, token accounting, wall time, and output hashes.
-5. Do not reactivate unrelated 2030 OOXML experiments without explicit human approval.
+Requires a working LaTeX toolchain (MiKTeX or TeX Live) with `latexmk`/`pdflatex` and `bibtex`
+on `PATH`.
+
+## Running the tests
+
+```
+pixi run test
+```
+
+Note: `pixi.toml` depends on two packages (`meridian-docparse`, `meridian-docs-mcp`) as editable
+installs from a sibling `../repository` directory — the private parent Meridian monorepo that
+this benchmark's treatment arm exercises. That repository is not included here, so the full test
+suite and any live trial (treatment-arm) run are not reproducible standalone from just this
+repo. The statistics/grading unit tests under `tests/` (`test_graph_scorer.py`,
+`test_compute_s7_statistics.py`) exercise only this repo's own `tools/` code and have no such
+dependency.
