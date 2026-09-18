@@ -486,9 +486,32 @@ def score_round_trip_editability(pre_items: dict, post_items: dict, marker_text:
 # Bootstrap CIs and paired significance tests
 # ---------------------------------------------------------------------------
 
+def _clopper_pearson_boundary_ci(successes: int, n: int, alpha: float = 0.05) -> tuple[float, float]:
+    """Exact Clopper-Pearson CI for the two proportions the percentile bootstrap
+    below cannot express at all: every trial passed, or every trial failed. Those
+    are the only two observed proportions where every possible bootstrap resample
+    is identical to the original sample (nothing else could be drawn), so the
+    resampled-mean distribution has zero variance and the percentile interval
+    collapses to a single point -- reporting no uncertainty rather than a real
+    one. Closed-form here because Beta(n, 1) and Beta(1, n) have elementary CDFs
+    (x**n and 1-(1-x)**n respectively), so no numerical Beta-inverse is needed.
+    """
+    if successes == n:
+        return (alpha / 2) ** (1.0 / n), 1.0
+    if successes == 0:
+        return 0.0, 1.0 - (alpha / 2) ** (1.0 / n)
+    raise ValueError("_clopper_pearson_boundary_ci is only valid at 0 or n successes")
+
+
 def bootstrap_ci(values: list[float], n_resamples: int = _BOOTSTRAP_RESAMPLES, alpha: float = 0.05,
                   seed: int = _BOOTSTRAP_SEED) -> dict[str, Any]:
-    """Percentile bootstrap CI for the mean of `values`. Pure stdlib (`random`)."""
+    """Percentile bootstrap CI for the mean of `values`. Pure stdlib (`random`).
+
+    Falls back to the exact Clopper-Pearson binomial CI when `values` is binary
+    (0/1) and every value is identical -- see `_clopper_pearson_boundary_ci` for
+    why the percentile bootstrap itself cannot produce a meaningful interval in
+    exactly that one situation.
+    """
     clean = [v for v in values if v is not None]
     if len(clean) < 2:
         return {"mean": (clean[0] if clean else None), "ci_low": None, "ci_high": None,
@@ -502,13 +525,22 @@ def bootstrap_ci(values: list[float], n_resamples: int = _BOOTSTRAP_RESAMPLES, a
     means.sort()
     lo_idx = int((alpha / 2) * n_resamples)
     hi_idx = int((1 - alpha / 2) * n_resamples) - 1
+    ci_low = means[lo_idx]
+    ci_high = means[min(hi_idx, n_resamples - 1)]
+    mean = sum(clean) / n
+    method = "percentile_bootstrap"
+    if ci_low == ci_high and set(clean) <= {0.0, 1.0}:
+        successes = int(round(mean * n))
+        ci_low, ci_high = _clopper_pearson_boundary_ci(successes, n, alpha)
+        method = "clopper_pearson_exact_fallback"
     return {
-        "mean": sum(clean) / n,
-        "ci_low": means[lo_idx],
-        "ci_high": means[min(hi_idx, n_resamples - 1)],
+        "mean": mean,
+        "ci_low": ci_low,
+        "ci_high": ci_high,
         "n": n,
         "confidence_level": 1 - alpha,
         "n_resamples": n_resamples,
+        "method": method,
     }
 
 

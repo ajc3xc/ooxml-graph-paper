@@ -7,6 +7,8 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
+import pytest
+
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "tools"))
 
 import graph_scorer  # noqa: E402
@@ -162,10 +164,28 @@ def test_reclassify_omml_handles_unparseable_string():
 # ---------------------------------------------------------------------------
 
 def test_bootstrap_ci_reasonable_bounds_for_constant_values():
+    # All-identical input is the one case the percentile bootstrap itself
+    # cannot express any uncertainty for (every resample is identical to the
+    # original sample), so this falls back to the exact Clopper-Pearson
+    # interval rather than reporting a zero-width [1.0, 1.0] "interval".
     result = graph_scorer.bootstrap_ci([1.0] * 20)
     assert result["mean"] == 1.0
-    assert result["ci_low"] == 1.0
+    assert result["method"] == "clopper_pearson_exact_fallback"
+    assert result["ci_low"] == pytest.approx((0.05 / 2) ** (1.0 / 20))
     assert result["ci_high"] == 1.0
+
+
+def test_bootstrap_ci_all_fail_uses_clopper_pearson_upper_bound():
+    result = graph_scorer.bootstrap_ci([0.0] * 20)
+    assert result["mean"] == 0.0
+    assert result["method"] == "clopper_pearson_exact_fallback"
+    assert result["ci_low"] == 0.0
+    assert result["ci_high"] == pytest.approx(1.0 - (0.05 / 2) ** (1.0 / 20))
+
+
+def test_bootstrap_ci_non_boundary_uses_ordinary_percentile_bootstrap():
+    result = graph_scorer.bootstrap_ci([1.0] * 18 + [0.0] * 2)
+    assert result["method"] == "percentile_bootstrap"
 
 
 def test_bootstrap_ci_undefined_with_fewer_than_two_values():

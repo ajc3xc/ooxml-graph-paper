@@ -33,16 +33,16 @@ Docs -- a small set of bounded, atomic, structurally-aware editing operations fo
 Word's Office Open XML (OOXML/\texttt{.docx}) format -- changes task correctness relative to an
 agent given only generic tools and raw XML access. We report a confirmatory benchmark across six task families
 (bibliography-entry insertion, inline citation insertion, section reordering, equation insertion,
-whole-table insertion, and figure-caption insertion) on a held-out corpus of real, previously
+table-structural insertion, and figure-caption insertion) on a held-out corpus of real, previously
 unseen \texttt{.docx} documents, each task run as a forward edit followed by its own inverse and
 independently graded against the original document's structure. Two families
 (bibliography, citation) show no measurable difference between arms. One family (section
 reordering) shows no difference on a single edit but a statistically significant advantage for
 the bounded tool under four repeated edit-undo cycles (92.9\% vs.\ 67.3\% pass rate, $p=0.0015$),
 traced to a specific, data-grounded failure mode in the generic-tool arm: compounding loss of
-the true original document state across repeated cycles, a pattern we call \emph{state drift}. Three families (equation, whole-table, and caption insertion) share a
+the true original document state across repeated cycles, a pattern we call \emph{state drift}. Three families (equation, table-structural, and caption insertion) share a
 write-time structural-correctness verification step; on a shared, variably-contended host, two of
-the three reported markedly lower pass rates (equation 46.2\%, caption 7.7\%) while whole-table
+the three reported markedly lower pass rates (equation 46.2\%, caption 7.7\%) while table-structural
 reached 96.2\%. We treated this as a hypothesis rather than a finding and tested it directly: a
 controlled, isolated timing test first rejected task-dependent render cost as the explanation,
 and a full confirmatory re-run of the identical benchmark -- same model, same corpus, same
@@ -51,7 +51,7 @@ reaching 100\% pass for both arms. The original numbers were a deployment-enviro
 (shared-host scheduling contention, a physically unreliable storage device, and confirmed network
 failures), not an editing-capability limitation, and we report both the original and the
 confirmatory numbers rather than replacing one with the other silently. Separately, we
-document nine
+document ten
 infrastructure and evaluation-harness defects that this benchmark's own development surfaced and
 fixed -- several of which materially changed the reported numbers -- disclosed in full rather
 than silently corrected.
@@ -84,6 +84,26 @@ benchmark designed to measure that tradeoff directly, for one concrete document 
 (Microsoft Word's \texttt{.docx}, standardized as Office Open XML \citep{ecma376}) and one
 concrete set of editing tasks.
 
+\subsection{Research questions}
+\label{sec:rqs}
+Three questions were fixed before any trial in this paper was run (Section~\ref{sec:methods}'s
+preregistration commit hashes), and each maps directly to one of this paper's three main
+results:
+\begin{description}
+\item[RQ1] On a single forward/inverse edit, does a bounded tool pair change task correctness
+  relative to generic tools, for each of six document-editing task families? (Table~\ref{tab:single-edit},
+  Table~\ref{tab:render-gate-clean})
+\item[RQ2] Under four repeated edit-undo cycles on the same document, does either arm's
+  correctness compound or decay with repetition? (Section~\ref{sec:section-reorder},
+  Table~\ref{tab:k4})
+\item[RQ3] If a write-time structural-verification step produces a large gap between arms, is
+  that gap attributable to the editing operations themselves or to the deployment environment
+  they were measured in? (Section~\ref{sec:render-gate}, Section~\ref{sec:methods-rerun})
+\end{description}
+RQ3 was not itself preregistered -- it is a post-hoc question motivated by an anomaly RQ1's own
+data revealed (Section~\ref{sec:render-gate}) -- and we report it as a diagnostic investigation
+of that anomaly, not as a fourth planned confirmatory test on equal footing with RQ1/RQ2.
+
 \subsection{Design}
 
 Each of six task families is defined as a \emph{forward} edit (e.g., insert a bibliography
@@ -113,7 +133,7 @@ is performed entirely outside the agent, never by trusting its own transcript cl
   identical benchmark on a dedicated, single-tenant host, which closes the gap completely and
   confirms the confound was a deployment-environment artifact, not a capability limitation
   (Section~\ref{sec:render-gate}).
-\item We disclose nine infrastructure, harness, and evaluation-code defects found during this
+\item We disclose ten infrastructure, harness, and evaluation-code defects found during this
   project -- each with its root cause, fix, and independent re-verification -- and show that
   several materially changed an already-reported number (Section~\ref{sec:defects}).
 \end{itemize}
@@ -128,10 +148,22 @@ general-purpose real-world task completion requiring tool use and multi-step rea
 given some fixed tool surface; they do not hold the underlying task and model fixed while
 varying only the shape of that tool surface (bounded versus generic) as the manipulated
 variable, which is the specific question this paper addresses for one document-editing domain.
-\todo{expand related work: prior work specifically on structured-output/schema-constrained tool
-calling, and on OOXML/document-format editing tooling, once a fuller literature pass is done --
-this section is intentionally minimal in this preliminary draft to avoid citing anything not
-independently verified.}
+
+A separate line of work studies whether constraining an LLM's \emph{output format} changes its
+performance, rather than whether the \emph{tool surface itself} is bounded or generic:
+\citet{tam2024letmespeak} find that structured-format restrictions (JSON, XML) measurably degrade
+LLM reasoning relative to free-form generation, and \citet{patil2023gorilla} show that grounding
+tool calls in a fixed, retrieval-aware API surface reduces call-hallucination. Both manipulate the
+shape of the model's own output; this paper instead holds output format fixed (a real \texttt{.docx}
+file either way) and manipulates which tools can produce it. For document-format-aware editing
+specifically, the closest prior work targets sibling Office Open XML formats rather than Word
+directly: \citet{li2023sheetcopilot} give an LLM a bounded set of atomic spreadsheet actions, and
+\citet{ofengenden2025pptarena} evaluate an agent that routes between programmatic tools and
+deterministic XML operations for PowerPoint editing, verifying each edit before committing it --
+an architecture directly analogous to Meridian Docs' own write-time verification
+(Section~\ref{sec:render-gate}), applied to a different OOXML-based format. We are not aware of
+prior work posing this paper's specific bounded-versus-generic comparison for Word/OOXML editing
+itself.
 
 \section{Methods}
 \label{sec:methods}
@@ -251,9 +283,18 @@ as a full pass only if both directions independently graded pass.
 
 \subsection{Statistics}
 Per-family pass rates are reported with percentile bootstrap confidence intervals (2{,}000
-resamples) \citep{efron1979bootstrap}, and paired arms are compared with a paired sign-flip
+resamples) \citep{efron1979bootstrap}, except at a literal 100\% or 0\% observed rate, where the
+percentile method is degenerate (every possible resample is identical to the original sample) and
+we report the exact Clopper-Pearson interval instead (Section~\ref{sec:defects}, defect 9). Paired
+arms are compared with a paired sign-flip
 permutation test (2{,}000 resamples) \citep{nichols2002permutation}, with a fixed random seed
-set before any result existed. A chain that never executed or never finished because of a
+set before any result existed. We report every comparison this benchmark's design specifies (six
+families, at $K=1$, plus the one preregistered $K=4$ depth study) rather than a subset, and do
+not apply a multiple-comparison correction across them: the $K=4$ section-reorder result is the
+one comparison this benchmark's design was built in advance to make (Section~\ref{sec:section-reorder}),
+not one significant finding selected after the fact from many equally-likely candidates, so we
+report it and its p-value directly rather than adjusting it for tests it was never in competition
+with. A chain that never executed or never finished because of a
 harness- or infrastructure-level failure unrelated to the task itself (a network error, a
 process-level subprocess timeout) is excluded from both arms' denominators for that document,
 rather than scored as a failure. A chain that executed to completion and reports a genuine
@@ -298,17 +339,17 @@ that had failed instantly under root before this was found.
 \toprule
 Family & Arm & Pass rate & 95\% CI & $n$ & Paired $p$ \\
 \midrule
-Bibliography entry & control   & 100\% & [100, 100] & 26 & \multirow{2}{*}{1.0} \\
-                    & treatment & 100\% & [100, 100] & 26 & \\
+Bibliography entry & control   & 100\% & [86.8, 100]$^\dagger$ & 26 & \multirow{2}{*}{1.0} \\
+                    & treatment & 100\% & [86.8, 100]$^\dagger$ & 26 & \\
 \addlinespace
 Inline citation\footnote{Treatment $n=25$: one forward call hit a genuine 300-second
 process-level subprocess timeout unrelated to the citation task itself, excluded from the
 denominator per Section~\ref{sec:methods}'s harness-flake rule rather than scored as a
-failure.} & control   & 100\% & [100, 100] & 26 & \multirow{2}{*}{1.0} \\
-                    & treatment & 100\% & [100, 100] & 25 & \\
+failure.} & control   & 100\% & [86.8, 100]$^\dagger$ & 26 & \multirow{2}{*}{1.0} \\
+                    & treatment & 100\% & [86.3, 100]$^\dagger$ & 25 & \\
 \addlinespace
 Section reorder (original corpus) & control   & 72.7\% & [45.5, 100]  & 11 & \multirow{2}{*}{0.240} \\
-                                   & treatment & 100\%  & [100, 100]   & 11 & \\
+                                   & treatment & 100\%  & [71.5, 100]$^\dagger$   & 11 & \\
 \addlinespace
 Section reorder (combined, v1+v2)\footnote{Control $n=55$, treatment $n=56$: one 1.7MB document's
 control-arm chain never completed within the harness's 300-second timeout across six independent
@@ -321,7 +362,10 @@ from control's denominator only), while its treatment-arm chain completed and pa
 structural-verification. Bibliography and citation show a genuine, literal parity between arms.
 Section reorder shows a directionally consistent but not-yet-significant advantage for the
 bounded tool at $K=1$; see Section~\ref{sec:section-reorder} for the $K=4$ result on the same
-corpus.}
+corpus. $^\dagger$Exact Clopper-Pearson interval rather than the percentile bootstrap used
+elsewhere (Section~\ref{sec:defects}, defect 9): at a literal 100\% observed rate every possible
+bootstrap resample is identical to the original sample, so the percentile method itself cannot
+express any uncertainty there.}
 \label{tab:single-edit}
 \end{table}
 
@@ -490,7 +534,7 @@ grading on a genuine task mistake -- 11/11 \emph{resolved} is not the same as 11
 Table (structural) & control   & 92.3\% & [80.8, 100] & 26 & \multirow{2}{*}{1.0} & \multirow{2}{*}{original (shared host)} \\
                     & treatment & 96.2\% & [88.5, 100] & 26 & & \\
 \addlinespace
-Caption         & control   & 100\%  & [100, 100]  & 26 & \multirow{2}{*}{$<0.001$} & \multirow{2}{*}{original (shared host)} \\
+Caption         & control   & 100\%  & [86.8, 100]$^\dagger$  & 26 & \multirow{2}{*}{$<0.001$} & \multirow{2}{*}{original (shared host)} \\
                 & treatment & 7.7\%  & [0, 19.2]  & 26 & & \\
 \bottomrule
 \end{tabular}
@@ -500,7 +544,10 @@ directly) and is unaffected by host contention. Equation's treatment $n=26$ has 
 significance test here because its control arm comes from a different, unpaired corpus (see
 footnote) -- resolved in Table~\ref{tab:render-gate-clean}, which pairs both on the same corpus.
 Superseded by the confirmatory re-run in Table~\ref{tab:render-gate-clean}; retained here as the
-evidence for that re-run's causal claim, not as a final number.}
+evidence for that re-run's causal claim, not as a final number. $^\dagger$Exact Clopper-Pearson
+interval rather than the percentile bootstrap used elsewhere (Section~\ref{sec:defects}, defect
+9): at a literal 100\% observed rate every possible bootstrap resample is identical to the
+original sample, so the percentile method itself cannot express any uncertainty there.}
 \label{tab:render-gate}
 \end{table}
 
@@ -537,14 +584,14 @@ rather than resting on it as an inference from indirect evidence.
 \toprule
 Family & Arm & Pass rate & 95\% CI & $n$ & Paired $p$ & Status \\
 \midrule
-Equation            & control   & 100\% & [100, 100] & 26 & \multirow{2}{*}{1.0} & \multirow{2}{*}{confirmatory (dedicated host)} \\
-                    & treatment & 100\% & [100, 100] & 26 & & \\
+Equation            & control   & 100\% & [86.8, 100]$^\dagger$ & 26 & \multirow{2}{*}{1.0} & \multirow{2}{*}{confirmatory (dedicated host)} \\
+                    & treatment & 100\% & [86.8, 100]$^\dagger$ & 26 & & \\
 \addlinespace
-Table (structural)  & control   & 100\% & [100, 100] & 26 & \multirow{2}{*}{1.0} & \multirow{2}{*}{confirmatory (dedicated host)} \\
-                    & treatment & 100\% & [100, 100] & 26 & & \\
+Table (structural)  & control   & 100\% & [86.8, 100]$^\dagger$ & 26 & \multirow{2}{*}{1.0} & \multirow{2}{*}{confirmatory (dedicated host)} \\
+                    & treatment & 100\% & [86.8, 100]$^\dagger$ & 26 & & \\
 \addlinespace
-Caption             & control   & 100\% & [100, 100] & 26 & \multirow{2}{*}{1.0} & \multirow{2}{*}{confirmatory (dedicated host)} \\
-                    & treatment & 100\% & [100, 100] & 26 & & \\
+Caption             & control   & 100\% & [86.8, 100]$^\dagger$ & 26 & \multirow{2}{*}{1.0} & \multirow{2}{*}{confirmatory (dedicated host)} \\
+                    & treatment & 100\% & [86.8, 100]$^\dagger$ & 26 & & \\
 \bottomrule
 \end{tabular}
 \caption{The identical benchmark -- same model, same 26-document corpus, same harness and
@@ -554,7 +601,10 @@ $\times$ 26 documents) independently graded pass, with real, varied per-trial wa
 caption forward trials ranged 14.7--237.8s, not a uniform or short-circuited artifact) confirming
 this is a live re-run, not a re-derivation from cached data. Equation's control here uses the
 same 26-document corpus as treatment, so unlike Table~\ref{tab:render-gate} a paired test is
-reported for all three families.}
+reported for all three families. $^\dagger$Exact Clopper-Pearson interval rather than the
+percentile bootstrap used elsewhere (Section~\ref{sec:defects}, defect 9): at a literal 100\%
+observed rate every possible bootstrap resample is identical to the original sample, so the
+percentile method itself cannot express any uncertainty there.}
 \label{tab:render-gate-clean}
 \end{table}
 
@@ -593,7 +643,7 @@ prediction: removing host contention should close the gap. It does -- on a dedic
 caption's treatment reaches the identical 100\% as its control ($p=1.0$), confirming the
 verification-reliability reading over a capability-limitation one.
 
-\section{Nine real defects found and fixed}
+\section{Ten real defects found and fixed}
 \label{sec:defects}
 
 The reported numbers depend on the harness, evaluator, and infrastructure that produced them, and
@@ -675,6 +725,23 @@ rather than fold it silently into a final figure.
   before re-running anything at scale, and confirmed the fix by re-inspecting individual trials'
   wall time and grading output (not merely their exit status) for realistic, varied values before
   trusting the run's aggregate numbers.
+\item \textbf{Every reported 100\%/0\% confidence interval was a bootstrap artifact.}
+  \texttt{graph\_scorer.py}'s \texttt{bootstrap\_ci} function resamples only from the observed
+  per-document pass/fail values; when every value is identical (a literal 100\% or 0\% observed
+  rate), every possible resample is also identical to the original sample, so the percentile
+  method has no source of variability and collapses to a zero-width $[100,100]$ interval --
+  reporting no uncertainty at all rather than a real one, silently, on every boundary row in this
+  paper (12 of them: Tables~\ref{tab:single-edit}, \ref{tab:render-gate}, and
+  \ref{tab:render-gate-clean}). This was found while comparing this paper's statistical reporting
+  against related empirical-reproducibility work, not by a user report or a test failure -- the
+  existing unit test suite had encoded the degenerate behavior as the expected one. Fixed by
+  falling back to the exact Clopper-Pearson interval specifically when the bootstrap resample
+  distribution has zero variance (only possible at a literal 100\% or 0\% observed rate for
+  binary data); every other row's interval is untouched, since the ordinary percentile bootstrap
+  is not degenerate away from that boundary. The corrected intervals are visibly wider and
+  honestly represent less certainty than $[100,100]$ implied -- e.g., 26/26 passes now reports
+  $[86.8, 100]$, not $[100,100]$ -- without changing a single point-estimate pass rate anywhere in
+  this paper.
 \end{enumerate}
 
 Every defect above was independently re-verified against real output data -- either by
@@ -706,7 +773,7 @@ specific benchmark: a write-time verification step's reported reliability is onl
 as the host it was measured on, and a benchmark result that looks like a capability finding is
 worth testing against a change of deployment environment before it is reported as one.
 
-\section{Limitations}
+\section{Limitations and threats to validity}
 \label{sec:limitations}
 
 Five factors limit how far these results generalize. \textbf{First}, this benchmark tests only
@@ -739,6 +806,14 @@ benchmark does not measure -- their content-derived synthetic ids are explicitly
 shifting if an earlier paragraph with the same text is edited, inserted, or removed elsewhere in
 the document.
 
+\subsection{Artifact availability}
+This benchmark's harness, evaluator, statistics code, and corpus manifests all exist in a private
+git repository; none of it is publicly released as of this draft.
+\pending{decide, before submission: what gets released (harness/evaluator code, statistics code,
+corpus manifests -- not the licensed DocOps documents themselves), under what license, and hosted
+where, then update this statement and Section~\ref{sec:defects}'s item 6 with the real link
+rather than leaving both as a placeholder.}
+
 \section{Conclusion}
 \label{sec:conclusion}
 
@@ -770,12 +845,16 @@ audit tool itself that only the unbounded control arm caught. Too small a sample
 claim -- but a concrete argument for running this at confirmatory scale, not a reason to treat the
 question as settled either way.
 
-\todo{This is a preliminary draft. Before any submission: (1) re-run the full
-paper-review-toolkit pipeline (writing-quality + content-quality prompts) against this revision,
-since the previous pass's findings were applied against an earlier draft with different numbers;
-(2) decide a target venue and apply its actual formatting requirements rather than this
-generic-article format; (3) expand Related Work with a fuller, independently-verified literature
-pass.}
+\todo{This is a preliminary draft. Before any submission: (1) re-run a full writing-quality and
+content-quality review against this revision, since the most recent pass (which added the
+research questions, the Clopper-Pearson defect/fix, the artifact-availability note, and the
+expanded Related Work below) has not itself been re-reviewed; (2) decide a target venue --
+ACM REP (the Conference on Reproducibility and Replicability) is the leading candidate given
+this paper's confirmatory framing and defect-disclosure emphasis, per its own CFP -- and convert
+from this generic-article format to that venue's actual template and page limit; (3) resolve
+Section~\ref{sec:limitations}'s pending artifact-availability decision (what gets released,
+under what license, hosted where) and update that section and defect 6's citation with the real
+link.}
 
 \bibliographystyle{plainnat}
 \bibliography{refs}
