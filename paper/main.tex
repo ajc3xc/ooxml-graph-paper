@@ -135,9 +135,11 @@ is performed entirely outside the agent, never by trusting its own transcript cl
   identical benchmark on a dedicated, single-tenant host, which closes the gap completely and
   confirms the confound was a deployment-environment artifact, not a capability limitation
   (Section~\ref{sec:render-gate}).
-\item We disclose ten infrastructure, harness, and evaluation-code defects found during this
-  project -- each with its root cause, fix, and independent re-verification -- and show that
-  several materially changed an already-reported number (Section~\ref{sec:defects}).
+\item We show that a confirmatory benchmark's own numbers are only as trustworthy as its
+  harness: of ten infrastructure, harness, and evaluation-code defects found during this
+  project, several silently altered an already-reported result before independent
+  re-verification caught them -- each disclosed with its root cause, fix, and re-verification
+  (Section~\ref{sec:defects}).
 \end{itemize}
 
 \section{Related Work}
@@ -310,7 +312,14 @@ not apply a multiple-comparison correction across them: the $K=4$ section-reorde
 one comparison this benchmark's design was built in advance to make (Section~\ref{sec:section-reorder}),
 not one significant finding selected after the fact from many equally-likely candidates, so we
 report it and its p-value directly rather than adjusting it for tests it was never in competition
-with. A chain that never executed or never finished because of a
+with. Per CONSORT's own outcome-reporting guidance for paired designs \citep{schulz2010consort},
+we report each arm's own marginal pass rate with its own CI alongside a paired significance test
+-- both are standard, not redundant. What we do not report is a confidence interval on the paired
+difference itself (only its p-value) for the three families where that difference is doing real
+interpretive work (section reorder at $K=1$ original, $K=1$ combined, and $K=4$); computing it
+correctly needs the underlying per-document paired outcomes, which this draft does not
+recompute from raw data, so we name the gap rather than silently report only the point estimate.
+A chain that never executed or never finished because of a
 harness- or infrastructure-level failure unrelated to the task itself (a network error, a
 process-level subprocess timeout) is excluded from both arms' denominators for that document,
 rather than scored as a failure. This per-trial subprocess timeout is 300 seconds (600 seconds for
@@ -336,12 +345,19 @@ and grading code -- on a dedicated, single-tenant cloud CPU instance (4 dedicate
 tenant or process competing for the same physical resources). Two environment differences were
 necessary and are disclosed here rather than left implicit. First, the instance runs Linux, so
 the write-time verification step's Microsoft Word COM backend (Windows-only) is unavailable; only
-its LibreOffice/\texttt{soffice} backend runs. This does not change what is being measured: an
-audit of every persisted chain result across the original host's full run history found the
-Word COM backend never won the two-backend race on its own in any recorded successful chain (it
-only ever appears in failure records where both backends failed together), so a
-LibreOffice-only environment is evaluating the same effective verification path the original run
-already relied on almost exclusively, not a different one. Second, the CLI executing each trial
+its LibreOffice/\texttt{soffice} backend runs (tried first in the fallback order described in
+Section~\ref{sec:defects}; Word COM is invoked only if it fails). This does not change what is
+being measured: an audit of every persisted chain result across the original host's full run
+history found the Word COM backend never succeeded on its own in any recorded chain (it only
+ever appears in failure records where both backends failed together). We are explicit that this
+audit is observational, not a controlled ablation: it reports which backend actually succeeded
+under the existing sequential fallback order on real trials, not the result of deliberately
+forcing each backend alone on the same documents, which the code supports
+(\texttt{check\_render\_capability}'s own \texttt{backends} parameter) but which we did not run.
+We read the observational result as strong evidence that a LibreOffice-only environment is
+evaluating the same effective verification path the original run already relied on almost
+exclusively, but a genuine backend effect on the measured pass rates cannot be fully ruled out
+without that ablation. Second, the CLI executing each trial
 refuses to run with permission checks bypassed when invoked as the root user, a restriction the
 original host (a non-root desktop account) never triggered; we created a dedicated non-root
 account on the instance for this reason, verified functionally, and re-ran the affected trials
@@ -362,19 +378,13 @@ Family & Arm & Pass rate & 95\% CI & $n$ & Paired $p$ \\
 Bibliography entry & control   & 100\% & [86.8, 100]$^\dagger$ & 26 & \multirow{2}{*}{1.0} \\
                     & treatment & 100\% & [86.8, 100]$^\dagger$ & 26 & \\
 \addlinespace
-Inline citation\footnote{Treatment $n=25$: one forward call hit a genuine 300-second
-process-level subprocess timeout unrelated to the citation task itself, excluded from the
-denominator per Section~\ref{sec:methods}'s harness-flake rule rather than scored as a
-failure.} & control   & 100\% & [86.8, 100]$^\dagger$ & 26 & \multirow{2}{*}{1.0} \\
+Inline citation$^{\text{a}}$ & control   & 100\% & [86.8, 100]$^\dagger$ & 26 & \multirow{2}{*}{1.0} \\
                     & treatment & 100\% & [86.3, 100]$^\dagger$ & 25 & \\
 \addlinespace
 Section reorder (original corpus) & control   & 72.7\% & [45.5, 100]  & 11 & \multirow{2}{*}{0.240} \\
                                    & treatment & 100\%  & [71.5, 100]$^\dagger$   & 11 & \\
 \addlinespace
-Section reorder (combined, v1+v2)\footnote{Control $n=55$, treatment $n=56$: one 1.7MB document's
-control-arm chain never completed within the harness's 300-second timeout across six independent
-attempts at varying host load (a real, document-size-driven control-arm limitation, excluded
-from control's denominator only), while its treatment-arm chain completed and passed.} & control   & 83.6\% & [74.5, 92.7] & 55 & \multirow{2}{*}{0.271} \\
+Section reorder (combined, v1+v2)$^{\text{b}}$ & control   & 83.6\% & [74.5, 92.7] & 55 & \multirow{2}{*}{0.271} \\
                                        & treatment & 92.9\% & [85.7, 98.2] & 56 & \\
 \bottomrule
 \end{tabular}
@@ -385,7 +395,7 @@ bounded tool at $K=1$; see Section~\ref{sec:section-reorder} for the $K=4$ resul
 corpus. $^\dagger$Exact Clopper-Pearson interval rather than the percentile bootstrap used
 elsewhere (Section~\ref{sec:defects}, defect 9): at a literal 100\% observed rate every possible
 bootstrap resample is identical to the original sample, so the percentile method itself cannot
-express any uncertainty there.}
+express any uncertainty there. Notes a--b: Appendix~\ref{app:notes}.}
 \label{tab:single-edit}
 \end{table}
 
@@ -416,30 +426,6 @@ bottom row.}
 \label{tab:k4}
 \end{table}
 
-Run through four repeated edit-undo cycles rather than one, the same 55/56-document combined
-corpus produced the single significant result in this benchmark (Table~\ref{tab:k4}): control's
-pass rate fell to 67.3\% while treatment held at 92.9\% ($p=0.0015$). This is not a p-value
-found by fishing
-across many cuts of the data -- it is the specific comparison the $K$-sweep design was built to
-make, on the same corpus already reported at $K=1$.
-
-The mechanism was traced directly rather than inferred from the p-value alone, in the
-48-document v2 follow-up sub-corpus specifically (the source of the finer per-cycle grading
-breakdown below; the full 55/56 combined corpus is not broken down at this granularity in this
-draft). Of the 12 v2-corpus control chains with at least one failing cycle, 9 failed specifically
-on exact-order restoration starting from the second cycle onward -- a real, dominant majority
-pattern, not a universal rule -- and 2 failed that same check on the very first cycle (one of
-those two then recovering fully on later cycles); the remaining chain's specific failure
-category is not itemized in our current evidence record, a gap we disclose rather than paper
-over. The bounded tool showed no equivalent drift on
-any chain, in either sub-corpus. This is consistent
-with a specific, plausible cause: the bounded tool re-resolves a fresh structural anchor for the
-target section on every call, while the generic-tool agent must reconstruct or remember ``the
-original layout'' itself across calls, and that reconstruction compounds error with repetition.
-The pattern is dominant but not exceptionless (2 of 12 control failures occur on the very first
-cycle, one of those two then recovering on a later cycle) -- the significance finding rests on
-the dominant trend, not on every case fitting the same story.
-
 \begin{figure}[h]
 \centering
 \begin{tikzpicture}[
@@ -469,12 +455,37 @@ the dominant trend, not on every case fitting the same story.
 \draw[arr] (c2) -- (c3);
 \draw[arr] (c3) -- (c4);
 \end{tikzpicture}
-\caption{The mechanism behind Table~\ref{tab:k4}'s result. Treatment re-resolves its target by
+\caption{The mechanism behind Table~\ref{tab:k4}'s result. \emph{C1--C4} label the four repeated
+edit-undo cycles. Treatment re-resolves its target by
 a stable structural id fresh each cycle (dashed: no real dependency between cycles). Control has
 no such anchor, so each cycle's unverified edit builds on whatever the previous cycle actually
 left in the file (solid: a real dependency an undetected mistake can cross).}
 \label{fig:drift-mechanism}
 \end{figure}
+
+Run through four repeated edit-undo cycles rather than one, the same 55/56-document combined
+corpus produced the single significant result in this benchmark (Table~\ref{tab:k4}): control's
+pass rate fell to 67.3\% while treatment held at 92.9\% ($p=0.0015$). This is not a p-value
+found by fishing
+across many cuts of the data -- it is the specific comparison the $K$-sweep design was built to
+make, on the same corpus already reported at $K=1$.
+
+The mechanism was traced directly rather than inferred from the p-value alone, in the
+48-document v2 follow-up sub-corpus specifically (the source of the finer per-cycle grading
+breakdown below; the full 55/56 combined corpus is not broken down at this granularity in this
+draft). Of the 12 v2-corpus control chains with at least one failing cycle, 9 failed specifically
+on exact-order restoration starting from the second cycle onward -- a real, dominant majority
+pattern, not a universal rule -- and 2 failed that same check on the very first cycle (one of
+those two then recovering fully on later cycles); the remaining chain's specific failure
+category is not itemized in our current evidence record, a gap we disclose rather than paper
+over. The bounded tool showed no equivalent drift on
+any chain, in either sub-corpus. This is consistent
+with a specific, plausible cause: the bounded tool re-resolves a fresh structural anchor for the
+target section on every call, while the generic-tool agent must reconstruct or remember ``the
+original layout'' itself across calls, and that reconstruction compounds error with repetition.
+The pattern is dominant but not exceptionless (2 of 12 control failures occur on the very first
+cycle, one of those two then recovering on a later cycle) -- the significance finding rests on
+the dominant trend, not on every case fitting the same story.
 
 \begin{figure}[h]
 \centering
@@ -542,10 +553,10 @@ entirely -- they write raw XML directly, with no independent render-verification
 \label{fig:rendergate-arch}
 \end{figure}
 
-Figure~\ref{fig:rendergate-arch} shows this flow. The verification step itself races two
-independent renderer backends concurrently (Section~\ref{sec:defects}, defect 7) rather than
-trying one after the other, purely to bound worst-case latency under contention -- the pass/fail
-decision is unaffected by which backend answers first.
+Figure~\ref{fig:rendergate-arch} shows this flow. The verification step tries two independent
+renderer backends in a fixed fallback order, advancing to the second only if the first fails
+(Section~\ref{sec:defects}, defect 7, which also corrects an earlier draft's claim that this
+runs as a concurrent race) -- the pass/fail decision is unaffected by which backend succeeds.
 
 \begin{table}[h]
 \centering
@@ -553,12 +564,7 @@ decision is unaffected by which backend answers first.
 \toprule
 Family & Arm & Pass rate & 95\% CI & $n$ & Paired $p$ & Status \\
 \midrule
-Equation\footnote{Control ($n=11$) comes from an 11-document development-slice corpus run once
-under this project's confirmatory design, not the 26-document confirmatory corpus treatment
-uses; the two are not paired and no significance test is reported for this row. 10 of 11
-resolved chains passed; the 11th resolved (did not block on the verification step) but failed
-grading on a genuine task mistake -- 11/11 \emph{resolved} is not the same as 11/11
-\emph{passed}.}
+Equation$^{\text{c}}$
   & control   & 90.9\% & [72.7, 100] & 11 & \multirow{2}{*}{n/a} & \multirow{2}{*}{original (shared host)} \\
   & treatment & 46.2\% & [26.9, 65.4] & 26 & & \\
 \addlinespace
@@ -572,13 +578,14 @@ Caption         & control   & 100\%  & [86.8, 100]$^\dagger$  & 26 & \multirow{2
 \caption{Write-time structurally-verified families as originally measured, on a shared,
 variably-contended host. Control never invokes the verification step (it edits raw XML
 directly) and is unaffected by host contention. Equation's treatment $n=26$ has no paired
-significance test here because its control arm comes from a different, unpaired corpus (see
-footnote) -- resolved in Table~\ref{tab:render-gate-clean}, which pairs both on the same corpus.
+significance test here because its control arm comes from a different, unpaired corpus (note
+c, Appendix~\ref{app:notes}) -- resolved in Table~\ref{tab:render-gate-clean}, which pairs both on the same corpus.
 Superseded by the confirmatory re-run in Table~\ref{tab:render-gate-clean}; retained here as the
 evidence for that re-run's causal claim, not as a final number. $^\dagger$Exact Clopper-Pearson
 interval rather than the percentile bootstrap used elsewhere (Section~\ref{sec:defects}, defect
 9): at a literal 100\% observed rate every possible bootstrap resample is identical to the
-original sample, so the percentile method itself cannot express any uncertainty there.}
+original sample, so the percentile method itself cannot express any uncertainty there. Note c:
+Appendix~\ref{app:notes}.}
 \label{tab:render-gate}
 \end{table}
 
@@ -729,19 +736,25 @@ rather than fold it silently into a final figure.
   stale number published after an unrelated fix -- are described in full in the project's own
   working notes (\texttt{docs/} in the repository below) and omitted here for space.
 \item \textbf{Sequential backend fallback could cost more time than the harness's own outer
-  budget allowed.} The write-time verification step's two backends (Section~\ref{sec:render-gate})
+  budget allowed -- and the fix for it never actually shipped.} The write-time verification
+  step's two backends (Section~\ref{sec:render-gate})
   were tried sequentially, each with its own retry-bounded 90-second timeout -- discovering that
   both failed could cost up to their combined worst case (approximately 360 seconds), over half
-  the harness's 600-second outer per-trial timeout. We fixed this by racing both backends
-  concurrently instead, so discovering a double failure costs at most the slower of the two
-  (approximately 180 seconds) rather than their sum. We are explicit that this changes latency
-  under contention, not the underlying success probability: directly investigating this host's
-  resource consumption while implementing this fix found a large, unrelated, CPU- and
-  memory-heavy background workload (423\% CPU, 11.3GB resident memory) genuinely needed by its
-  owner and left running -- both backends are starved by the same real resource shortage
-  regardless of whether they are raced or chained, so this fix stops trials from being silently
-  killed by the outer timeout mid-verification, but does not raise equation's or caption's pass
-  rate.
+  the harness's 600-second outer per-trial timeout. A fix racing both backends concurrently
+  instead was written and committed, so discovering a double failure would cost at most the
+  slower of the two (approximately 180 seconds) rather than their sum. \textbf{Correction:}
+  independently re-auditing this defect while investigating a separate reviewer comment found
+  that commit was never merged into the branch this benchmark's own tooling actually runs
+  from -- every reported chain, including the confirmatory re-run, executed against the
+  original sequential-fallback code, not the described concurrent race. We are explicit that
+  this changes latency under contention, not the underlying success probability -- both
+  backends are starved by the same real resource shortage regardless of whether they are raced
+  or chained -- so this correction changes no reported pass/fail number: a dedicated,
+  uncontended confirmatory host has no double-backend-timeout latency problem to race against
+  in the first place. What it does mean is that on the original contended host, a chain whose
+  both backends genuinely failed may still have been silently killed by the outer timeout
+  mid-verification rather than gracefully reporting "both backends failed," exactly the failure
+  mode this fix was meant to prevent.
 \item \textbf{The confirmatory re-run's CLI silently refused every trial identically, and the
   failure signature was checked directly rather than assumed.} The first attempt at the
   dedicated-host confirmatory re-run (Section~\ref{sec:methods-rerun}) reported every one of 156
@@ -888,6 +901,25 @@ audit tool itself that only the unbounded control arm caught. Too small a sample
 claim -- but a concrete argument for running this at confirmatory scale, not a reason to treat the
 question as settled either way.
 
+Bibliography and citation insertion showing parity (Section~\ref{sec:results}) is itself likely a
+correct finding, not a benchmark design flaw: both tools write already-resolved metadata into an
+already-valid paragraph, a purely mechanical formatting step a capable generic agent can match. A
+genuinely harder version of this task family exists, structurally analogous to section reorder's
+$K=4$ finding: resolving a citation \emph{against a live external system} (\texttt{resolve\_citations}
+against a local Zotero library) rather than formatting metadata already supplied in the prompt --
+a real, mechanistically explainable gap a generic agent would need to independently
+discover the local API's protocol and error semantics to close, not simply write correct APA
+text. We did not test this; it is future work, not a claim.
+
+A genuinely blind confirmatory re-run -- now that the tooling's own defects (Section~\ref{sec:defects})
+are fixed -- is also worth naming explicitly rather than only implying: this benchmark's licensed
+DocOps corpus is fully exhausted (every document already used, per Limitations factor Six), but a
+separate, already-PII-screened pool of 35 organic documents from this project's own acquisition
+work sits unused by the editing benchmark, and a further $\sim$12{,}000 candidate documents remain
+identified but never fetched. Either is a bounded, near-term acquisition-and-screening pass, not
+a from-scratch effort, and either would be closer to a true blind holdout than this paper's own
+corpus now is.
+
 \todo{This is a preliminary draft. Before any submission: (1) re-run a full writing-quality and
 content-quality review against this revision, since the most recent pass (which added the
 research questions, the Clopper-Pearson defect/fix, the artifact-availability link, and the
@@ -898,5 +930,29 @@ from this generic-article format to that venue's actual template and page limit.
 
 \bibliographystyle{plainnat}
 \bibliography{refs}
+
+\appendix
+\section{Corpus and exclusion notes}
+\label{app:notes}
+Moved here from inline table footnotes, which otherwise float to the bottom of the page
+disconnected from the row that triggers them.
+
+\begin{description}
+\item[Note a (Table~\ref{tab:single-edit}, Inline citation)] Treatment $n=25$: one forward call
+  hit a genuine 300-second process-level subprocess timeout unrelated to the citation task
+  itself, excluded from the denominator per Section~\ref{sec:methods}'s harness-flake rule
+  rather than scored as a failure.
+\item[Note b (Table~\ref{tab:single-edit}, Section reorder combined)] Control $n=55$, treatment
+  $n=56$: one 1.7MB document's control-arm chain never completed within the harness's
+  300-second timeout across six independent attempts at varying host load (a real,
+  document-size-driven control-arm limitation, excluded from control's denominator only), while
+  its treatment-arm chain completed and passed.
+\item[Note c (Table~\ref{tab:render-gate}, Equation)] Control ($n=11$) comes from an 11-document
+  development-slice corpus run once under this project's confirmatory design, not the
+  26-document confirmatory corpus treatment uses; the two are not paired and no significance
+  test is reported for this row. 10 of 11 resolved chains passed; the 11th resolved (did not
+  block on the verification step) but failed grading on a genuine task mistake -- 11/11
+  \emph{resolved} is not the same as 11/11 \emph{passed}.
+\end{description}
 
 \end{document}
