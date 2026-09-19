@@ -983,17 +983,21 @@ disconnected from the row that triggers them.
   \emph{resolved} is not the same as 11/11 \emph{passed}.
 \item[Note d (Table~\ref{tab:render-gate}, Table structural)] This row's published number
   (96.2\%, 25/26) was independently re-verified during a later revision pass and found to be
-  correct, but not, at the time, reproducible from the stored trial data: two treatment chains'
-  forward legs had genuinely timed out and were later confirmed, by re-grading them against their
-  own pre-write backups, to actually pass -- but that re-grade was never written back into the
-  stored chain results, which still carried the original timeout's \texttt{not\_run} sentinel
-  for the forward leg (the corresponding inverse-leg recovery had been persisted correctly).
-  Re-running the grading function directly against the still-present output and backup files
-  independently reproduced a pass verdict for both; the stored data was then corrected to match
-  and a full re-run of this project's own statistics code against the corrected data reproduces
-  96.2\%, CI $[88.5, 100]$, $n=26$ exactly. No number in this paper changed as a result -- the
-  published figure was already right -- but the underlying data did not, until this fix, actually
-  support it.
+  correct, but not, at the time, reproducible from the stored trial data. The two chains involved
+  are the same two defect 3 (Section~\ref{sec:defects}) describes recovering by re-grading their
+  output against their own pre-write backups after the harness's outer timeout killed their
+  forward leg -- that description was accurate, and defect 3's own fix (attempting grading on a
+  changed file even after an outer-timeout kill) is what made the recovery possible at all. What
+  had not happened is that the confirmed forward-leg \emph{pass} verdict was ever written back
+  into the stored chain results, which still carried the original timeout's \texttt{not\_run}
+  sentinel for the forward leg; only a later, separate inverse-leg recovery for the same two
+  chains was actually persisted, with its own audit marker. Re-running the grading function
+  directly against the still-present output and backup files independently reproduced a pass
+  verdict for both; the stored data was then corrected to match, with the same kind of audit
+  marker the inverse-leg recovery already carried, and a full re-run of this project's own
+  statistics code against the corrected data reproduces 96.2\%, CI $[88.5, 100]$, $n=26$ exactly.
+  No number in this paper changed as a result -- the published figure was already right -- but
+  the underlying data did not, until this fix, actually support it.
 \end{description}
 
 \end{document}

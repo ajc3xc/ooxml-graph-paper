@@ -1370,9 +1370,13 @@ leg's original `not_run` timeout sentinel in both the raw `chain-result.json` fi
 been written back; the forward-leg re-grade this entry narrates was performed and reported, but
 never persisted.
 
-Re-ran `grade_forward_trial_table_structural` directly against the still-present
-`p0-forward/doc.docx` and `doc.docx.bak` for both chains: both independently regrade `pass`,
-confirming this entry's original claim was factually correct. Patched the forward leg's
+These are the same two chains `paper/main.tex`'s defect 3 describes recovering by re-grading
+against their own pre-write backups -- that description was accurate, and defect 3's own fix
+(attempting grading on a changed file even after an outer-timeout kill) is what made the
+recovery possible; only the confirmed forward-leg pass verdict from that recovery was never
+written back to disk. Re-ran `grade_forward_trial_table_structural` directly against the
+still-present `p0-forward/doc.docx` and `doc.docx.bak` for both chains: both independently
+regrade `pass`, confirming this entry's original claim was factually correct. Patched the forward leg's
 `grading` field in both `chain-result.json` files and both `slice-manifest.json` files (backups
 of all four written alongside before patching, `.json.pre-forward-regrade-backup`), each with an
 explicit `manually_recovered_forward_grading: true` marker and provenance note, mirroring the
