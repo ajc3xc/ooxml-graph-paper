@@ -29,6 +29,7 @@ Usage:
     python zotero_sync.py ensure-collection --name "OOXML-Graph Paper"
     python zotero_sync.py check --tex ../paper/main.tex --bib ../paper/refs.bib
     python zotero_sync.py sync --collection "OOXML-Graph Paper" --bib ../paper/refs.bib
+    python zotero_sync.py push --collection "OOXML-Graph Paper" --bib ../paper/refs.bib
 """
 from __future__ import annotations
 
@@ -233,6 +234,175 @@ def strip_bibtex_key_hint(entry: str) -> str:
     return entry[: m.start()] + replacement + entry[m.end():]
 
 
+BIB_ENTRY_BODY_RE = re.compile(r"@(\w+)\{([^,\s]+),\s*\n(.*?)\n\}", re.DOTALL)
+BIB_FIELD_LINE_RE = re.compile(r"^\s*(\w+)\s*=\s*\{(.*)\},?\s*$", re.MULTILINE)
+
+# BibTeX entry type -> Zotero itemType, matched to what's already in the
+# "OOXML-Graph Paper" collection (confirmed by inspecting its live items):
+# @article -> journalArticle, @inproceedings -> conferencePaper,
+# @techreport -> report, @misc -> preprint (this file's @misc entries are all
+# arXiv preprints). Anything else falls back to "document" rather than guessing.
+_ENTRY_TYPE_TO_ITEM_TYPE = {
+    "article": "journalArticle",
+    "inproceedings": "conferencePaper",
+    "techreport": "report",
+    "misc": "preprint",
+    "book": "book",
+    "incollection": "bookSection",
+}
+
+
+def strip_bib_braces(s: str) -> str:
+    """Drop BibTeX capitalization-protection braces (``{SWE}-bench`` ->
+    ``SWE-bench``) -- Zotero fields are plain text, not BibTeX source."""
+    return s.replace("{", "").replace("}", "")
+
+
+def parse_bib_entries(text: str) -> list[dict]:
+    """Parse ``@type{citekey, field = {value}, ...}`` entries.
+
+    Assumes each field is one physical line (true of every entry this repo's
+    refs.bib has ever contained) -- a value spanning multiple lines, or
+    containing a literal unescaped ``}``, will not parse correctly.
+    """
+    entries = []
+    for entry_type, citekey, body in BIB_ENTRY_BODY_RE.findall(text):
+        fields = {m.group(1).lower(): m.group(2) for m in BIB_FIELD_LINE_RE.finditer(body)}
+        entries.append({"type": entry_type.lower(), "citekey": citekey, "fields": fields})
+    return entries
+
+
+def parse_creators(author_field: str) -> list[dict]:
+    """``"Last, First and Org Name and Last2, First2"`` -> Zotero creators.
+
+    A ``"Last, First"`` pair becomes a person creator; anything with no comma
+    (a bare organization name, e.g. ``"Ecma International"``) becomes a
+    single-field ``name`` creator, matching Zotero's own convention (seen on
+    the existing ``ecma376`` item in the collection).
+    """
+    creators = []
+    for person in author_field.split(" and "):
+        person = person.strip()
+        if not person:
+            continue
+        if "," in person:
+            last, _, first = person.partition(",")
+            creators.append({"creatorType": "author", "firstName": first.strip(), "lastName": last.strip()})
+        else:
+            creators.append({"creatorType": "author", "name": person})
+    return creators
+
+
+def build_item_data(entry: dict, collection_key: str) -> dict | None:
+    """Build a Zotero item-creation payload from one parsed bib entry.
+
+    Field mapping matches what's already live in the collection: journal ->
+    publicationTitle, number -> issue, note -> the first line(s) of extra,
+    with a trailing ``bibtex-key: <citekey>`` line always appended so
+    remap_citekeys (the read-path counterpart) can restore this exact citekey
+    on a future ``sync`` pull instead of Zotero's auto-generated one.
+    Returns ``None`` if the entry has no title (nothing usable to create).
+    """
+    f = entry["fields"]
+    citekey = entry["citekey"]
+    item_type = _ENTRY_TYPE_TO_ITEM_TYPE.get(entry["type"], "document")
+    title = strip_bib_braces(f.get("title", "")).strip()
+    if not title:
+        return None
+    data: dict = {
+        "itemType": item_type,
+        "title": title,
+        "creators": parse_creators(f.get("author", "")),
+        "date": f.get("year", ""),
+        "collections": [collection_key],
+    }
+    if f.get("doi"):
+        data["DOI"] = f["doi"]
+    if f.get("url"):
+        data["url"] = f["url"]
+    if item_type == "journalArticle":
+        if f.get("journal"):
+            data["publicationTitle"] = f["journal"]
+        if f.get("volume"):
+            data["volume"] = f["volume"]
+        if f.get("number"):
+            data["issue"] = f["number"]
+    if f.get("pages"):
+        data["pages"] = f["pages"].replace("--", "-")
+    if item_type == "conferencePaper" and f.get("booktitle"):
+        data["proceedingsTitle"] = strip_bib_braces(f["booktitle"])
+    if item_type == "report" and f.get("institution"):
+        data["institution"] = strip_bib_braces(f["institution"])
+    note_lines = [strip_bib_braces(f["note"])] if f.get("note") else []
+    note_lines.append(f"bibtex-key: {citekey}")
+    data["extra"] = "\n".join(note_lines)
+    return data
+
+
+def fetch_collection_items(client: httpx.Client, key: str) -> list[dict]:
+    resp = client.get(f"{BASE}/users/{LOCAL_USER}/collections/{key}/items",
+                       params={"format": "json", "limit": 100})
+    resp.raise_for_status()
+    return resp.json()
+
+
+def cmd_push(args: argparse.Namespace) -> None:
+    with httpx.Client(timeout=10.0) as client:
+        coll = find_collection(client, args.collection)
+        if not coll:
+            sys.exit(f"No Zotero collection named {args.collection!r} -- run "
+                      f"ensure-collection first.")
+        key = coll["data"]["key"]
+        existing_items = fetch_collection_items(client, key)
+        existing_dois = {
+            d["DOI"].strip().lower()
+            for it in existing_items
+            if (d := it["data"]).get("DOI")
+        }
+        existing_keys = set()
+        for it in existing_items:
+            m = BIBTEX_KEY_HINT_RE.search(it["data"].get("extra") or "")
+            if m:
+                existing_keys.add(m.group(1))
+
+        entries = parse_bib_entries(Path(args.bib).read_text(encoding="utf-8"))
+
+        to_create = []
+        skipped = []
+        for entry in entries:
+            citekey = entry["citekey"]
+            doi = entry["fields"].get("doi", "").strip().lower()
+            if citekey in existing_keys or (doi and doi in existing_dois):
+                skipped.append(citekey)
+                continue
+            data = build_item_data(entry, key)
+            if data is None:
+                skipped.append(f"{citekey} (no title -- not pushed)")
+                continue
+            to_create.append((citekey, data))
+
+        if not to_create:
+            print(f"Nothing to push -- all {len(entries)} bib entr"
+                  f"{'y' if len(entries) == 1 else 'ies'} already present in {args.collection!r}.")
+            return
+
+        server_id = get_server_id(client)
+        resp = write_with_auth(client, server_id, "POST", f"{BASE}/users/{LOCAL_USER}/items",
+                                json=[d for _, d in to_create])
+        resp.raise_for_status()
+        body = resp.json()
+        successful = body.get("successful", {})
+        failed = body.get("failed", {})
+        for idx, (citekey, _) in enumerate(to_create):
+            si = str(idx)
+            if si in successful:
+                print(f"Created: {successful[si]['data']['key']} {citekey}")
+            elif si in failed:
+                print(f"FAILED: {citekey} -- {failed[si]}")
+        if skipped:
+            print(f"Skipped (already present): {', '.join(skipped)}")
+
+
 def cmd_sync(args: argparse.Namespace) -> None:
     with httpx.Client(timeout=10.0) as client:
         coll = find_collection(client, args.collection)
@@ -268,6 +438,11 @@ def main() -> None:
     p.add_argument("--collection", required=True)
     p.add_argument("--bib", required=True)
     p.set_defaults(func=cmd_sync)
+
+    p = sub.add_parser("push", help="Create Zotero items for .bib entries not already in the collection")
+    p.add_argument("--collection", required=True)
+    p.add_argument("--bib", required=True)
+    p.set_defaults(func=cmd_push)
 
     args = parser.parse_args()
     args.func(args)
