@@ -26,15 +26,15 @@ for Agentic Word Document Editing: A Confirmatory Benchmark}
 \maketitle
 
 \begin{abstract}
-Many agent systems increasingly edit real documents through generic file-manipulation tools
+Agent systems that edit real documents typically do so through generic file-manipulation tools
 (read, write, search-and-replace, shell commands) rather than through primitives designed for
 the document's own format. On the same model and the same documents, we ask whether Meridian
 Docs' document-editing tools -- a bounded, atomic, structurally-aware subset of that package's
-much larger MCP tool surface (Section~\ref{sec:limitations}), for Microsoft Word's Office Open
+MCP tool surface (11 of 86 registered tools; Section~\ref{sec:limitations}), for Microsoft Word's Office Open
 XML (OOXML/\texttt{.docx}) format -- change task correctness relative to an
 agent given only generic tools and raw XML access. We report a confirmatory benchmark across six task families
 (bibliography-entry insertion, inline citation insertion, section reordering, equation insertion,
-table-structural insertion, and figure-caption insertion) on a held-out corpus of real, previously
+table-structural insertion, and caption insertion) on a held-out corpus of real, previously
 unseen \texttt{.docx} documents, each task run as a forward edit followed by its own inverse and
 independently graded against the original document's structure. Two families
 (bibliography, citation) show no measurable difference between arms. One family (section
@@ -50,8 +50,8 @@ controlled, isolated timing test first rejected task-dependent render cost as th
 and a full confirmatory re-run of the identical benchmark -- same model, same corpus, same
 code -- on a dedicated, single-tenant cloud host closed the gap completely, all three families
 reaching 100\% pass for both arms. The original numbers were a deployment-environment artifact
-(shared-host scheduling contention, a physically unreliable storage device, and confirmed network
-failures), not an editing-capability limitation, and we report both the original and the
+(shared-host scheduling contention and a physically unreliable external drive), not an
+editing-capability limitation, and we report both the original and the
 confirmatory numbers rather than replacing one with the other silently. Separately, we
 document ten
 infrastructure and evaluation-harness defects that this benchmark's own development surfaced and
@@ -186,10 +186,11 @@ iterative debug-and-rerun cycle in full (Section~\ref{sec:defects}, Section~\ref
 rather than describe either subset as a blind holdout in the machine-learning sense -- it is not
 one. An independently preregistered (2026-08-31, \texttt{e813cd7}) 48-document follow-up corpus
 was built specifically for the section-reordering family, because the primary corpus yields only 11
-documents on which that task is structurally applicable; the follow-up corpus itself yields 44
+documents on which that task is structurally applicable; the follow-up corpus itself yields 45
 applicable documents (of 48), so the combined section-reordering corpus reported in
-Table~\ref{tab:single-edit} and Table~\ref{tab:k4} is $11+44=55$ paired documents, not
-$11+48=59$.
+Table~\ref{tab:single-edit} and Table~\ref{tab:k4} is $11+45=56$ paired documents, not
+$11+48=59$ -- treatment reports the full $n=56$, while control reports $n=55$ after one further,
+disclosed exclusion (Appendix~\ref{app:notes}, Note b).
 
 \subsection{Task families}
 Six families are reported, each implemented as one forward/inverse tool pair in Meridian Docs on
@@ -320,8 +321,11 @@ correctly needs the underlying per-document paired outcomes, which this draft do
 recompute from raw data, so we name the gap rather than silently report only the point estimate.
 A chain that never executed or never finished because of a
 harness- or infrastructure-level failure unrelated to the task itself (a network error, a
-process-level subprocess timeout) is excluded from both arms' denominators for that document,
-rather than scored as a failure. This is a single global per-trial subprocess timeout applied to
+process-level subprocess timeout) is excluded from the denominator of whichever arm's chain it
+actually prevented from completing for that document: both arms' when the failure blocks either
+arm's chain from running at all, or a single arm's when only one arm's process was affected, as in
+the two harness-flake cases we report (Appendix~\ref{app:notes}, Notes a--b), rather than scored as
+a failure. This is a single global per-trial subprocess timeout applied to
 every family, not a per-family budget; it started at 300 seconds (an uninstrumented initial
 choice) and was raised to 600 seconds on 2026-09-07 as a reactive doubling to survive a specific
 host-contention episode (Section~\ref{sec:defects} defect 7) -- so families whose trials ran before
@@ -330,8 +334,8 @@ saw 600s, but this was an artifact of when each family's trials happened to run,
 per-family design. We have since derived an evidence-informed value from the corpus's own recorded
 wall-clock times: aggregating \texttt{wall\_time\_seconds} across all 643 recorded chain results
 (2409 of 2460 trials that completed without hitting either ceiling) gives a 99th-percentile
-completion time of 388.8s and an observed maximum of 574.8s for the two render-gated families
-combined, right at the old 600s ceiling -- and 37 render-gated trials genuinely hit that ceiling as
+completion time of 388.8s and an observed maximum of 574.8s for the two slower render-gated
+families (equation and caption) combined, right at the old 600s ceiling -- and 37 render-gated trials genuinely hit that ceiling as
 recently as 2026-09-12, confirming 600s was still insufficient for a real fraction of correct,
 non-infrastructure-failing attempts. Because the successful-trial data is right-censored at
 whatever ceiling was in effect when each trial ran, this cannot be treated as a closed percentile
@@ -400,8 +404,9 @@ Section reorder (combined, v1+v2)$^{\text{b}}$ & control   & 83.6\% & [74.5, 92.
                                        & treatment & 92.9\% & [85.7, 98.2] & 56 & \\
 \bottomrule
 \end{tabular}
-\caption{Single-edit ($K=1$) results for the four families not gated by write-time
-structural-verification. Bibliography and citation show a genuine, literal parity between arms.
+\caption{Single-edit ($K=1$) results for the three families not gated by write-time
+structural-verification, shown across four rows since section reorder appears at two corpus
+stages. Bibliography and citation show a genuine, literal parity between arms.
 Section reorder shows a directionally consistent but not-yet-significant advantage for the
 bounded tool at $K=1$; see Section~\ref{sec:section-reorder} for the $K=4$ result on the same
 corpus. $^\dagger$Exact Clopper-Pearson interval rather than the percentile bootstrap used
@@ -500,8 +505,9 @@ The significance finding rests on that dominant trend, not on every case fitting
 \begin{figure}[h]
 \centering
 \includegraphics[width=0.85\textwidth]{figures/fig-single-edit-forest.pdf}
-\caption{Pass rate and 95\% CI by arm for the four families not gated by write-time
-structural-verification (Table~\ref{tab:single-edit}, Table~\ref{tab:k4}). Bibliography and
+\caption{Pass rate and 95\% CI by arm for the three families not gated by write-time
+structural-verification, shown across four rows since section reorder appears at two corpus
+stages (Table~\ref{tab:single-edit}, Table~\ref{tab:k4}). Bibliography and
 citation show literal overlap; section reorder's confidence intervals narrow but still overlap at
 $K=1$ and separate cleanly at $K=4$, the benchmark's one significant single-family comparison.}
 \label{fig:single-edit}
@@ -515,7 +521,7 @@ only once cycling reaches $K=4$.
 \label{sec:render-gate}
 
 The remaining three families (equation, table, caption) share one architectural property the
-first four do not: their treatment-side insertion tool verifies its own write correctness before
+first three do not: their treatment-side insertion tool verifies its own write correctness before
 persisting a change -- rendering the resulting document with an independent renderer and
 confirming it opens without error -- and it atomically restores the original file if that
 verification fails for any reason. This design choice trades a real reliability cost
@@ -847,8 +853,8 @@ write-time-verification designs, only that it fully explains the gap observed he
 \textbf{Third}, corpus size for section reordering ($n=11$ at $K=1$ on the original corpus) is
 small before the follow-up corpus is combined in. \textbf{Fourth}, one specific piece of our own
 test infrastructure -- an external drive holding all run data -- proved physically unreliable,
-disconnecting twice during this project (confirmed via OS-level disk I/O error events, not
-inferred); this remains a real defect in our original test environment (Section~\ref{sec:defects}),
+disconnecting twice during this project (confirmed via Windows disk-layer I/O retry/error events,
+not inferred); this remains a real defect in our original test environment (Section~\ref{sec:defects}),
 though the confirmatory re-run's clean result means it is no longer load-bearing for any number
 in this paper's final reporting. \textbf{Fifth}, this benchmark exercises 11 of Meridian Docs'
 86 registered tools, across the six families reported here; the remaining tools -- other editing
@@ -865,8 +871,8 @@ several defects (Section~\ref{sec:defects}) were found by observing trial outcom
 26-document corpus during the benchmark's own execution, then fixed directly in the tooling and
 the affected chains re-run (Section~\ref{sec:methods}). We mitigate, but do not eliminate, the
 resulting risk in two ways that distinguish this from conditioning a statistical model on its own
-test set: every fix targets a deterministic code defect (a wrong file path, a schema-invalid
-element order), not the underlying language model's prompts, weights, or grading criteria, which
+test set: every fix targets a deterministic code defect (a wrong file path, a missing COM
+type-library cache), not the underlying language model's prompts, weights, or grading criteria, which
 never varied; and every fix was independently re-verified against real re-run data rather than
 assumed effective. We do not claim these numbers estimate performance on documents this tooling
 has never previously encountered in any form. \textbf{Seventh}, the per-trial subprocess timeout
@@ -957,16 +963,20 @@ disconnected from the row that triggers them.
 \begin{description}
 \item[Note a (Table~\ref{tab:single-edit}, Inline citation)] Treatment $n=25$: one forward call
   hit a genuine 300-second process-level subprocess timeout unrelated to the citation task
-  itself, excluded from the denominator per Section~\ref{sec:methods}'s harness-flake rule
-  rather than scored as a failure.
+  itself, excluded from the denominator per Section~\ref{sec:methods}'s harness/infrastructure-failure
+  exclusion rule rather than scored as a failure.
 \item[Note b (Table~\ref{tab:single-edit}, Section reorder combined)] Control $n=55$, treatment
   $n=56$: one 1.7MB document's control-arm chain never completed within the harness's
   300-second timeout across six independent attempts at varying host load (a real,
-  document-size-driven control-arm limitation, excluded from control's denominator only), while
+  document-size-driven control-arm limitation, excluded from control's denominator only, a
+  document-level exception to Section~\ref{sec:methods}'s exclusion rule), while
   its treatment-arm chain completed and passed.
 \item[Note c (Table~\ref{tab:render-gate}, Equation)] Control ($n=11$) comes from an 11-document
-  development-slice corpus run once under this project's confirmatory design, not the
-  26-document confirmatory corpus treatment uses; the two are not paired and no significance
+  development-slice corpus run once under this project's confirmatory design\todo{Add the
+  preregistration date and commit hash given for this paper's other corpora in
+  Section~\ref{sec:methods}, or state explicitly that this corpus predates preregistration and
+  was not itself preregistered.}, not the
+  26-document primary corpus treatment uses; the two are not paired and no significance
   test is reported for this row. 10 of 11 resolved chains passed; the 11th resolved (did not
   block on the verification step) but failed grading on a genuine task mistake -- 11/11
   \emph{resolved} is not the same as 11/11 \emph{passed}.
