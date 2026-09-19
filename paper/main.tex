@@ -584,7 +584,7 @@ Equation$^{\text{c}}$
   & control   & 90.9\% & [72.7, 100] & 11 & \multirow{2}{*}{n/a} & \multirow{2}{*}{original (shared host)} \\
   & treatment & 46.2\% & [26.9, 65.4] & 26 & & \\
 \addlinespace
-Table (structural) & control   & 92.3\% & [80.8, 100] & 26 & \multirow{2}{*}{1.0} & \multirow{2}{*}{original (shared host)} \\
+Table (structural)$^{\text{d}}$ & control   & 92.3\% & [80.8, 100] & 26 & \multirow{2}{*}{1.0} & \multirow{2}{*}{original (shared host)} \\
                     & treatment & 96.2\% & [88.5, 100] & 26 & & \\
 \addlinespace
 Caption         & control   & 100\%  & [86.8, 100]$^\dagger$  & 26 & \multirow{2}{*}{$<0.001$} & \multirow{2}{*}{original (shared host)} \\
@@ -596,6 +596,7 @@ variably-contended host. Control never invokes the verification step (it edits r
 directly) and is unaffected by host contention. Equation's treatment $n=26$ has no paired
 significance test here because its control arm comes from a different, unpaired corpus (note
 c, Appendix~\ref{app:notes}) -- resolved in Table~\ref{tab:render-gate-clean}, which pairs both on the same corpus.
+Note d (table-structural): Appendix~\ref{app:notes}.
 Superseded by the confirmatory re-run in Table~\ref{tab:render-gate-clean}; retained here as the
 evidence for that re-run's causal claim, not as a final number. $^\dagger$Exact Clopper-Pearson
 interval rather than the percentile bootstrap used elsewhere (Section~\ref{sec:defects}, defect
@@ -980,6 +981,19 @@ disconnected from the row that triggers them.
   test is reported for this row. 10 of 11 resolved chains passed; the 11th resolved (did not
   block on the verification step) but failed grading on a genuine task mistake -- 11/11
   \emph{resolved} is not the same as 11/11 \emph{passed}.
+\item[Note d (Table~\ref{tab:render-gate}, Table structural)] This row's published number
+  (96.2\%, 25/26) was independently re-verified during a later revision pass and found to be
+  correct, but not, at the time, reproducible from the stored trial data: two treatment chains'
+  forward legs had genuinely timed out and were later confirmed, by re-grading them against their
+  own pre-write backups, to actually pass -- but that re-grade was never written back into the
+  stored chain results, which still carried the original timeout's \texttt{not\_run} sentinel
+  for the forward leg (the corresponding inverse-leg recovery had been persisted correctly).
+  Re-running the grading function directly against the still-present output and backup files
+  independently reproduced a pass verdict for both; the stored data was then corrected to match
+  and a full re-run of this project's own statistics code against the corrected data reproduces
+  96.2\%, CI $[88.5, 100]$, $n=26$ exactly. No number in this paper changed as a result -- the
+  published figure was already right -- but the underlying data did not, until this fix, actually
+  support it.
 \end{description}
 
 \end{document}
