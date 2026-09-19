@@ -27,6 +27,7 @@ from __future__ import annotations
 
 import argparse
 import concurrent.futures
+import hashlib
 import json
 import sys
 from pathlib import Path
@@ -60,6 +61,35 @@ _PERSONAL_DOCS = [
 def _existing_corpus_documents(corpus_manifest_path: Path, split: str) -> list[dict[str, Any]]:
     manifest = json.loads(corpus_manifest_path.read_text(encoding="utf-8"))
     return [d for d in manifest["documents"] if d["s7_split"] == split]
+
+
+def _short_unique_doc_label(original_doc_label: str, anchor_index: int) -> str:
+    """run_chain (run_paper_s7_benchmark.py) truncates doc_label to its first
+    32 characters to build chain_id/chain_root (a real, deliberate Windows
+    MAX_PATH guard on the original single-anchor corpus, where that first-32
+    prefix already happened to be unique per document). A naive
+    f"{original_doc_label}__anchor{i}" suffix defeats that: for any
+    original_doc_label longer than ~22 characters the anchor-distinguishing
+    suffix falls entirely outside the 32-char window truncation keeps, so
+    every anchor of the same document collides onto the identical chain_id
+    -- confirmed live, 2026-09-19: 372 expected chains collapsed to 146
+    actual directories on a real remote run, because _load_checkpoint then
+    silently returned anchor 0's already-completed result for every later
+    anchor's supposedly-independent trial, rather than running them.
+
+    Fixed by putting the uniqueness-bearing parts FIRST and keeping the
+    whole label <=32 chars outright, so run_chain's truncation becomes a
+    no-op: a short human-readable prefix (<=12 chars) + an 8-hex-char
+    sha256 of the FULL original label (collision probability negligible at
+    this trial-count scale) + the anchor index. Callers must keep their own
+    mapping from this synthetic label back to the real document identity
+    (see plan_extra_trials's returned "original_doc_label" field) since the
+    synthetic label alone is not human-identifiable."""
+    prefix = original_doc_label[:12]
+    digest = hashlib.sha256(original_doc_label.encode("utf-8")).hexdigest()[:8]
+    label = f"{prefix}_{digest}_a{anchor_index}"
+    assert len(label) <= 32, f"synthetic doc_label still too long: {label!r} ({len(label)} chars)"
+    return label
 
 
 def plan_extra_trials(
@@ -96,7 +126,9 @@ def plan_extra_trials(
                 resolved = _resolve_all(docx_path)
                 for i, item in enumerate(resolved[1:], start=1):  # skip index 0: already run
                     jobs.append({
-                        "doc_label": f"{doc['doc_label']}__anchor{i}",
+                        "doc_label": _short_unique_doc_label(doc["doc_label"], i),
+                        "original_doc_label": doc["doc_label"],
+                        "anchor_index": i,
                         "docx_path": str(docx_path),
                         "anchor_or_plan_override": item,
                         "source": f"existing_corpus:{split}",
@@ -110,7 +142,9 @@ def plan_extra_trials(
             resolved = _resolve_all(docx_path)
             for i, item in enumerate(resolved):  # include index 0: never run before
                 jobs.append({
-                    "doc_label": f"{doc['doc_label']}__anchor{i}",
+                    "doc_label": _short_unique_doc_label(doc["doc_label"], i),
+                    "original_doc_label": doc["doc_label"],
+                    "anchor_index": i,
                     "docx_path": str(docx_path),
                     "anchor_or_plan_override": item,
                     "source": "author_owned_personal",
@@ -124,6 +158,32 @@ def run_extra_trials(
     word_receipts_enabled: bool = True, max_workers: int = 4,
 ) -> list[dict[str, Any]]:
     run_root.mkdir(parents=True, exist_ok=True)
+
+    # Hard pre-flight check: every job's doc_label must be unique, and must
+    # SURVIVE run_chain's own doc_label[:32] truncation unique -- this is
+    # the exact invariant _short_unique_doc_label exists to guarantee.
+    # Checked here too (not just trusted from the caller) so any future
+    # regression fails loudly before spending real trial cost, instead of
+    # silently collapsing chains the way the 2026-09-19 bug did.
+    seen_labels = [job["doc_label"] for job in jobs]
+    seen_truncated = [label[:32] for label in seen_labels]
+    if len(set(seen_truncated)) != len(seen_truncated):
+        dupes = {l for l in seen_truncated if seen_truncated.count(l) > 1}
+        raise AssertionError(
+            f"doc_label collision after run_chain's 32-char truncation: {dupes} -- "
+            f"refusing to run, this would silently duplicate/skip chains."
+        )
+
+    # Persist the synthetic-label -> real-document mapping so results remain
+    # attributable after the fact (chain-result.json itself only stores the
+    # short synthetic doc_label, not the original document identity).
+    mapping = [
+        {"doc_label": job["doc_label"], "original_doc_label": job.get("original_doc_label"),
+         "anchor_index": job.get("anchor_index"), "source": job["source"], "docx_path": job["docx_path"]}
+        for job in jobs
+    ]
+    (run_root / "doc_label_mapping.json").write_text(json.dumps(mapping, indent=2), encoding="utf-8")
+
     results: list[dict[str, Any]] = []
     with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as pool:
         futures = {
