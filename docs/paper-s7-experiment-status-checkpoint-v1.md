@@ -1355,6 +1355,33 @@ correct winner/fallback_from reporting). Full extension suite: 1149 passed, 3 fa
 full-suite run and passed cleanly in isolation (real-backend-dependent tests hitting the same
 host contention this whole change is about, not a regression from it). Replaced the one test
 that asserted the now-intentionally-changed sequential invariant; added a race-condition test
+
+## Update, 2026-09-19: table_structural's 96.2% was correct but not reproducible -- now fixed
+
+While independently re-running this project's own statistics code against the raw trial data
+(paper/main.tex's own review process, not a new experiment), found that this checkpoint's
+2026-09-12 claim -- "table_structural's real, live-verified, independently re-derived number is
+now 25/26 (96.2%)... `paper/main.tex` and this checkpoint have both been updated with this
+number" -- was correct about the paper, but incomplete about the data: the two treatment chains
+recovered that day (`atomic__word_006_section_reorder-table_structural-treatment-k1`,
+`composite_same_type__wordc_009_i-table_structural-treatment-k1`) still carried their forward
+leg's original `not_run` timeout sentinel in both the raw `chain-result.json` files and the
+`slice-manifest.json` aggregations built from them. Only the inverse-leg recovery had actually
+been written back; the forward-leg re-grade this entry narrates was performed and reported, but
+never persisted.
+
+Re-ran `grade_forward_trial_table_structural` directly against the still-present
+`p0-forward/doc.docx` and `doc.docx.bak` for both chains: both independently regrade `pass`,
+confirming this entry's original claim was factually correct. Patched the forward leg's
+`grading` field in both `chain-result.json` files and both `slice-manifest.json` files (backups
+of all four written alongside before patching, `.json.pre-forward-regrade-backup`), each with an
+explicit `manually_recovered_forward_grading: true` marker and provenance note, mirroring the
+existing `manually_recovered_inverse_leg` marker already present on the same two chains. A full,
+unmodified re-run of `graph_scorer`'s real `bootstrap_ci`/`paired_permutation_test` against the
+corrected data now reproduces 96.2%, CI [88.5, 100], n=26 exactly -- matching `paper/main.tex`
+precisely. No number in the paper changed. Disclosed in the paper as Appendix Note d attached to
+Table~\ref{tab:render-gate}'s table-structural row, not as an eleventh cataloged defect, since no
+reported figure was altered.
 and a still-works-with-one-failure regression test. Committed to `repository`
 (`fa73dcf4`), isolated-hunk reviewed first (`git status --short` showed only the 2 intended
 files).
