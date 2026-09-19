@@ -111,11 +111,30 @@ def _milestone_word_receipt(docx_path: Path, out_dir: Path, *, milestone: str) -
     return result
 
 
-def probe_family_applicability(family: str, docx_path: Path) -> dict[str, Any]:
+def probe_family_applicability(
+    family: str, docx_path: Path, *, anchor_or_plan_override: dict[str, Any] | None = None,
+) -> dict[str, Any]:
     """Determine, harness-side, whether this document supports this family at
     all -- an inapplicable family is reported as not_applicable, never forced
     or silently dropped (PAPER-S9 protocol's own corpus-heterogeneity design:
-    not every document need support every template)."""
+    not every document need support every template).
+
+    anchor_or_plan_override (added for the multi-anchor-per-document
+    extension, PAPER-S7 follow-up): when given, skips the single-candidate
+    resolve_body_anchor/resolve_section_reorder_plan call entirely and uses
+    this already-resolved anchor/plan dict directly -- the same shape
+    resolve_multiple_body_anchors/resolve_multiple_section_reorder_plans
+    each element of their returned list already is. None (the default)
+    preserves the exact original single-anchor behavior for every existing
+    caller; this parameter only exists so run_chain can be driven with one
+    of several anchors discovered from the same document without
+    duplicating any of this function's own logic."""
+    if anchor_or_plan_override is not None:
+        if family in ("citation", "caption", "equation", "table_structural"):
+            return {"applicable": True, "anchor": anchor_or_plan_override}
+        if family == "section_reorder":
+            return {"applicable": True, "plan": anchor_or_plan_override}
+        raise ValueError(f"anchor_or_plan_override not supported for family {family!r}")
     if family in ("bibliography",):
         return {"applicable": True}
     if family in ("citation", "caption", "equation", "table_structural"):
@@ -266,7 +285,17 @@ def _write_checkpoint(chain_root: Path, result: dict[str, Any]) -> None:
 def run_chain(
     family: str, doc_label: str, docx_path: Path, arm: str, k_pairs: int, model: str,
     run_root: Path, *, word_receipts_enabled: bool = True,
+    anchor_or_plan_override: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
+    # anchor_or_plan_override: multi-anchor-per-document extension. The
+    # CALLER is responsible for passing a doc_label that is already unique
+    # per anchor (e.g. f"{base_label}__anchor2") when using this -- doc_label
+    # is what compute_s7_statistics.py pairs control against treatment by,
+    # so two different anchors sharing one doc_label would silently
+    # conflate two independent trial points into one paired slot instead of
+    # two. chain_id/chain_root below are derived from doc_label, so a
+    # distinct doc_label already gives each anchor its own checkpoint
+    # directory with no further change needed here.
     # Windows MAX_PATH (260 chars) is a real constraint here: chain_root
     # nests trial directories several levels deep under a long E: run root,
     # and DocOps doc_labels can be 60+ chars on their own -- truncate rather
@@ -287,7 +316,7 @@ def run_chain(
     if checkpoint is not None:
         return checkpoint
 
-    applicability = probe_family_applicability(family, docx_path)
+    applicability = probe_family_applicability(family, docx_path, anchor_or_plan_override=anchor_or_plan_override)
     if not applicability["applicable"]:
         result = {
             "chain_id": chain_id, "doc_label": doc_label, "family": family, "arm": arm,
