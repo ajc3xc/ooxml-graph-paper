@@ -63,7 +63,7 @@ than silently corrected.
 \label{sec:intro}
 
 When agents use large language models to edit real documents -- inserting a citation, reordering
-a section, adding a table -- they typically do so one of two ways. In the first, the agent is
+a section, adding a table -- they typically do so in one of two ways. In the first, the agent is
 given generic file tools (read a file, write a file, run a shell command) and is expected to
 construct or edit the document's own serialization format correctly by direct manipulation, the
 same way a human would edit raw markup in a text editor. In the second, the agent is given a
@@ -133,10 +133,10 @@ is performed entirely outside the agent, never by trusting its own transcript cl
 \item We identify a confound introduced by a write-time structural-verification step shared by
   three of the six families, and resolve it with a controlled confirmatory re-run of the
   identical benchmark on a dedicated, single-tenant host, which closes the gap completely and
-  confirms the confound was a deployment-environment artifact, not a capability limitation
-  (Section~\ref{sec:render-gate}).
+  confirms the confound was a deployment-environment artifact, not an editing-capability
+  limitation (Section~\ref{sec:render-gate}).
 \item We show that a confirmatory benchmark's own numbers are only as trustworthy as its
-  harness: of ten infrastructure, harness, and evaluation-code defects found during this
+  harness: of the ten infrastructure and evaluation-harness defects found during this
   project, several silently altered an already-reported result before independent
   re-verification caught them -- each disclosed with its root cause, fix, and re-verification
   (Section~\ref{sec:defects}).
@@ -148,10 +148,9 @@ is performed entirely outside the agent, never by trusting its own transcript cl
 Benchmarks for tool-augmented and agentic LLM behavior have largely targeted software
 engineering \citep{jimenez2023swebench}, open-ended web navigation \citep{zhou2024webarena}, and
 general-purpose real-world task completion requiring tool use and multi-step reasoning
-\citep{mialon2023gaia}. These benchmarks measure whether an agent \emph{can accomplish} a task
-given some fixed tool surface; they do not hold the underlying task and model fixed while
-varying only the shape of that tool surface (bounded versus generic) as the manipulated
-variable, which is the specific question this paper addresses for one document-editing domain.
+\citep{mialon2023gaia}. None of these benchmarks holds the underlying task and model fixed while
+varying only the shape of the tool surface (bounded versus generic) as the manipulated variable,
+which is the manipulation this paper performs for one document-editing domain.
 
 A separate line of work studies whether constraining an LLM's \emph{output format} changes its
 performance, rather than whether the \emph{tool surface itself} is bounded or generic:
@@ -163,9 +162,9 @@ file either way) and manipulates which tools can produce it. For document-format
 specifically, the closest prior work targets sibling Office Open XML formats rather than Word
 directly: \citet{li2023sheetcopilot} give an LLM a bounded set of atomic spreadsheet actions, and
 \citet{ofengenden2025pptarena} evaluate an agent that routes between programmatic tools and
-deterministic XML operations for PowerPoint editing, verifying each edit before committing it --
-an architecture directly analogous to Meridian Docs' own write-time verification
-(Section~\ref{sec:render-gate}), applied to a different OOXML-based format. We are not aware of
+deterministic XML operations for PowerPoint editing, verifying each edit before committing it.
+This architecture, applied to a different OOXML-based format, is directly analogous to Meridian
+Docs' own write-time verification (Section~\ref{sec:render-gate}). We are not aware of
 prior work posing this paper's specific bounded-versus-generic comparison for Word/OOXML editing
 itself.
 
@@ -179,14 +178,14 @@ and meeting minutes, not hand-authored fixtures), split into a 14-document prima
 12-document validation set, pooled into the flat $n=26$ reported throughout this paper. This
 corpus's own construction is independently preregistered, prior to any trial reported
 here.\footnote{2026-08-27, commit \texttt{1061e0e}, this project's evaluation-harness repository.}
-Neither subset was used to design the tooling's original feature set, but several defects
-(Section~\ref{sec:defects}) were subsequently found by observing this corpus's own trial outcomes
-during the benchmark's execution and fixed directly in the tooling, with every affected chain then
-independently re-run and re-graded rather than assumed fixed. We disclose this iterative
-debug-and-rerun cycle in full (Section~\ref{sec:defects}, Section~\ref{sec:limitations}) rather
-than describe either subset as a blind holdout in the machine-learning sense -- it is not one. A
-separately preregistered (2026-08-31, \texttt{e813cd7}) 48-document follow-up corpus was built
-specifically for the section-reordering family, because the primary corpus yields only 11
+Neither subset was used to design the tooling's original feature set, but several of the ten
+defects cataloged in Section~\ref{sec:defects} were subsequently found by observing this corpus's
+own trial outcomes during the benchmark's execution and fixed directly in the tooling, with every
+affected chain then independently re-run and re-graded rather than assumed fixed. We disclose this
+iterative debug-and-rerun cycle in full (Section~\ref{sec:defects}, Section~\ref{sec:limitations})
+rather than describe either subset as a blind holdout in the machine-learning sense -- it is not
+one. An independently preregistered (2026-08-31, \texttt{e813cd7}) 48-document follow-up corpus
+was built specifically for the section-reordering family, because the primary corpus yields only 11
 documents on which that task is structurally applicable; the follow-up corpus itself yields 44
 applicable documents (of 48), so the combined section-reordering corpus reported in
 Table~\ref{tab:single-edit} and Table~\ref{tab:k4} is $11+44=55$ paired documents, not
@@ -254,7 +253,7 @@ the treatment side:
 \caption{Meridian Docs' overall functional architecture, including the discovery step a real
 deployment needs (this benchmark's harness bypasses it -- Section~\ref{sec:methods}). Editing
 itself is a shared step for all six families; render-gate verification is a sequential,
-conditional step layered on \emph{after} the edit, only for the three structural families,
+conditional step layered on \emph{after} the edit, only for the three render-gated families,
 detailed in Figure~\ref{fig:rendergate-arch} -- not an independent alternative path chosen from
 the start. This split is exactly the property that Section~\ref{sec:render-gate} shows produces
 markedly different reliability behavior.}
@@ -266,7 +265,7 @@ The control arm receives \texttt{Read}, \texttt{Write}, \texttt{Edit}, and \text
 no access to any purpose-built document-editing tool. The treatment arm receives exactly one
 bounded tool pair and \texttt{Read}, with no generic write access at all -- for the
 table-structural family, for example, \texttt{insert\_table} and \texttt{remove\_table}. We
-post-hoc audited every trial's transcript for isolation
+audited every trial's transcript post hoc for isolation
 violations -- a control transcript referencing a purpose-built tool name, or a treatment
 transcript referencing any tool outside its one declared pair, would indicate a harness leak --
 and found no such violation in any reported trial. Neither arm's tool set includes a
@@ -413,7 +412,7 @@ express any uncertainty there. Notes a--b: Appendix~\ref{app:notes}.}
 \end{table}
 
 Table~\ref{tab:single-edit} shows bibliography and citation with no measurable difference
-between arms at any sample size tested: both reached a literal 100\%/100\% parity once two real
+between arms: both reached a literal 100\%/100\% parity once two real
 evaluation-harness defects (described in Section~\ref{sec:defects}) were found and fixed.
 Section reordering's original 11-document result looked directionally favorable to the bounded
 tool but was underpowered
@@ -471,7 +470,7 @@ bottom row.}
 \caption{The mechanism behind Table~\ref{tab:k4}'s result. \emph{C1--C4} label the four repeated
 edit-undo cycles. Treatment re-resolves its target by
 a stable structural id fresh each cycle (dashed: no real dependency between cycles). Control has
-no such anchor, so each cycle's unverified edit builds on whatever the previous cycle actually
+no such anchor, so each cycle's unchecked edit builds on whatever the previous cycle actually
 left in the file (solid: a real dependency an undetected mistake can cross).}
 \label{fig:drift-mechanism}
 \end{figure}
@@ -483,10 +482,10 @@ found by fishing
 across many cuts of the data -- it is the specific comparison the $K$-sweep design was built to
 make, on the same corpus already reported at $K=1$.
 
-The mechanism was traced directly rather than inferred from the p-value alone, in the
-48-document v2 follow-up sub-corpus specifically (the source of the finer per-cycle grading
-breakdown below; the full 55/56 combined corpus is not broken down at this granularity in this
-draft). Of the 12 v2-corpus control chains with at least one failing cycle, 9 failed specifically
+We traced the mechanism directly, rather than inferring it from the p-value alone, using the
+finer per-cycle grading breakdown below; that breakdown covers only the 48-document v2 follow-up
+sub-corpus, since the full 55/56 combined corpus is not broken down at this granularity in this
+draft. Of the 12 v2-corpus control chains with at least one failing cycle, 9 failed specifically
 on exact-order restoration starting from the second cycle onward -- a real, dominant majority
 pattern, not a universal rule -- and 2 failed that same check on the very first cycle (one of
 those two then recovering fully on later cycles); the remaining chain's specific failure
@@ -496,9 +495,7 @@ any chain, in either sub-corpus. This is consistent
 with a specific, plausible cause: the bounded tool re-resolves a fresh structural anchor for the
 target section on every call, while the generic-tool agent must reconstruct or remember ``the
 original layout'' itself across calls, and that reconstruction compounds error with repetition.
-The pattern is dominant but not exceptionless (2 of 12 control failures occur on the very first
-cycle, one of those two then recovering on a later cycle) -- the significance finding rests on
-the dominant trend, not on every case fitting the same story.
+The significance finding rests on that dominant trend, not on every case fitting the same story.
 
 \begin{figure}[h]
 \centering
@@ -813,8 +810,9 @@ This benchmark's central capability finding is that bounded structural tools res
 drift a generic-tool agent shows under repeated edit-undo cycling. This result is more
 informative than any single-edit pass-rate comparison, because it isolates a mechanism -- fresh
 anchor resolution versus accumulated agent-maintained state -- rather than reporting an aggregate
-number. We expect this mechanism to generalize to any repeated-editing workflow, not just section
-reordering specifically, though this benchmark tests only one task family at depth.
+number. Whether this mechanism generalizes beyond section reordering to other repeated-editing
+workflows is untested here; this benchmark exercises only one task family at depth, and we make
+no broader claim.
 
 The write-time-verification-gated families illustrate a different, under-discussed methodological
 hazard: an architectural choice made for a good reason (never persist a corrupt document) can
@@ -823,8 +821,8 @@ deployment-environment artifact. Disentangling the two required real, disclosed 
 (Section~\ref{sec:defects}) and a controlled confirmatory re-run (Section~\ref{sec:methods-rerun}),
 not just a larger sample size or a more careful argument. Rejecting the most obvious alternative
 explanation -- that these tools are simply more expensive to render-verify than table
-insertion's -- was not sufficient on its own; the attribution to shared-host contention and a
-physically unreliable test-host component required a direct test, not an inference. Re-running
+insertion is -- was not sufficient on its own; the attribution to shared-host contention and the
+physically unreliable external drive required a direct test, not an inference. Re-running
 the identical benchmark on a dedicated, single-tenant host closed the gap completely for both
 equation and caption (Table~\ref{tab:render-gate-clean}). The general lesson extends past this
 specific benchmark: a write-time verification step's reported reliability is only as meaningful
@@ -890,10 +888,11 @@ without including their content.
 \section{Conclusion}
 \label{sec:conclusion}
 
-Bounded, structurally-aware editing primitives like Meridian Docs show no advantage over generic
-file tools for a single document edit, on the task families and model tested here, but show a significant,
-mechanistically-traced advantage under repeated editing -- the more realistic condition for an
-agent maintaining a document over time. Three further task families were initially confounded by
+Bounded, structurally-aware editing primitives like Meridian Docs show no statistically
+significant advantage over generic file tools for a single edit, on the task families and model
+tested here (though section reorder trends in that direction at $K=1$; Table~\ref{tab:single-edit}),
+but show a significant, mechanistically-traced advantage under repeated edit-undo cycling -- the
+more realistic condition for an agent maintaining a document over time. Three further task families were initially confounded by
 a write-time verification step whose reliability cost proved substantial and
 environment-dependent; a controlled confirmatory re-run on a dedicated, single-tenant host
 resolved that confound completely, closing all three families to 100\% pass for both arms and
@@ -912,7 +911,8 @@ built from two sources together -- a venue's own published guidelines for its un
 vaguer clauses -- evaluated with the same treatment-versus-control design used throughout this
 paper, not an ablation in place of one. A small, exploratory pilot along these lines already
 exists: four fixtures, \texttt{audit\_equation\_style} versus generic tools, reported in full in
-our internal notes rather than here. Both arms matched on three hand-authored fixtures, but the
+the project's own working notes (\texttt{docs/} in the repository linked above under Artifact
+availability) rather than here. Both arms matched on three hand-authored fixtures, but the
 one real, organically-occurring document tested surfaced a genuine, previously-unknown bug in the
 audit tool itself that only the unbounded control arm caught. Too small a sample to support any
 claim -- but a concrete argument for running this at confirmatory scale, not a reason to treat the
@@ -923,9 +923,9 @@ correct finding, not a benchmark design flaw: both tools write already-resolved 
 already-valid paragraph, a purely mechanical formatting step a capable generic agent can match. A
 genuinely harder version of this task family exists, structurally analogous to section reorder's
 $K=4$ finding: resolving a citation \emph{against a live external system} (\texttt{resolve\_citations}
-against a local Zotero library) rather than formatting metadata already supplied in the prompt --
-a real, mechanistically explainable gap a generic agent would need to independently
-discover the local API's protocol and error semantics to close, not simply write correct APA
+against a local Zotero library) rather than formatting metadata already supplied in the prompt.
+That gap is real and mechanistically explainable: a generic agent would need to independently
+discover the local API's protocol and error semantics to close it, not simply write correct APA
 text. We did not test this; it is future work, not a claim.
 
 A genuinely blind confirmatory re-run -- now that the tooling's own defects (Section~\ref{sec:defects})
