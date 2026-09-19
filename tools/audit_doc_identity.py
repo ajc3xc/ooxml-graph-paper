@@ -113,7 +113,23 @@ def audit(family: str, run_root: Path, manifest_path: Path) -> tuple[dict, list[
 
         src_texts, src_err = first_paras(src_path, n=5)
         trial_texts, trial_err = first_paras(str(trial_docx), n=40)
-        if src_err or trial_err:
+        if trial_err:
+            # The chain's own FINAL artifact can't even be parsed (e.g. a
+            # broken OOXML package missing a referenced media part) --
+            # that's a reset-worthy integrity problem regardless of status,
+            # not a benign "skip and move on" case: a "completed" grade on
+            # an unopenable package can't be trusted either.
+            results["unreadable"] += 1
+            mismatches.append({
+                "doc_label": doc_label,
+                "chain_dir": chain_dir.name,
+                "expected_source": orig_label,
+                "expected_first_line": src_texts[0][:80] if src_texts else None,
+                "trial_first_lines": None,
+                "reason": f"trial doc unreadable: {trial_err}",
+            })
+            continue
+        if src_err:
             results["unreadable"] += 1
             continue
         if not src_texts:
