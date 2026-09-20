@@ -397,6 +397,64 @@ def _anchor_node_accuracy(gold_anchors: list[dict], cand_anchors: list[dict],
 
 
 # ---------------------------------------------------------------------------
+# bibliography / citation node scoring (PAPER-S23 respec_cascade)
+# ---------------------------------------------------------------------------
+
+def _bibliography_entry_prf1(gold_entries: list[dict], cand_entries: list[dict],
+                              candidate_has_bibliography_detection: bool) -> dict[str, Any]:
+    """Exact-multiset PRF1 on a bibliography entry's citation KEY -- pattern-
+    matched to `_anchor_node_accuracy` rather than `_caption_node_accuracy`,
+    since a citation key is a stable minted identifier (like a bookmark
+    name), not free text that benefits from LCS's fuzzy/reordering
+    tolerance. `not_applicable: no_candidate_adapter` (never a fabricated 0,
+    per this module's docstring) when the candidate's own extraction API does
+    not expose bibliography/reference-list entry data at all."""
+    if not candidate_has_bibliography_detection:
+        return {"precision": None, "recall": None, "f1": None, "matched": 0,
+                "gold_total": len(gold_entries), "cand_total": len(cand_entries),
+                "status": NOT_APPLICABLE_NO_ADAPTER,
+                "reason": "candidate system's extraction API does not expose bibliography/"
+                          "reference-list entry data"}
+    from collections import Counter
+
+    gold_keys = [e.get("key") for e in gold_entries if e.get("key")]
+    cand_keys = [e.get("key") for e in cand_entries if e.get("key")]
+    gold_counter, cand_counter = Counter(gold_keys), Counter(cand_keys)
+    matched = sum((gold_counter & cand_counter).values())
+    result = _prf1(matched, len(gold_keys), len(cand_keys))
+    result["status"] = "scored"
+    return result
+
+
+def _citation_marker_prf1(gold_citations: list[dict], cand_citations: list[dict],
+                           candidate_has_citation_detection: bool) -> dict[str, Any]:
+    """Exact-multiset PRF1 on a citation marker's KEY -- the bibliography
+    entry it cites, a stable identifier, not the citation's rendered/
+    formatted display text (which varies by style and is not what this
+    benchmark's grading cares about: `docx_trial_evaluator.py`'s citation
+    graders check the field code/key, not prose, per this project's own
+    "never trust the system under test's own self-report" rule). Same
+    `_anchor_node_accuracy`-style exact-multiset pattern and the same
+    `not_applicable: no_candidate_adapter` convention as
+    `_bibliography_entry_prf1` above."""
+    if not candidate_has_citation_detection:
+        return {"precision": None, "recall": None, "f1": None, "matched": 0,
+                "gold_total": len(gold_citations), "cand_total": len(cand_citations),
+                "status": NOT_APPLICABLE_NO_ADAPTER,
+                "reason": "candidate system's extraction API does not expose citation "
+                          "marker/field-code data needed to identify which entry a citation cites"}
+    from collections import Counter
+
+    gold_keys = [c.get("key") for c in gold_citations if c.get("key")]
+    cand_keys = [c.get("key") for c in cand_citations if c.get("key")]
+    gold_counter, cand_counter = Counter(gold_keys), Counter(cand_keys)
+    matched = sum((gold_counter & cand_counter).values())
+    result = _prf1(matched, len(gold_keys), len(cand_keys))
+    result["status"] = "scored"
+    return result
+
+
+# ---------------------------------------------------------------------------
 # Word round-trip editability / render-equivalence (PAPER-S5)
 # ---------------------------------------------------------------------------
 
@@ -478,6 +536,121 @@ def score_round_trip_editability(pre_items: dict, post_items: dict, marker_text:
         "equation_count_stable": equation_count_stable,
         "equation_semantic_labels_stable": equation_semantic_stable,
         "equation_label_mismatches": equation_label_mismatches,
+        "overall_status": overall_status,
+    }
+
+
+# ---------------------------------------------------------------------------
+# Keep-survival differ (PAPER-S23 respec_cascade, Checkpoint B)
+# ---------------------------------------------------------------------------
+
+def score_keep_survival(checkpoint_a_items: dict, checkpoint_b_items: dict,
+                         kept_element_markers: dict[str, str],
+                         excluded_paragraph_texts: list[str] | None = None) -> dict[str, Any]:
+    """Generalizes `score_round_trip_editability`'s before/after diff pattern
+    from one Word-COM round trip's single marker to two ARBITRARY named
+    checkpoints (not specifically a Word-COM round trip) and MULTIPLE named
+    elements at once -- this is the respec_cascade design's Checkpoint B
+    "selective revert" test (`docs/paper-s23-respec-cascade-protocol-v0.md`
+    section 4): can an arm touch exactly the elements named for reversal/
+    redirection while leaving every other, untouched sibling from the same
+    chain completely alone.
+
+    `kept_element_markers` maps an element's name to its exact, expected
+    (whitespace-insensitive, via `_normalize` -- same convention
+    `score_round_trip_editability` uses for its own marker check) text, e.g.
+    a bibliography entry's rendered text or a caption's text. For each
+    element this counts how many paragraphs in each checkpoint normalize to
+    exactly that text:
+
+    - zero occurrences in `checkpoint_b_items` -> the element was lost
+      somewhere between the two checkpoints (`kept_element_missing`).
+    - more than one occurrence in `checkpoint_b_items` -> the element was
+      unintentionally duplicated (`kept_element_duplicated`).
+    - exactly one occurrence in `checkpoint_b_items` but not exactly one in
+      `checkpoint_a_items` -> the element's own checkpoint-A form was not
+      stably present under this exact text (already missing, duplicated, or
+      textually different there), so checkpoint-B's apparent survival cannot
+      be credited as "unchanged" (`kept_element_changed`). This is a
+      deliberately conservative exact-text-multiset check, the same kind
+      `_anchor_node_accuracy` uses for bookmark names, not a positional
+      diff -- it can only say a kept element's exact expected text failed to
+      appear exactly once on both sides, not pinpoint how it changed.
+
+    `excluded_paragraph_texts` names paragraphs BOTH checkpoints are allowed
+    to differ on for a reason other than a kept element -- e.g. the citation
+    anchor paragraph's own two different forms (with the marker at
+    checkpoint A, restored without it at checkpoint B) -- so a caller-named,
+    intentional respec-phase CONTENT change is never silently absorbed into
+    "unintended drift" and never silently ignored either.
+
+    Every paragraph in `checkpoint_b_items` not attributable to a kept
+    element or an excluded paragraph is compared against its
+    `checkpoint_a_items` counterpart via exact-multiset (`Counter`)
+    matching, NOT `_lcs_correspondence` -- deliberately, unlike
+    `score_round_trip_editability`'s own remainder check. `_lcs_correspondence`'s
+    own docstring says it "by construction NEVER reveals reordering... do
+    not use this for a reading-order metric," but this function's whole
+    purpose (protocol section 4's Checkpoint B, "the design's central,
+    novel test") is to grade a checkpoint pair where a REAL, INTENTIONAL
+    reorder happens in between -- step 2.3 relocates an entire section
+    (heading + every body paragraph) to a new position, changing none of
+    those paragraphs' text, only their position. A Counter-based multiset
+    diff is naturally blind to pure reordering (same texts, same counts,
+    different order -> zero apparent drift) without needing the caller to
+    enumerate every one of a moved section's body paragraphs as excluded --
+    only a genuine CONTENT change (added/removed/edited text, like the
+    citation marker) shows up as drift, which is exactly what this check
+    should catch.
+    """
+    from collections import Counter
+
+    excluded_norms = {_normalize(t) for t in (excluded_paragraph_texts or [])}
+
+    a_para_texts = [p["text"] for p in checkpoint_a_items["paragraphs"]]
+    b_para_texts = [p["text"] for p in checkpoint_b_items["paragraphs"]]
+    a_norms = [_normalize(t) for t in a_para_texts]
+    b_norms = [_normalize(t) for t in b_para_texts]
+
+    element_results: dict[str, dict[str, Any]] = {}
+    kept_norms: set[str] = set()
+    for name, marker_text in kept_element_markers.items():
+        marker_norm = _normalize(marker_text)
+        kept_norms.add(marker_norm)
+        count_a = sum(1 for n in a_norms if n == marker_norm)
+        count_b = sum(1 for n in b_norms if n == marker_norm)
+        element_results[name] = {
+            "present": count_b >= 1,
+            "unchanged": count_a == 1 and count_b == 1,
+            "occurrences": count_b,
+        }
+
+    a_remainder = [text for text, n in zip(a_para_texts, a_norms) if n not in kept_norms and n not in excluded_norms]
+    b_remainder = [text for text, n in zip(b_para_texts, b_norms) if n not in kept_norms and n not in excluded_norms]
+    a_remainder_ctr = Counter(_normalize(t) for t in a_remainder)
+    b_remainder_ctr = Counter(_normalize(t) for t in b_remainder)
+    matched = sum((a_remainder_ctr & b_remainder_ctr).values())
+    unintended_drift_prf1 = _prf1(matched, len(a_remainder), len(b_remainder))
+
+    overall_status = "clean_keep_survival"
+    for name in kept_element_markers:
+        result = element_results[name]
+        if not result["present"]:
+            overall_status = f"kept_element_missing:{name}"
+            break
+        if result["occurrences"] > 1:
+            overall_status = f"kept_element_duplicated:{name}"
+            break
+        if not result["unchanged"]:
+            overall_status = f"kept_element_changed:{name}"
+            break
+    else:
+        if unintended_drift_prf1["f1"] != 1.0:
+            overall_status = "unintended_paragraph_drift_detected"
+
+    return {
+        **element_results,
+        "unintended_drift_prf1": unintended_drift_prf1,
         "overall_status": overall_status,
     }
 

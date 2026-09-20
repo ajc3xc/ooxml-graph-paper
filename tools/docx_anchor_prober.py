@@ -19,6 +19,22 @@ from typing import Any
 
 _HEADING_STYLE_RE = re.compile(r"heading\s*\d|title|subtitle", re.IGNORECASE)
 
+# Percentile fractions resolve_multiple_body_anchors walks, in priority order.
+# The first 9 are the original, already-used-in-published-results set (every
+# historical caller passed max_anchors<=9, most <=4) -- left untouched, same
+# order, so no existing call site's output changes. The remaining 9 are pure
+# additions (never returned to a caller requesting max_anchors<=9) needed by
+# PAPER-S23's resolve_respec_schedule, which must resolve THREE disjoint
+# per-family anchor pools (citation/equation/caption) from one document in one
+# pass -- 3 families x up to 4 anchor-sets = up to 12 distinct positions,
+# which the original 9-fraction list could never supply regardless of how
+# large the candidate pool was (a resolver capacity ceiling, not a
+# per-document content limit).
+_BODY_ANCHOR_FRACTIONS = [
+    0.8, 0.2, 0.4, 0.6, 0.5, 0.1, 0.3, 0.7, 0.9,
+    0.15, 0.25, 0.35, 0.45, 0.55, 0.65, 0.75, 0.85, 0.95,
+]
+
 
 def _import_docs_intel():
     from meridian_docs import docs_intel
@@ -60,7 +76,9 @@ def resolve_body_anchor(docx_path: Path) -> dict[str, Any]:
     }
 
 
-def resolve_multiple_body_anchors(docx_path: Path, max_anchors: int = 4) -> list[dict[str, Any]]:
+def resolve_multiple_body_anchors(
+    docx_path: Path, max_anchors: int = 4, exclude_para_ids: set[str] | None = None,
+) -> list[dict[str, Any]]:
     """Generalizes resolve_body_anchor to return up to max_anchors distinct
     anchors from the same eligible-candidate pool that function already
     computes, instead of discarding every candidate but one. Reuses the
@@ -80,9 +98,23 @@ def resolve_multiple_body_anchors(docx_path: Path, max_anchors: int = 4) -> list
     callers adding EXTRA anchors on top of an already-run single-anchor
     corpus should skip index 0 and use only anchors[1:], not re-run it.
 
+    exclude_para_ids (PAPER-S23 respec_cascade addition): para_ids to treat
+    as already claimed by a SIBLING family's anchor pool within the same
+    document, so multiple resolve_multiple_body_anchors calls against one
+    document can be composed into disjoint per-family anchor sets (see
+    resolve_respec_schedule, which needs three non-overlapping pools --
+    citation/equation/caption -- from one document, since all three land an
+    edit in the same chain and must not target the same paragraph). Walks
+    the FULL _BODY_ANCHOR_FRACTIONS list (not just the first max_anchors of
+    it) so a heavily-excluded call still has enough fallback positions to
+    fill max_anchors results -- for any existing call with no exclusions
+    this is behavior-identical to the old truncated-slice walk, since the
+    loop already stops as soon as max_anchors results are found.
+
     Deduplicates by para_id (two percentile targets can land on the same
-    candidate in a short document); returns fewer than max_anchors if the
-    candidate pool is too small to support that many distinct positions."""
+    candidate in a short document, or on an excluded one); returns fewer
+    than max_anchors if the candidate pool (minus exclusions) is too small
+    to support that many distinct positions."""
     docs_intel = _import_docs_intel()
     paragraphs = docs_intel.parse_docx(str(docx_path))
     candidates = [
@@ -94,8 +126,8 @@ def resolve_multiple_body_anchors(docx_path: Path, max_anchors: int = 4) -> list
     if not candidates:
         return []
 
-    fractions = [0.8, 0.2, 0.4, 0.6, 0.5, 0.1, 0.3, 0.7, 0.9][:max(max_anchors, 4)]
-    seen_para_ids: set[str] = set()
+    fractions = _BODY_ANCHOR_FRACTIONS
+    seen_para_ids: set[str] = set(exclude_para_ids or ())
     results: list[dict[str, Any]] = []
     for frac in fractions:
         if len(results) >= max_anchors:
@@ -421,3 +453,228 @@ def resolve_multiple_section_reorder_plans(docx_path: Path, max_plans: int = 4) 
         exclude.add(plan["original_preceding_heading_para_id"])
         exclude.add(plan["destination_heading_para_id"])
     return results
+
+
+def resolve_section_redirect_plan(
+    docx_path: Path,
+    section_id: str,
+    original_preceding_heading_para_id: str,
+    destination_heading_para_id: str,
+) -> dict[str, Any]:
+    """PAPER-S23 respec_cascade only: resolve a SECOND, distinct destination
+    `D2` for a section whose forward move (`O` -> `D1`) was already resolved
+    by resolve_section_reorder_plan/resolve_multiple_section_reorder_plans,
+    for the mid-chain "redirect, don't undo" respec step (protocol section
+    2.1/2.3: move the section from `D1` to `D2`, never back to `O`).
+
+    `chosen` (the section itself, identified by section_id) and `preceding`
+    (identified by original_preceding_heading_para_id) are taken as FIXED
+    inputs here, never re-derived from a fresh _try_section_plan_at scan,
+    because D2 must be relative to the SAME section D1 was resolved for --
+    re-choosing "the middle-ish heading" independently could land on a
+    different section entirely, silently decoupling the redirect from the
+    section the chain actually moved. This is also why this function does
+    NOT simply call _try_section_plan_at(headings, ..., exclude_para_ids=
+    {section_id, ...}): excluding section_id from consideration would make
+    it ineligible to be re-selected as `chosen` (wrong -- it must stay
+    `chosen`), and separately, passing original_preceding_heading_para_id as
+    excluded while still expecting it to validate as `preceding` would
+    always fail, since _try_section_plan_at's own preceding-validation
+    checks `preceding["para_id"] in exclude_para_ids` and returns None when
+    true. Both anchors are simply reused verbatim instead.
+
+    Only the `following`/redirect side is freshly resolved -- scanning
+    forward from the section's own position in the outline for the nearest
+    same-level sibling heading that is not `section_id`,
+    original_preceding_heading_para_id, or destination_heading_para_id (D1
+    itself, so the "redirect" is genuinely a second destination, not an
+    accidental re-pick of the first one). This mirrors the same
+    same-level-sibling safety rule resolve_section_reorder_plan and
+    _try_section_plan_at already establish for the `following` side, since a
+    child (deeper-level) heading immediately after `chosen` is not a valid
+    move destination (see resolve_section_reorder_plan's docstring for the
+    full incoherent-destination story this rule was fixed for).
+
+    Returns {"found": False, "reason": "no_redirect_target"} (the exact
+    status string the protocol's anchor-set usability reporting expects,
+    never a silently fabricated destination) when section_id can't be found
+    in the current outline, or no eligible same-level sibling heading exists
+    after it once section_id/original_preceding_heading_para_id/
+    destination_heading_para_id are excluded."""
+    docs_intel = _import_docs_intel()
+    outline = docs_intel.document_outline(str(docx_path))
+    headings = outline.get("headings") or []
+    section_index = next((i for i, h in enumerate(headings) if h["para_id"] == section_id), None)
+    if section_index is None:
+        return {"found": False, "reason": "no_redirect_target"}
+
+    chosen = headings[section_index]
+    chosen_level = chosen.get("level")
+    exclude = {section_id, original_preceding_heading_para_id, destination_heading_para_id}
+
+    redirect = None
+    for candidate in headings[section_index + 1:]:
+        if candidate["para_id"] in exclude:
+            continue
+        candidate_level = candidate.get("level")
+        if chosen_level is None or candidate_level is None or candidate_level <= chosen_level:
+            redirect = candidate
+            break
+    if redirect is None:
+        return {"found": False, "reason": "no_redirect_target"}
+
+    return {
+        "found": True,
+        "section_id": section_id,
+        "section_heading_text": chosen.get("text"),
+        "redirect_destination_heading_para_id": redirect["para_id"],
+        "redirect_destination_heading_text": redirect.get("text"),
+    }
+
+
+def resolve_respec_schedule(docx_path: Path, max_anchor_sets: int = 4) -> list[dict[str, Any]]:
+    """PAPER-S23 respec_cascade only: resolve up to max_anchor_sets full
+    respec_cascade anchor-sets for one document in a single pass, bundling
+    everything one chain at anchor-set index i needs -- the i-th citation,
+    equation, and caption body anchor, the i-th section-reorder plan
+    (O -> D1), and that same plan's own D2 redirect (D1 -> D2) -- so a
+    caller doesn't have to re-derive the index-i correspondence across five
+    separate resolver calls itself. Bibliography needs no per-anchor-set
+    entry: protocol section 2.1 is explicit that it is document-global (same
+    end-of-reference-list insertion point for every anchor-set), exactly as
+    the existing bibliography family already treats it in
+    docx_trial_broker.generate_bibliography_pair.
+
+    Each of citation/equation/caption is resolved with its own call to
+    resolve_multiple_body_anchors(docx_path, max_anchors=max_anchor_sets,
+    exclude_para_ids=...), chained so each later family excludes every
+    para_id already claimed by an earlier one in this same schedule --
+    NOT three identical calls. resolve_multiple_body_anchors is a pure
+    function of (docx_path, max_anchors) with no concept of "family": three
+    unexcluded calls with the same arguments return the SAME list three
+    times, which would point citation/equation/caption at the identical
+    paragraph within one anchor-set. That is wrong here specifically
+    because, unlike tools/run_multi_anchor_extension.py::plan_extra_trials
+    (which resolves ONE family at a time, in separate script invocations,
+    each into its own independent extension run -- collisions across
+    families are never possible there since no single document run ever
+    edits two families' anchors together), a respec_cascade chain inserts
+    citation, equation, AND caption into the SAME live document within one
+    continuous chain, so two families landing on the same paragraph would
+    corrupt each other's edit and break the later family's text-based
+    (control-arm) anchor resolution the moment the earlier family's edit
+    changes that paragraph's text.
+
+    An anchor-set index i is only usable if ALL of the following resolved:
+    citation/equation/caption each returned a result at index i (any of the
+    three resolve_multiple_body_anchors calls may return fewer than
+    max_anchor_sets results if the document's candidate pool is too small --
+    the smallest of the three lengths, and the section-reorder plan count,
+    bounds how many indices are even attempted), the section-reorder plan at
+    index i exists, and that plan's own D2 redirect resolved (found=True).
+    Every attempted index up to that smallest available count is recorded
+    in the return value with an explicit reason when unusable -- never
+    silently dropped -- per this project's standing N-disclosure rule
+    (see docs/paper-s23-respec-cascade-protocol-v0.md section 6)."""
+    citation_anchors = resolve_multiple_body_anchors(docx_path, max_anchors=max_anchor_sets)
+    claimed = {a["anchor_para_id"] for a in citation_anchors if a.get("found")}
+    equation_anchors = resolve_multiple_body_anchors(
+        docx_path, max_anchors=max_anchor_sets, exclude_para_ids=claimed,
+    )
+    claimed = claimed | {a["anchor_para_id"] for a in equation_anchors if a.get("found")}
+    caption_anchors = resolve_multiple_body_anchors(
+        docx_path, max_anchors=max_anchor_sets, exclude_para_ids=claimed,
+    )
+    section_plans = resolve_multiple_section_reorder_plans(docx_path, max_plans=max_anchor_sets)
+
+    attempt_count = min(
+        len(citation_anchors),
+        len(equation_anchors),
+        len(caption_anchors),
+        len(section_plans),
+    )
+
+    schedule: list[dict[str, Any]] = []
+    for i in range(attempt_count):
+        citation_anchor = citation_anchors[i]
+        equation_anchor = equation_anchors[i]
+        caption_anchor = caption_anchors[i]
+        plan = section_plans[i]
+
+        if not citation_anchor.get("found"):
+            schedule.append({
+                "anchor_set_index": i,
+                "usable": False,
+                "reason": "missing_citation_anchor",
+                "citation_anchor": citation_anchor,
+                "equation_anchor": equation_anchor,
+                "caption_anchor": caption_anchor,
+                "section_reorder_plan": plan,
+            })
+            continue
+        if not equation_anchor.get("found"):
+            schedule.append({
+                "anchor_set_index": i,
+                "usable": False,
+                "reason": "missing_equation_anchor",
+                "citation_anchor": citation_anchor,
+                "equation_anchor": equation_anchor,
+                "caption_anchor": caption_anchor,
+                "section_reorder_plan": plan,
+            })
+            continue
+        if not caption_anchor.get("found"):
+            schedule.append({
+                "anchor_set_index": i,
+                "usable": False,
+                "reason": "missing_caption_anchor",
+                "citation_anchor": citation_anchor,
+                "equation_anchor": equation_anchor,
+                "caption_anchor": caption_anchor,
+                "section_reorder_plan": plan,
+            })
+            continue
+        if not plan or not plan.get("found"):
+            schedule.append({
+                "anchor_set_index": i,
+                "usable": False,
+                "reason": "missing_section_reorder_plan",
+                "citation_anchor": citation_anchor,
+                "equation_anchor": equation_anchor,
+                "caption_anchor": caption_anchor,
+                "section_reorder_plan": plan,
+            })
+            continue
+
+        redirect = resolve_section_redirect_plan(
+            docx_path,
+            plan["section_id"],
+            plan["original_preceding_heading_para_id"],
+            plan["destination_heading_para_id"],
+        )
+        plan_with_redirect = dict(plan)
+        plan_with_redirect["redirect"] = redirect
+
+        if not redirect.get("found"):
+            schedule.append({
+                "anchor_set_index": i,
+                "usable": False,
+                "reason": redirect.get("reason", "no_redirect_target"),
+                "citation_anchor": citation_anchor,
+                "equation_anchor": equation_anchor,
+                "caption_anchor": caption_anchor,
+                "section_reorder_plan": plan_with_redirect,
+            })
+            continue
+
+        schedule.append({
+            "anchor_set_index": i,
+            "usable": True,
+            "reason": None,
+            "citation_anchor": citation_anchor,
+            "equation_anchor": equation_anchor,
+            "caption_anchor": caption_anchor,
+            "section_reorder_plan": plan_with_redirect,
+        })
+
+    return schedule

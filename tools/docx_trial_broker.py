@@ -445,6 +445,194 @@ def generate_section_reorder_pair(
 
 
 # ---------------------------------------------------------------------------
+# respec_cascade (PAPER-S23) extensions to section_reorder: a genuine one-way
+# mid-chain redirect (protocol section 2.3, Phase 2 step 2.3) and a second,
+# twice-more-moved there-and-back exposure pair (Phase 3 step 3.3).
+#
+# move_section semantics verified directly (2026-09-20) against the live tool
+# implementation's own docstring, `repository/extensions/meridian-docs/
+# meridian_docs/server.py::move_section` (marker `6ff24136`), not inferred or
+# guessed: "Existing paraIds/bookmarks are preserved (not regenerated)", so
+# `section_id` keyed off the section's OWN heading paragraph stays valid and
+# addresses the same logical section across an arbitrary number of prior
+# moves -- there is no notion of a "stale" section_id the way citation's
+# anchor_para_id goes stale after a text-changing edit (see this module's
+# citation-family docstring above). Each call only needs section_id (the
+# section being moved, wherever it currently sits) and a
+# destination_anchor_para_id/destination_position pair (where to splice it
+# next); the tool does not care whether the section has moved 0 times or N
+# times before this call, or whether destination_anchor_para_id was the
+# ORIGINAL position, a prior destination, or a brand-new one. This is exactly
+# why a redirect (D1 -> D2, never seen as a destination before) and a second
+# exposure pair (D2 -> D1 -> D2, reusing D1 as a destination a second time)
+# both reduce to the identical one-call-per-move shape
+# generate_section_reorder_pair already uses -- confirmed, not assumed.
+# ---------------------------------------------------------------------------
+
+def generate_section_redirect_trial(
+    doc_label: str, input_docx: Path, marker: str, section_id: str, section_heading_text: str,
+    d1_heading_para_id: str, d1_heading_text: str, d2_heading_para_id: str, d2_heading_text: str,
+) -> TrialSpec:
+    """PAPER-S23 Phase 2 step 2.3: the section is currently at D1 (Phase 1's
+    own forward move, step 1.3) and must move ONWARD to D2 -- a genuine
+    redirect, not an undo. This is deliberately a single TrialSpec, not a
+    forward/inverse pair: there is no companion "move it back" step in this
+    phase (D1 and O are never revisited here; O is not even threaded through
+    this function's signature, since nothing in this step needs it).
+
+    ``direction="forward"`` (not a new third literal) is the considered
+    choice here, not a default left unexamined: mechanically this call is
+    indistinguishable from any other forward move_section spec
+    (generate_section_reorder_pair's own forward half is the same one-call
+    shape, just pointed at a different destination) -- move_section itself
+    has no notion of "redirect" vs. "fresh move," per this module's own
+    verification note above. Inventing a third direction value would leave
+    every existing direction-keyed dispatch in this codebase (anything
+    written against the documented "forward" | "inverse" contract on
+    TrialSpec.direction) silently unable to handle it, for no actual
+    semantic gain: this step's grading is Checkpoint B's own new
+    `grade_phase2_respec`/`score_keep_survival` logic (protocol section 4),
+    not a reuse of grade_forward_trial_reorder/grade_inverse_trial_reorder's
+    before-vs-pristine-original comparison, which would be the WRONG check
+    here regardless of what direction string is attached -- the phase-aware
+    orchestrator dispatches on which step of the schedule this is, not on
+    this field alone.
+    """
+    trial_base = f"{doc_label}-section_reorder-{marker}"
+
+    return TrialSpec(
+        trial_id=f"{trial_base}-redirect",
+        doc_label=doc_label, arm="", direction="forward", family="section_reorder",
+        input_docx=input_docx,
+        marker_text=section_heading_text,
+        treatment_tool="move_section",
+        treatment_args={
+            "section_id": section_id,
+            "destination_anchor_para_id": d2_heading_para_id,
+            "destination_position": "after",
+        },
+        prompt=(
+            f"You are editing a Word document at the path given to you. "
+            f"It has a section heading with the exact text: "
+            f"{section_heading_text!r}\n\n"
+            f"That section was already moved once earlier in this session, "
+            f"and currently appears immediately after the section whose "
+            f"heading is the exact text: {d1_heading_text!r}\n\n"
+            f"Move that ENTIRE section (its heading and all of its body "
+            f"content, up to but not including the next heading) again, so "
+            f"it now appears immediately AFTER a DIFFERENT section, the one "
+            f"whose heading is the exact text: {d2_heading_text!r}\n\n"
+            f"This is a further move, not an undo -- do not move the "
+            f"section back to wherever it was before its earlier move. Do "
+            f"not change the text of any paragraph, and do not change the "
+            f"relative order of any OTHER section. Save the document in "
+            f"place at the same path. When finished, reply with a single "
+            f"line: DONE."
+        ),
+    )
+
+
+def generate_second_exposure_reorder_pair(
+    doc_label: str, input_docx: Path, marker: str, section_id: str, section_heading_text: str,
+    d2_heading_para_id: str, d2_heading_text: str, d1_heading_para_id: str, d1_heading_text: str,
+) -> tuple[TrialSpec, TrialSpec]:
+    """PAPER-S23 Phase 3 step 3.3: the section currently sits at D2 (Phase
+    2's own redirect, step 2.3) and must move to D1 and back to D2 -- two
+    more move_section calls, testing whether the section's identity, now
+    twice-moved and mid-redirect, still resolves for a third and fourth
+    move.
+
+    Built directly (by symmetry with generate_section_reorder_pair) rather
+    than by calling generate_section_reorder_pair(original=D2,
+    destination=D1) and reusing its output, for two concrete reasons, not
+    just style preference:
+
+    1. Trial-id collision. generate_section_reorder_pair derives both
+       trial_ids from f"{doc_label}-section_reorder-{marker}", the SAME
+       trial_base this respec_cascade chain's Phase-1 pair (step 1.3) and
+       generate_section_redirect_trial (step 2.3) also derive theirs from,
+       given the one ``marker`` the orchestrator mints per chain. Delegating
+       here would either collide with those trial_ids outright or require
+       the caller to mint and thread through a second, second-exposure-only
+       marker just to avoid it -- simpler and less error-prone to give this
+       pair its own explicit "-second-exposure" trial_base directly.
+    2. Prompt truthfulness. generate_section_reorder_pair's own inverse
+       prompt says moving back "restores the document's section order to
+       exactly what it was before the earlier move" -- true for a fresh
+       original-to-destination pair, but FALSE here: this pair's own
+       "before" state is D2 (itself already a mid-chain redirect target,
+       Phase 2's output), never the document's pristine original O. Reusing
+       that wording verbatim would misinform the agent about what "restore"
+       means at this point in the chain. The prompts below say so
+       explicitly instead of implying a return to the document's true
+       original state.
+
+    move_section's own semantics (see this module's verification note
+    above) make the underlying mechanism identical either way -- this is a
+    call-site/prompt-wording choice, not a workaround for any move_section
+    limitation.
+    """
+    trial_base = f"{doc_label}-section_reorder-{marker}-second-exposure"
+
+    forward = TrialSpec(
+        trial_id=f"{trial_base}-forward",
+        doc_label=doc_label, arm="", direction="forward", family="section_reorder",
+        input_docx=input_docx,
+        marker_text=section_heading_text,
+        treatment_tool="move_section",
+        treatment_args={
+            "section_id": section_id,
+            "destination_anchor_para_id": d1_heading_para_id,
+            "destination_position": "after",
+        },
+        prompt=(
+            f"You are editing a Word document at the path given to you. "
+            f"It has a section heading with the exact text: "
+            f"{section_heading_text!r}\n\n"
+            f"That section has already been moved more than once earlier "
+            f"in this session, and currently appears immediately after the "
+            f"section whose heading is the exact text: {d2_heading_text!r}\n\n"
+            f"Move that ENTIRE section (its heading and all of its body "
+            f"content, up to but not including the next heading) so it "
+            f"appears immediately AFTER the section whose heading is the "
+            f"exact text: {d1_heading_text!r}\n\n"
+            f"Do not change the text of any paragraph, and do not change "
+            f"the relative order of any OTHER section. Save the document "
+            f"in place at the same path. When finished, reply with a "
+            f"single line: DONE."
+        ),
+    )
+    inverse = TrialSpec(
+        trial_id=f"{trial_base}-inverse",
+        doc_label=doc_label, arm="", direction="inverse", family="section_reorder",
+        input_docx=input_docx,
+        marker_text=section_heading_text,
+        treatment_tool="move_section",
+        treatment_args={
+            "section_id": section_id,
+            "destination_anchor_para_id": d2_heading_para_id,
+            "destination_position": "after",
+        },
+        prompt=(
+            f"You are editing a Word document at the path given to you. "
+            f"It has a section heading with the exact text: "
+            f"{section_heading_text!r}\n\n"
+            f"That section was just moved. Move it back so it appears "
+            f"immediately AFTER the section whose heading is the exact "
+            f"text: {d2_heading_text!r}\n\n"
+            f"This restores the document's section order to exactly what "
+            f"it was immediately before this pair's own forward move above "
+            f"-- NOT necessarily the document's very original state, since "
+            f"this section has already been moved more than once earlier "
+            f"in this session. Do not change the text of any paragraph. "
+            f"Save the document in place at the same path. When finished, "
+            f"reply with a single line: DONE."
+        ),
+    )
+    return forward, inverse
+
+
+# ---------------------------------------------------------------------------
 # equation (new display-mode paragraph; inverse args resolved post-forward by
 # the runner via docx_anchor_prober.resolve_equation_para_id_by_marker, NOT
 # resolve_para_id_by_marker_text -- see this module's docstring above)
