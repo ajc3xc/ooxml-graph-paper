@@ -366,7 +366,7 @@ fraction of chains passing every one of the four cycles) across four consecutive
 cycles on the same document, rather than a single cycle, specifically to test whether either
 arm's correctness compounds or decays under repetition.
 
-\subsection{Multi-anchor extension (supplementary, not yet incorporated into Section~\ref{sec:results})}
+\subsection{Multi-anchor extension}
 \label{sec:methods-multianchor}
 \begin{sloppypar}
 A supplementary extension generalizes the single fixed-percentile anchor above to up to three
@@ -399,10 +399,13 @@ This is consistent with section reordering's extra anchors moving a different he
 the \emph{same} underlying document and content, a structurally different, more document-bound
 kind of additional sample than the body-anchor families' spatially distinct insertion points --
 and the asymmetry between arms suggests this may be a property of the treatment condition, not
-merely of the family. This extension's own tiered outcomes, and the work of merging them into the
-confirmatory corpus's reported $N$ under this same disclosure discipline, are not yet part of any
-number in Section~\ref{sec:results}; we name this as ongoing, not omit it silently
-(Section~\ref{sec:limitations}).
+merely of the family. For equation and caption, this extension's tiered outcomes are merged into
+the confirmatory corpus's own reported numbers in Section~\ref{sec:results-multianchor}, once the
+exact canonical original-corpus source was identified and independently verified rather than
+assumed. Section reordering's own combined-corpus number (Section~\ref{sec:single-edit}) has a
+more complex two-corpus provenance not yet resolved with the same rigor, and table-structural has
+no multi-anchor extension run at all -- both named as still-open rather than silently merged on a
+guess (Section~\ref{sec:limitations}).
 \end{sloppypar}
 
 \subsection{Confirmatory re-run environment}
@@ -751,6 +754,64 @@ moment, which is a gap in \emph{how often the arm successfully persists a change
 prediction: removing host contention should close the gap. It does -- on a dedicated host,
 caption's treatment reaches the identical 100\% as its control ($p=1.0$), confirming the
 verification-reliability reading over a capability-limitation one.
+
+\subsection{Multi-anchor extension, incorporated: equation and caption}
+\label{sec:results-multianchor}
+Section~\ref{sec:methods-multianchor} described a supplementary extension growing each family's
+$N$ by resolving up to three additional anchors per document, deferred at the time of writing
+pending identification of the exact canonical original-corpus source these new anchors would need
+to be merged against. That source is now verified directly, not assumed: the confirmatory
+dedicated-host re-run's own per-document results
+(Section~\ref{sec:methods-rerun}) recompute to the identical numbers already published in
+Table~\ref{tab:render-gate-clean} (equation and caption, both 100\%/100\%, $n=26$, $p=1.0$) before
+any extension data is added, which is what makes merging the two sources onto the same
+per-document identity trustworthy rather than a guess. table-structural and section reordering are
+not included here: the former has no multi-anchor extension run at all, and the latter's
+currently-published number is itself already a two-corpus merge (Table~\ref{tab:single-edit},
+Section~\ref{sec:single-edit}) with a more complex provenance question not yet resolved with the
+same rigor -- named as still-open, not silently skipped.
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{llrrrc}
+\toprule
+Family & Arm & Tier 1 & Tier 2 & Tier 3 ($n_\text{eff}$) & Paired $p$ \\
+\midrule
+Equation & control   & 100\%$^\dagger$ & 100\% & 100\% (108) & \multirow{2}{*}{1.0 / 1.0 / --} \\
+         & treatment & 100\%$^\dagger$ & 100\% & 100\% (108) & \\
+\addlinespace
+Caption  & control   & 96.6\% & 96.3\% & 96.3\% (80.7) & \multirow{2}{*}{0.252 / 0.252 / --} \\
+         & treatment & 100\%$^\dagger$ & 100\% & 100\% (108) & \\
+\bottomrule
+\end{tabular}
+\normalsize
+\caption{Original corpus (confirmatory dedicated-host re-run, Table~\ref{tab:render-gate-clean})
+merged with the multi-anchor extension's new trial points, $n=29$ documents (26 original + 3
+author-owned personal documents added under the same extension), reported under all three
+aggregation tiers (Section~\ref{sec:methods-multianchor}; $n_\text{eff}$ is Tier 3's
+ICC-corrected effective $n$, out of a naive pooled $n=108$ trial points for every row --
+computed directly from this data: $\text{ICC}=0$ for equation on both arms and for caption's
+treatment arm, $\text{ICC}=0.124$ for caption's control arm). Full 95\% CIs: equation
+100\% [88.1, 100] (Tier 1), [100, 100] (Tier 2), [96.6, 100] (Tier 3) on both arms; caption
+control 96.6\% [92.2, 100] / 96.3\% [91.5, 100] / 96.3\% [92.6, 99.1], caption treatment
+100\% [88.1, 100] / [100, 100] / [96.6, 100] (Tiers 1/2/3 respectively). Paired $p$ is reported
+per tier in the order Tier 1 / Tier 2 / Tier 3, with a dash where a tier's own paired test is
+not separately computed (Tier 3's naive pooled data is not paired at the trial level, only the
+per-document Tier 1/2 means are). $^\dagger$Exact Clopper-Pearson interval (Section~\ref{sec:defects},
+defect 9).}
+\label{tab:render-gate-multianchor}
+\end{table}
+
+Both families' qualitative conclusions are unchanged by this additional data, which is itself a
+meaningful confirmatory result, not a null one: equation remains a literal 100\%/100\% parity
+across all three tiers, and caption's small control-treatment gap (previously $100\%$ vs $7.7\%$
+under host contention, closing to $100\%$ vs $100\%$ on the dedicated host at $n=26$) remains
+directionally present but not significant at $n=29$ ($p=0.252$ across Tiers 1 and 2), consistent
+with -- not contradicting -- the confirmatory re-run's own $p=1.0$ result. The extension does not
+manufacture significance that was not already there, which is itself evidence the tiered
+methodology is behaving as intended rather than as an avenue for finding whatever result more data
+happens to produce.
 
 \section{Ten real defects found and fixed}
 \label{sec:defects}
