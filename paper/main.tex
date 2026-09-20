@@ -275,6 +275,21 @@ anchor for each forward edit is resolved once, at corpus-build time, and supplie
 trial's prompt, so indexing/discovery-tool availability is not part of what this benchmark
 measures -- only editing correctness given a target that is already known.
 
+This resolution rule is deterministic, not randomly sampled or hand-picked per document. For the
+four body-anchor families (bibliography, citation, equation, caption),
+\texttt{resolve\_body\_anchor} filters each document's paragraphs to non-heading, non-empty
+candidates of at least eight characters, then selects the paragraph at the 80th-percentile
+position of that eligible list -- one fixed rule applied identically across every document, never
+tuned per document or per family. Section reordering uses an analogous fixed rule,
+\texttt{resolve\_section\_reorder\_plan}, which selects a heading at a fixed starting percentile of
+the document's heading list, then validates two structural safety rules before accepting it at
+corpus-build time (distinct from
+\texttt{move\_section}'s own runtime validation described above): the chosen heading's own text
+must be non-blank under an outward scan, and the destination must be a same-or-shallower-level
+heading reached by scanning forward past any intervening child headings; if either check fails,
+resolution advances deterministically to the next candidate position rather than falling back to
+randomness.
+
 Discovery and editing share the same tool surface deliberately, not incidentally:
 \texttt{locate\_anchor} and \texttt{document\_outline} return the same identifier format
 (\texttt{w14:paraId}, or a content-derived fallback for paragraphs without one) that the editing
@@ -350,6 +365,45 @@ denominator. The one repeated-cycling ($K=4$) design compares steady-state pass 
 fraction of chains passing every one of the four cycles) across four consecutive forward/inverse
 cycles on the same document, rather than a single cycle, specifically to test whether either
 arm's correctness compounds or decays under repetition.
+
+\subsection{Multi-anchor extension (supplementary, not yet incorporated into Section~\ref{sec:results})}
+\label{sec:methods-multianchor}
+\begin{sloppypar}
+A supplementary extension generalizes the single fixed-percentile anchor above to up to three
+additional anchors per document, using the identical eligibility filter at three further fixed
+percentile positions. \texttt{resolve\_multiple\_body\_anchors} implements
+this for the body-anchor families.
+\texttt{resolve\_multiple\_section\_reorder\_plans} implements the analogous
+extension for section reordering, additionally excluding already-used heading triples across
+plans. Both reuse the original single-anchor resolver's own output unchanged as anchor zero. The
+purpose is to grow $N$ using the corpus's own already-eligible candidate positions rather than
+additional documents alone. Because anchors drawn from the same document
+share document-level confounds -- formatting, authorial style, content -- we do not report this
+extension's outcomes as one pooled $N$ under the confirmatory corpus's existing denominator.
+Instead we report three distinct, separately-labeled aggregation tiers, following the same
+aggregation-family discipline CONSORT recommends against conflating correlated observations under
+one denominator \citep{schulz2010consort}: an unweighted per-document mean (most conservative, $N$
+= document count); an anchor-count-weighted per-document mean (each document's outer weight is how
+many extension anchors it actually contributed, rather than treating every document as worth
+exactly one vote regardless of how much it was actually sampled); and a pooled anchor-level
+estimate reported alongside a design-effect-corrected effective $N$, derived from a one-way
+random-effects intraclass correlation estimated directly from the extension's own outcome data
+\citep{rutterford2015clustersamplesize}, so the naive pooled $N$ -- which overstates precision
+whenever anchors within a document are correlated -- is never reported without its
+clustering-aware counterpart beside it \citep{irsova2025spuriousprecision}. For section reordering
+specifically, this clustering correction is not merely a theoretical caveat: computed on the
+extension's own real data, the treatment arm's intraclass correlation is $1.0$ (every anchor within
+a document passes or fails together, collapsing the naive pooled $N$ from 22 to an effective $N$ of
+10, identical to the document count), while the control arm shows no such clustering ($\text{ICC}=0$).
+This is consistent with section reordering's extra anchors moving a different heading pair within
+the \emph{same} underlying document and content, a structurally different, more document-bound
+kind of additional sample than the body-anchor families' spatially distinct insertion points --
+and the asymmetry between arms suggests this may be a property of the treatment condition, not
+merely of the family. This extension's own tiered outcomes, and the work of merging them into the
+confirmatory corpus's reported $N$ under this same disclosure discipline, are not yet part of any
+number in Section~\ref{sec:results}; we name this as ongoing, not omit it silently
+(Section~\ref{sec:limitations}).
+\end{sloppypar}
 
 \subsection{Confirmatory re-run environment}
 \label{sec:methods-rerun}
@@ -852,7 +906,12 @@ a competing final number. This resolution does not extend past this specific ver
 mechanism: we make no claim that shared-host contention is never a genuine factor for other
 write-time-verification designs, only that it fully explains the gap observed here.
 \textbf{Third}, corpus size for section reordering ($n=11$ at $K=1$ on the original corpus) is
-small before the follow-up corpus is combined in. \textbf{Fourth}, one specific piece of our own
+small before the follow-up corpus is combined in. A multi-anchor extension aimed at this exact gap
+is underway (Section~\ref{sec:methods-multianchor}) but not yet merged into any number reported
+here; its own preliminary data already surfaces a real, distinct limitation specific to section
+reordering -- an intraclass correlation of $1.0$ on the treatment arm, meaning additional anchors
+within the same document are not adding independent evidence for that arm the way they appear to
+for the body-anchor families -- which we report as an open finding, not a solved one. \textbf{Fourth}, one specific piece of our own
 test infrastructure -- an external drive holding all run data -- proved physically unreliable,
 disconnecting twice during this project (confirmed via Windows disk-layer I/O retry/error events,
 not inferred); this remains a real defect in our original test environment (Section~\ref{sec:defects}),
