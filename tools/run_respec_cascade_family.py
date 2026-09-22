@@ -72,6 +72,7 @@ from docx_trial_broker import (  # noqa: E402
     new_marker,
 )
 from docx_trial_evaluator import (  # noqa: E402
+    _equation_flat_texts,
     _package_is_valid_docx,
     chain_pass,
     grade_phase1_build,
@@ -286,12 +287,24 @@ def run_respec_cascade_chain(
 
     current_input = docx_path
     steps_run = 0
+    # Populated once Phase 1/2's own diagnostic grading actually runs (after
+    # step 1.5, resp. 2.3) -- _freeze reads whatever is here AT THE TIME it's
+    # called, so a freeze during Phase 2 or Phase 3 still preserves an
+    # earlier phase's already-computed result instead of discarding it.
+    # Previously this was unconditionally hardcoded to None in every freeze,
+    # which silently threw away real diagnostic signal (e.g. whether Phase
+    # 1's own per-family content grading actually passed) for any chain that
+    # froze partway through Phase 2/3 -- exactly the case that most needs it,
+    # since that's when something has already gone wrong and the "did the
+    # earlier phases even semantically succeed" question matters most.
+    phase1_result: dict[str, Any] | None = None
+    phase2_result: dict[str, Any] | None = None
 
     def _freeze(step_id: str, step_result: dict[str, Any] | None, extra_reason: str | None = None) -> dict[str, Any]:
         reason = extra_reason if extra_reason is not None else (step_result or {}).get("package_invalid_reason")
         result = {
             **base_result, "status": f"chain_broken_at_step_{step_id}", "reason": reason,
-            "phase1_result": None, "phase2_result": None, "phase3_result": None,
+            "phase1_result": phase1_result, "phase2_result": phase2_result, "phase3_result": None,
             "steps_run": steps_run, "word_com_receipts": receipts,
             "frozen_step_result": step_result,
         }
@@ -415,8 +428,37 @@ def run_respec_cascade_chain(
     current_input = Path(step["output_docx_path"])
 
     checkpoint_b_docx = current_input
+    # score_keep_survival matches by EXACT normalized paragraph/equation
+    # text, not substring -- bib_forward.marker_text/cap_forward.marker_text
+    # are just the short UUID-suffixed fragments handed to insert_bibliography_
+    # entry/insert_caption, never the full rendered text those tools actually
+    # produce (e.g. "Marker, P. (2026). Commissioning Pilot Marker
+    # Publication <fragment>."). Found live (2026-09-22 RunPod smoke test):
+    # passing the raw fragment here means score_keep_survival can never find
+    # a match, silently reporting a real, correctly-surviving bibliography
+    # entry as "missing" on every single chain. Fixed by searching checkpoint
+    # A's own paragraphs for whichever one actually carries the marker
+    # fragment and using ITS full text -- the same technique already used
+    # for citation's own excluded_texts a few lines below. Equation is
+    # unaffected (its flat text IS just the bare marker, confirmed against
+    # grade_forward_trial_equation's own substring-match convention), so
+    # eq_forward.marker_text needs no such resolution.
+    # equation is the SAME bug class: generate_equation_forward's own
+    # treatment_args payload is f"x = {marker}" (docx_trial_broker.py) --
+    # eq_forward.marker_text is only the bare numeric fragment, never the
+    # equation's actual flat text ("x=<marker>", post-OMML-round-trip
+    # formatting), confirmed live (2026-09-22 RunPod re-run: keep_survival
+    # reported "equation": {"present": false, ...} despite the equation
+    # genuinely, correctly surviving -- the SAME false-negative shape
+    # bibliography/caption had before their own fix above, just for
+    # equation flat-text instead of paragraph text).
+    bib_full_text = next((p for p in paragraphs_at_checkpoint_a if bib_forward.marker_text in p), bib_forward.marker_text)
+    cap_full_text = next((p for p in paragraphs_at_checkpoint_a if cap_forward.marker_text in p), cap_forward.marker_text)
+    eq_full_text = next(
+        (t for t in _equation_flat_texts(checkpoint_a_docx) if eq_forward.marker_text in t), eq_forward.marker_text,
+    )
     kept_markers = {
-        "bibliography": bib_forward.marker_text, "equation": eq_forward.marker_text, "caption": cap_forward.marker_text,
+        "bibliography": bib_full_text, "equation": eq_full_text, "caption": cap_full_text,
     }
     phase2_result = _safe_call(
         grade_phase2_respec, checkpoint_a_docx, checkpoint_b_docx, paragraphs_at_checkpoint_a,
@@ -595,6 +637,7 @@ def run_respec_cascade_chain(
     }
     phase3_result = _safe_call(
         grade_phase3_second_exposure, checkpoint_c_docx, paragraphs_at_checkpoint_b, phase3_targets, expected_final_structure,
+        checkpoint_b_docx,
     )
     if word_receipts_enabled:
         receipts.append(_milestone_word_receipt(checkpoint_c_docx, chain_root / "receipts" / "after-phase3", milestone="after_phase3"))

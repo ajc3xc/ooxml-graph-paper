@@ -440,6 +440,30 @@ def _items_from_paragraph_texts(paragraph_texts: list[str]) -> dict[str, Any]:
     return {"paragraphs": [{"text": t} for t in paragraph_texts]}
 
 
+def _items_with_equations(docx_path: Path, paragraph_texts: list[str]) -> dict[str, Any]:
+    """Like `_items_from_paragraph_texts`, but ALSO folds each equation's
+    flat text (`_equation_flat_texts`) into the same `"paragraphs"` list.
+
+    Found live (2026-09-22 RunPod smoke test): `score_keep_survival` only
+    ever reads `checkpoint_*_items["paragraphs"]`, which -- being built from
+    `_paragraph_texts` -- structurally CANNOT see equation content at all (a
+    pure-equation paragraph's `<w:t>` text is empty, confirmed directly
+    against the real jcshm-manuscript.docx corpus document; see
+    `grade_forward_trial_equation`'s own module comment on this same fact).
+    This means `E` (the equation family's own kept target in Phase 2/3) was
+    being silently, permanently invisible to every keep-survival check --
+    not merely absent from a marker-text mismatch, but structurally
+    unverifiable regardless of what text was passed for it. Merging
+    equations' flat text into the same comparable-items list (rather than
+    inventing a second, parallel "equations" concept `score_keep_survival`
+    would need to know about) fixes this with no change to that function at
+    all: exact-multiset text matching does not care which XML namespace a
+    comparable unit came from, and the unintended-drift remainder check
+    gains real equation-collateral-damage detection as a side effect,
+    which it also did not have before."""
+    return {"paragraphs": [{"text": t} for t in (*paragraph_texts, *_equation_flat_texts(docx_path))]}
+
+
 def _collateral_diff_outside_touched(
     paragraphs_before: list[str], paragraphs_after: list[str],
     touched_before: list[str], touched_after: list[str],
@@ -467,10 +491,41 @@ def _collateral_diff_outside_touched(
     before_remainder = Counter({k: v for k, v in before_ctr.items() if v > 0})
     after_remainder = Counter({k: v for k, v in after_ctr.items() if v > 0})
     clean = before_remainder == after_remainder
+    # 2026-09-22 correction (found live, RunPod smoke test control arm):
+    # this previously returned the two FULL remainder multisets side by
+    # side (`before_remainder.elements()`/`after_remainder.elements()`),
+    # not their actual difference -- so any time `clean` was False, the
+    # reported "unexplained_missing"/"unexplained_added" dumped nearly the
+    # entire document (every paragraph present in each remainder, whether
+    # or not its count actually changed) instead of showing what genuinely
+    # differed. `Counter` subtraction (`-`) keeps only positive-count
+    # differences, which is what these fields were always meant to report.
+    missing_diff = before_remainder - after_remainder
+    added_diff = after_remainder - before_remainder
     return clean, {
-        "unexplained_missing": sorted(before_remainder.elements()),
-        "unexplained_added": sorted(after_remainder.elements()),
+        "unexplained_missing": sorted(missing_diff.elements()),
+        "unexplained_added": sorted(added_diff.elements()),
     }
+
+
+def _end_of_heading_subtree_index(headings: list[dict[str, Any]], index: int) -> int:
+    """Index of the heading immediately after the subtree rooted at
+    `headings[index]` -- i.e. skip forward past every descendant (any
+    heading with `level` deeper than `headings[index]`'s own), stopping at
+    the first same-or-shallower-level heading, or `len(headings)` if none
+    remains. Mirrors `move_section`'s own real destination_position="after"
+    semantics, `_locate_section_bounds` (`meridian_docs/docs_intel.py`:
+    "resolve to after that heading's WHOLE pre-existing content"), applied
+    to the flat heading-outline list this module already works with rather
+    than the raw paragraph-range that function itself operates on."""
+    root_level = headings[index].get("level")
+    i = index + 1
+    while i < len(headings):
+        level = headings[i].get("level")
+        if root_level is None or level is None or level <= root_level:
+            break
+        i += 1
+    return i
 
 
 def _section_heading_adjacency(
@@ -478,16 +533,31 @@ def _section_heading_adjacency(
 ) -> dict[str, Any]:
     """Reads the live heading outline (`docs_intel.document_outline`, via
     this module's own `_import_docs_intel`) and checks whether the section
-    identified by `section_id` is the heading immediately following D1's,
-    resp. D2's, own heading -- the structural signature `move_section`'s
-    real, verified `destination_position: "after"` semantics produce (see
-    `tools/docx_trial_broker.py`'s respec_cascade `generate_section_
-    redirect_trial`/`generate_second_exposure_reorder_pair` docstrings,
-    which confirm this directly against the live tool, 2026-09-20). Position
-    -- not text presence alone -- is what distinguishes "still at D1" from
-    "moved on to D2": both D1's and D2's own heading text remain in the
-    document the whole time (a destination heading is never removed), so a
-    presence-only check (`grade_forward_trial_reorder`'s own
+    identified by `section_id` sits immediately after the END of D1's,
+    resp. D2's, own heading SUBTREE -- the structural signature
+    `move_section`'s real, verified `destination_position: "after"`
+    semantics produce.
+
+    2026-09-22 correction (found live, RunPod smoke test against the real
+    jcshm-manuscript.docx corpus document): this previously checked
+    `section_index == d2_index + 1` -- "the very next heading after D2's
+    OWN heading line" -- which is wrong whenever D2 has child headings.
+    `move_section`'s real behavior (confirmed directly against
+    `meridian_docs/docs_intel.py::move_section`'s own destination-resolution
+    comment, "resolve to after that heading's WHOLE pre-existing content",
+    which calls the SAME `_locate_section_bounds` function used to resolve
+    the section being moved) places the section after the destination
+    heading's ENTIRE subtree, not immediately after its own heading line.
+    Confirmed empirically: this run's D2 ("4.1 MIDLINE EVALUATION") has 4
+    child subsections (4.1.1-4.1.4); the section landed correctly, right
+    before "4.2 WIDTH CORRESPONDENCE AND EVALUATION" (D2's subtree's real
+    end), which the old index+1 check misread as "not at D2" -- a false
+    failure, not a real one. Fixed via `_end_of_heading_subtree_index`.
+
+    Position -- not text presence alone -- is what distinguishes "still at
+    D1" from "moved on to D2": both D1's and D2's own heading text remain in
+    the document the whole time (a destination heading is never removed),
+    so a presence-only check (`grade_forward_trial_reorder`'s own
     `moved_heading_still_present`) cannot by itself tell D1 from D2.
 
     D1/D2 are matched by their stable `para_id` (as
@@ -508,12 +578,15 @@ def _section_heading_adjacency(
     d1_index = next((i for i, h in enumerate(headings) if h.get("para_id") == d1_heading_para_id), None)
     d2_index = next((i for i, h in enumerate(headings) if h.get("para_id") == d2_heading_para_id), None)
 
+    d1_subtree_end = _end_of_heading_subtree_index(headings, d1_index) if d1_index is not None else None
+    d2_subtree_end = _end_of_heading_subtree_index(headings, d2_index) if d2_index is not None else None
+
     return {
         "section_found": section_index is not None,
         "d1_found": d1_index is not None,
         "d2_found": d2_index is not None,
-        "at_d1": section_index is not None and d1_index is not None and section_index == d1_index + 1,
-        "at_d2": section_index is not None and d2_index is not None and section_index == d2_index + 1,
+        "at_d1": section_index is not None and d1_subtree_end is not None and section_index == d1_subtree_end,
+        "at_d2": section_index is not None and d2_subtree_end is not None and section_index == d2_subtree_end,
         "section_heading_text": headings[section_index].get("text") if section_index is not None else None,
     }
 
@@ -564,15 +637,95 @@ def _grade_family_inverse(
     raise ValueError(f"unknown respec_cascade family: {family!r}")
 
 
+_FAMILY_OWN_TARGET_CHECKS: dict[str, tuple[str, ...]] = {
+    # Each family's own forward grader bundles two DIFFERENT questions into
+    # one `checks` dict: (a) "did MY OWN edit's target land correctly" and
+    # (b) "did nothing ELSE in the whole document change" (e.g.
+    # `no_original_paragraphs_removed`, `paragraph_count_unchanged`,
+    # `no_paragraph_added_or_removed_or_reworded`). Question (b) is only
+    # correct to ask of a SINGLE isolated edit -- these graders were built
+    # for the existing single-family K=1 benchmark, where "before the
+    # phase" and "before this edit" are the same paragraph list. In
+    # respec_cascade's Phase 1, five DIFFERENT families each edit the SAME
+    # document in sequence, so by the time grade_phase1_build calls a given
+    # family's grader against the PHASE's cumulative final output, the
+    # other four families' own legitimate edits are real, expected changes
+    # -- but question (b), scoped to "nothing besides MY edit changed",
+    # necessarily sees them as violations and always fails. Confirmed
+    # empirically (2026-09-22 smoke test, real subprocess trial against
+    # jcshm-manuscript.docx): all five families showed verdict="fail" with
+    # question-(b) checks naming EACH OTHER's own successful edits as
+    # "missing original paragraphs" / "paragraph count changed", while the
+    # PHASE-WIDE collateral check below (which correctly accounts for all
+    # five targets at once via Counter-based multiset diff, not a single
+    # target) reported clean.
+    #
+    # This dict names only the (a)-type checks -- the ones that verify
+    # THIS family's own target, not the whole document -- for
+    # grade_phase1_build to gate on. The (b)-type question is answered once,
+    # correctly, for all five targets together, by the collateral check.
+    "bibliography": ("marker_title_present_in_exactly_one_paragraph", "paragraph_count_delta_is_at_least_one"),
+    "citation": ("anchor_paragraph_now_contains_marker_exactly_once", "marker_not_leaked_into_other_paragraphs"),
+    "section_reorder": ("order_actually_changed", "moved_heading_still_present"),
+    "equation": ("marker_equation_present_exactly_once",),
+    "caption": ("marker_title_present_in_exactly_one_paragraph", "paragraph_count_delta_is_at_least_one"),
+}
+
+
+def _family_own_target_ok(family: str, result: dict[str, Any]) -> bool:
+    checks = result.get("checks") or {}
+    if not checks.get("output_is_valid_docx", False):
+        return False
+    required = _FAMILY_OWN_TARGET_CHECKS.get(family)
+    if required is None:
+        raise ValueError(f"unknown respec_cascade family: {family!r}")
+    return all(checks.get(name, False) for name in required)
+
+
+# Phase 3's per-family sibling of _FAMILY_OWN_TARGET_CHECKS above, for the
+# INVERSE graders' checks dicts. Same rationale: `grade_inverse_trial*`'s
+# broad checks (`exact_pre_forward_paragraph_list_restored`,
+# `paragraph_count_restored`, etc.) ask "does the WHOLE document exactly
+# match checkpoint B" -- correct when every one of the 5 families' own net
+# round trip genuinely completed, but a misattribution risk when a SINGLE
+# family's step degrades (e.g. an equation render-gate timeout): the other
+# four families' own narrow checks would still correctly show their own
+# target is fine, but their broad checks would ALSO flip to "fail" purely
+# because the broken family's leftover state changed the whole-document
+# comparison. `section_reorder` has no narrower check available -- its own
+# net-effect check (`exact_original_order_restored`) inherently requires
+# the whole document to match, so it is not included here and keeps using
+# its full verdict (the best granularity this family's grader can offer).
+_FAMILY_OWN_INVERSE_TARGET_CHECKS: dict[str, tuple[str, ...]] = {
+    "bibliography": ("marker_entry_removed",),
+    "citation": ("marker_fully_removed",),
+    "equation": ("marker_equation_removed",),
+    "caption": ("marker_entry_removed",),
+}
+
+
+def _family_own_inverse_target_ok(family: str, result: dict[str, Any]) -> bool:
+    checks = result.get("checks") or {}
+    if not checks.get("output_is_valid_docx", False):
+        return False
+    required = _FAMILY_OWN_INVERSE_TARGET_CHECKS.get(family)
+    if required is None:
+        # section_reorder: no narrower check exists; fall back to the full verdict.
+        return result.get("verdict") == "pass"
+    return all(checks.get(name, False) for name in required)
+
+
 def grade_phase1_build(
     output_docx: Path, paragraphs_before: list[str], targets: dict[str, dict[str, Any]],
 ) -> dict[str, Any]:
     """Checkpoint A (protocol section 4): grades the end of Phase 1 (BUILD,
     5 steps, forward-only, order R') in one pass -- each family's own
     EXISTING forward grader, called with that family's own args from
-    `targets`, plus one new generalized check: zero paragraph-text diff
-    anywhere outside the five targets' own touched paragraphs, against
-    `paragraphs_before` (the pristine, pre-Phase-1 paragraph list).
+    `targets`, for its OWN target's narrow presence/correctness checks only
+    (see `_family_own_target_ok`/`_FAMILY_OWN_TARGET_CHECKS`) -- plus one
+    generalized, phase-wide check: zero paragraph-text diff anywhere outside
+    the five targets' own touched paragraphs, against `paragraphs_before`
+    (the pristine, pre-Phase-1 paragraph list).
 
     `targets` must have exactly the five keys in `FAMILY_ORDER`, e.g.:
         {"bibliography": {"marker_text": ...},
@@ -625,7 +778,7 @@ def grade_phase1_build(
         paragraphs_before, paragraphs_after, touched_before, touched_after,
     )
 
-    all_family_pass = all(r.get("verdict") == "pass" for r in family_results.values())
+    all_family_pass = all(_family_own_target_ok(f, r) for f, r in family_results.items())
     phase1_pass = bool(all_family_pass and collateral_clean)
 
     return {
@@ -651,10 +804,12 @@ def grade_phase2_respec(
     """Checkpoint B (protocol section 4, "the design's central, novel
     test"): grades the end of Phase 2 (RESPEC -- 2.1 Citation inverse, 2.3
     SectionReorder redirect D1->D2; five-family contingency has no 2.2
-    Table). `checkpoint_a_docx` is accepted for symmetry with the other two
-    grade_phase* functions and to make the checkpoint pairing explicit in
-    every call site, even though only `paragraphs_at_checkpoint_a` (not a
-    fresh re-read of the file) is actually used below.
+    Table). `checkpoint_a_docx` is re-read directly (via `_items_with_
+    equations`, alongside `checkpoint_b_docx`) to fold each checkpoint's
+    OWN equation content into `score_keep_survival`'s comparison -- `E`'s
+    survival can only be checked this way, never from `paragraphs_at_
+    checkpoint_a`'s flat text alone (see `_items_with_equations`'s own
+    docstring for why: a pure-equation paragraph's `<w:t>` text is empty).
 
     (a) Citation absence is checked directly against `checkpoint_b_docx`'s
     own paragraph texts, NOT by calling `grade_inverse_trial_inline` itself:
@@ -713,8 +868,8 @@ def grade_phase2_respec(
     checkpoint_a_citation_paragraphs = [p for p in paragraphs_at_checkpoint_a if citation_marker_text in p]
     excluded_texts = list(checkpoint_a_citation_paragraphs) + [citation_anchor_text_before]
     keep_survival = score_keep_survival(
-        _items_from_paragraph_texts(paragraphs_at_checkpoint_a),
-        _items_from_paragraph_texts(paragraphs_at_checkpoint_b),
+        _items_with_equations(checkpoint_a_docx, paragraphs_at_checkpoint_a),
+        _items_with_equations(checkpoint_b_docx, paragraphs_at_checkpoint_b),
         kept_markers,
         excluded_paragraph_texts=excluded_texts,
     )
@@ -805,6 +960,7 @@ def grade_phase3_second_exposure(
     paragraphs_at_checkpoint_b: list[str],
     targets: dict[str, dict[str, Any]],
     expected_final_structure: dict[str, Any],
+    checkpoint_b_docx: Path | None = None,
 ) -> dict[str, Any]:
     """Checkpoint C (protocol section 4, "K=4-comparable primary outcome"):
     grades the end of Phase 3 (SECOND EXPOSURE -- 5 families forward+inverse
@@ -861,18 +1017,47 @@ def grade_phase3_second_exposure(
             raise ValueError(f"grade_phase3_second_exposure: targets is missing required family {family!r}")
         result = _grade_family_inverse(family, output_docx, paragraphs_at_checkpoint_b, targets[family])
         family_results[family] = result
-    all_family_pass = all(r.get("verdict") == "pass" for r in family_results.values())
+    all_family_pass = all(_family_own_inverse_target_ok(f, r) for f, r in family_results.items())
 
     final_structure = _check_final_structure(output_docx, expected_final_structure)
 
+    # score_keep_survival needs each kept element's FULL exact text, not the
+    # bare marker fragment `expected_final_structure` carries for
+    # `_check_final_structure`'s own SUBSTRING checks (`_paragraphs_containing`)
+    # -- same bug class as grade_phase2_respec's own kept_markers construction
+    # (see that fix's comment for the full story). Resolved the same way:
+    # search checkpoint B's own paragraphs/equations for whichever one
+    # actually carries the marker fragment, use its full text -- equation
+    # needs this too (confirmed live, 2026-09-22 RunPod re-run:
+    # generate_equation_forward's own payload is f"x = {marker}", never the
+    # bare marker `equation_marker` carries).
+    bib_fragment = expected_final_structure["bibliography_marker_text"]
+    cap_fragment = expected_final_structure["caption_marker_text"]
+    eq_fragment = expected_final_structure["equation_marker"]
+    bib_full_text = next((p for p in paragraphs_at_checkpoint_b if bib_fragment in p), bib_fragment)
+    cap_full_text = next((p for p in paragraphs_at_checkpoint_b if cap_fragment in p), cap_fragment)
+    if checkpoint_b_docx is not None:
+        checkpoint_b_items = _items_with_equations(checkpoint_b_docx, paragraphs_at_checkpoint_b)
+        checkpoint_c_items = _items_with_equations(output_docx, _paragraph_texts(output_docx))
+        eq_full_text = next(
+            (t for t in _equation_flat_texts(checkpoint_b_docx) if eq_fragment in t), eq_fragment,
+        )
+    else:
+        # Backward-compatible degraded path (no checkpoint_b_docx given):
+        # `E`'s own survival is unverifiable here, same limitation this
+        # whole function had before `_items_with_equations` existed -- see
+        # that helper's docstring.
+        checkpoint_b_items = _items_from_paragraph_texts(paragraphs_at_checkpoint_b)
+        checkpoint_c_items = _items_from_paragraph_texts(_paragraph_texts(output_docx))
+        eq_full_text = eq_fragment
     kept_markers = {
-        "bibliography": expected_final_structure["bibliography_marker_text"],
-        "equation": expected_final_structure["equation_marker"],
-        "caption": expected_final_structure["caption_marker_text"],
+        "bibliography": bib_full_text,
+        "equation": eq_full_text,
+        "caption": cap_full_text,
     }
     keep_survival_final = score_keep_survival(
-        _items_from_paragraph_texts(paragraphs_at_checkpoint_b),
-        _items_from_paragraph_texts(_paragraph_texts(output_docx)),
+        checkpoint_b_items,
+        checkpoint_c_items,
         kept_markers,
     )
 
@@ -929,7 +1114,7 @@ def chain_failure_taxonomy(
         # conflate with this). Mirrors phase3_broken_at_<family>'s own
         # per-family attribution below.
         families = phase1_result.get("families", {})
-        failed_families = [f for f in FAMILY_ORDER if families.get(f, {}).get("verdict") != "pass"]
+        failed_families = [f for f in FAMILY_ORDER if not _family_own_target_ok(f, families.get(f, {}))]
         if failed_families:
             return f"phase1_broken_at_{failed_families[0]}"
         return "phase1_broken_at_collateral"  # every family passed; collateral_clean was False
@@ -959,7 +1144,7 @@ def chain_failure_taxonomy(
         return phase3_result.get("status", "chain_broken_at_step_unknown")
     if not phase3_result.get("phase3_pass"):
         families = phase3_result.get("families", {})
-        failed_families = [f for f in FAMILY_ORDER if families.get(f, {}).get("verdict") != "pass"]
+        failed_families = [f for f in FAMILY_ORDER if not _family_own_inverse_target_ok(f, families.get(f, {}))]
         if failed_families:
             return f"phase3_broken_at_{failed_families[0]}"
         return "phase3_broken_at_final_structure"
