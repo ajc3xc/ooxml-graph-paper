@@ -52,8 +52,16 @@ code -- on a dedicated, single-tenant cloud host closed the gap completely, all 
 reaching 100\% pass for both arms. The original numbers were a deployment-environment artifact
 (shared-host scheduling contention and a physically unreliable external drive), not an
 editing-capability limitation, and we report both the original and the
-confirmatory numbers rather than replacing one with the other silently. Separately, we
-document ten
+confirmatory numbers rather than replacing one with the other silently. A separate, preregistered
+extension generalizes the section-reordering finding two ways at once -- across all five
+task families in a single 17-step chain rather than one family repeated against itself, and under
+a mid-chain reversal of a structural requirement rather than uniform repetition -- on a real,
+previously-unseen three-document corpus. The bounded tool completes the full protocol cleanly on
+83.3\% of chains against the generic tool's 8.3\% (pooled anchor-set-level comparison, $p<0.0005$),
+and on the design's own central test -- whether unrelated, already-correct content survives a
+mid-chain reversal of a different requirement untouched -- the generic tool's raw edits leak into
+untouched content while the bounded tool's never do ($p=0.0305$). Separately, we
+document twelve
 infrastructure and evaluation-harness defects that this benchmark's own development surfaced and
 fixed -- several of which materially changed the reported numbers -- disclosed in full rather
 than silently corrected.
@@ -436,6 +444,48 @@ original host (a non-root desktop account) never triggered; we created a dedicat
 account on the instance for this reason, verified functionally, and re-ran the affected trials
 that had failed instantly under root before this was found.
 
+\subsection{Cross-family cascading edits: \texttt{respec\_cascade}}
+\label{sec:methods-respec-cascade}
+Section~\ref{sec:section-reorder}'s $K=4$ result is this benchmark's one significant finding, but
+it tests only one family repeated against itself. A separate, preregistered protocol
+(\texttt{docs/paper-s23-respec-cascade-protocol-v0.md}, locked 2026-09-20) generalizes it two ways
+at once: across all five families in a single chain rather than one family alone, and under a
+mid-chain \emph{reversal} of a structural requirement rather than uniform repetition. Each chain is
+one document, one arm, 17 steps in three phases: BUILD (5 steps, one forward insert per family, in
+the fixed rotation $R' = [\text{bibliography}, \text{citation}, \text{section reorder},
+\text{equation}, \text{caption}]$; table-structural is dropped from this rotation because
+\texttt{insert\_table}/\texttt{remove\_table} are confirmed absent from the live Meridian Docs tool
+manifest at corpus-build time); RESPEC (2 steps, injected mid-chain: the citation inserted in BUILD
+is removed, and the section moved in BUILD is redirected to a second, different destination instead
+of being undone) -- this is the design's central, novel test, explained below; and SECOND EXPOSURE
+(10 steps, forward then inverse for every family again, confirming the chain still ends where a
+correct execution requires). Every one of the three already-inserted, untouched targets
+(bibliography, equation, caption) must survive RESPEC's two edits completely unchanged --
+Checkpoint B's own keep-survival check, scored with the same order-blind multiset comparison as the
+rest of this benchmark's collateral-damage checks (Section~\ref{sec:defects}, defect 9)
+specifically because a section move must not by itself count as drift. Corpus, arms, and grading
+discipline are otherwise identical to the rest of this benchmark: the same three real, author-owned
+documents already added under the multi-anchor extension (Section~\ref{sec:results-multianchor}),
+up to four anchor-sets per document (all twelve usable, none excluded), the same isolated
+subprocess-per-trial arm boundary (Section~\ref{sec:methods}), and every check re-derived
+directly from the persisted \texttt{.docx} XML rather than either arm's own self-report. One
+methodological difference is disclosed rather than left implicit: these chains run on the
+\texttt{claude} CLI's \texttt{haiku} model alias (Claude Haiku 4.5 at the time these trials ran),
+not the \texttt{claude-sonnet-5} model used for every other result in this paper, chosen for the
+throughput this extension's larger job count (24 cascade chains plus a 120-trial baseline sweep)
+needed on a metered cloud host; this is a genuine, disclosed scope limitation
+(Section~\ref{sec:limitations}), not a claim that the two models are interchangeable.
+
+A fresh, isolated $K=1$ baseline is run separately for every (document, anchor-set, family, arm)
+combination -- one single forward/inverse trial at the identical anchor used in that chain's own
+Phase 1/3, on a fresh copy of the pristine document, reusing \texttt{run\_paper\_s7\_benchmark.py}'s
+own \texttt{run\_chain} completely unmodified (120 trials: 3 documents $\times$ 4 anchor-sets
+$\times$ 5 families $\times$ 2 arms). This is what makes the two numbers this design reports
+meaningful together rather than separately: whether a chain's Phase-3 outcome is lower than that
+same arm's own uncontested single-edit performance at the identical anchor (\emph{control\_drop},
+\emph{treatment\_drop}) isolates compounding-pressure degradation from any baseline difference in
+how well an arm handles a given family at all.
+
 \section{Results}
 \label{sec:results}
 
@@ -813,7 +863,85 @@ manufacture significance that was not already there, which is itself evidence th
 methodology is behaving as intended rather than as an avenue for finding whatever result more data
 happens to produce.
 
-\section{Ten real defects found and fixed}
+\subsection{Cross-family cascading edits: a generalization of the $K=4$ finding}
+\label{sec:results-respec-cascade}
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{llrrrc}
+\toprule
+Measure & Arm & Tier 1 & Tier 2 & Tier 3 ($n_\text{eff}$) & Paired $p$ (T1/T2/T3) \\
+\midrule
+Whole-chain composite pass & control   & 8.3\%  & 9.1\%  & 9.1\% (11.0)  & \multirow{2}{*}{0.2305 / 0.2305 / --} \\
+(17-step, 5-family chain)  & treatment & 83.3\% & 83.3\% & 83.3\% (12.0) & \\
+\addlinespace
+Checkpoint B keep-survival & control   & 44.4\% & 45.5\% & 45.5\% (10.7) & \multirow{2}{*}{0.2305 / 0.2305 / --} \\
+(central novel test)       & treatment & 100\%$^\dagger$  & 100\%  & 100\% (12.0)  & \\
+\bottomrule
+\end{tabular}
+\normalsize
+\caption{\texttt{respec\_cascade}: 24 chains (3 documents $\times$ 4 anchor-sets $\times$ 2 arms,
+all twelve anchor-sets usable). ``Whole-chain composite pass'' requires all three phases
+(BUILD, RESPEC, SECOND EXPOSURE) to pass; a chain that froze mid-protocol on a package-validity
+gate is scored as a failure here, not excluded (Section~\ref{sec:methods-respec-cascade}).
+``Checkpoint B keep-survival'' is whether the three already-inserted, untouched targets
+(bibliography, equation, caption) survive RESPEC's two edits completely unchanged. Full 95\% CIs:
+composite control 8.3\% [0, 25] / 9.1\% [0, 25] / 9.1\% [0, 27.3], composite treatment 83.3\%
+[75, 100] / 83.3\% [75, 100] / 83.3\% [58.3, 100]; keep-survival control 44.4\% [25, 75] / 45.5\%
+[25, 75] / 45.5\% [18.2, 72.7], keep-survival treatment 100\% [29.2, 100] / 100\% [100, 100] /
+100\% [73.5, 100] (Tiers 1/2/3 respectively). $^\dagger$Exact Clopper-Pearson interval
+(Section~\ref{sec:defects}, defect 9). Both measures' Tier 1/2 paired tests are underpowered at
+$N=3$ documents, the same limitation already disclosed for every Tier-1 comparison in this paper
+(Section~\ref{sec:methods-multianchor}); the anchor-set-level tests below are the properly-powered
+versions of the same two comparisons.}
+\label{tab:respec-cascade-headline}
+\end{table}
+
+Table~\ref{tab:respec-cascade-headline}'s two chain-level measures point the same direction as
+Section~\ref{sec:section-reorder}'s $K=4$ result, on a design that never repeats one family against
+itself: the bounded tool completes the full three-phase, five-family protocol cleanly on 10 of 12
+chains (83.3\%), the generic tool on 1 of 12 (8.3\%). At the anchor-set level -- pooling every
+family's own Phase-3 forward/inverse round trip as a separate paired observation rather than
+requiring all five to succeed together, the higher-powered version of the same comparison --
+control and treatment differ by 46.7 percentage points on 30 paired (family, anchor-set)
+observations ($p<0.0005$, 2{,}000 permutations, zero as extreme as observed). On Checkpoint B's own
+central test -- whether unrelated, already-correct content survives untouched through a mid-chain
+reversal of a different requirement -- the same anchor-set-level comparison (11 paired chains,
+after one control chain excluded for breaking before Checkpoint B) reaches $p=0.0305$: the
+generic-tool arm's raw XML edits leak into content it was never asked to touch; the bounded tool's
+never do, in any of the twelve chains attempted.
+
+We separately compared each arm's cascade Phase-3 outcome against that same arm's own fresh,
+isolated $K=1$ baseline at the identical anchor (Section~\ref{sec:methods-respec-cascade}), pooled
+across families (30 anchor-set-level pairs where both a cascade and a baseline outcome exist for
+control, 60 for treatment -- the counts differ because more control chains never reached a given
+family's Phase-3 step at all, itself part of the finding). Control's cascade performance runs 17.2
+points below its own single-edit baseline ($p=0.219$, $n=29$); treatment shows no such gap
+(+3.3 points, $p=0.4895$, $n=60$) -- not significant on its own at this $N$, but the same direction
+Section~\ref{sec:discussion} already argues for mechanistically: a tool that re-resolves its target
+fresh each call does not accumulate the compounding state-drift risk a generic-tool agent
+reconstructing document state across many edits does. Per-family, treatment's Tier-1 pass rate is a
+literal 100\% (Clopper-Pearson $[29.2, 100]$) on every one of the five families; control ranges from
+44.4\% (bibliography, section reorder, equation, caption) to 77.8\% (citation) -- none individually
+significant at $N=3$ documents per family ($p$ between 0.486 and 1.0), but a pattern with the same
+sign on all five, not a mix of directions.
+
+The gap has a concrete, qualitative failure mode behind it, not only a lower pass rate: 5 of the 12
+control chains (41.7\%) broke entirely mid-protocol -- the raw XML edit itself corrupted the
+document badly enough that a later step's package-validity gate refused to continue -- against 0 of
+12 treatment chains. This matches the smoke-test-stage qualitative findings already reported for
+this protocol's design (duplicate-heading and section-position-drift defects, found live during
+harness development and disclosed as evaluation-harness debugging rather than as reported results)
+and is consistent with, not merely analogous to, the mechanism already traced in
+Section~\ref{sec:section-reorder}: unbounded raw-XML editing degrades further, and more
+catastrophically, as more edits accumulate on the same document. Two further real defects in this
+extension's own harness were found and fixed during this run, disclosed alongside this benchmark's
+other ten (Section~\ref{sec:defects}, defects 11--12); both were verified directly against the real
+checkpoint data before and after the fix, following the same discipline as every other correction in
+this paper.
+
+\section{Twelve real defects found and fixed}
 \label{sec:defects}
 
 The reported numbers depend on the harness, evaluator, and infrastructure that produced them, and
@@ -919,6 +1047,42 @@ rather than fold it silently into a final figure.
   honestly represent less certainty than $[100,100]$ implied -- e.g., 26/26 passes now reports
   $[86.8, 100]$, not $[100,100]$ -- without changing a single point-estimate pass rate anywhere in
   this paper.
+\item \textbf{The \texttt{respec\_cascade} grader miscounted a documented, intended tool
+  side-effect as collateral damage.} \texttt{insert\_bibliography\_entry} locates an existing
+  References/Bibliography heading or creates one when a document has none -- documented behavior,
+  not a bug in the tool. The grader's collateral-diff check (Section~\ref{sec:results-respec-cascade})
+  only ever accounted for the entry paragraph itself as an intentional edit; on any corpus document
+  with no pre-existing heading, the auto-created heading paragraph registered as unexplained
+  drift, failing that document's every chain on this alone regardless of anchor-set. This surfaced
+  as a uniform, document-specific failure pattern -- all four anchor-sets on one of the three
+  corpus documents (\texttt{jcshm-si.docx}, confirmed directly to have zero References/Bibliography
+  headings, unlike the other two) failing identically while the other two documents mostly passed
+  -- which we traced to this exact mechanism before concluding it was real signal rather than a
+  defect, following the same discipline as every earlier correction in this section. Fixed by
+  treating the heading text as an expected addition specifically when it is absent from the
+  document's own pre-edit paragraph list; verified directly against the real checkpoint output
+  files for both the affected document (the check now passes) and an unaffected one that already
+  had a heading under different text (unchanged, confirming no regression).
+\item \textbf{A doc\_label truncation collision silently merged four independent baseline trial
+  points into one.} \texttt{run\_paper\_s7\_benchmark.py}'s \texttt{run\_chain} derives its
+  on-disk checkpoint directory from the first 32 characters of its \texttt{doc\_label} argument,
+  a Windows path-length safeguard that was safe for every doc\_label this function had previously
+  been called with. The \texttt{respec\_cascade} baseline sweep (Section~\ref{sec:methods-respec-cascade})
+  calls it with a longer, anchor-set-scoped label following this project's own established
+  multi-anchor convention, and one of the three corpus document names is long enough on its own
+  that all four of its anchor-sets' labels share an identical 32-character prefix. Every one of
+  that document's baseline trials, across all five families and both arms, silently collided onto
+  one shared checkpoint directory -- confirmed directly by listing the output tree, which showed
+  exactly one directory where four were expected, for every family. This is the same defect class
+  already fixed once in this benchmark's cascade orchestrator (a chain-id collision, an earlier,
+  unlisted correction to that script) recurring in an older, previously-unaffected script reused
+  for this baseline. Fixed by disambiguating with an 8-character content hash suffix only when a
+  label would otherwise be truncated, so every doc\_label already under the 32-character budget
+  keeps its exact prior checkpoint path; the corrupted document's baseline directories were
+  deleted and regenerated under the fix, the other two documents' already-correct baseline data
+  was left untouched (confirmed unique per anchor-set before and after), and the full 120-trial
+  baseline sweep was re-run to completion before any statistic in Section~\ref{sec:results-respec-cascade}
+  was computed from it.
 \end{enumerate}
 
 Every defect above was independently re-verified against real output data -- either by
@@ -933,8 +1097,16 @@ drift a generic-tool agent shows under repeated edit-undo cycling. This result i
 informative than any single-edit pass-rate comparison, because it isolates a mechanism -- fresh
 anchor resolution versus accumulated agent-maintained state -- rather than reporting an aggregate
 number. Whether this mechanism generalizes beyond section reordering to other repeated-editing
-workflows is untested here; this benchmark exercises only one task family at depth, and we make
-no broader claim.
+workflows, and beyond uniform repetition to genuinely compound, cross-family pressure, was
+untested when this was first written; Section~\ref{sec:results-respec-cascade} tests exactly that,
+on a design built specifically to avoid repeating the same test rather than to confirm it cheaply
+-- five families in one chain rather than one repeated, plus a mid-chain reversal the original
+$K$-sweep never included -- and finds the same qualitative pattern: the generic-tool arm's edits
+increasingly corrupt the document as more of them accumulate, including into content the arm was
+never asked to touch, while the bounded tool's do not. We still make no claim this mechanism holds
+for every conceivable repeated-editing workflow; two independent designs pointing the same
+direction is stronger evidence than one, not a closed generalization to task families or workflows
+neither design tested.
 
 The write-time-verification-gated families illustrate a different, under-discussed methodological
 hazard: an architectural choice made for a good reason (never persist a corrupt document) can
@@ -955,7 +1127,12 @@ worth testing against a change of deployment environment before it is reported a
 \label{sec:limitations}
 
 Seven factors limit generalization. \textbf{First}, this benchmark tests only
-the \texttt{claude-sonnet-5} model and does not claim the results generalize across models.
+the \texttt{claude-sonnet-5} model and does not claim the results generalize across models --
+with one disclosed exception: the \texttt{respec\_cascade} extension
+(Section~\ref{sec:methods-respec-cascade}) runs on the \texttt{claude} CLI's \texttt{haiku} model
+alias instead, chosen for cost and throughput on a larger, metered job count, so its result is
+evidence the section-reordering mechanism generalizes across at least one model change as well as
+across task families, not a same-model replication of the rest of this paper's numbers.
 \textbf{Second}, the write-time-verification-gated families' originally-reported numbers
 (Table~\ref{tab:render-gate}) were collected on a single, shared, variably-contended host rather
 than a dedicated one, and that host condition materially depressed two of the three families'
@@ -1019,7 +1196,13 @@ Bounded, structurally-aware editing primitives like Meridian Docs show no statis
 significant advantage over generic file tools for a single edit, on the task families and model
 tested here (though section reorder trends in that direction at $K=1$; Table~\ref{tab:single-edit}),
 but show a significant, mechanistically-traced advantage under repeated edit-undo cycling -- the
-more realistic condition for an agent maintaining a document over time. Three further task families were initially confounded by
+more realistic condition for an agent maintaining a document over time. A separate, preregistered
+extension confirms this is not an artifact of testing one family alone: run across all five task
+families in a single compound chain, with a mid-chain reversal the original design never included,
+the same advantage reappears at a larger magnitude (83.3\% vs.\ 8.3\% chain completion,
+$p<0.0005$) and on the extension's own central test -- whether unrelated content survives untouched
+through a mid-chain reversal -- reaches significance on its own ($p=0.0305$;
+Section~\ref{sec:results-respec-cascade}). Three further task families were initially confounded by
 a write-time verification step whose reliability cost proved substantial and
 environment-dependent; a controlled confirmatory re-run on a dedicated, single-tenant host
 resolved that confound completely, closing all three families to 100\% pass for both arms and
