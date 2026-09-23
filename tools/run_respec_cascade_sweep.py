@@ -25,6 +25,7 @@ import argparse
 import concurrent.futures
 import datetime
 import json
+import os
 import sys
 from pathlib import Path
 from typing import Any
@@ -35,10 +36,19 @@ from run_respec_cascade_family import run_respec_cascade_chain  # noqa: E402
 
 # The three real author-owned documents (docs/paper-s23-respec-cascade-protocol-v0.md
 # section 1.1, hash-pinned 2026-09-20 in raw/author-owned-personal/PROVENANCE.md).
+# Base directory is overridable via RESPEC_CASCADE_CORPUS_DIR (e.g. a Linux
+# RunPod path like /workspace/ooxml-graph-paper/corpus, where the local
+# Windows raw/author-owned-personal path obviously does not exist) -- found
+# live, 2026-09-22, when this hardcoded Windows path crashed the sweep at
+# startup on a fresh RunPod pod.
+_CORPUS_DIR = Path(os.environ.get(
+    "RESPEC_CASCADE_CORPUS_DIR",
+    r"D:\MeridianData\ooxml-graph-paper\raw\author-owned-personal",
+))
 REAL_DOCUMENTS: dict[str, Path] = {
-    "jcshm-manuscript": Path(r"D:\MeridianData\ooxml-graph-paper\raw\author-owned-personal\jcshm-manuscript.docx"),
-    "jcshm-si": Path(r"D:\MeridianData\ooxml-graph-paper\raw\author-owned-personal\jcshm-si.docx"),
-    "masters-dissertation-defense": Path(r"D:\MeridianData\ooxml-graph-paper\raw\author-owned-personal\masters-dissertation-defense.docx"),
+    "jcshm-manuscript": _CORPUS_DIR / "jcshm-manuscript.docx",
+    "jcshm-si": _CORPUS_DIR / "jcshm-si.docx",
+    "masters-dissertation-defense": _CORPUS_DIR / "masters-dissertation-defense.docx",
 }
 
 
