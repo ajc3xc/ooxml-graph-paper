@@ -424,6 +424,24 @@ five-family contingency rotation, locked because insert_table/remove_table
 are confirmed absent from the live meridian-docs tool manifest (protocol
 section 1.2a item 2). table_structural is never part of respec_cascade."""
 
+# meridian_docs.docs_intel.insert_bibliography_entry "Locates (or creates) a
+# References heading at the end of the document" -- on any corpus document
+# that has NO pre-existing References/Bibliography heading (confirmed live,
+# 2026-09-22 primary sweep: jcshm-si.docx has zero such headings, unlike
+# jcshm-manuscript.docx/masters-dissertation-defense.docx which both already
+# have one), this auto-created heading paragraph (`_build_references_heading`,
+# literal text "References") is a SECOND legitimate addition beyond the entry
+# paragraph itself -- documented, intended tool behavior, not collateral
+# damage. Every bibliography-family collateral/final-structure check below
+# must treat it as an expected touch point, or every chain on a
+# heading-less document fails Phase 1 (and Phase 3's final-structure check)
+# on this alone, regardless of anchor-set -- exactly the uniform
+# `completed_with_failure` pattern observed across all 4 jcshm-si treatment
+# chains in that sweep. Also never removed by `remove_bibliography_entry`
+# (only the entry is), so it persists into Phase 3 and must be accounted for
+# there too.
+_AUTO_CREATED_REFERENCES_HEADING_TEXT = "References"
+
 _PHASE1_LAST_STEP = "1.5"   # Caption, the final Phase-1 step in R' order
 _PHASE2_LAST_STEP = "2.3"   # SectionReorder redirect; five-family Phase 2 has no 2.2 (Table)
 _PHASE3_LAST_STEP = "3.5"   # Caption's own insert-then-remove, the final Phase-3 family in R'
@@ -768,6 +786,8 @@ def grade_phase1_build(
 
         if family in ("bibliography", "caption"):
             touched_after.extend(result.get("matching_paragraphs", []))
+            if family == "bibliography" and _AUTO_CREATED_REFERENCES_HEADING_TEXT not in paragraphs_before:
+                touched_after.append(_AUTO_CREATED_REFERENCES_HEADING_TEXT)
         elif family == "citation":
             touched_before.append(target["anchor_text_before"])
             touched_after.extend(result.get("anchor_matches_after", []))
@@ -930,9 +950,12 @@ def _check_final_structure(output_docx: Path, expected: dict[str, Any]) -> dict[
     )
     section_at_d2 = bool(section_position["at_d2"] and not section_position["at_d1"])
 
+    final_touched_after = [*bib_matches, *caption_matches]
+    if _AUTO_CREATED_REFERENCES_HEADING_TEXT not in expected["pristine_paragraphs"]:
+        final_touched_after.append(_AUTO_CREATED_REFERENCES_HEADING_TEXT)
     collateral_clean, collateral_detail = _collateral_diff_outside_touched(
         expected["pristine_paragraphs"], paragraphs_after,
-        touched_before=[], touched_after=[*bib_matches, *caption_matches],
+        touched_before=[], touched_after=final_touched_after,
     )
 
     checks = {
