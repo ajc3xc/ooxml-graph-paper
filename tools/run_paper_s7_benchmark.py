@@ -25,6 +25,7 @@ from __future__ import annotations
 import concurrent.futures
 import dataclasses
 import datetime
+import hashlib
 import json
 import sys
 import xml.etree.ElementTree as ET
@@ -295,19 +296,32 @@ def run_chain(
     # conflate two independent trial points into one paired slot instead of
     # two. chain_id/chain_root below are derived from doc_label, so a
     # distinct doc_label already gives each anchor its own checkpoint
-    # directory with no further change needed here.
+    # directory -- PROVIDED it survives the truncation below intact (see
+    # that correction).
     # Windows MAX_PATH (260 chars) is a real constraint here: chain_root
     # nests trial directories several levels deep under a long E: run root,
     # and DocOps doc_labels can be 60+ chars on their own -- truncate rather
     # than let a long label silently produce a WinError 267 deep in
     # subprocess creation.
     #
-    # chain_id/chain_root are deliberately DETERMINISTIC (no random suffix,
-    # unlike the per-trial marker() used below) so a re-run of the same
-    # (doc, family, arm, k) combo after a crash finds and resumes from the
-    # SAME directory, instead of starting a fresh one blind to prior work --
-    # this is what actually enables checkpointing.
-    short_doc_label = doc_label[:32]
+    # 2026-09-23 correction (found live, PAPER-S23 respec_cascade baseline
+    # sweep): plain `doc_label[:32]` silently COLLIDES whenever two distinct
+    # doc_labels share the same first 32 characters -- exactly what
+    # f"{base_label}__anchor{i}" produces once base_label alone is >=32
+    # chars (confirmed directly: "masters-dissertation-defense__anchor0..3"
+    # all truncate to the identical "masters-dissertation-defense__a",
+    # so every anchor's job raced on/silently reused ONE shared chain_root
+    # across all 5 families -- the exact same class of bug already fixed in
+    # run_respec_cascade_family.py's own chain_id, commit 0cd9eb8). Only
+    # truncate+disambiguate when the label actually exceeds the budget, so
+    # every existing doc_label under 32 chars keeps its EXACT prior
+    # chain_id/chain_root (preserves checkpoint-resume compatibility with
+    # any already-running or historical PAPER-S7 sweep).
+    if len(doc_label) > 32:
+        doc_label_hash = hashlib.sha256(doc_label.encode("utf-8")).hexdigest()[:8]
+        short_doc_label = f"{doc_label[:23]}-{doc_label_hash}"
+    else:
+        short_doc_label = doc_label
     chain_id = f"{short_doc_label}-{family}-{arm}-k{k_pairs}"
     chain_root = run_root / chain_id
     chain_root.mkdir(parents=True, exist_ok=True)
