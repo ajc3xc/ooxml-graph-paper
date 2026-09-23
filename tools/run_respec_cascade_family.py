@@ -43,6 +43,7 @@ from __future__ import annotations
 
 import dataclasses
 import datetime
+import hashlib
 import json
 import sys
 import xml.etree.ElementTree as ET
@@ -252,7 +253,23 @@ def run_respec_cascade_chain(
     the sibling-file contract this is written against, and protocol section
     2.3 for the exact five-family step sequence.
     """
-    short_doc_label = doc_label[:32]
+    # 2026-09-22 correction (found live, RunPod primary sweep, all 24
+    # chains): a plain `doc_label[:32]` truncation silently COLLIDES for any
+    # doc_label sharing the same first-32-characters prefix -- confirmed
+    # concretely: "masters-dissertation-defense__anchor0" through
+    # "...anchor3" (the real f"{original}__anchor{i}" convention
+    # tools/run_respec_cascade_sweep.py uses) all truncate to the IDENTICAL
+    # "masters-dissertation-defense__an", since the distinguishing digit
+    # falls at position 37, past the cutoff. This made all 4 of that
+    # document's anchor-set chains (per arm) share one chain_id/chain_root,
+    # silently overwriting each other's checkpoints -- real corrupted data,
+    # not a cosmetic naming issue: 3 of the 4 anchor-sets' real results were
+    # lost for that document in that run. Fixed by keeping the truncation
+    # short (for filesystem path-length headroom) but appending a short
+    # hash of the FULL doc_label, so two labels sharing a long common
+    # prefix can never collide.
+    doc_label_hash = hashlib.sha256(doc_label.encode("utf-8")).hexdigest()[:8]
+    short_doc_label = f"{doc_label[:24]}-{doc_label_hash}"
     chain_id = f"{short_doc_label}-{_FAMILY}-{arm}"
     chain_root = run_root / chain_id
     chain_root.mkdir(parents=True, exist_ok=True)
