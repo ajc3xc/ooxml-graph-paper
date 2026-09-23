@@ -274,6 +274,31 @@ def run_respec_cascade_chain(
     chain_root = run_root / chain_id
     chain_root.mkdir(parents=True, exist_ok=True)
 
+    # 2026-09-22 correction #2 (found live, RunPod primary sweep, EVERY
+    # treatment chain): `short_doc_label` (above) is fine for chain_id/
+    # directory naming (no length constraint there) but is still far too
+    # long to use inside a MARKER passed to new_marker() -- confirmed
+    # concretely: insert_bibliography_entry's own duplicate-detection is by
+    # BOOKMARK NAME, sanitized then truncated to 40 chars
+    # (meridian_docs/docs_intel.py::_find_bibliography_entry,
+    # `safe_key = safe_key[:40]`, Word's classic bookmark-name limit). With
+    # doc_label now `f"{original}__anchor{i}"`-suffixed (tools/
+    # run_respec_cascade_sweep.py) plus this file's own "pilot-s7-" /
+    # "respec-" prefixing, B's and B2's citation keys shared an IDENTICAL
+    # 40-char truncated bookmark name ('pilot_s7_respec_jcshm_manuscript__
+    # anchor', verified by direct reproduction) -- Phase 1's B and Phase 3's
+    # B2 were never two entries at all; insert_bibliography_entry correctly
+    # refused the second insert as a duplicate, the agent recovered via
+    # update_bibliography_entry exactly as instructed, and that update
+    # OVERWROTE B's own entry with B2's content, silently discarding B --
+    # a real, 100%-reproducible defect in EVERY treatment chain, not a
+    # rare flake. `doc_tag` (pure 8-hex-char hash, no doc_label text at
+    # all) replaces `short_doc_label` in every marker prefix below so the
+    # distinguishing role token (B vs B2, C vs C2, ...) plus new_marker's
+    # own 12-hex-char uniqueness suffix both comfortably survive ANY
+    # plausible truncation limit, regardless of how long doc_label is.
+    doc_tag = doc_label_hash
+
     checkpoint = _load_checkpoint(chain_root)
     if checkpoint is not None:
         return checkpoint
@@ -332,7 +357,7 @@ def run_respec_cascade_chain(
     # PHASE 1 -- BUILD (5 steps, forward-only, order R')
     # -------------------------------------------------------------------
 
-    marker_b = new_marker(f"respec-{short_doc_label}-bib-B")
+    marker_b = new_marker(f"{doc_tag}-bib-B")
     bib_forward, _bib_inverse_unused = generate_bibliography_pair(doc_label, current_input, marker_b)
     # B is never removed anywhere in this chain (Phase 1 inserts it, Phase 2
     # leaves it untouched by design, Phase 3 inserts+removes a DISTINCT B2
@@ -344,7 +369,7 @@ def run_respec_cascade_chain(
         return _freeze("1.1", step)
     current_input = Path(step["output_docx_path"])
 
-    marker_c = new_marker(f"respec-{short_doc_label}-cit-C")
+    marker_c = new_marker(f"{doc_tag}-cit-C")
     cit_forward = generate_citation_forward(
         doc_label, current_input, marker_c, citation_anchor["anchor_para_id"], citation_anchor["anchor_text_snippet"],
     )
@@ -354,7 +379,7 @@ def run_respec_cascade_chain(
         return _freeze("1.2", step)
     current_input = Path(step["output_docx_path"])
 
-    marker_sec = new_marker(f"respec-{short_doc_label}-sec")
+    marker_sec = new_marker(f"{doc_tag}-sec")
     sec_forward, _sec_inverse_unused = generate_section_reorder_pair(
         doc_label, current_input, marker_sec,
         plan["section_id"], plan["section_heading_text"],
@@ -370,7 +395,7 @@ def run_respec_cascade_chain(
         return _freeze("1.3", step)
     current_input = Path(step["output_docx_path"])
 
-    marker_e = new_marker(f"respec-{short_doc_label}-eq")
+    marker_e = new_marker(f"{doc_tag}-eq")
     eq_forward = generate_equation_forward(
         doc_label, current_input, marker_e, equation_anchor["anchor_para_id"], equation_anchor["anchor_text_snippet"],
     )
@@ -380,7 +405,7 @@ def run_respec_cascade_chain(
         return _freeze("1.4", step)
     current_input = Path(step["output_docx_path"])
 
-    marker_cap = new_marker(f"respec-{short_doc_label}-cap")
+    marker_cap = new_marker(f"{doc_tag}-cap")
     cap_forward = generate_caption_forward(
         doc_label, current_input, marker_cap, caption_anchor["anchor_para_id"], caption_anchor["anchor_text_snippet"],
     )
@@ -493,7 +518,7 @@ def run_respec_cascade_chain(
     phase3_targets: dict[str, Any] = {}
 
     paragraphs_before_3_1 = _safe_paragraph_texts(current_input)
-    marker_b2 = new_marker(f"respec-{short_doc_label}-bib-B2")
+    marker_b2 = new_marker(f"{doc_tag}-bib-B2")
     b2_forward, b2_inverse = generate_bibliography_pair(doc_label, current_input, marker_b2)
     step = _run_step(b2_forward, chain_root, model, arm, "3.1-bibliography-forward", current_input)
     steps_run += 1
@@ -517,7 +542,7 @@ def run_respec_cascade_chain(
     }
 
     paragraphs_before_3_2 = _safe_paragraph_texts(current_input)
-    marker_c2 = new_marker(f"respec-{short_doc_label}-cit-C2")
+    marker_c2 = new_marker(f"{doc_tag}-cit-C2")
     cit2_forward = generate_citation_forward(
         doc_label, current_input, marker_c2, citation_anchor["anchor_para_id"], citation_anchor["anchor_text_snippet"],
     )
@@ -547,7 +572,7 @@ def run_respec_cascade_chain(
     }
 
     paragraphs_before_3_3 = _safe_paragraph_texts(current_input)
-    marker_sec2 = new_marker(f"respec-{short_doc_label}-sec2")
+    marker_sec2 = new_marker(f"{doc_tag}-sec2")
     sec2_forward, sec2_inverse = generate_second_exposure_reorder_pair(
         doc_label, current_input, marker_sec2, plan["section_id"], plan["section_heading_text"],
         d2_heading_para_id, d2_heading_text,  # current position, D2
@@ -571,7 +596,7 @@ def run_respec_cascade_chain(
     }
 
     paragraphs_before_3_4 = _safe_paragraph_texts(current_input)
-    marker_e2 = new_marker(f"respec-{short_doc_label}-eq2")
+    marker_e2 = new_marker(f"{doc_tag}-eq2")
     eq2_forward = generate_equation_forward(
         doc_label, current_input, marker_e2, equation_anchor["anchor_para_id"], equation_anchor["anchor_text_snippet"],
     )
@@ -602,7 +627,7 @@ def run_respec_cascade_chain(
     }
 
     paragraphs_before_3_5 = _safe_paragraph_texts(current_input)
-    marker_cap2 = new_marker(f"respec-{short_doc_label}-cap2")
+    marker_cap2 = new_marker(f"{doc_tag}-cap2")
     cap2_forward = generate_caption_forward(
         doc_label, current_input, marker_cap2, caption_anchor["anchor_para_id"], caption_anchor["anchor_text_snippet"],
     )
