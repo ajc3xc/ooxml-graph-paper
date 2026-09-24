@@ -676,5 +676,285 @@ def resolve_respec_schedule(docx_path: Path, max_anchor_sets: int = 4) -> list[d
             "caption_anchor": caption_anchor,
             "section_reorder_plan": plan_with_redirect,
         })
-
     return schedule
+
+
+def resolve_comment_targeting_clusters(
+    docx_path: Path, max_k: int = 8, min_group_size: int = 3,
+) -> dict[str, Any]:
+    """PAPER-S24 comment_targeting only (docs/paper-s24-targeted-comment-protocol-v0.md
+    section 2.2): resolve this document's real duplicate-label table-row
+    clusters (the family's "ambiguous target" pool) plus a matched pool of
+    unique body paragraphs (the "unique target" pool), freezing one ordered
+    schedule before any trial runs -- the same corpus-build-time-only
+    discipline resolve_respec_schedule already follows.
+
+    Walks word/document.xml directly with stdlib zipfile + ElementTree, one
+    top-to-bottom pass over body-level children (reusing
+    independent_gold_extractor.py's namespace constants and _local_text
+    helper rather than duplicating OOXML text-extraction logic), tracking the
+    nearest-preceding heading text as it goes -- Regime 2's own disambiguator
+    needs this, and neither docs_intel.parse_docx nor independent_gold_
+    extractor.extract()'s own generic node/edge graph tracks paragraph style
+    at all, so this is a dedicated pass, not a reuse of either.
+
+    Two distinct duplicate-label regimes are resolved (protocol section 1.2,
+    itself the corrected, corpus-verified replacement for one candidate
+    design's specific, falsified digit-normalization clustering key):
+      Regime 1 ("within_table_run"): the same first-cell label repeats as
+        several rows within ONE table. The disambiguator is whichever OTHER
+        cell column actually varies across that group's rows (numeric or
+        categorical) -- resolved per cluster, not assumed to be a fixed
+        column index, since protocol section 1.2 found this corpus has both
+        shapes.
+      Regime 2 ("cross_table_scatter"): a short label recurs once per table
+        across several different tables. The disambiguator is that
+        occurrence's own enclosing table's nearest-preceding heading text.
+
+    Every candidate target's native w14:paraId is resolved directly from this
+    same raw-XML walk (the table cell's own first <w:p> child), NEVER via
+    locate_anchor's lossy table-cell scheme (protocol section 1.2's closed
+    blocker), and checked against a FULL document (body+table) duplicate-
+    paraId scan computed in this same pass -- deliberately NOT
+    meridian_docs._vendored_content_tree._find_duplicate_native_para_ids,
+    which only scans body-DIRECT-CHILD <w:p> elements and would silently
+    report zero duplicates among every table-cell paragraph this family's
+    candidates actually are (confirmed by reading that function's own source
+    this session; protocol section 8's own disclosed risk). A candidate whose
+    paraId collides is marked duplicate_para_id=True and excluded from the
+    frozen target list, not silently dropped -- still visible in
+    excluded_candidates with its reason, per this project's standing
+    N-disclosure rule.
+
+    The unique-target pool reuses resolve_multiple_body_anchors (already
+    tested, already the existing body-anchor resolver) rather than
+    reimplementing body-paragraph selection, then re-filters its output
+    against this same duplicate_para_ids set for consistency.
+
+    Returns a dict, never partial: {"document": str(docx_path),
+    "min_group_size": min_group_size, "duplicate_para_id_count": int,
+    "regime1_clusters": [...], "regime2_clusters": [...],
+    "ambiguous_targets": [...up to max_k, alternating regime1/regime2 by
+    descending cluster size...], "unique_targets": [...matched to the same
+    count...], "usable_k": int, "excluded_candidates": [...]} -- every
+    cluster and every excluded candidate is reported, never silently
+    dropped, matching resolve_respec_schedule's own convention above."""
+    import zipfile
+    from xml.etree import ElementTree as ET
+
+    from independent_gold_extractor import _W, _W14, _local_text, _q  # noqa: E402 -- sibling module, imported lazily to avoid a hard import-time dependency for callers that never use this function
+
+    with zipfile.ZipFile(docx_path) as zf:
+        doc_xml = zf.read("word/document.xml")
+    root = ET.fromstring(doc_xml)
+    body = root.find(_q(_W, "body"))
+    if body is None:
+        return {"document": str(docx_path), "error": "no body element in word/document.xml"}
+
+    w_p = _q(_W, "p")
+    w_tbl = _q(_W, "tbl")
+    w_tr = _q(_W, "tr")
+    w_tc = _q(_W, "tc")
+    w_pStyle = _q(_W, "pStyle")
+    w_pPr = _q(_W, "pPr")
+    w_val = _q(_W, "val")
+    w14_paraId = _q(_W14, "paraId")
+
+    def _para_style(p: Any) -> str:
+        ppr = p.find(w_pPr)
+        if ppr is None:
+            return ""
+        pstyle = ppr.find(w_pStyle)
+        if pstyle is None:
+            return ""
+        return pstyle.get(w_val) or ""
+
+    def _first_cell_para_id(tc: Any) -> str | None:
+        p = tc.find(w_p)
+        if p is None:
+            return None
+        return p.get(w14_paraId)
+
+    # Pass 1: full-document (body+table) native paraId duplicate detection --
+    # see docstring above for why this is NOT _find_duplicate_native_para_ids.
+    seen_para_ids: dict[str, int] = {}
+    for p in body.iter(w_p):
+        pid = p.get(w14_paraId)
+        if pid:
+            seen_para_ids[pid] = seen_para_ids.get(pid, 0) + 1
+    duplicate_para_ids = {pid for pid, count in seen_para_ids.items() if count > 1}
+
+    # Pass 2: single top-to-bottom walk of body-level children, tracking the
+    # nearest-preceding heading text (Regime 2's disambiguator) and every
+    # table's own row/cell structure (both regimes) in one pass.
+    tables: list[dict[str, Any]] = []
+    last_heading_text: str | None = None
+    for child in body:
+        if child.tag == w_p:
+            if _HEADING_STYLE_RE.search(_para_style(child)):
+                text = _local_text(child).strip()
+                if text:
+                    last_heading_text = text
+        elif child.tag == w_tbl:
+            rows = []
+            for tr in child.findall(w_tr):
+                cells = tr.findall(w_tc)
+                rows.append({
+                    "cell_texts": [_local_text(tc).strip() for tc in cells],
+                    "cell_para_ids": [_first_cell_para_id(tc) for tc in cells],
+                })
+            tables.append({
+                "table_index": len(tables),
+                "nearest_preceding_heading": last_heading_text,
+                "rows": rows,
+            })
+
+    excluded_candidates: list[dict[str, Any]] = []
+
+    # --- Regime 1: within-table label runs ---
+    regime1_clusters: list[dict[str, Any]] = []
+    for tbl in tables:
+        by_label: dict[str, list[int]] = {}
+        for row_idx, row in enumerate(tbl["rows"]):
+            if not row["cell_texts"] or not row["cell_texts"][0]:
+                continue
+            by_label.setdefault(row["cell_texts"][0], []).append(row_idx)
+        for label, row_idxs in by_label.items():
+            if len(row_idxs) < min_group_size:
+                continue
+            max_cols = max(len(tbl["rows"][ri]["cell_texts"]) for ri in row_idxs)
+            disambiguator_col = None
+            for c in range(1, max_cols):
+                values = [
+                    tbl["rows"][ri]["cell_texts"][c] if c < len(tbl["rows"][ri]["cell_texts"]) else None
+                    for ri in row_idxs
+                ]
+                if len(set(values)) > 1:
+                    disambiguator_col = c
+                    break
+            members = []
+            for ri in row_idxs:
+                row = tbl["rows"][ri]
+                pid = row["cell_para_ids"][0] if row["cell_para_ids"] else None
+                dup = bool(pid) and pid in duplicate_para_ids
+                member = {
+                    "table_index": tbl["table_index"], "row_index": ri, "para_id": pid,
+                    "disambiguator_value": (
+                        row["cell_texts"][disambiguator_col]
+                        if disambiguator_col is not None and disambiguator_col < len(row["cell_texts"])
+                        else None
+                    ),
+                    "duplicate_para_id": dup,
+                }
+                members.append(member)
+                if dup or not pid:
+                    excluded_candidates.append({
+                        **member, "label": label, "regime": "within_table_run",
+                        "reason": "duplicate_native_paraid" if dup else "no_native_paraid",
+                    })
+            regime1_clusters.append({
+                "regime": "within_table_run", "table_index": tbl["table_index"],
+                "label": label, "disambiguator_column": disambiguator_col, "members": members,
+            })
+
+    # --- Regime 2: cross-table scatter (one occurrence per table, matching
+    # the protocol's own "recurs once, or a handful of times, per table") ---
+    by_label_global: dict[str, list[dict[str, Any]]] = {}
+    for tbl in tables:
+        seen_labels_this_table: set[str] = set()
+        for row_idx, row in enumerate(tbl["rows"]):
+            if not row["cell_texts"] or not row["cell_texts"][0]:
+                continue
+            label = row["cell_texts"][0]
+            if label in seen_labels_this_table:
+                continue
+            seen_labels_this_table.add(label)
+            pid = row["cell_para_ids"][0] if row["cell_para_ids"] else None
+            by_label_global.setdefault(label, []).append({
+                "table_index": tbl["table_index"], "row_index": row_idx, "para_id": pid,
+                "disambiguator_value": tbl["nearest_preceding_heading"],
+                "duplicate_para_id": bool(pid) and pid in duplicate_para_ids,
+            })
+    regime2_clusters: list[dict[str, Any]] = []
+    for label, members in by_label_global.items():
+        if len(members) < min_group_size:
+            continue
+        for m in members:
+            if m["duplicate_para_id"] or not m["para_id"]:
+                excluded_candidates.append({
+                    **m, "label": label, "regime": "cross_table_scatter",
+                    "reason": "duplicate_native_paraid" if m["duplicate_para_id"] else "no_native_paraid",
+                })
+        regime2_clusters.append({"regime": "cross_table_scatter", "label": label, "members": members})
+
+    # --- Ambiguous-target selection: one usable (non-duplicate, real paraId)
+    # target per cluster, largest clusters first (the sharpest, most
+    # confusable-sibling-rich ambiguity first), alternating Regime 1/Regime 2
+    # so neither regime silently dominates a short K. ---
+    def _usable_target(cluster: dict[str, Any]) -> dict[str, Any] | None:
+        for m in cluster["members"]:
+            if m["para_id"] and not m["duplicate_para_id"]:
+                sibling_para_ids = [
+                    mm["para_id"] for mm in cluster["members"]
+                    if mm is not m and mm["para_id"]
+                ]
+                return {
+                    "regime": cluster["regime"], "label": cluster["label"],
+                    "para_id": m["para_id"], "disambiguator_value": m["disambiguator_value"],
+                    "table_index": m["table_index"], "row_index": m["row_index"],
+                    "confusable_sibling_para_ids": sibling_para_ids,
+                }
+        return None
+
+    r1_sorted = sorted(regime1_clusters, key=lambda c: -len(c["members"]))
+    r2_sorted = sorted(regime2_clusters, key=lambda c: -len(c["members"]))
+    r1_targets = [t for t in (_usable_target(c) for c in r1_sorted) if t]
+    r2_targets = [t for t in (_usable_target(c) for c in r2_sorted) if t]
+
+    ambiguous_targets: list[dict[str, Any]] = []
+    i1 = i2 = 0
+    while len(ambiguous_targets) < max_k and (i1 < len(r1_targets) or i2 < len(r2_targets)):
+        if i1 < len(r1_targets):
+            ambiguous_targets.append(r1_targets[i1]); i1 += 1
+        if len(ambiguous_targets) < max_k and i2 < len(r2_targets):
+            ambiguous_targets.append(r2_targets[i2]); i2 += 1
+
+    # --- Unique-target pool: reuses the existing, already-tested body-anchor
+    # resolver rather than reimplementing body-paragraph selection, then
+    # re-filters against this function's own duplicate_para_ids for
+    # consistency (resolve_multiple_body_anchors has no knowledge of this
+    # family's table-cell-derived duplicate set). Requests MORE candidates
+    # than len(ambiguous_targets) strictly needs, not exactly that many: this
+    # function's own post-filter can drop some of resolve_multiple_body_
+    # anchors's own picks (a real risk, not hypothetical -- found live via
+    # this function's own test suite, a small candidate pool where the
+    # percentile-based resolver's single pick landed on exactly the one
+    # paragraph this filter then had to reject), and requesting only the
+    # exact target count leaves no room for a fallback pick when that
+    # happens. len(_BODY_ANCHOR_FRACTIONS) is resolve_multiple_body_anchors's
+    # own real ceiling -- requesting past it is a no-op, never an error. ---
+    claimed = {t["para_id"] for t in ambiguous_targets}
+    body_anchors = resolve_multiple_body_anchors(
+        docx_path, max_anchors=min(len(ambiguous_targets) + 8, len(_BODY_ANCHOR_FRACTIONS)),
+        exclude_para_ids=claimed,
+    )
+    unique_targets = [
+        {"para_id": a["anchor_para_id"], "text_snippet": a["anchor_text_snippet"]}
+        for a in body_anchors
+        if a.get("found") and a["anchor_para_id"] not in duplicate_para_ids
+    ][:len(ambiguous_targets)]
+
+    usable_k = min(len(ambiguous_targets), len(unique_targets))
+    return {
+        "document": str(docx_path),
+        "min_group_size": min_group_size,
+        "duplicate_para_id_count": len(duplicate_para_ids),
+        "regime1_cluster_count": len(regime1_clusters),
+        "regime2_cluster_count": len(regime2_clusters),
+        "regime1_clusters": regime1_clusters,
+        "regime2_clusters": regime2_clusters,
+        "ambiguous_targets": ambiguous_targets[:usable_k],
+        "unique_targets": unique_targets[:usable_k],
+        "usable_k": usable_k,
+        "excluded_candidates": excluded_candidates,
+    }

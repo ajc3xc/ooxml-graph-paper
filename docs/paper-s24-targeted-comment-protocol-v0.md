@@ -1,19 +1,18 @@
 # PAPER-S24: targeted native Word-comment placement under repeated,
 lookalike-cluster targeting pressure (protocol v0)
 
-Status: **draft, not locked.** Every tool-surface and corpus-structure claim below was
-re-verified live this session (ToolSearch against the connected `meridian-docs`
-manifest; direct reads of `meridian_docs/docs_intel.py` in
-`C:\Users\13144\Documents\Meridian\repository\extensions\meridian-docs\meridian_docs\`;
-independent `zipfile`/`ElementTree` scans of the three real, hash-pinned corpus files),
-but the one genuinely new, load-bearing artifact this family depends on -- a real
-`resolve_comment_targeting_clusters` resolver that walks the corpus, applies a
-paraId-uniqueness filter, and hash-pins the actual per-document K and target list --
-has not been built or run; this session's corpus numbers come from ad hoc exploratory
-scripts, not the frozen harness resolver. Per this project's own discipline (`docs/
-paper-s23-respec-cascade-protocol-v0.md`'s "a design is not locked until its stated
-preconditions are actually checked, not merely named"), this document names exactly
-what remains (section 8) and is not marked lock.
+Status: **lock (2026-09-24).** Originally drafted "not locked" pending the one
+genuinely new, load-bearing artifact this family depends on: a real
+`resolve_comment_targeting_clusters` resolver, actually built and run against the
+three real corpus files rather than estimated from ad hoc exploratory scripts. That
+precondition is now resolved -- see section 1.2b's dated addendum -- along with the
+other two section-8 preconditions gating lock specifically (corpus SHA-256
+re-verification; a live re-check that no comment-removal/resolve/edit tool has
+appeared since design). The smoke-test precondition (section 8's own separate item)
+still gates moving to validation/primary trials, not this design lock, exactly
+mirroring `docs/paper-s23-respec-cascade-protocol-v0.md`'s own precedent (that
+document's own 1.2a addendum locked on resolved corpus-build preconditions, with its
+harness build and smoke test following as later, post-lock phases).
 
 This design was produced by comparing four independently-drafted candidate families
 (precision-scale, accumulated-state, find-inverse, distractor-corpus), each with two
@@ -220,6 +219,70 @@ own exploratory scan did -- can hand `insert_word_comment`/`insert_highlighted_n
 working `anchor_para_id` for a table-cell target today. This is real, new harness code
 (section 5), not yet built as frozen harness logic, but it is now confirmed buildable
 rather than merely hoped to be.
+
+### 1.2b Addendum (2026-09-24): resolver built and run, preconditions resolved, protocol locked
+
+`resolve_comment_targeting_clusters` (section 2.2) is now real code in
+`tools/docx_anchor_prober.py`, not a plan -- built reusing
+`independent_gold_extractor.py`'s namespace constants and `_local_text` helper (never
+duplicating OOXML text-extraction logic), with its own dedicated single top-to-bottom
+`word/document.xml` walk tracking nearest-preceding-heading text for Regime 2 (neither
+`docs_intel.parse_docx` nor `independent_gold_extractor.extract()`'s own generic graph
+tracks paragraph style at all, so this could not be assembled from either alone).
+Deliberately does **not** call
+`meridian_docs._vendored_content_tree._find_duplicate_native_para_ids` for the
+mandatory uniqueness filter (section 2.2 item 2) -- confirmed by reading that
+function's own source that it only scans body-DIRECT-CHILD `<w:p>` elements and would
+silently see zero duplicates among every table-cell paragraph this family's candidates
+actually are. A dedicated full-document (body+table) `w14:paraId` scan is computed in
+the same pass instead.
+
+Run for real against the three hash-pinned corpus files
+(`tools/freeze_comment_targeting_schedule.py --max-k 8 --min-group-size 3`, output
+hash-pinned at `D:\MeridianData\ooxml-graph-paper\runs\paper-s24\comment-targeting-schedule-v1.json`):
+
+| Document | Regime-1 clusters | Regime-2 clusters | Duplicate `w14:paraId` values | Usable K (capped at 8) | Excluded candidates |
+|---|---:|---:|---:|---:|---:|
+| `jcshm-manuscript.docx` | 0 | 4 | 0 | 4 | 0 |
+| `jcshm-si.docx` | 21 | 18 | 0 | 8 | 0 |
+| `masters-dissertation-defense.docx` | 22 | 16 | **236** | 8 | 0 |
+
+Every number in this table matches this document's own earlier predictions closely
+enough to trust the resolver, not merely to hope it is correct: the manuscript's
+Regime-1 count of exactly 0 and Regime-2 count of exactly 4 matches section 1.2's own
+direct-dump finding ("the manuscript has essentially no Regime-1... and only a thin,
+4-group Regime-2 pool") precisely; the dissertation's duplicate-`w14:paraId` count of
+**236** is an exact match to section 1.2's own independently-dumped figure. Zero
+excluded candidates on all three documents means every selected target's own
+duplicate-paraId check passed cleanly -- the mandatory filter (section 2.2 item 2) is
+exercised and produces a real, non-trivial nonzero count on the one document where a
+real collision risk exists (236, dissertation), while never spuriously excluding a
+clean candidate on any of the three.
+
+Section 6's own K figures are corrected from provisional estimates to these frozen,
+real numbers: **manuscript K=4 (Regime-2-only, exactly as predicted, no Regime-1 pool
+to draw from at all); SI K=8; dissertation K=8** (both capped at this run's
+`max_k=8` -- SI's and the dissertation's own real cluster pools, 39 and 38 respectively,
+comfortably exceed 8, so raising `max_k` in a later run is a live option, not a corpus
+ceiling, should more chain depth be wanted).
+
+Corpus SHA-256 hashes (section 8's own named precondition) were re-verified this
+session, computed directly from the same three files the resolver just read, and match
+`PROVENANCE.md`'s 2026-09-20 pins exactly, byte for byte, on all three documents --
+confirming no drift since that pin.
+
+Tool-surface absence (section 8's own named, explicitly time-bound precondition) was
+re-checked live one final time this session via `ToolSearch` against several phrasings
+("remove resolve edit comment word docx delete") against the current, live connected
+`meridian-docs` manifest: still no comment-removal/resolve/edit tool and no
+`flag_for_review` tool exposed. Sections 0.2/0.3's conclusions stand, re-confirmed a
+sixth time, immediately before lock.
+
+What remains, unchanged from section 8, and now the sole gate before any
+validation/primary trial rather than before this lock: the live smoke test (one
+document, one Regime-1 target, one Regime-2 target, both arms), and the harness/grading
+code items in section 5 beyond the resolver itself (items 2-7), none of which are yet
+built.
 
 ### 1.3 Pre-existing organic content (a real grading hazard, independently reconfirmed)
 
@@ -471,14 +534,14 @@ literal mistargeting-under-accumulation signature).
   Reported as Tier 1 (unweighted per-document mean).
 - **Target/chain level:** per-document K is capped by the *smaller* of that document's
   ambiguous-target pool and its matched unique-target pool (section 2.1), and is **not**
-  forced to a common value across documents. This session's own exploratory scan
-  (section 1.2) suggests roughly K<=8 is realistic for the SI and dissertation (each has
-  20+ label groups of size >=3 once Regime 1 and Regime 2 are pooled) and K<=4 for the
-  manuscript (only 4 qualifying groups total, all Regime 2) -- these are **provisional,
-  ad hoc-scan numbers, not the frozen resolver's actual output** (section 8), and the
-  real, corpus-build-time numbers from `resolve_comment_targeting_clusters` are what
-  must be reported, whatever they turn out to be, including every excluded candidate and
-  the specific reason (`duplicate_native_paraid`, `no_confusable_sibling`, etc.).
+  forced to a common value across documents. **Frozen by the real resolver run
+  (section 1.2b): manuscript K=4 (Regime-2-only, 4 usable clusters total, none
+  excluded), SI K=8, dissertation K=8** (both capped at this run's `max_k=8`; SI's and
+  the dissertation's real cluster pools, 39 and 38 respectively, exceed the cap, so a
+  later run could raise it). Zero candidates were excluded on any document, including
+  the dissertation despite its 236 duplicate-`w14:paraId` values -- the mandatory
+  uniqueness filter (section 2.2 item 2) never had to fall back past a cluster's first
+  candidate on any of the frozen targets this run selected.
 - **Isolated-baseline level (section 3):** one single-step trial per (document, target,
   arm), same denominator structure as the chain targets themselves, so the section-3
   comparison is always apples-to-apples at the same aggregation tier.
@@ -553,30 +616,31 @@ times, a genuine, disclosed throughput risk, not yet solved, see section 8).
 ## 8. Risks and confounds (disclosed, not hidden; every live blocker any candidate's
 review found that this session was not able to fully resolve is carried forward here)
 
-- **The single largest reason this document is not locked: `resolve_comment_targeting_
-  clusters` (section 2.2/5) has not been built or run.** This session's corpus numbers
-  (section 1.2, section 6) come from ad hoc exploratory scripts written and run this
-  session, not the frozen, hash-pinned harness resolver every other family's protocol
-  locks against. Until that resolver exists, is run against the three real files, and
-  its output is hash-pinned, the exact per-document K, the exact target list, and the
-  exact confusable-sibling sets are not frozen -- and per this project's own standing
-  rule, a design does not lock until its stated preconditions are checked, not merely
-  named.
-- **No live smoke-test call has been made.** This document's claim that a
-  directly-resolved native `w14:paraId` for a table-cell paragraph can be passed to
+- **Resolved 2026-09-24 (section 1.2b): `resolve_comment_targeting_clusters` is built
+  and has run against the three real corpus files, hash-pinned output at
+  `D:\MeridianData\ooxml-graph-paper\runs\paper-s24\comment-targeting-schedule-v1.json`.**
+  Was the single largest reason this document was not locked; is not a remaining risk.
+- **Still open, and the sole gate before any validation/primary trial: no live
+  smoke-test call has been made.** This document's claim that a directly-resolved
+  native `w14:paraId` for a table-cell paragraph can be passed to
   `insert_word_comment`/`insert_highlighted_note(mode="comment")` successfully is
-  verified only by reading `_find_para_by_id`'s source and confirming 100% `paraId`
-  coverage on sampled table-cell paragraphs -- no actual tool call against these three
-  files was made this session. A real smoke test (one document, one Regime-1 target, one
-  Regime-2 target, both arms) must run and be manually spot-checked before any
-  validation/primary trial, per `docs/benchmark-preregistration-v0.md`'s standing smoke
-  -> scale-up -> final discipline.
-- **SHA-256 corpus hashes have not been re-verified this session.** `PROVENANCE.md`'s
-  pins are from 2026-09-20; its own stated precondition requires re-verification
-  immediately before any trial that consumes these files, not merely during design.
-- **Tool-surface absence is time-bound.** Re-check live, at actual corpus-build time,
-  that no comment-removal/resolve/edit tool and no live `insert_table`/`remove_table`-
-  style surprise has appeared since this session -- the same standing precondition
+  verified only by reading `_find_para_by_id`'s source, confirming 100% `paraId`
+  coverage on sampled table-cell paragraphs, and confirming the resolver itself runs
+  cleanly end-to-end -- no actual `insert_word_comment`/`insert_highlighted_note` tool
+  call against these three files has been made yet. A real smoke test (one document,
+  one Regime-1 target, one Regime-2 target, both arms) must run and be manually
+  spot-checked before any validation/primary trial, per
+  `docs/benchmark-preregistration-v0.md`'s standing smoke -> scale-up -> final
+  discipline.
+- **Resolved 2026-09-24 (section 1.2b): SHA-256 corpus hashes re-verified**, computed
+  directly from the same three files the resolver read, matching `PROVENANCE.md`'s
+  2026-09-20 pins exactly on all three documents.
+- **Resolved 2026-09-24 (section 1.2b), but genuinely time-bound, not a one-time
+  check: tool-surface absence was re-confirmed live immediately before lock** (no
+  comment-removal/resolve/edit tool, no live `flag_for_review`, no
+  `insert_table`/`remove_table`-style surprise). Re-check again at actual harness-build
+  and smoke-test time regardless -- a manifest can change between this lock and
+  whenever the smoke test above actually runs, the same standing precondition
   `respec_cascade`'s own protocol names for its own tool dependencies.
 - **No round-trip metric is possible for this family, a structural fact, not a gap
   worked around quietly** (section 0.2); its outcome measure (per-chain-position
@@ -605,9 +669,11 @@ review found that this session was not able to fully resolve is carried forward 
   negative finding) but were not exhaustively checked at every other structural level;
   this design should not be read as covering the general case of "hard targeting" in
   arbitrary documents.
-- **First-use grading and resolver code.** `resolve_comment_targeting_clusters`,
+- **First-use grading and orchestration code remains, beyond the resolver.**
+  `resolve_comment_targeting_clusters` itself has now run for real (section 1.2b);
   `score_comment_set_survival`, `_comment_range_precision`, and the chain orchestration
-  in `grade_comment_targeting_step`/`grade_comment_targeting_chain` have never run.
+  in `grade_comment_targeting_step`/`grade_comment_targeting_chain` (section 5 items
+  2-7) have not been written yet, let alone run.
 
 ## 9. What this document does not decide
 

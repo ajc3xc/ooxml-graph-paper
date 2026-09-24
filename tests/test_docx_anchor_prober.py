@@ -8,6 +8,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools"))
 
 from docx_anchor_prober import (  # noqa: E402
+    resolve_comment_targeting_clusters,
     resolve_equation_para_id_by_marker,
     resolve_section_reorder_plan,
     resolve_table_index_by_marker,
@@ -236,3 +237,130 @@ def test_section_reorder_plan_not_applicable_when_no_sibling_destination_exists(
 
     assert plan["found"] is False
     assert "sibling" in plan["reason"]
+
+
+# ---------------------------------------------------------------------------
+# resolve_comment_targeting_clusters (PAPER-S24)
+# ---------------------------------------------------------------------------
+
+def _row_xml(cell_texts: list[str], first_cell_para_id: str | None = None) -> str:
+    """One <w:tr> with len(cell_texts) cells; the first cell's own paragraph
+    carries first_cell_para_id if given (every other cell's paragraph has no
+    w14:paraId -- only the first cell is ever used as a candidate target)."""
+    cells = []
+    for i, text in enumerate(cell_texts):
+        id_attr = (
+            f' w14:paraId="{first_cell_para_id}" xmlns:w14="http://schemas.microsoft.com/office/word/2010/wordml"'
+            if i == 0 and first_cell_para_id else ""
+        )
+        cells.append(f'<w:tc><w:p{id_attr}><w:r><w:t>{text}</w:t></w:r></w:p></w:tc>')
+    return f"<w:tr>{''.join(cells)}</w:tr>"
+
+
+def _table_with_rows(rows_xml: list[str]) -> str:
+    return f'<w:tbl><w:tblGrid><w:gridCol w:w="1000"/></w:tblGrid>{"".join(rows_xml)}</w:tbl>'
+
+
+def test_regime1_within_table_run_finds_the_varying_disambiguator_column(tmp_path: Path) -> None:
+    """A label ("MAT (DSE)") repeated 4x within ONE table, differentiated by
+    a numeric second cell -- the design this family's protocol dumped
+    directly from the real jcshm-si.docx corpus (docs/paper-s24-targeted-
+    comment-protocol-v0.md section 1.2, Regime 1's first sub-pattern)."""
+    body = _table_with_rows([
+        _row_xml(["MAT (DSE)", "1"], first_cell_para_id="R0000001"),
+        _row_xml(["MAT (DSE)", "2"], first_cell_para_id="R0000002"),
+        _row_xml(["MAT (DSE)", "3"], first_cell_para_id="R0000003"),
+        _row_xml(["MAT (DSE)", "4"], first_cell_para_id="R0000004"),
+    ])
+    path = _make_docx_raw_body(tmp_path, "regime1.docx", body)
+
+    result = resolve_comment_targeting_clusters(path, max_k=8, min_group_size=3)
+
+    assert result["regime1_cluster_count"] == 1
+    assert result["regime2_cluster_count"] == 0
+    cluster = result["regime1_clusters"][0]
+    assert cluster["label"] == "MAT (DSE)"
+    assert cluster["disambiguator_column"] == 1
+    assert len(cluster["members"]) == 4
+    assert {m["disambiguator_value"] for m in cluster["members"]} == {"1", "2", "3", "4"}
+
+
+def test_regime2_cross_table_scatter_uses_nearest_preceding_heading(tmp_path: Path) -> None:
+    """A short label ("Atomic") recurring once per table across several
+    different, structurally parallel tables -- protocol section 1.2's
+    second real pattern -- disambiguated by each occurrence's own nearest
+    preceding heading, not an adjacent cell."""
+    body = "".join([
+        _heading("Section One", "H0000001", 1),
+        _table_with_rows([_row_xml(["Atomic", "0.5"], first_cell_para_id="R0000001")]),
+        _heading("Section Two", "H0000002", 1),
+        _table_with_rows([_row_xml(["Atomic", "0.7"], first_cell_para_id="R0000002")]),
+        _heading("Section Three", "H0000003", 1),
+        _table_with_rows([_row_xml(["Atomic", "0.9"], first_cell_para_id="R0000003")]),
+    ])
+    path = _make_docx_raw_body(tmp_path, "regime2.docx", body)
+
+    result = resolve_comment_targeting_clusters(path, max_k=8, min_group_size=3)
+
+    assert result["regime1_cluster_count"] == 0
+    assert result["regime2_cluster_count"] == 1
+    cluster = result["regime2_clusters"][0]
+    assert cluster["label"] == "Atomic"
+    disambiguators = {m["disambiguator_value"] for m in cluster["members"]}
+    assert disambiguators == {"Section One", "Section Two", "Section Three"}
+
+
+def test_group_below_min_group_size_is_not_a_cluster(tmp_path: Path) -> None:
+    body = _table_with_rows([
+        _row_xml(["MAT (DSE)", "1"], first_cell_para_id="R0000001"),
+        _row_xml(["MAT (DSE)", "2"], first_cell_para_id="R0000002"),
+    ])
+    path = _make_docx_raw_body(tmp_path, "too_small.docx", body)
+
+    result = resolve_comment_targeting_clusters(path, max_k=8, min_group_size=3)
+
+    assert result["regime1_cluster_count"] == 0
+    assert result["usable_k"] == 0
+
+
+def test_duplicate_native_para_id_candidate_is_excluded_not_selected(tmp_path: Path) -> None:
+    """A candidate row whose native w14:paraId collides with ANOTHER
+    paragraph anywhere in the document (protocol section 1.2's disclosed
+    dissertation-corpus hazard, section 2.2 item 2's mandatory filter) must
+    never be handed out as a usable target -- it is reported in
+    excluded_candidates with reason duplicate_native_paraid, and the
+    cluster's usable target falls through to its next clean member."""
+    body = "".join([
+        # A genuinely clean, sufficiently long body paragraph, so the
+        # unique-target pool this resolver also needs isn't zeroed out by
+        # the deliberately-colliding paragraph below being its only
+        # body-direct candidate (that would truncate the whole result via
+        # usable_k = min(len(ambiguous), len(unique)) for an unrelated
+        # reason, not the one this test actually exercises).
+        _body_text("A perfectly ordinary, sufficiently long unique body paragraph."),
+        # A stray body paragraph reusing the SAME paraId as the first
+        # candidate row below -- a real, Word-invalid duplicate.
+        _body_text("An unrelated duplicate-id paragraph."),
+        _table_with_rows([
+            _row_xml(["MAT (DSE)", "1"], first_cell_para_id="DUPEPID1"),
+            _row_xml(["MAT (DSE)", "2"], first_cell_para_id="R0000002"),
+            _row_xml(["MAT (DSE)", "3"], first_cell_para_id="R0000003"),
+        ]),
+    ])
+    # Splice the duplicate paraId onto the stray body paragraph by hand,
+    # since _body_text has no paraId parameter of its own.
+    body = body.replace(
+        "<w:p><w:r><w:t>An unrelated duplicate-id paragraph.</w:t></w:r></w:p>",
+        '<w:p w14:paraId="DUPEPID1" xmlns:w14="http://schemas.microsoft.com/office/word/2010/wordml">'
+        "<w:r><w:t>An unrelated duplicate-id paragraph.</w:t></w:r></w:p>",
+    )
+    path = _make_docx_raw_body(tmp_path, "dup_paraid.docx", body)
+
+    result = resolve_comment_targeting_clusters(path, max_k=8, min_group_size=3)
+
+    assert result["duplicate_para_id_count"] == 1
+    excluded_ids = {c["para_id"] for c in result["excluded_candidates"]}
+    assert "DUPEPID1" in excluded_ids
+    selected_ids = {t["para_id"] for t in result["ambiguous_targets"]}
+    assert "DUPEPID1" not in selected_ids
+    assert "R0000002" in selected_ids  # falls through to the next clean member
