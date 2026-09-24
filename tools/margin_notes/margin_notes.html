@@ -864,6 +864,63 @@ let VIEWED_BEFORE = 0;
 try { VIEWED_BEFORE = Number(localStorage.getItem(NOTES_LAST_SEEN_KEY)) || 0; } catch (e) {}
 try { localStorage.setItem(NOTES_LAST_SEEN_KEY, String(Date.now())); } catch (e) {}
 
+// ---------------------------------------------------------------------------
+// Reading-position restore: which paragraph a reviewer was last looking at,
+// so closing and reopening the page resumes there instead of back at the
+// top. Deliberately localStorage, not the shared db, even when db IS
+// connected -- this is per-viewer scroll state, not team data, the same
+// category NOTES_LAST_SEEN_KEY above and edits/notes/reviewedMap's own
+// local-mode fallback already treat as browser-local-only.
+// ---------------------------------------------------------------------------
+const LAST_POSITION_KEY = 'marginNotesLastPosition:' + META.id;
+let saveScrollPositionTimer = null;
+
+function currentTopBlockId() {
+  // The first block (paragraph/header/figure/table) whose bottom edge is
+  // still below the viewport's top -- i.e. the one the reader is currently
+  // at or has most recently scrolled past into. A small downward offset
+  // (60px) means a block whose top has JUST scrolled under the fixed page
+  // padding still counts as "current", not the one right after it.
+  const blocks = document.querySelectorAll('[data-block]');
+  for (const el of blocks) {
+    if (el.getBoundingClientRect().bottom > 60) return el.dataset.block;
+  }
+  return blocks.length ? blocks[blocks.length - 1].dataset.block : null;
+}
+
+function saveScrollPosition() {
+  try {
+    const blockId = currentTopBlockId();
+    if (blockId) localStorage.setItem(LAST_POSITION_KEY, blockId);
+  } catch (e) { /* storage unavailable or full -- local-only convenience, fail silent */ }
+}
+
+function restoreScrollPosition() {
+  let blockId = null;
+  try { blockId = localStorage.getItem(LAST_POSITION_KEY); } catch (e) { return; }
+  if (!blockId) return;
+  const el = document.querySelector(`[data-block="${blockId}"]`);
+  if (!el) return; // saved position no longer exists (main.tex changed) -- fall back to the top, not an error
+  el.scrollIntoView({ block: 'start' }); // no behavior:'smooth' -- opens already there, not visibly animating to it
+  const paraIdx = PARA_IDS.indexOf(blockId);
+  if (paraIdx !== -1) {
+    currentFocusIndex = paraIdx;
+    el.classList.add('kbd-current');
+  }
+}
+
+window.addEventListener('scroll', () => {
+  clearTimeout(saveScrollPositionTimer);
+  saveScrollPositionTimer = setTimeout(saveScrollPosition, 400);
+}, { passive: true });
+// Scroll events alone can miss the very last position if the page unloads
+// mid-debounce (the 400ms timer above never fires) -- pagehide is the
+// reliable "about to close/navigate away" signal (fires on tab close and
+// back/forward navigation; unlike beforeunload it isn't blocked by the
+// bfcache in browsers that support it), so it saves synchronously as a
+// backstop regardless of whether the debounced save already ran.
+window.addEventListener('pagehide', saveScrollPosition);
+
 function plainTextOf(blockId) {
   const el = document.querySelector(`[data-textsrc="${blockId}"]`);
   return el ? el.textContent : '';
@@ -1743,5 +1800,6 @@ document.addEventListener('keydown', (e) => {
 
 initDb();
 renderProgress();
+restoreScrollPosition();
 </script>
 
