@@ -1484,6 +1484,18 @@ def grade_comment_targeting_chain(
             "condition": condition,
             "outcome": step_result.get("outcome"),
             "step_pass": bool(step_result.get("step_pass")),
+            # Carried through separately from step_pass (found needed when
+            # building tools/compute_comment_targeting_statistics.py against
+            # this function's real persisted output): protocol section 7's
+            # own confirm criterion 4 needs keep-survival specifically ("the
+            # selective-precision-under-load analogue of respec_cascade's own
+            # Checkpoint-B test"), not step_pass, which also folds in this
+            # step's OWN targeting correctness -- a chain that mistargeted
+            # but never corrupted anything else, and one that corrupted prior
+            # state, both show step_pass=False identically without this
+            # field, even though they are different failures this specific
+            # measure must tell apart.
+            "keep_survival_ok": bool(step_result.get("keep_survival_ok")),
         })
 
     first_failed_position = next((p["chain_position"] for p in per_position if not p["step_pass"]), None)
