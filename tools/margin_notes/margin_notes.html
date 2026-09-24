@@ -805,6 +805,14 @@ document.querySelectorAll('[data-textsrc][contenteditable]').forEach(el => {
   el.addEventListener('input', () => onParagraphInput(el));
 });
 
+// Every rendered block (paragraph, header, figure, table), in true DOM/
+// document order -- sourced from the live DOM rather than re-deriving it from
+// DOC, since one DOC entry can render as two separate blocks (a header plus
+// its own body content on the same object) and this needs to match reality
+// exactly, not the source array's own shape. Used to enumerate every block a
+// cross-block comment span (see the mouseup handler below) actually covers.
+const ALL_BLOCK_IDS = Array.from(document.querySelectorAll('[data-block]')).map(el => el.dataset.block);
+
 // ---------------------------------------------------------------------------
 // DB + state
 // ---------------------------------------------------------------------------
@@ -989,7 +997,19 @@ function renderStats() {
 // edit, or an explicit "mark as read" -- whichever comes first.
 function reviewedBlockIds() {
   const touched = new Set();
-  notes.forEach(n => touched.add(n.block_id));
+  notes.forEach(n => {
+    touched.add(n.block_id);
+    // A cross-block span counts every block it covers as reviewed, not just
+    // its start -- matches applyWholeBlockNote's own soft-fill treatment,
+    // which tints the whole range, not only the anchor block.
+    if (n.end_block_id && n.end_block_id !== n.block_id) {
+      const startIdx = ALL_BLOCK_IDS.indexOf(n.block_id);
+      const endIdx = ALL_BLOCK_IDS.indexOf(n.end_block_id);
+      if (startIdx !== -1 && endIdx !== -1) {
+        ALL_BLOCK_IDS.slice(Math.min(startIdx, endIdx), Math.max(startIdx, endIdx) + 1).forEach(id => touched.add(id));
+      }
+    }
+  });
   Object.keys(edits).forEach(id => touched.add(id));
   Object.keys(reviewedMap).forEach(id => touched.add(id));
   return touched;
@@ -1038,7 +1058,7 @@ function renderSummary() {
     html: `<div class="note-card ${n.status === 'resolved' ? 'resolved' : ''}" data-goto="${n.block_id}">
       <div class="note-card-top">
         <span class="note-badge ${n.status === 'resolved' ? 'resolved-badge' : n.type}">${n.status === 'resolved' ? 'Resolved' : (n.type === 'suggestion' ? 'Suggestion' : 'Comment')}</span>
-        <span class="note-section">${n.block_id}</span>
+        <span class="note-section">${noteSectionLabel(n)}</span>
       </div>
       ${n.quoted_text ? `<blockquote class="note-quote">&ldquo;${escapeHtml(n.quoted_text)}&rdquo;</blockquote>` : ''}
       <p class="note-body">${escapeHtml(n.comment || '')}</p>
@@ -1088,7 +1108,7 @@ function renderNotes() {
     const quote = n.quoted_text ? `<blockquote class="note-quote">&ldquo;${escapeHtml(n.quoted_text)}&rdquo;</blockquote>` : '';
     if (editingNoteId === n.id) {
       return `<div class="note-edit-form" data-editing-id="${n.id}">
-        <div class="note-card-top">${badge}<span class="note-section">${n.block_id}</span></div>
+        <div class="note-card-top">${badge}<span class="note-section">${noteSectionLabel(n)}</span></div>
         ${quote}
         <textarea data-field="comment" placeholder="What's the issue?">${escapeHtml(n.comment || '')}</textarea>
         ${n.type === 'suggestion' ? `<textarea data-field="suggestion" placeholder="Replacement text&hellip;">${escapeHtml(n.suggestion || '')}</textarea>` : ''}
@@ -1101,7 +1121,7 @@ function renderNotes() {
     const suggest = n.suggestion ? `<div class="note-suggest"><b>Suggested text</b>${escapeHtml(n.suggestion)}</div>` : '';
     const edited = n.updated_at && n.updated_at !== n.created_at;
     return `<div class="note-card ${n.status === 'resolved' ? 'resolved' : ''}" data-goto="${n.block_id}" data-id="${n.id}">
-      <div class="note-card-top">${badge}${newBadge}<span class="note-section">${n.block_id}</span></div>
+      <div class="note-card-top">${badge}${newBadge}<span class="note-section">${noteSectionLabel(n)}</span></div>
       ${quote}
       <p class="note-body">${escapeHtml(n.comment || '')}</p>
       ${suggest}
@@ -1121,6 +1141,13 @@ function escapeHtml(s) {
   return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 
+// The block-id label shown on a note card: just the block id for an ordinary
+// single-block note, or "start → end" for a note spanning multiple sequential
+// blocks (n.end_block_id set and different from n.block_id).
+function noteSectionLabel(n) {
+  return (n.end_block_id && n.end_block_id !== n.block_id) ? `${n.block_id} → ${n.end_block_id}` : n.block_id;
+}
+
 function applyHighlights() {
   document.querySelectorAll('mark.note-mark').forEach(m => {
     const parent = m.parentNode;
@@ -1134,28 +1161,51 @@ function applyHighlights() {
   notes.forEach(n => {
     const el = document.querySelector(`[data-textsrc="${n.block_id}"]`);
     if (!el) return;
+    // A cross-block span (n.end_block_id set and different from n.block_id):
+    // there is no single element to wrap a precise <mark> substring around
+    // (highlightIn below only ever searches ONE block's own text), so every
+    // block the span covers gets the same whole-block soft-fill treatment a
+    // no-specific-text note already gets -- honest ("these paragraphs are
+    // covered by this note") rather than a fragile attempt to reconstruct an
+    // exact inline underline across element boundaries. The pin (single click
+    // target) renders once, on the span's start block.
+    if (n.end_block_id && n.end_block_id !== n.block_id) {
+      applyWholeBlockNote(n, n.block_id, n.end_block_id);
+      return;
+    }
     if (n.quoted_text) {
       highlightIn(el, n.quoted_text, n.type, n.status, n.id, n.comment);
       return;
     }
-    // Whole-block note (created via "+", no text selection): there's no
-    // specific substring to wrap in a <mark>, so the containing block gets
-    // the same soft-fill treatment as a real highlight instead -- "the line
-    // is highlighted" either way, not sometimes-highlighted/sometimes-not.
-    // A small pin badge, not the tinted background, is the click target for
-    // opening the note (see the docInner click handler below), so this never
-    // intercepts a normal click-to-position-cursor edit inside the block.
-    const container = el.closest('.block, .figblock, .tabblock') || el;
-    const cls = n.status === 'resolved' ? 'has-note-resolved' : (n.type === 'suggestion' ? 'has-note-suggestion' : 'has-note');
-    container.classList.add(cls);
-    const pin = document.createElement('button');
-    pin.type = 'button';
-    pin.className = 'note-pin' + (n.status === 'resolved' ? ' resolved' : (n.type === 'suggestion' ? ' suggestion' : ''));
-    pin.dataset.noteId = n.id;
-    pin.title = n.comment ? n.comment.slice(0, 160) : 'Open note';
-    pin.textContent = '•';
-    container.appendChild(pin);
+    applyWholeBlockNote(n, n.block_id, n.block_id);
   });
+}
+
+// Whole-block soft-fill + a single pin, across every block from `startId` to
+// `endId` inclusive (both the same id for an ordinary single-block note).
+// The pin is the click target for opening the note (see the docInner click
+// handler below), placed on the start block only so it never intercepts a
+// normal click-to-position-cursor edit and never duplicates across a span.
+function applyWholeBlockNote(n, startId, endId) {
+  const startIdxAll = ALL_BLOCK_IDS.indexOf(startId);
+  const endIdxAll = ALL_BLOCK_IDS.indexOf(endId);
+  const ids = (startIdxAll === -1 || endIdxAll === -1)
+    ? [startId]
+    : ALL_BLOCK_IDS.slice(Math.min(startIdxAll, endIdxAll), Math.max(startIdxAll, endIdxAll) + 1);
+  const cls = n.status === 'resolved' ? 'has-note-resolved' : (n.type === 'suggestion' ? 'has-note-suggestion' : 'has-note');
+  ids.forEach(id => {
+    const blockEl = document.querySelector(`[data-block="${id}"]`);
+    if (blockEl) blockEl.classList.add(cls);
+  });
+  const pinHost = document.querySelector(`[data-block="${startId}"]`);
+  if (!pinHost) return;
+  const pin = document.createElement('button');
+  pin.type = 'button';
+  pin.className = 'note-pin' + (n.status === 'resolved' ? ' resolved' : (n.type === 'suggestion' ? ' suggestion' : ''));
+  pin.dataset.noteId = n.id;
+  pin.title = n.comment ? n.comment.slice(0, 160) : 'Open note';
+  pin.textContent = '•';
+  pinHost.appendChild(pin);
 }
 
 function highlightIn(el, text, type, status, noteId, comment) {
@@ -1189,7 +1239,7 @@ const popover = document.getElementById('popover');
 // a selection now only ever shows a small, non-focus-stealing pill; opening
 // the actual comment popover is a deliberate click on that pill.
 const selectPill = document.getElementById('selectPill');
-let pillSelection = null; // { blockId, quotedText, rect }
+let pillSelection = null; // { blockId, endBlockId?, quotedText, rect }
 
 function hideSelectPill() {
   selectPill.classList.remove('show');
@@ -1201,8 +1251,117 @@ function showSelectPill(rect) {
   selectPill.classList.add('show');
 }
 
+// ---------------------------------------------------------------------------
+// Cross-block selection (comments spanning multiple sequential blocks).
+//
+// Each paragraph/header/figure/table is its OWN separate contenteditable
+// island (needed so per-block edit-tracking/diff/revert stays simple), and
+// the browser's native Selection cannot extend past the boundary of the
+// contenteditable element it started in -- confirmed live: dragging from the
+// end of one paragraph into the next just silently stops selecting at the
+// boundary, with no error and no visual cue why, which is exactly what read
+// as "comments can't span multiple sequential sections while scrolling."
+// Rather than fighting that boundary, this tracks the drag's start and end
+// points independently via pointer coordinates (document.caretRangeFromPoint/
+// caretPositionFromPoint), entirely sidestepping the Selection API, and only
+// takes over when the two points actually land in different blocks -- the
+// ordinary same-block case below is untouched and still uses the native
+// Selection exactly as before.
+// ---------------------------------------------------------------------------
+let dragStartBlock = null; // { id, range } set on mousedown inside a text block
+
+function caretRangeFromEvent(e) {
+  if (document.caretRangeFromPoint) return document.caretRangeFromPoint(e.clientX, e.clientY);
+  if (document.caretPositionFromPoint) {
+    const pos = document.caretPositionFromPoint(e.clientX, e.clientY);
+    if (!pos || !pos.offsetNode) return null;
+    const r = document.createRange();
+    r.setStart(pos.offsetNode, pos.offset);
+    r.collapse(true);
+    return r;
+  }
+  return null;
+}
+
+document.addEventListener('mousedown', (e) => {
+  dragStartBlock = null;
+  if (popover.contains(e.target) || selectPill.contains(e.target)) return;
+  const blockEl = e.target.closest && e.target.closest('[data-textsrc]');
+  if (!blockEl) return;
+  const range = caretRangeFromEvent(e);
+  if (!range) return;
+  dragStartBlock = { id: blockEl.dataset.textsrc, range };
+});
+
+// Text content of `blockEl` from `caretRange`'s position to the block's end,
+// resp. from the block's start to `caretRange`'s position -- via Range.
+// toString() rather than raw offset math, so nested markup (<i>, <cite>, a
+// citation's rendered text) flattens to plain text correctly either way.
+function textFromCaretToBlockEnd(blockEl, caretRange) {
+  const r = document.createRange();
+  r.setStart(caretRange.startContainer, caretRange.startOffset);
+  r.setEnd(blockEl, blockEl.childNodes.length);
+  return r.toString();
+}
+function textFromBlockStartToCaret(blockEl, caretRange) {
+  const r = document.createRange();
+  r.setStart(blockEl, 0);
+  r.setEnd(caretRange.startContainer, caretRange.startOffset);
+  return r.toString();
+}
+
+// Builds the combined quoted text for a genuine cross-block span: the tail
+// of the (true, DOM-order) start block, every block strictly between in
+// full, and the head of the (true) end block -- `dragStartBlock`/`dragEnd`
+// are passed in whatever order the user actually dragged, which may be
+// upward (end block precedes start block in the document), so this
+// resolves the true order from ALL_BLOCK_IDS first rather than assuming it.
+function buildCrossBlockSpan(dragStartBlock, dragEnd) {
+  const startIdx = ALL_BLOCK_IDS.indexOf(dragStartBlock.id);
+  const endIdx = ALL_BLOCK_IDS.indexOf(dragEnd.id);
+  if (startIdx === -1 || endIdx === -1) return null;
+  const forward = startIdx <= endIdx;
+  const trueStart = forward ? dragStartBlock : dragEnd;
+  const trueEnd = forward ? dragEnd : dragStartBlock;
+  const trueStartIdx = Math.min(startIdx, endIdx);
+  const trueEndIdx = Math.max(startIdx, endIdx);
+  const startEl = document.querySelector(`[data-textsrc="${trueStart.id}"]`);
+  const endEl = document.querySelector(`[data-textsrc="${trueEnd.id}"]`);
+  if (!startEl || !endEl) return null;
+  const parts = [textFromCaretToBlockEnd(startEl, trueStart.range)];
+  for (let i = trueStartIdx + 1; i < trueEndIdx; i++) {
+    const midEl = document.querySelector(`[data-textsrc="${ALL_BLOCK_IDS[i]}"]`);
+    if (midEl) parts.push(midEl.textContent);
+  }
+  parts.push(textFromBlockStartToCaret(endEl, trueEnd.range));
+  const quotedText = parts.map(p => p.trim()).filter(Boolean).join(' ').replace(/\s+/g, ' ').trim();
+  return { blockId: trueStart.id, endBlockId: trueEnd.id, quotedText };
+}
+
 document.addEventListener('mouseup', (e) => {
   if (popover.contains(e.target) || selectPill.contains(e.target) || popover.classList.contains('show')) return;
+  // Cross-block case: the drag started in one text block (recorded on
+  // mousedown above) and released in a DIFFERENT one. Checked before the
+  // native-selection path below, since the native Selection has no idea the
+  // pointer ever reached a second block at all (see comment block above).
+  if (dragStartBlock) {
+    const endBlockEl = e.target.closest && e.target.closest('[data-textsrc]');
+    if (endBlockEl && endBlockEl.dataset.textsrc !== dragStartBlock.id) {
+      const endRange = caretRangeFromEvent(e);
+      const started = dragStartBlock; // snapshot -- cleared below before the async continuation
+      dragStartBlock = null;
+      if (endRange) {
+        const span = buildCrossBlockSpan(started, { id: endBlockEl.dataset.textsrc, range: endRange });
+        if (span && span.quotedText.length >= 2) {
+          pillSelection = { blockId: span.blockId, endBlockId: span.endBlockId, quotedText: span.quotedText, rect: { top: e.clientY, bottom: e.clientY, left: e.clientX, right: e.clientX } };
+          showSelectPill(pillSelection.rect);
+          window.getSelection().removeAllRanges(); // the browser's own truncated single-block selection is no longer meaningful here
+          return;
+        }
+      }
+    }
+  }
+  dragStartBlock = null;
   setTimeout(() => {
     const sel = window.getSelection();
     if (!sel || sel.isCollapsed || !sel.toString().trim()) { hideSelectPill(); return; }
@@ -1219,9 +1378,13 @@ document.addEventListener('mouseup', (e) => {
 // Selection collapsing (e.g. the user pressed Backspace/Delete and the
 // selected text is now gone, or they just clicked to move the caret) means
 // there's nothing left to comment on - drop the pill rather than leave it
-// pointing at text that no longer exists.
+// pointing at text that no longer exists. Exempts a cross-block pill
+// (pillSelection.endBlockId set): its text was already captured independently
+// of the native Selection, which this handler's own removeAllRanges() call
+// (in the mouseup handler above) deliberately collapses right after -- that
+// collapse must not immediately hide the pill it was just shown for.
 document.addEventListener('selectionchange', () => {
-  if (!pillSelection) return;
+  if (!pillSelection || pillSelection.endBlockId) return;
   const sel = window.getSelection();
   if (!sel || sel.isCollapsed || !sel.toString().trim()) hideSelectPill();
 });
@@ -1231,7 +1394,7 @@ document.addEventListener('mousedown', (e) => {
 selectPill.addEventListener('mousedown', (e) => e.preventDefault()); // don't let the click collapse the live selection
 selectPill.addEventListener('click', () => {
   if (!pillSelection) return;
-  pendingSelection = { blockId: pillSelection.blockId, quotedText: pillSelection.quotedText };
+  pendingSelection = { blockId: pillSelection.blockId, endBlockId: pillSelection.endBlockId || null, quotedText: pillSelection.quotedText };
   const rect = pillSelection.rect;
   hideSelectPill();
   openPopover(rect);
@@ -1285,7 +1448,8 @@ document.getElementById('popSave').onclick = async () => {
   if (!pendingSelection) return;
   const id = 'c_' + Date.now().toString(36) + Math.random().toString(36).slice(2,7);
   const doc = {
-    id, block_id: pendingSelection.blockId, quoted_text: pendingSelection.quotedText,
+    id, block_id: pendingSelection.blockId, end_block_id: pendingSelection.endBlockId || null,
+    quoted_text: pendingSelection.quotedText,
     comment, suggestion: popType === 'suggestion' ? suggestion : '', type: popType,
     status: 'open', created_at: Date.now(),
   };
