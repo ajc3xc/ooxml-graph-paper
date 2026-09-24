@@ -675,6 +675,163 @@ def generate_equation_forward(
     )
 
 
+def _describe_comment_target(condition: str, target: dict[str, Any]) -> tuple[str, str]:
+    """Returns `(locate_description, disambiguator_description)` -- the two
+    natural-language fragments `generate_comment_targeting_step`'s shared
+    prompt is built from, derived from ONE element of `docx_anchor_prober.
+    resolve_comment_targeting_clusters`'s own `ambiguous_targets`/
+    `unique_targets` lists (see that function's docstring for the exact
+    shape -- read directly before writing this, per this build's own
+    discipline requirement). Regime 1 ("within_table_run") and Regime 2
+    ("cross_table_scatter") get different disambiguator phrasing, matching
+    protocol section 1.2's own two real sub-patterns; a unique target needs
+    no disambiguator beyond its own exact text, since it is unmatched
+    anywhere else in the document by construction."""
+    if condition == "unique":
+        text_snippet = target["text_snippet"]
+        locate = f"the paragraph whose text begins with exactly: {text_snippet!r}"
+        disambiguator = (
+            "This exact text does not appear anywhere else in the document, "
+            "so there is only one paragraph it can refer to."
+        )
+        return locate, disambiguator
+
+    if condition != "ambiguous":
+        raise ValueError(f"unknown comment_targeting condition: {condition!r}")
+
+    label = target["label"]
+    regime = target["regime"]
+    if regime == "within_table_run":
+        locate = (
+            f"a table in this document that has SEVERAL rows whose first "
+            f"cell reads exactly: {label!r}"
+        )
+        disambiguator = (
+            f"Among those rows, use the ONE specific row where another cell "
+            f"in that same row reads exactly: {target['disambiguator_value']!r}"
+        )
+    elif regime == "cross_table_scatter":
+        locate = (
+            f"SEVERAL different tables in this document, each containing "
+            f"exactly one row whose first cell reads exactly: {label!r}"
+        )
+        disambiguator = (
+            f"Among those occurrences, use the ONE specific occurrence "
+            f"whose table appears under or near the heading: "
+            f"{target['disambiguator_value']!r}"
+        )
+    else:
+        raise ValueError(f"unknown comment_targeting regime: {regime!r}")
+    return locate, disambiguator
+
+
+# ---------------------------------------------------------------------------
+# comment_targeting (PAPER-S24, docs/paper-s24-targeted-comment-protocol-v0.md)
+#
+# No inverse exists for this family (protocol section 0.2: insert_word_comment
+# has no safe removal/resolve/edit counterpart anywhere in the live
+# meridian-docs tool manifest, confirmed by an exhaustive grep of docs_intel.py
+# this session) -- this is the first family in this module with no forward/
+# inverse PAIR shape. generate_comment_targeting_step therefore returns a
+# SINGLE TrialSpec per (chain, step, condition), never a tuple.
+#
+# direction="forward" (not a new third literal) is the considered choice
+# here, for the same reason generate_section_redirect_trial above already
+# documents for respec_cascade's own one-way redirect step: every existing
+# direction-keyed dispatch in this codebase is written against the
+# documented "forward" | "inverse" contract, and this step is mechanically a
+# single forward tool call with no companion inverse anywhere in this chain
+# -- there is nothing a new literal would buy here, since this family's own
+# orchestrator (tools/run_comment_targeting_family.py) dispatches on chain
+# position, not on this field.
+#
+# Both arms receive the IDENTICAL natural-language prompt (protocol section
+# 2.3: "Both arms receive the identical prompt at each step") -- the
+# target's confusable label plus its realistic disambiguator (Regime 1's
+# adjacent-cell value, Regime 2's surrounding-table identity, or a unique
+# target's own unmatched-elsewhere text). Only the treatment arm
+# additionally receives anchor_para_id as an exact tool argument (via
+# treatment_args, read only when claude_pair_runner builds a treatment-arm
+# trial), the same asymmetry every existing family already tests.
+# ---------------------------------------------------------------------------
+
+def generate_comment_targeting_step(
+    doc_label: str,
+    input_docx: Path,
+    chain_marker: str,
+    step_index: int,
+    condition: str,
+    target: dict[str, Any],
+    author_tag: str,
+) -> TrialSpec:
+    """PAPER-S24 comment_targeting: one TrialSpec per chain/step/condition
+    (protocol section 5 item 2). `condition` is `"ambiguous"` (drawn from a
+    Regime-1/Regime-2 cluster in `resolve_comment_targeting_clusters`'s own
+    `ambiguous_targets`) or `"unique"` (from its `unique_targets`);
+    `target` is the corresponding single element of whichever of those two
+    lists this step draws from, passed through UNMODIFIED so this function's
+    signature stays stable if that resolver's own per-target fields grow.
+    `chain_marker`/`step_index` identify this step within its own chain for
+    trial-id/marker purposes only -- the orchestrator overrides `trial_id`
+    (and `arm`/`input_docx`) again immediately before running it, exactly
+    like every other family's own generator (see
+    `run_respec_cascade_family.py::_run_step`'s docstring for why that
+    override always happens regardless of what a generator already set).
+
+    `author_tag` is this step's own distinct per-trial author tag (protocol
+    section 4 item 1, e.g. `f"MeridianBench-{trial_id}"`) -- minted by the
+    ORCHESTRATOR, not here, since it must be threaded unmodified through to
+    grading (`docx_trial_evaluator.grade_comment_targeting_step`) and
+    survival-checking (`graph_scorer.score_comment_set_survival`) regardless
+    of which arm ran the step. It is passed to `insert_highlighted_note`'s
+    own `author` parameter for the treatment arm (via `treatment_args`), and
+    stated explicitly in the shared prompt so the control arm's
+    hand-authored `word/comments.xml` entry is graded on the identical
+    identifying scheme -- neither arm gets to choose its own author name.
+    """
+    marker = new_marker(f"comment-targeting-{step_index}")
+    comment_text = (
+        f"MeridianBench comment-targeting marker {marker} "
+        f"(step {step_index}, {condition} condition)."
+    )
+    locate_description, disambiguator_description = _describe_comment_target(condition, target)
+    trial_base = f"{doc_label}-comment_targeting-{chain_marker}-step{step_index}"
+
+    prompt = (
+        f"You are editing a Word document at the path given to you. Find "
+        f"{locate_description}.\n\n"
+        f"{disambiguator_description}\n\n"
+        f"Add a native Word REVIEW COMMENT (the kind that shows up in "
+        f"Word's Comments pane, anchored to that exact paragraph/row -- NOT "
+        f"plain text inserted into the paragraph itself) to that one exact "
+        f"paragraph, with this comment text: {comment_text!r}\n\n"
+        f"Use exactly this author name for the comment: {author_tag!r}\n\n"
+        f"The document may already contain other comments, from your own "
+        f"earlier work in this same document or pre-existing ones -- leave "
+        f"every one of them exactly as they are; add ONLY this one new "
+        f"comment. Do not change the text of that paragraph, or of any "
+        f"other paragraph, anywhere in the document. Save the document in "
+        f"place at the same path. When finished, reply with a single line: "
+        f"DONE."
+    )
+
+    return TrialSpec(
+        trial_id=trial_base,
+        doc_label=doc_label, arm="", direction="forward", family="comment_targeting",
+        input_docx=input_docx,
+        prompt=prompt,
+        marker_text=comment_text,
+        treatment_tool="insert_highlighted_note",
+        treatment_args={
+            "anchor_para_id": target["para_id"],
+            "text": comment_text,
+            "author": author_tag,
+            "mode": "comment",
+        },
+        pair_index=step_index,
+    )
+
+
 def generate_equation_inverse(
     doc_label: str, input_docx: Path, marker_prefix: str, marker: str, equation_para_id: str,
 ) -> TrialSpec:

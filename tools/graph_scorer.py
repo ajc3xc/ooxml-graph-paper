@@ -656,6 +656,276 @@ def score_keep_survival(checkpoint_a_items: dict, checkpoint_b_items: dict,
 
 
 # ---------------------------------------------------------------------------
+# comment_targeting precision + set-survival scorers (PAPER-S24,
+# docs/paper-s24-targeted-comment-protocol-v0.md section 4/5)
+# ---------------------------------------------------------------------------
+
+def _comment_range_precision(
+    bracketed_para_ids: set[str],
+    target_para_id: str,
+    confusable_sibling_para_ids: list[str] | set[str],
+) -> dict[str, Any]:
+    """PAPER-S24 comment_targeting only (protocol section 4 item 2): the
+    presence-AND-absence check for one already-inserted comment's own range
+    -- does it bracket EXACTLY the intended target paragraph, and NO other
+    paragraph in that target's frozen confusable-sibling set (the specific
+    precision failure -- `wrong_target_same_cluster` -- this whole family
+    exists to measure), and no other paragraph at all.
+
+    Pattern-matched to `_bibliography_entry_prf1`/`_citation_marker_prf1`'s
+    exact-match-on-a-stable-identifier style (a native `w14:paraId`, never
+    fuzzy text), but deliberately NOT the same `(gold_entries, cand_entries,
+    candidate_has_X_detection)` corpus-level PRF1 signature those two share:
+    this grades a single structural fact about ONE already-resolved comment
+    (protocol section 4's `grade_comment_targeting_step` is a one-step
+    check, not an aggregate precision/recall over many candidate comments),
+    so there is no corpus here to average over. The caller
+    (`docx_trial_evaluator.py::grade_comment_targeting_step`) is responsible
+    for deriving `bracketed_para_ids` directly from raw `word/document.xml`
+    (never from `list_internal_notes` -- protocol section 4's own standing
+    rule) -- this function only does the presence/absence comparison
+    against the frozen ground truth, the same narrow scope every other
+    `_*_prf1` helper in this module keeps for itself.
+
+    `bracketed_para_ids` is deliberately a SET of every paragraph id whose
+    own `<w:p>` element structurally contains (directly or via a nested
+    descendant) a `commentRangeStart` or `commentRangeEnd` tagged with this
+    comment's id -- NOT a document-order interpolation of every paragraph
+    physically BETWEEN a start and an end landing in two different
+    paragraphs. A native insertion via `_stage_word_comment` never produces
+    more than one such paragraph (protocol section 0.1, confirmed by reading
+    that function directly), so this distinction only matters for a
+    malformed control-arm hand-edit that puts the two markers in different
+    paragraphs -- and for that case, `bracketed_para_ids` already contains
+    more than one id, which fails `exact_single_paragraph_match` regardless
+    of which paragraphs a document-order interpolation would additionally
+    include. This simpler, tag-container definition is sufficient for every
+    distinction this check needs to make and avoids a full document-order
+    walk of the whole body+table tree just to resolve one malformed edge
+    case that changes no downstream verdict.
+    """
+    siblings = set(confusable_sibling_para_ids)
+    target_present = target_para_id in bracketed_para_ids
+    bracketed_siblings = bracketed_para_ids & siblings
+    bracketed_other = bracketed_para_ids - siblings - {target_para_id}
+    exact_single_paragraph_match = bracketed_para_ids == {target_para_id}
+
+    if not bracketed_para_ids:
+        status = "no_range_found"
+    elif exact_single_paragraph_match:
+        status = "exact_match"
+    elif bracketed_siblings:
+        status = "wrong_target_same_cluster"
+    else:
+        status = "wrong_target_other"
+
+    return {
+        "target_present": target_present,
+        "confusable_siblings_absent": not bracketed_siblings,
+        "bracketed_confusable_siblings": sorted(bracketed_siblings),
+        "bracketed_other_paragraphs": sorted(bracketed_other),
+        "bracketed_para_ids": sorted(bracketed_para_ids),
+        "exact_single_paragraph_match": exact_single_paragraph_match,
+        "status": status,
+        "pass": status == "exact_match",
+    }
+
+
+def score_comment_set_survival(
+    checkpoint_a_comments: list[dict[str, Any]],
+    checkpoint_b_comments: list[dict[str, Any]],
+    kept_comments: dict[str, dict[str, Any]],
+    excluded_authors: list[str] | None = None,
+) -> dict[str, Any]:
+    """PAPER-S24 comment_targeting only (protocol section 4 item 3):
+    generalizes `score_keep_survival`'s before/after checkpoint-pair diff
+    (see that function's own docstring for the full design this adapts)
+    from a small, FIXED set of named elements (respec_cascade's
+    `bibliography`/`equation`/`caption`, three keys chosen once per chain at
+    design time) to an arbitrary, GROWING per-chain set: every comment
+    inserted at steps `1..k-1` of THIS chain, plus every pre-existing
+    organic comment (protocol section 1.3), checked at chain position `k`.
+
+    `checkpoint_{a,b}_comments` are lists of comment "item" dicts,
+    `{"author": str, "text": str, "anchor_para_ids": tuple[str, ...]}`,
+    extracted by the CALLER directly from raw `word/comments.xml` +
+    `word/document.xml` range markers (never from `list_internal_notes`,
+    the same standing rule `_comment_range_precision` and every grader in
+    this module follows) -- this function never touches a `.docx` path
+    itself, exactly like `score_keep_survival`'s own items-dict convention.
+    `anchor_para_ids` is a tuple (not a single id) for the same reason
+    `_comment_range_precision` uses a set: a malformed comment can bracket
+    zero, one, or more than one paragraph structurally, and this function
+    needs to be able to tell "unchanged" from "silently re-anchored"
+    without assuming exactly one.
+
+    `kept_comments` maps a STABLE identifying key to that comment's own
+    EXPECTED `(author, text, anchor_para_ids)` triple -- each earlier step's
+    own per-trial author tag (protocol section 4 item 1: "a distinct
+    per-trial author tag" is this family's own harness-minted stable
+    identifier, playing the role `score_keep_survival`'s three fixed
+    element NAMES play for respec_cascade) for harness-inserted comments,
+    or a synthesized key (e.g. `f"organic:{index}"`) for each pre-existing
+    organic comment.
+
+    Matching is by the FULL `(author, text, anchor_para_ids)` triple, never
+    by author alone: protocol section 1.3's own real corpus data confirms
+    author is NOT a unique key across a document's comments in general
+    (`jcshm-si.docx` has 6 organic comments, 5 of them all authored "Claude
+    (review flag)") -- only a HARNESS-MINTED per-trial author tag is
+    guaranteed unique (protocol section 4 item 1's own per-step "exactly one
+    new `<w:comment>` by this author" check enforces that at insertion
+    time), and this function must grade organic comments correctly too, so
+    it cannot assume author uniqueness in general. A full-tuple match
+    is checked in BOTH checkpoints -- not just checkpoint B alone --
+    mirroring `score_keep_survival`'s own "checkpoint A's own form must
+    ALSO be exactly one occurrence" discipline: an element already
+    missing/duplicated/wrong at checkpoint A cannot be credited as
+    "surviving" merely because checkpoint B shows the identical wrong state.
+    A comment that survives under the same author but drifts to a different
+    TEXT or ANCHOR_PARA_IDS is reported as `present=False` (it no longer
+    matches its own expected record) exactly like a comment that vanished
+    outright -- both collapse to `kept_comment_missing` at the `overall_
+    status` level, the same granularity `score_keep_survival` itself uses
+    for its own three named elements (this function does not attempt a
+    finer "moved" vs. "deleted" distinction at the top level, though the
+    per-key `occurrences_checkpoint_{a,b}_by_author` fields below retain
+    enough raw detail for a caller that wants to investigate further).
+
+    `excluded_authors` names the author tag(s) legitimately NEW at
+    checkpoint B and absent at checkpoint A -- THIS step's own freshly
+    inserted comment, whose own correctness is graded separately by
+    `_comment_range_precision` and the per-step "exactly one new comment"
+    check, never by this function -- the same role `score_keep_survival`'s
+    own `excluded_paragraph_texts` plays for citation's anchor-paragraph
+    text change.
+
+    Deliberate, disclosed deviation from a byte-for-byte copy of
+    `score_keep_survival`'s own remainder-drift check: that function flags
+    drift whenever its Counter-based remainder PRF1's `f1 != 1.0`, which is
+    safe there because respec_cascade's remainder is "every OTHER paragraph
+    in a real, hundreds-of-paragraphs document" -- essentially never empty
+    on either side, so `_prf1`'s `recall=None` (undefined-when-gold-empty)
+    edge case never actually arises in that caller. Here, once the kept set
+    and this step's own excluded new comment are removed, the remainder is
+    typically EMPTY on BOTH sides in the normal, clean case (a document's
+    comments are, absent a defect, entirely accounted for by kept +
+    this-step's-own-new). `_prf1(0, 0, 0)` returns `f1=None` (recall is
+    undefined when `gold_total=0`), and `None != 1.0` is True -- so a blind
+    copy of `score_keep_survival`'s own check would flag EVERY clean step as
+    drift-detected, a real bug class this function was caught making before
+    it shipped (the same level of care
+    `docx_trial_evaluator.py`'s own `_AUTO_CREATED_REFERENCES_HEADING_TEXT`
+    fix was applied with elsewhere in this codebase, cited in this family's
+    own build brief as the precedent to match). Fixed here by treating "both
+    remainders empty" as its own explicit clean case rather than routing it
+    through the ambiguous f1-vs-1.0 comparison.
+    """
+    from collections import Counter
+
+    def _tuple_of(item: dict[str, Any]) -> tuple[Any, Any, Any]:
+        return (item.get("author"), item.get("text"), tuple(item.get("anchor_para_ids") or ()))
+
+    def _by_author(items: list[dict[str, Any]]) -> dict[str, list[dict[str, Any]]]:
+        grouped: dict[str, list[dict[str, Any]]] = {}
+        for item in items:
+            grouped.setdefault(item.get("author"), []).append(item)
+        return grouped
+
+    a_by_author = _by_author(checkpoint_a_comments)
+    b_by_author = _by_author(checkpoint_b_comments)
+
+    element_results: dict[str, dict[str, Any]] = {}
+    for key, expected in kept_comments.items():
+        expected_tuple = (
+            expected.get("author"), expected.get("text"), tuple(expected.get("anchor_para_ids") or ()),
+        )
+        author = expected.get("author")
+        a_author_comments = a_by_author.get(author, [])
+        b_author_comments = b_by_author.get(author, [])
+        a_exact = [c for c in a_author_comments if _tuple_of(c) == expected_tuple]
+        b_exact = [c for c in b_author_comments if _tuple_of(c) == expected_tuple]
+        # present/duplicated/unchanged are all keyed on the FULL exact
+        # tuple, never on author alone -- see docstring for why (organic
+        # comments are not author-unique in the real corpus). The
+        # by-author counts are kept only as extra diagnostic detail.
+        element_results[key] = {
+            "present": len(b_exact) >= 1,
+            "duplicated": len(b_exact) > 1,
+            "unchanged": len(a_exact) == 1 and len(b_exact) == 1,
+            "occurrences_checkpoint_a_by_author": len(a_author_comments),
+            "occurrences_checkpoint_b_by_author": len(b_author_comments),
+            "exact_matches_checkpoint_a": len(a_exact),
+            "exact_matches_checkpoint_b": len(b_exact),
+        }
+
+    # Remainder = every comment NOT accounted for by kept_comments/excluded_
+    # authors, used for the generic drift check below. Excluded authors are
+    # removed by AUTHOR membership (safe: an excluded author is always this
+    # step's own harness-minted, guaranteed-unique tag, never shared with
+    # any other real comment). Kept comments are removed by exact-TUPLE
+    # multiset subtraction (one occurrence per kept_comments entry), never
+    # by author membership -- author-based removal would be WRONG here: if
+    # two organic comments share an author (real, confirmed on
+    # jcshm-si.docx per protocol section 1.3) and only one is a genuine
+    # "kept" match, author-based filtering would silently exempt the OTHER
+    # one from drift-checking too, even if it were a totally unrelated,
+    # unaccounted-for comment that merely happens to share that author
+    # string.
+    excluded = set(excluded_authors or ())
+    kept_tuples = Counter(
+        (expected.get("author"), expected.get("text"), tuple(expected.get("anchor_para_ids") or ()))
+        for expected in kept_comments.values()
+    )
+
+    def _remainder(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        filtered = [c for c in items if c.get("author") not in excluded]
+        remaining = Counter(kept_tuples)
+        result: list[dict[str, Any]] = []
+        for c in filtered:
+            t = _tuple_of(c)
+            if remaining.get(t, 0) > 0:
+                remaining[t] -= 1
+                continue
+            result.append(c)
+        return result
+
+    a_remainder = _remainder(checkpoint_a_comments)
+    b_remainder = _remainder(checkpoint_b_comments)
+    a_ctr = Counter(_tuple_of(c) for c in a_remainder)
+    b_ctr = Counter(_tuple_of(c) for c in b_remainder)
+    matched = sum((a_ctr & b_ctr).values())
+    unintended_drift_prf1 = _prf1(matched, len(a_remainder), len(b_remainder))
+    if not a_remainder and not b_remainder:
+        drift_detected = False  # see docstring -- both-empty is this function's own explicit clean case
+    else:
+        drift_detected = unintended_drift_prf1["f1"] != 1.0
+
+    overall_status = "clean_comment_set_survival"
+    for key in kept_comments:
+        result = element_results[key]
+        if not result["present"]:
+            overall_status = f"kept_comment_missing:{key}"
+            break
+        if result["duplicated"]:
+            overall_status = f"kept_comment_duplicated:{key}"
+            break
+        if not result["unchanged"]:
+            overall_status = f"kept_comment_changed:{key}"
+            break
+    else:
+        if drift_detected:
+            overall_status = "unintended_comment_drift_detected"
+
+    return {
+        **element_results,
+        "unintended_drift_prf1": unintended_drift_prf1,
+        "unintended_drift_detected": drift_detected,
+        "overall_status": overall_status,
+    }
+
+
+# ---------------------------------------------------------------------------
 # Bootstrap CIs and paired significance tests
 # ---------------------------------------------------------------------------
 

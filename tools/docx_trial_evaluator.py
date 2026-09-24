@@ -13,12 +13,18 @@ edit produced) and the treatment arm (Meridian's own APA formatter).
 from __future__ import annotations
 
 import zipfile
+import xml.etree.ElementTree as ET
 from collections import Counter
 from pathlib import Path
 from typing import Any
 
 from docx_trial_broker import _paragraph_texts  # noqa: E402
-from graph_scorer import score_keep_survival  # noqa: E402
+from graph_scorer import score_keep_survival, score_comment_set_survival, _comment_range_precision  # noqa: E402
+# PAPER-S24 comment_targeting only: reuses independent_gold_extractor.py's own
+# namespace constants and _local_text helper (never duplicating OOXML
+# text-extraction logic), the same convention docx_anchor_prober.py's own
+# resolve_comment_targeting_clusters already established for this family.
+from independent_gold_extractor import _W, _W14, _local_text, _q  # noqa: E402
 
 
 def _package_is_valid_docx(path: Path) -> tuple[bool, str | None]:
@@ -1173,3 +1179,319 @@ def chain_failure_taxonomy(
         return "phase3_broken_at_final_structure"
 
     return None
+
+
+# ---------------------------------------------------------------------------
+# comment_targeting (PAPER-S24, docs/paper-s24-targeted-comment-protocol-v0.md
+# section 4/5 item 3). No phases here -- a chain is K sequential, distinct,
+# never-repeated single-step comment placements (protocol section 2.1), so
+# grading is per-STEP (grade_comment_targeting_step) plus a simple chain-wide
+# composite (grade_comment_targeting_chain), not respec_cascade's three-phase
+# shape above. Every check parses word/comments.xml / word/document.xml
+# directly via stdlib zipfile/ElementTree, per protocol section 4's own
+# standing rule: list_internal_notes is explicitly NOT used as ground truth
+# anywhere in this family (it is a sidecar populated by insert_highlighted_
+# note itself at insertion time -- confirmed by reading that function's
+# source, which upserts index_db_path's sidecar row for mode="comment" too,
+# `note_id = f"_MComment{comment_id}"` -- never an independent re-derivation),
+# and neither arm's own self-report is trusted either.
+# ---------------------------------------------------------------------------
+
+_COMMENTS_PART = "word/comments.xml"
+_DOCUMENT_PART = "word/document.xml"
+
+
+def _read_optional_xml_part(docx_path: Path, part_name: str) -> ET.Element | None:
+    """The parsed root of `part_name` inside `docx_path`, or None if the
+    part is absent -- e.g. `word/comments.xml` on a document with zero
+    comments (protocol section 1.3 found this true of
+    masters-dissertation-defense.docx: its first inserted comment in this
+    family exercises `_stage_word_comment`'s own "create the part from
+    scratch" code path, never the "extend an existing part" path the other
+    two documents exercise). Never raises on a MISSING part; a genuinely
+    corrupt/unparseable PRESENT part is allowed to raise, since that is real
+    evidence for `_package_is_valid_docx`'s own gate to have already caught
+    -- this helper is only ever called after that gate passes."""
+    with zipfile.ZipFile(docx_path) as zf:
+        if part_name not in zf.namelist():
+            return None
+        return ET.fromstring(zf.read(part_name))
+
+
+def _comment_texts_by_id(comments_root: ET.Element | None) -> dict[str, dict[str, str]]:
+    """`{comment_id: {"author": ..., "text": ...}}` from `word/comments.xml`'s
+    own `<w:comment>` elements, read directly."""
+    if comments_root is None:
+        return {}
+    out: dict[str, dict[str, str]] = {}
+    for comment in comments_root.findall(_q(_W, "comment")):
+        comment_id = comment.get(_q(_W, "id"))
+        if comment_id is None:
+            continue
+        out[comment_id] = {
+            "author": comment.get(_q(_W, "author")) or "",
+            "text": _local_text(comment).strip(),
+        }
+    return out
+
+
+def _walk_all_paragraphs(document_root: ET.Element):
+    body = document_root.find(_q(_W, "body"))
+    if body is None:
+        return
+    yield from body.iter(_q(_W, "p"))
+
+
+def _comment_bracketed_para_ids(document_root: ET.Element) -> dict[str, set[str]]:
+    """`{comment_id: {para_id, ...}}` -- for every `commentRangeStart`/
+    `commentRangeEnd` found anywhere in `word/document.xml`, the identity of
+    the `<w:p>` element that structurally contains it (directly or via a
+    nested descendant -- this naturally covers table-cell paragraphs too,
+    since `<w:tc>`'s own `<w:p>` children are the ones actually walked here,
+    never a `<w:tbl>`/`<w:tr>`/`<w:tc>` ancestor). No OOXML paragraph is ever
+    nested inside another, so walking one paragraph's own subtree can never
+    misattribute a range marker to the wrong paragraph.
+
+    Identity is the paragraph's native `w14:paraId` when present -- every
+    candidate target this family's resolver hands out already has one
+    (protocol section 1.1: 100% native `w14:paraId` coverage on all three
+    real corpus documents) -- falling back to a positional
+    `f"__unindexed_para_{n}"` placeholder for the rare paragraph with none,
+    so a malformed control-arm edit that brackets an off-target,
+    unindexed paragraph still shows up as "an extra paragraph got touched"
+    in `_comment_range_precision` rather than silently vanishing from the
+    bracketed set. This fallback is exercised only by a synthetic test
+    fixture or a genuine control-arm mistake, never by the real corpus."""
+    bracketed: dict[str, set[str]] = {}
+    start_tag = _q(_W, "commentRangeStart")
+    end_tag = _q(_W, "commentRangeEnd")
+    id_attr = _q(_W, "id")
+    for index, p in enumerate(_walk_all_paragraphs(document_root)):
+        pid = p.get(_q(_W14, "paraId")) or f"__unindexed_para_{index}"
+        ids_here: set[str] = set()
+        for el in p.iter():
+            if el.tag in (start_tag, end_tag):
+                cid = el.get(id_attr)
+                if cid is not None:
+                    ids_here.add(cid)
+        for cid in ids_here:
+            bracketed.setdefault(cid, set()).add(pid)
+    return bracketed
+
+
+def _extract_comment_items(docx_path: Path) -> list[dict[str, Any]]:
+    """Every native Word comment currently present in `docx_path`, read
+    directly from `word/comments.xml` + `word/document.xml`'s own range
+    markers. Returns one item dict per `<w:comment>`,
+    `{"comment_id": str, "author": str, "text": str,
+    "anchor_para_ids": tuple[str, ...]}` -- the same shape
+    `graph_scorer.score_comment_set_survival` and `_comment_range_precision`
+    (via its own `bracketed_para_ids` set argument) expect. `anchor_para_ids`
+    is `()` for a comment id whose range markers were not found bracketing
+    any paragraph at all (a genuinely malformed edit)."""
+    document_root = _read_optional_xml_part(docx_path, _DOCUMENT_PART)
+    if document_root is None:
+        return []
+    comments_root = _read_optional_xml_part(docx_path, _COMMENTS_PART)
+    comment_meta = _comment_texts_by_id(comments_root)
+    bracketed = _comment_bracketed_para_ids(document_root)
+
+    items: list[dict[str, Any]] = []
+    for comment_id, meta in comment_meta.items():
+        items.append({
+            "comment_id": comment_id,
+            "author": meta["author"],
+            "text": meta["text"],
+            "anchor_para_ids": tuple(sorted(bracketed.get(comment_id, ()))),
+        })
+    return items
+
+
+def _safe_paragraph_texts_or_none(docx_path: Path) -> list[str] | None:
+    """Mirrors `run_respec_cascade_family.py::_safe_paragraph_texts` (not
+    imported -- private to that module, and this file avoids the same
+    backwards/sideways private-import coupling the respec_cascade ground
+    truth already warned against): a raw zipfile read against the
+    immediately-prior checkpoint must never raise and abort grading just
+    because an earlier step (either arm) left something unreadable behind.
+    That prior checkpoint's OWN package validity was already gated when it
+    was produced (every step runs through `_package_is_valid_docx`); this
+    is only a defensive re-read, not a second validity gate."""
+    try:
+        return _paragraph_texts(docx_path)
+    except (KeyError, zipfile.BadZipFile, ET.ParseError, FileNotFoundError):
+        return None
+
+
+def grade_comment_targeting_step(
+    output_docx: Path,
+    input_docx: Path,
+    author_tag: str,
+    target_para_id: str,
+    confusable_sibling_para_ids: list[str],
+    kept_comments: dict[str, dict[str, Any]],
+) -> dict[str, Any]:
+    """PAPER-S24 comment_targeting (protocol section 4, "Per-step check: new
+    `grade_comment_targeting_step`"). Grades ONE step of a comment_targeting
+    chain: `input_docx` is the checkpoint IMMEDIATELY BEFORE this step,
+    `output_docx` is this step's own output -- matching every other per-step
+    gate's before/after convention in this file.
+
+    `kept_comments` is every comment this step's own survival check must
+    verify byte-identical across the two checkpoints -- every comment
+    inserted at steps `1..k-1` of this SAME chain plus every pre-existing
+    organic comment (protocol section 1.3), keyed exactly the way
+    `graph_scorer.score_comment_set_survival` expects (see its docstring):
+    a stable key -> `{"author": ..., "text": ..., "anchor_para_ids": ...}`.
+    The orchestrator (`tools/run_comment_targeting_family.py`) grows this
+    dict by one entry after every successfully-graded step and seeds it with
+    the organic comments found in the PRISTINE document before step 1.
+
+    `_package_is_valid_docx` (reused unmodified, protocol section 5 item 3)
+    gates first -- a corrupt/missing output short-circuits every other check
+    with an `outcome` of `"chain_broken_at_step_k"` (the orchestrator
+    supplies the actual step id when it logs this), the same failure-
+    taxonomy value `respec_cascade` already introduced.
+
+    Outcome taxonomy (protocol section 4): one of `correct_target` /
+    `wrong_target_same_cluster` / `wrong_target_other` / `no_comment_created`
+    / `prior_comment_corrupted` / `chain_broken_at_step_k`, chosen by
+    priority in that order once the package-validity gate and the "exactly
+    one new comment by this author" check both pass -- a step's own target
+    precision is diagnosed first (mirroring `docx_trial_evaluator.py`'s own
+    respec_cascade `chain_failure_taxonomy`, which likewise checks a step's
+    OWN specific-target correctness before falling back to keep-survival
+    attribution), and only a step that got its OWN new comment exactly right
+    can still be downgraded to `prior_comment_corrupted` if it damaged
+    something else (an earlier comment, an organic comment, or unrelated
+    paragraph text) in the process. `len(own_new_comments) > 1` (a genuine
+    edge case the protocol's six-value taxonomy does not separately name) is
+    folded into `no_comment_created`, disclosed here rather than silently
+    reusing that label without comment: both cases mean "the intended
+    SINGLE new comment was not cleanly created," which is the property this
+    check exists to verify.
+    """
+    ok, err = _package_is_valid_docx(output_docx)
+    if not ok:
+        return {
+            "package_valid": False, "outcome": "chain_broken_at_step_k",
+            "reason": f"invalid output package: {err}", "step_pass": False,
+        }
+
+    paragraphs_before = _safe_paragraph_texts_or_none(input_docx)
+    paragraphs_after = _paragraph_texts(output_docx)
+    # A real comment insertion never touches run text (confirmed by reading
+    # _stage_word_comment: it only splices commentRangeStart/commentRangeEnd/
+    # a commentReference run into the paragraph's own child list, never
+    # edits or adds a <w:t>) -- so this is a strict, cheap invariant,
+    # stricter than bibliography/citation/caption require of themselves
+    # since those legitimately mutate text (protocol section 4 item 4).
+    zero_text_diff = paragraphs_before is not None and paragraphs_after == paragraphs_before
+
+    comments_before = _extract_comment_items(input_docx)
+    comments_after = _extract_comment_items(output_docx)
+    own_new_comments = [c for c in comments_after if c["author"] == author_tag]
+    exactly_one_new_comment = len(own_new_comments) == 1
+
+    keep_survival = score_comment_set_survival(
+        comments_before, comments_after, kept_comments, excluded_authors=[author_tag],
+    )
+    keep_survival_ok = keep_survival.get("overall_status") == "clean_comment_set_survival"
+    prior_state_clean = keep_survival_ok and zero_text_diff
+
+    range_precision: dict[str, Any] | None = None
+    if not exactly_one_new_comment:
+        outcome = "no_comment_created"
+    else:
+        range_precision = _comment_range_precision(
+            set(own_new_comments[0]["anchor_para_ids"]), target_para_id, confusable_sibling_para_ids,
+        )
+        status = range_precision["status"]
+        if status == "no_range_found":
+            # A <w:comment> record exists by this author but its range never
+            # actually bracketed any paragraph -- functionally equivalent to
+            # never having been created, for this family's own grading
+            # purposes (there is no paragraph a reader could ever see it
+            # attached to).
+            outcome = "no_comment_created"
+        elif status in ("wrong_target_same_cluster", "wrong_target_other"):
+            outcome = status
+        elif not prior_state_clean:
+            outcome = "prior_comment_corrupted"
+        else:
+            outcome = "correct_target"
+
+    step_pass = bool(
+        exactly_one_new_comment
+        and range_precision is not None
+        and range_precision["status"] == "exact_match"
+        and prior_state_clean
+    )
+
+    return {
+        "package_valid": True,
+        "outcome": outcome,
+        "step_pass": step_pass,
+        "exactly_one_new_comment_by_author": exactly_one_new_comment,
+        "new_comments_by_author_count": len(own_new_comments),
+        # The ACTUAL observed (author, text, anchor_para_ids) of this step's
+        # own new comment (or None when zero/multiple were found) -- NOT
+        # necessarily what was intended. The orchestrator needs this,
+        # regardless of whether this step landed on the correct target, to
+        # grow its own running kept_comments dict for LATER steps' survival
+        # checks: even a wrongly-targeted comment is now real content in the
+        # document that a later step must not additionally corrupt.
+        "new_comment_item": own_new_comments[0] if exactly_one_new_comment else None,
+        "range_precision": range_precision,
+        "keep_survival": keep_survival,
+        "keep_survival_ok": keep_survival_ok,
+        "zero_paragraph_text_diff": zero_text_diff,
+    }
+
+
+def grade_comment_targeting_chain(
+    step_results: list[dict[str, Any]], condition_by_step: list[str],
+) -> dict[str, Any]:
+    """PAPER-S24 comment_targeting: chain-level composite (protocol section
+    4, "Chain-level composite: per-chain pass = every step `correct_target`
+    AND every keep-survival check passed AND every package-validity gate
+    passed"). Since `grade_comment_targeting_step`'s own `step_pass` already
+    folds in all three of those conditions for that one step (see its
+    docstring), the chain composite reduces to "every step's own `step_pass`
+    is True" -- no separate re-derivation of the three conditions here.
+
+    `step_results` is this chain's own ordered list of
+    `grade_comment_targeting_step` results (one per chain position, in
+    order -- this function trusts list order, not any embedded index);
+    `condition_by_step` is the matching list of `"ambiguous"` | `"unique"`
+    condition labels (protocol section 2.1's alternating design), carried
+    through into the returned `per_position` breakdown for the primary
+    per-chain-position, per-condition readout (protocol section 4's own
+    "Primary statistic: per-chain-position pass rate (1..K), by condition")
+    -- it does NOT gate the chain PASS/FAIL verdict itself, which is
+    unconditional on every step regardless of condition.
+    """
+    if len(step_results) != len(condition_by_step):
+        raise ValueError(
+            f"grade_comment_targeting_chain: step_results has {len(step_results)} entries "
+            f"but condition_by_step has {len(condition_by_step)} -- must be the same length"
+        )
+
+    per_position: list[dict[str, Any]] = []
+    for i, (step_result, condition) in enumerate(zip(step_results, condition_by_step), start=1):
+        per_position.append({
+            "chain_position": i,
+            "condition": condition,
+            "outcome": step_result.get("outcome"),
+            "step_pass": bool(step_result.get("step_pass")),
+        })
+
+    first_failed_position = next((p["chain_position"] for p in per_position if not p["step_pass"]), None)
+    chain_pass = first_failed_position is None
+
+    return {
+        "chain_pass": chain_pass,
+        "first_failed_chain_position": first_failed_position,
+        "per_position": per_position,
+        "step_count": len(step_results),
+    }

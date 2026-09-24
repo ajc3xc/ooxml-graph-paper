@@ -423,3 +423,262 @@ def test_score_round_trip_editability_detects_equation_semantic_drift():
     result = graph_scorer.score_round_trip_editability(pre, post, marker_text="PAPER-S5 marker")
     assert result["equation_semantic_labels_stable"] is False
     assert result["overall_status"] == "equation_semantic_drift_detected"
+
+
+# ---------------------------------------------------------------------------
+# _comment_range_precision (PAPER-S24 comment_targeting)
+# ---------------------------------------------------------------------------
+
+def test_comment_range_precision_exact_match():
+    result = graph_scorer._comment_range_precision(
+        bracketed_para_ids={"TARGET01"}, target_para_id="TARGET01",
+        confusable_sibling_para_ids=["SIB0001", "SIB0002"],
+    )
+    assert result["status"] == "exact_match"
+    assert result["pass"] is True
+    assert result["target_present"] is True
+    assert result["confusable_siblings_absent"] is True
+
+
+def test_comment_range_precision_wrong_target_same_cluster():
+    """The precision failure mode this whole family exists to measure: the
+    comment landed on a CONFUSABLE SIBLING of the intended target, not the
+    target itself."""
+    result = graph_scorer._comment_range_precision(
+        bracketed_para_ids={"SIB0001"}, target_para_id="TARGET01",
+        confusable_sibling_para_ids=["SIB0001", "SIB0002"],
+    )
+    assert result["status"] == "wrong_target_same_cluster"
+    assert result["pass"] is False
+    assert result["target_present"] is False
+    assert result["confusable_siblings_absent"] is False
+
+
+def test_comment_range_precision_wrong_target_other():
+    """Landed on a paragraph that is neither the target nor in its
+    confusable-sibling set at all -- a different, less specific failure mode
+    than wrong_target_same_cluster."""
+    result = graph_scorer._comment_range_precision(
+        bracketed_para_ids={"UNRELATED9"}, target_para_id="TARGET01",
+        confusable_sibling_para_ids=["SIB0001", "SIB0002"],
+    )
+    assert result["status"] == "wrong_target_other"
+    assert result["pass"] is False
+
+
+def test_comment_range_precision_no_range_found():
+    result = graph_scorer._comment_range_precision(
+        bracketed_para_ids=set(), target_para_id="TARGET01",
+        confusable_sibling_para_ids=["SIB0001"],
+    )
+    assert result["status"] == "no_range_found"
+    assert result["pass"] is False
+
+
+def test_comment_range_precision_target_plus_extra_paragraph_is_not_exact_match():
+    """A malformed range that correctly includes the target paragraph but
+    ALSO brackets an extra, unrelated paragraph must not be credited as an
+    exact match -- catches a control-arm hand-edit that puts
+    commentRangeStart/commentRangeEnd in two different paragraphs."""
+    result = graph_scorer._comment_range_precision(
+        bracketed_para_ids={"TARGET01", "UNRELATED9"}, target_para_id="TARGET01",
+        confusable_sibling_para_ids=["SIB0001"],
+    )
+    assert result["status"] == "wrong_target_other"
+    assert result["exact_single_paragraph_match"] is False
+    assert result["target_present"] is True
+    assert result["pass"] is False
+
+
+# ---------------------------------------------------------------------------
+# score_comment_set_survival (PAPER-S24 comment_targeting)
+# ---------------------------------------------------------------------------
+
+def _comment_item(author: str, text: str, anchor_para_ids: tuple[str, ...]) -> dict:
+    return {"author": author, "text": text, "anchor_para_ids": anchor_para_ids}
+
+
+def test_comment_set_survival_clean_when_kept_comments_unchanged_and_one_new_added():
+    organic = _comment_item("Adam Camerer", "An organic pre-existing comment.", ("ORGANIC1",))
+    step1 = _comment_item("MeridianBench-step1", "step 1 marker", ("STEP0001",))
+    checkpoint_a = [organic, step1]
+    step2_new = _comment_item("MeridianBench-step2", "step 2 marker", ("STEP0002",))
+    checkpoint_b = [organic, step1, step2_new]
+
+    kept = {
+        "organic:0": organic,
+        "MeridianBench-step1": step1,
+    }
+    result = graph_scorer.score_comment_set_survival(
+        checkpoint_a, checkpoint_b, kept, excluded_authors=["MeridianBench-step2"],
+    )
+    assert result["overall_status"] == "clean_comment_set_survival"
+    assert result["organic:0"]["unchanged"] is True
+    assert result["MeridianBench-step1"]["unchanged"] is True
+    assert result["unintended_drift_detected"] is False
+
+
+def test_comment_set_survival_detects_missing_kept_comment():
+    organic = _comment_item("Adam Camerer", "An organic pre-existing comment.", ("ORGANIC1",))
+    step1 = _comment_item("MeridianBench-step1", "step 1 marker", ("STEP0001",))
+    checkpoint_a = [organic, step1]
+    checkpoint_b = [organic]  # step1's own comment vanished between checkpoints
+
+    kept = {"organic:0": organic, "MeridianBench-step1": step1}
+    result = graph_scorer.score_comment_set_survival(checkpoint_a, checkpoint_b, kept)
+    assert result["overall_status"] == "kept_comment_missing:MeridianBench-step1"
+    assert result["MeridianBench-step1"]["present"] is False
+
+
+def test_comment_set_survival_detects_re_anchored_comment_as_missing():
+    """A kept comment still exists by the same author with the same text,
+    but its range now brackets a DIFFERENT paragraph than it did at
+    checkpoint A -- "still correctly anchored" (protocol section 4 item 3)
+    has been violated even though the comment was not deleted outright.
+    Matching is by the FULL (author, text, anchor_para_ids) tuple, never by
+    author alone (see the function's own docstring: author is not a unique
+    key across a document's real comments, so author-based matching would
+    misclassify organic comments that share an author) -- a re-anchored
+    comment therefore no longer matches its own expected tuple and is
+    reported exactly like an outright deletion, `kept_comment_missing`, the
+    same granularity score_keep_survival itself uses for its own elements."""
+    step1_a = _comment_item("MeridianBench-step1", "step 1 marker", ("STEP0001",))
+    step1_b_moved = _comment_item("MeridianBench-step1", "step 1 marker", ("WRONGPARA",))
+    checkpoint_a = [step1_a]
+    checkpoint_b = [step1_b_moved]
+
+    kept = {"MeridianBench-step1": step1_a}
+    result = graph_scorer.score_comment_set_survival(checkpoint_a, checkpoint_b, kept)
+    assert result["overall_status"] == "kept_comment_missing:MeridianBench-step1"
+    assert result["MeridianBench-step1"]["unchanged"] is False
+    # The raw by-author count still shows a comment by this author exists in
+    # B -- just not under its expected exact form -- retained as extra
+    # diagnostic detail even though it doesn't change the top-level status.
+    assert result["MeridianBench-step1"]["occurrences_checkpoint_b_by_author"] == 1
+
+
+def test_comment_set_survival_detects_duplicated_kept_comment():
+    step1 = _comment_item("MeridianBench-step1", "step 1 marker", ("STEP0001",))
+    checkpoint_a = [step1]
+    checkpoint_b = [step1, dict(step1)]  # duplicated between checkpoints
+
+    kept = {"MeridianBench-step1": step1}
+    result = graph_scorer.score_comment_set_survival(checkpoint_a, checkpoint_b, kept)
+    assert result["overall_status"] == "kept_comment_duplicated:MeridianBench-step1"
+    assert result["MeridianBench-step1"]["duplicated"] is True
+
+
+def test_comment_set_survival_not_credited_when_checkpoint_a_already_wrong():
+    """Mirrors score_keep_survival's own discipline: an element that was
+    ALREADY missing/wrong at checkpoint A cannot be credited as "surviving"
+    just because checkpoint B shows the same (wrong) state."""
+    step1_expected = _comment_item("MeridianBench-step1", "step 1 marker", ("STEP0001",))
+    step1_actual_at_a = _comment_item("MeridianBench-step1", "WRONG TEXT ALREADY", ("STEP0001",))
+    checkpoint_a = [step1_actual_at_a]
+    checkpoint_b = [step1_actual_at_a]  # identical to A, but A itself never matched "expected"
+
+    kept = {"MeridianBench-step1": step1_expected}
+    result = graph_scorer.score_comment_set_survival(checkpoint_a, checkpoint_b, kept)
+    # Never matches the expected exact tuple at EITHER checkpoint -- not
+    # credited as "unchanged" just because checkpoint B's wrong state
+    # matches checkpoint A's wrong state.
+    assert result["overall_status"] == "kept_comment_missing:MeridianBench-step1"
+    assert result["MeridianBench-step1"]["exact_matches_checkpoint_a"] == 0
+    assert result["MeridianBench-step1"]["unchanged"] is False
+
+
+def test_comment_set_survival_detects_unintended_drift_outside_kept_set():
+    """An extra, unaccounted-for comment appears at checkpoint B that is
+    neither a kept comment nor this step's own excluded new one -- real,
+    unattributed drift, distinct from every named kept-comment failure."""
+    kept_comment = _comment_item("MeridianBench-step1", "step 1 marker", ("STEP0001",))
+    checkpoint_a = [kept_comment]
+    rogue = _comment_item("SomeoneElse", "an unexplained extra comment", ("ROGUE0001",))
+    checkpoint_b = [kept_comment, rogue]
+
+    kept = {"MeridianBench-step1": kept_comment}
+    result = graph_scorer.score_comment_set_survival(
+        checkpoint_a, checkpoint_b, kept, excluded_authors=["MeridianBench-step2"],
+    )
+    assert result["overall_status"] == "unintended_comment_drift_detected"
+    assert result["unintended_drift_detected"] is True
+
+
+def test_comment_set_survival_shared_author_organic_comments_graded_independently():
+    """Regression test: real corpus data (protocol section 1.3) has organic
+    comments that do NOT have unique authors -- jcshm-si.docx has 5 of its 6
+    organic comments all authored "Claude (review flag)". Matching by author
+    alone would let one such comment's survival vouch for a SIBLING organic
+    comment sharing the same author but different text/anchor. This
+    constructs exactly that shape: two organic comments, same author,
+    different text/anchor -- one survives unchanged, the OTHER is silently
+    dropped between checkpoints -- and asserts the drop is still caught."""
+    organic_a = _comment_item("Claude (review flag)", "First organic note.", ("ORGA0001",))
+    organic_b = _comment_item("Claude (review flag)", "Second organic note.", ("ORGA0002",))
+    checkpoint_a = [organic_a, organic_b]
+    checkpoint_b = [organic_a]  # organic_b silently vanished; organic_a (same author) survives fine
+
+    kept = {"organic:0": organic_a, "organic:1": organic_b}
+    result = graph_scorer.score_comment_set_survival(checkpoint_a, checkpoint_b, kept)
+
+    assert result["organic:0"]["unchanged"] is True
+    assert result["organic:1"]["unchanged"] is False
+    assert result["overall_status"] == "kept_comment_missing:organic:1"
+
+
+def test_comment_set_survival_shared_author_unrelated_comment_not_masked_as_kept():
+    """Same shared-author real-corpus shape, but checking the REMAINDER/drift
+    side rather than the per-element side: an untracked, genuinely NEW
+    comment appears sharing an author with a kept organic comment -- it must
+    still surface as unintended drift, not be silently absorbed because its
+    author matches a kept entry's author."""
+    organic_a = _comment_item("Claude (review flag)", "First organic note.", ("ORGA0001",))
+    checkpoint_a = [organic_a]
+    rogue_same_author = _comment_item("Claude (review flag)", "An unrelated NEW note.", ("ROGUE0001",))
+    checkpoint_b = [organic_a, rogue_same_author]
+
+    kept = {"organic:0": organic_a}
+    result = graph_scorer.score_comment_set_survival(checkpoint_a, checkpoint_b, kept)
+
+    assert result["organic:0"]["unchanged"] is True
+    assert result["overall_status"] == "unintended_comment_drift_detected"
+    assert result["unintended_drift_detected"] is True
+
+
+def test_comment_set_survival_changed_status_when_checkpoint_a_lacked_exact_form():
+    """The one shape that legitimately reaches "changed" rather than
+    "missing": checkpoint A never had the exact expected form (0 exact
+    matches), but checkpoint B does (1 exact match) -- credited as neither
+    "missing" (it IS present at B) nor "unchanged" (A's own form was never
+    confirmed valid, mirroring score_keep_survival's own discipline)."""
+    expected = _comment_item("MeridianBench-step1", "step 1 marker", ("STEP0001",))
+    wrong_at_a = _comment_item("MeridianBench-step1", "different text at A", ("STEP0001",))
+    checkpoint_a = [wrong_at_a]
+    checkpoint_b = [expected]
+
+    kept = {"MeridianBench-step1": expected}
+    result = graph_scorer.score_comment_set_survival(checkpoint_a, checkpoint_b, kept)
+
+    assert result["overall_status"] == "kept_comment_changed:MeridianBench-step1"
+    assert result["MeridianBench-step1"]["present"] is True
+    assert result["MeridianBench-step1"]["unchanged"] is False
+
+
+def test_comment_set_survival_empty_remainder_on_both_sides_is_clean_not_drift():
+    """Regression test for the specific edge case this function's own
+    docstring discloses: when the remainder (comments outside the kept set
+    and this step's own excluded new one) is EMPTY on both checkpoints, a
+    blind copy of score_keep_survival's own f1!=1.0 check would misfire
+    (_prf1(0, 0, 0) returns f1=None, and None != 1.0), flagging every clean
+    step as drift. Exercises exactly that all-empty-remainder shape."""
+    kept_comment = _comment_item("MeridianBench-step1", "step 1 marker", ("STEP0001",))
+    new_comment = _comment_item("MeridianBench-step2", "step 2 marker", ("STEP0002",))
+    checkpoint_a = [kept_comment]
+    checkpoint_b = [kept_comment, new_comment]
+
+    kept = {"MeridianBench-step1": kept_comment}
+    result = graph_scorer.score_comment_set_survival(
+        checkpoint_a, checkpoint_b, kept, excluded_authors=["MeridianBench-step2"],
+    )
+    assert result["overall_status"] == "clean_comment_set_survival"
+    assert result["unintended_drift_detected"] is False
