@@ -28,10 +28,12 @@ for Agentic Word Document Editing: A Confirmatory Benchmark}
 \begin{abstract}
 Agent systems that edit real documents typically do so through generic file-manipulation tools
 (read, write, search-and-replace, shell commands) rather than through primitives designed for
-the document's own format. On the same model and the same documents, we ask whether Meridian
-Docs' document-editing tools -- a bounded, atomic, structurally-aware subset of that package's
-MCP tool surface (11 of 86 registered tools; Section~\ref{sec:limitations}), for Microsoft Word's Office Open
-XML (OOXML/\texttt{.docx}) format -- change task correctness relative to an
+the document's own format. On the same model and the same documents, we ask whether
+\emph{AnchorEdit} -- a bounded, atomic, structurally-aware document-editing tool subset of
+Meridian Docs, a larger document-intelligence package that also covers bibliography-database
+sync and output provenance (11 of that package's 86 registered MCP tools;
+Section~\ref{sec:limitations}), for Microsoft Word's Office Open XML (OOXML/\texttt{.docx})
+format -- changes task correctness relative to an
 agent given only generic tools and raw XML access. We report a confirmatory benchmark across six task families
 (bibliography-entry insertion, inline citation insertion, section reordering, equation insertion,
 table-structural insertion, and caption insertion) on a held-out corpus of real, previously
@@ -61,7 +63,7 @@ previously-unseen three-document corpus. The bounded tool completes the full pro
 and on the design's own central test -- whether unrelated, already-correct content survives a
 mid-chain reversal of a different requirement untouched -- the generic tool's raw edits leak into
 untouched content while the bounded tool's never do ($p=0.0305$). Separately, we
-document twelve
+document ten
 infrastructure and evaluation-harness defects that this benchmark's own development surfaced and
 fixed -- several of which materially changed the reported numbers -- disclosed in full rather
 than silently corrected.
@@ -171,8 +173,8 @@ specifically, the closest prior work targets sibling Office Open XML formats rat
 directly: \citet{li2023sheetcopilot} give an LLM a bounded set of atomic spreadsheet actions, and
 \citet{ofengenden2025pptarena} evaluate an agent that routes between programmatic tools and
 deterministic XML operations for PowerPoint editing, verifying each edit before committing it.
-This architecture, applied to a different OOXML-based format, is directly analogous to Meridian
-Docs' own write-time verification (Section~\ref{sec:render-gate}). We are not aware of
+This architecture, applied to a different OOXML-based format, is directly analogous to
+AnchorEdit's own write-time verification (Section~\ref{sec:render-gate}). We are not aware of
 prior work posing this paper's specific bounded-versus-generic comparison for Word/OOXML editing
 itself.
 
@@ -201,7 +203,7 @@ $11+48=59$ -- treatment reports the full $n=56$, while control reports $n=55$ af
 disclosed exclusion (Appendix~\ref{app:notes}, Note b).
 
 \subsection{Task families}
-Six families are reported, each implemented as one forward/inverse tool pair in Meridian Docs on
+Six families are reported, each implemented as one forward/inverse tool pair in AnchorEdit on
 the treatment side:
 \begin{itemize}
 \item \textbf{Bibliography entry} -- insert/remove one APA-formatted bibliography entry.
@@ -259,7 +261,7 @@ the treatment side:
 \draw[arr] (direct) -- (docx);
 \draw[arr] (gated) -- (docx);
 \end{tikzpicture}
-\caption{Meridian Docs' overall functional architecture, including the discovery step a real
+\caption{AnchorEdit's overall functional architecture, including the discovery step a real
 deployment needs (this benchmark's harness bypasses it -- Section~\ref{sec:methods}). Editing
 itself is a shared step for all six families; render-gate verification is a sequential,
 conditional step layered on \emph{after} the edit, only for the three render-gated families,
@@ -323,10 +325,14 @@ paragraph list exactly matched its pre-forward state. A chain (one forward/inver
 as a full pass only if both directions independently graded pass.
 
 \subsection{Statistics}
+\label{sec:methods-statistics}
 Per-family pass rates are reported with percentile bootstrap confidence intervals (2{,}000
 resamples) \citep{efron1979bootstrap}, except at a literal 100\% or 0\% observed rate, where the
-percentile method is degenerate (every possible resample is identical to the original sample) and
-we report the exact Clopper-Pearson interval instead (Section~\ref{sec:defects}, defect 9). Paired
+percentile method is degenerate (every possible resample is identical to the original sample, so
+the interval collapses to a zero-width $[100,100]$ or $[0,0]$ and represents no real uncertainty)
+and we report the exact Clopper-Pearson interval instead, leaving every other row's percentile
+interval untouched; tables marked $^\dagger$ throughout this paper use this exact interval for
+that reason. Paired
 arms are compared with a paired sign-flip
 permutation test (2{,}000 resamples) \citep{nichols2002permutation}, with a fixed random seed
 set before any result existed. We report every comparison this benchmark's design specifies (six
@@ -462,7 +468,7 @@ of being undone) -- this is the design's central, novel test, explained below; a
 correct execution requires). Every one of the three already-inserted, untouched targets
 (bibliography, equation, caption) must survive RESPEC's two edits completely unchanged --
 Checkpoint B's own keep-survival check, scored with the same order-blind multiset comparison as the
-rest of this benchmark's collateral-damage checks (Section~\ref{sec:defects}, defect 9)
+rest of this benchmark's collateral-damage checks (Section~\ref{sec:defects}, defect 8)
 specifically because a section move must not by itself count as drift. Corpus, arms, and grading
 discipline are otherwise identical to the rest of this benchmark: the same three real, author-owned
 documents already added under the multi-anchor extension (Section~\ref{sec:results-multianchor}),
@@ -517,7 +523,7 @@ stages. Bibliography and citation show a genuine, literal parity between arms.
 Section reorder shows a directionally consistent but not-yet-significant advantage for the
 bounded tool at $K=1$; see Section~\ref{sec:section-reorder} for the $K=4$ result on the same
 corpus. $^\dagger$Exact Clopper-Pearson interval rather than the percentile bootstrap used
-elsewhere (Section~\ref{sec:defects}, defect 9): at a literal 100\% observed rate every possible
+elsewhere (Section~\ref{sec:methods-statistics}): at a literal 100\% observed rate every possible
 bootstrap resample is identical to the original sample, so the percentile method itself cannot
 express any uncertainty there. Notes a--b: Appendix~\ref{app:notes}.}
 \label{tab:single-edit}
@@ -670,7 +676,7 @@ verification alone, or not at all, rather than paying render-gate's latency cost
 \draw[arr] (fail) |- (ret);
 \draw[arr] (ok) |- (ret);
 \end{tikzpicture}
-\caption{Meridian Docs' write-time verification flow, shared by the equation, table-structural,
+\caption{AnchorEdit's write-time verification flow, shared by the equation, table-structural,
 and caption insertion tools (Section~\ref{sec:render-gate}). Control-arm edits bypass this path
 entirely -- they write raw XML directly, with no independent render-verification step.}
 \label{fig:rendergate-arch}
@@ -706,8 +712,8 @@ c, Appendix~\ref{app:notes}) -- resolved in Table~\ref{tab:render-gate-clean}, w
 Note d (table-structural): Appendix~\ref{app:notes}.
 Superseded by the confirmatory re-run in Table~\ref{tab:render-gate-clean}; retained here as the
 evidence for that re-run's causal claim, not as a final number. $^\dagger$Exact Clopper-Pearson
-interval rather than the percentile bootstrap used elsewhere (Section~\ref{sec:defects}, defect
-9): at a literal 100\% observed rate every possible bootstrap resample is identical to the
+interval rather than the percentile bootstrap used elsewhere (Section~\ref{sec:methods-statistics}):
+at a literal 100\% observed rate every possible bootstrap resample is identical to the
 original sample, so the percentile method itself cannot express any uncertainty there. Note c:
 Appendix~\ref{app:notes}.}
 \label{tab:render-gate}
@@ -764,7 +770,7 @@ caption forward trials ranged 14.7--237.8s, not a uniform or short-circuited art
 this is a live re-run, not a re-derivation from cached data. Equation's control here uses the
 same 26-document corpus as treatment, so unlike Table~\ref{tab:render-gate} a paired test is
 reported for all three families. $^\dagger$Exact Clopper-Pearson interval rather than the
-percentile bootstrap used elsewhere (Section~\ref{sec:defects}, defect 9): at a literal 100\%
+percentile bootstrap used elsewhere (Section~\ref{sec:methods-statistics}): at a literal 100\%
 observed rate every possible bootstrap resample is identical to the original sample, so the
 percentile method itself cannot express any uncertainty there.}
 \label{tab:render-gate-clean}
@@ -848,8 +854,7 @@ control 96.6\% [92.2, 100] / 96.3\% [91.5, 100] / 96.3\% [92.6, 99.1], caption t
 100\% [88.1, 100] / [100, 100] / [96.6, 100] (Tiers 1/2/3 respectively). Paired $p$ is reported
 per tier in the order Tier 1 / Tier 2 / Tier 3, with a dash where a tier's own paired test is
 not separately computed (Tier 3's naive pooled data is not paired at the trial level, only the
-per-document Tier 1/2 means are). $^\dagger$Exact Clopper-Pearson interval (Section~\ref{sec:defects},
-defect 9).}
+per-document Tier 1/2 means are). $^\dagger$Exact Clopper-Pearson interval (Section~\ref{sec:methods-statistics}).}
 \label{tab:render-gate-multianchor}
 \end{table}
 
@@ -891,7 +896,7 @@ composite control 8.3\% [0, 25] / 9.1\% [0, 25] / 9.1\% [0, 27.3], composite tre
 [75, 100] / 83.3\% [75, 100] / 83.3\% [58.3, 100]; keep-survival control 44.4\% [25, 75] / 45.5\%
 [25, 75] / 45.5\% [18.2, 72.7], keep-survival treatment 100\% [29.2, 100] / 100\% [100, 100] /
 100\% [73.5, 100] (Tiers 1/2/3 respectively). $^\dagger$Exact Clopper-Pearson interval
-(Section~\ref{sec:defects}, defect 9). Both measures' Tier 1/2 paired tests are underpowered at
+(Section~\ref{sec:methods-statistics}). Both measures' Tier 1/2 paired tests are underpowered at
 $N=3$ documents, the same limitation already disclosed for every Tier-1 comparison in this paper
 (Section~\ref{sec:methods-multianchor}); the anchor-set-level tests below are the properly-powered
 versions of the same two comparisons.}
@@ -937,11 +942,11 @@ and is consistent with, not merely analogous to, the mechanism already traced in
 Section~\ref{sec:section-reorder}: unbounded raw-XML editing degrades further, and more
 catastrophically, as more edits accumulate on the same document. Two further real defects in this
 extension's own harness were found and fixed during this run, disclosed alongside this benchmark's
-other ten (Section~\ref{sec:defects}, defects 11--12); both were verified directly against the real
+other eight (Section~\ref{sec:defects}, defects 8--9); both were verified directly against the real
 checkpoint data before and after the fix, following the same discipline as every other correction in
 this paper.
 
-\section{Twelve real defects found and fixed}
+\section{Ten real defects found and fixed}
 \label{sec:defects}
 
 The reported numbers depend on the harness, evaluator, and infrastructure that produced them, and
@@ -971,23 +976,18 @@ rather than fold it silently into a final figure.
   attempt grading in that case too, directly recovering two genuinely correct table-insertion
   trials, confirmed by re-grading the real output files against their own pre-write backups, not
   by re-running anything.
-\item \textbf{A stale file-path bug after unrelated hardware disruption.} An external drive
-  holding the benchmark's run data physically disconnected and reconnected under a different
-  drive letter mid-project. The corpus manifest's document paths were still hardcoded to the
-  old letter, causing every subsequent trial to fail on a permission error before it could even
-  begin, rather than a clean not-found. We fixed this by correcting every path in the manifest.
 \item \textbf{A transient network/certificate failure, not a capability finding.} We
   systematically reviewed every remaining trial's exact failure signature -- return code,
   whether the process timed out, whether the output file changed -- and found a signature not
   previously characterized: 29 trials across two families (equation, caption) failed with an
   API-level certificate verification error, not a timeout or a genuine grading failure. All 29
-  clustered tightly in one short real-time window coinciding with the same unrelated hardware
-  disruption in item 4, and the API's certificate was confirmed to verify correctly again
+  clustered tightly in one short real-time window coinciding with the same physically unreliable
+  external drive documented in Section~\ref{sec:limitations} (Limitations, factor Four), and the API's certificate was confirmed to verify correctly again
   immediately afterward. We re-ran these 29 trials under confirmed-healthy network conditions
   rather than counting them as capability failures: equation ultimately recovered from 4/26 to
   12/26 and caption from 1/26 to 2/26 (Table~\ref{tab:render-gate}, across several subsequent
-  retry rounds -- see Section~\ref{sec:render-gate} for the full account, including a physically
-  unreliable drive found along the way that this item's own retries first exposed). Before this
+  retry rounds -- see Section~\ref{sec:render-gate} for the full account; this item's own retries
+  are what first exposed the drive problem). Before this
   item, Table~\ref{tab:render-gate}'s numbers for these two families had silently included these
   29 as ordinary capability failures -- a disclosure/reporting inconsistency corrected here and
   in that table.
@@ -1030,23 +1030,6 @@ rather than fold it silently into a final figure.
   trusting the run's aggregate numbers. This defect's exposure is a clean, fully-counted bound, not
   an open-ended risk: exactly 156 of 156 attempted chains failed this way before the fix, all 156
   were re-run after it, and none failed partially or silently in between.
-\item \textbf{Every reported 100\%/0\% confidence interval was a bootstrap artifact.}
-  \texttt{graph\_scorer.py}'s \texttt{bootstrap\_ci} function resamples only from the observed
-  per-document pass/fail values; when every value is identical (a literal 100\% or 0\% observed
-  rate), every possible resample is also identical to the original sample, so the percentile
-  method has no source of variability and collapses to a zero-width $[100,100]$ interval --
-  reporting no uncertainty at all rather than a real one, silently, on every boundary row in this
-  paper (12 of them: Tables~\ref{tab:single-edit}, \ref{tab:render-gate}, and
-  \ref{tab:render-gate-clean}). This was found while comparing this paper's statistical reporting
-  against related empirical-reproducibility work, not by a user report or a test failure -- the
-  existing unit test suite had encoded the degenerate behavior as the expected one. Fixed by
-  falling back to the exact Clopper-Pearson interval specifically when the bootstrap resample
-  distribution has zero variance (only possible at a literal 100\% or 0\% observed rate for
-  binary data); every other row's interval is untouched, since the ordinary percentile bootstrap
-  is not degenerate away from that boundary. The corrected intervals are visibly wider and
-  honestly represent less certainty than $[100,100]$ implied -- e.g., 26/26 passes now reports
-  $[86.8, 100]$, not $[100,100]$ -- without changing a single point-estimate pass rate anywhere in
-  this paper.
 \item \textbf{The \texttt{respec\_cascade} grader miscounted a documented, intended tool
   side-effect as collateral damage.} \texttt{insert\_bibliography\_entry} locates an existing
   References/Bibliography heading or creates one when a document has none -- documented behavior,
@@ -1154,8 +1137,8 @@ test infrastructure -- an external drive holding all run data -- proved physical
 disconnecting twice during this project (confirmed via Windows disk-layer I/O retry/error events,
 not inferred); this remains a real defect in our original test environment (Section~\ref{sec:defects}),
 though the confirmatory re-run's clean result means it is no longer load-bearing for any number
-in this paper's final reporting. \textbf{Fifth}, this benchmark exercises 11 of Meridian Docs'
-86 registered tools, across the six families reported here; the remaining tools -- other editing
+in this paper's final reporting. \textbf{Fifth}, this benchmark exercises AnchorEdit, 11 of
+Meridian Docs' 86 registered tools, across the six families reported here; the remaining tools -- other editing
 operations, format/style-compliance audit tools such as \texttt{audit\_document} and
 \texttt{audit\_equation\_style}, and read-only structural/indexing tools including
 \texttt{locate\_anchor} and \texttt{index\_document} -- are outside this benchmark's scope, and we
@@ -1184,7 +1167,10 @@ validation run with headroom above it that this draft does not report.
 
 \subsection{Artifact availability}
 This benchmark's harness, evaluator, statistics code, and corpus manifests are publicly available
-at \url{https://github.com/ajc3xc/ooxml-graph-paper} under the MIT license. The underlying
+at \url{https://github.com/meridianmcp/ooxml-graph-paper} under the Meridian Source License 1.0
+(MSL-1.0) -- source-available rather than OSI-approved, permitting research, academic, and
+internal commercial use freely, restricting only competing hosted-service use during a five-year
+protection period, after which each version automatically converts to MIT. The underlying
 \texttt{.docx} corpus documents themselves are a licensed slice of the DocOps benchmark corpus
 and are not redistributed; the released manifests identify which documents were used (by hash)
 without including their content.
@@ -1192,7 +1178,7 @@ without including their content.
 \section{Conclusion}
 \label{sec:conclusion}
 
-Bounded, structurally-aware editing primitives like Meridian Docs show no statistically
+Bounded, structurally-aware editing primitives like AnchorEdit show no statistically
 significant advantage over generic file tools for a single edit, on the task families and model
 tested here (though section reorder trends in that direction at $K=1$; Table~\ref{tab:single-edit}),
 but show a significant, mechanistically-traced advantage under repeated edit-undo cycling -- the
@@ -1249,7 +1235,7 @@ corpus now is.
 
 \todo{This is a preliminary draft. Before any submission: (1) re-run a full writing-quality and
 content-quality review against this revision, since the most recent pass (which added the
-research questions, the Clopper-Pearson defect/fix, the artifact-availability link, and the
+research questions, the Clopper-Pearson CI methodology, the artifact-availability link, and the
 expanded Related Work below) has not itself been re-reviewed; (2) decide a target venue --
 ACM REP (the Conference on Reproducibility and Replicability) is the leading candidate given
 this paper's confirmatory framing and defect-disclosure emphasis, per its own CFP -- and convert
