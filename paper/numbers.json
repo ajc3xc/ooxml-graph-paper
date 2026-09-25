@@ -488,6 +488,30 @@
    },
    "note": "The 2.7MB document's control chain (s7v2_sr_402d26ad8605a5ee) timed out at 300s in all six attempts and is scored as a failure via regenerate_paper_sources.SCORED_AS_FAILURE (Appendix Note b), so both arms have 56."
   },
+  "k4.secreorder.noteb_excluded.control.rate": {
+   "value": "67.3",
+   "quantity": "K=4 section-reorder control pass rate with the Note b chain excluded",
+   "status": "verified",
+   "source": {
+    "file": "sources/secreorder-combined-k4-statistics-noteb-excluded.json",
+    "format": "json",
+    "locator": "groups[family=section_reorder,k_pairs=4].control_pass_rate_ci.mean",
+    "source_value": "0.6727272727272727"
+   },
+   "note": "Same statistics with the Note b chain excluded, as the harness does for every other timeout; reported beside the scored-as-failure value because that scoring was chosen after the results were known."
+  },
+  "k4.secreorder.noteb_excluded.p": {
+   "value": "0.0015",
+   "quantity": "K=4 section-reorder paired p with the Note b chain excluded",
+   "status": "verified",
+   "source": {
+    "file": "sources/secreorder-combined-k4-statistics-noteb-excluded.json",
+    "format": "json",
+    "locator": "groups[family=section_reorder,k_pairs=4].paired_control_vs_treatment_significance.p_value",
+    "source_value": "0.0015"
+   },
+   "note": "Same statistics with the Note b chain excluded, as the harness does for every other timeout; reported beside the scored-as-failure value because that scoring was chosen after the results were known."
+  },
   "k4.secreorder.p": {
    "value": "0.0015",
    "quantity": "Paired sign-flip permutation p-value for the K=4 section-reorder control vs treatment comparison (Table tab:k4)",
@@ -3070,6 +3094,30 @@
     "source_value": "0.8214285714285714"
    },
    "note": "The 2.7MB document's control chain (s7v2_sr_402d26ad8605a5ee) timed out at 300s in all six attempts and is scored as a failure via regenerate_paper_sources.SCORED_AS_FAILURE (Appendix Note b), so both arms have 56."
+  },
+  "single.secreorder_comb.noteb_excluded.control.rate": {
+   "value": "83.6",
+   "quantity": "K=1 combined section-reorder control pass rate with the Note b chain excluded",
+   "status": "verified",
+   "source": {
+    "file": "sources/secreorder-combined-k1-statistics-noteb-excluded.json",
+    "format": "json",
+    "locator": "groups[family=section_reorder,k_pairs=1].control_pass_rate_ci.mean",
+    "source_value": "0.8363636363636363"
+   },
+   "note": "Same statistics with the Note b chain excluded, as the harness does for every other timeout; reported beside the scored-as-failure value because that scoring was chosen after the results were known."
+  },
+  "single.secreorder_comb.noteb_excluded.p": {
+   "value": "0.271",
+   "quantity": "K=1 combined section-reorder paired p with the Note b chain excluded",
+   "status": "verified",
+   "source": {
+    "file": "sources/secreorder-combined-k1-statistics-noteb-excluded.json",
+    "format": "json",
+    "locator": "groups[family=section_reorder,k_pairs=1].paired_control_vs_treatment_significance.p_value",
+    "source_value": "0.2705"
+   },
+   "note": "Same statistics with the Note b chain excluded, as the harness does for every other timeout; reported beside the scored-as-failure value because that scoring was chosen after the results were known."
   },
   "single.secreorder_comb.p": {
    "value": "0.170",

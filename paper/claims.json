@@ -200,7 +200,7 @@
       "depends_on": []
     },
     "infra-failure-excluded-from-denominator": {
-      "statement": "If a harness- or infrastructure-level failure unrelated to the task (such as a network error or a process-level subprocess timeout) stops a chain from running or finishing, the chain is dropped from the affected arm's denominator instead of being scored as a failure. Note a's inline-citation timeout is excluded under this rule; Note b's control-arm timeout is scored as a failure because it reflects the arm's own handling of a large document. The 29 certificate-error trials in defect 4 were re-run instead of being counted as capability failures.",
+      "statement": "If a harness- or infrastructure-level failure unrelated to the task (such as a network error or a process-level subprocess timeout) stops a chain from running or finishing, the chain is dropped from the affected arm's denominator instead of being scored as a failure. Note a's inline-citation timeout is excluded under this rule. Note b's control-arm timeout is scored as a failure by a post-hoc judgment, disclosed with the excluded-variant numbers. The 29 certificate-error trials in defect 4 were re-run instead of being counted as capability failures.",
       "depends_on": [
         "defects.cert_failure.count",
         "harness.timeout_initial_s"
@@ -625,10 +625,14 @@
       "depends_on": []
     },
     "section-reorder-combined-corpus-n56": {
-      "statement": "In the combined section-reorder corpus both arms report n=56. One document's control-arm chain never finished within the 300s timeout in six attempts (at K=1 and K=4) while its treatment chain passed; it is scored as a failure, the one timeout the exclusion rule treats as the arm's own task failure (Note b).",
+      "statement": "In the combined section-reorder corpus both arms report n=56. One document's control-arm chain never finished within the 300s timeout in six attempts (at K=1 and K=4) while its treatment chain passed; it is scored as a failure, a judgment made after the results were known that reverses the harness's default for timeouts. Note b reports the numbers with it excluded (K=1 83.6%, p=0.271; K=4 67.3%, p=0.0015).",
       "depends_on": [
         "harness.timeout_initial_s",
+        "k4.secreorder.noteb_excluded.control.rate",
+        "k4.secreorder.noteb_excluded.p",
         "single.secreorder_comb.control.n",
+        "single.secreorder_comb.noteb_excluded.control.rate",
+        "single.secreorder_comb.noteb_excluded.p",
         "single.secreorder_comb.treatment.n"
       ]
     }

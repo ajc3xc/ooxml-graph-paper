@@ -383,10 +383,11 @@ process-level subprocess timeout) is excluded from the denominator of whichever 
 actually prevented from completing for that document: both arms' when the failure blocks either
 arm's chain from running at all, \claim{section-reorder-combined-corpus-n56}{or a single arm's when only one arm's process was affected, as in
 the harness-flake case we report (Appendix~\ref{app:notes}, Note a),} rather than scored as
-a failure.} \claim{section-reorder-combined-corpus-n56}{The one timeout we do
+a failure.} \claim{section-reorder-combined-corpus-n56}{The one timeout we
 score as a failure is Note b's (Appendix~\ref{app:notes}): there the control agent never finished a
 large document within the timeout in six attempts while its treatment chain finished quickly and
-passed, so the timeout reflects the arm's own handling of the task, not an infrastructure fault.} \claim{per-trial-timeout-history}{The per-trial subprocess timeout is a single global value applied to
+passed. That scoring is a judgment made after the results were known, reversing the harness's
+default for timeouts, and Note b reports the numbers with the chain excluded instead.} \claim{per-trial-timeout-history}{The per-trial subprocess timeout is a single global value applied to
 every family, not a per-family budget. It was \val{harness.timeout_initial_s}s until 2026-09-07,
 when it was doubled to \val{harness.timeout_raised_s}s after a host memory-exhaustion episode (many concurrent sessions on the
 shared host); which families ran under which ceiling
@@ -1332,10 +1333,12 @@ throughout the paper.
 \item[Note b (Table~\ref{tab:single-edit} and Table~\ref{tab:k4}, Section reorder combined)] \claim{section-reorder-combined-corpus-n56}{Control $n=\val{single.secreorder_comb.control.n}$, treatment
   $n=\val{single.secreorder_comb.treatment.n}$: for one \val{notes.secreorder_comb.excluded_doc_size_mb}MB document (\val{notes.secreorder_comb.excluded_doc_xml_mb}MB of main-document XML), the \claim{per-trial-timeout-history}{control-arm chain never completed within the harness's
   \val{harness.timeout_initial_s}-second timeout across six independent attempts} at varying host load, at $K=1$ and at $K=4$,
-  while its treatment-arm chain completed and passed. \claim{infra-failure-excluded-from-denominator}{Because the timeout reflects the control
-  agent's own handling of a large document rather than an infrastructure fault, this chain is
-  scored as a failure in both tables, not excluded -- the one timeout Section~\ref{sec:methods}'s
-  exclusion rule treats this way.}}
+  while its treatment-arm chain completed and passed. \claim{infra-failure-excluded-from-denominator}{We score this chain as a failure in both
+  tables rather than excluding it, judging from six consistent timeouts against treatment's quick
+  pass that the control agent could not finish this document. That judgment was made after the
+  results were known, and the data do not rule out an infrastructure cause. Excluded instead, as
+  the harness does for every other timeout, control's pass rate is \val{single.secreorder_comb.noteb_excluded.control.rate}\% at $K=1$
+  ($p=\val{single.secreorder_comb.noteb_excluded.p}$) and \val{k4.secreorder.noteb_excluded.control.rate}\% at $K=4$ ($p=\val{k4.secreorder.noteb_excluded.p}$).}}
 \item[Note c (Table~\ref{tab:render-gate}, Equation)] \claim{equation-original-control-unpaired}{Control ($n=\val{rg.equation.control.n}$) comes from the \val{rg.equation.control.n} equation-applicable documents of a
   \val{corpus.devslice.n}-document development-slice corpus (its document list locked in the same preregistration commit as the primary corpus,
   Section~\ref{sec:methods}; this equation control run, on 2026-09-06, was not itself

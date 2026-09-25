@@ -43,22 +43,25 @@ def _score_as_failure_args(k: int) -> list[str]:
 def plan(runs: Path) -> list[dict]:
     v1, v2 = runs / "paper-s7", runs / "paper-s7-v2-section-reorder"
     rerun = runs / "paper-s7-clean-rerun-runpod" / "runs" / "paper-s7-clean-rerun"
+    # Order matters: the bootstrap resamples in chain-load order with a fixed seed.
+    secreorder_k1 = [TOOLS / "compute_s7_statistics.py",
+                     v1 / "validation-k1-fixrerun-20260831T145852Z-bib-flake-corrected-20260906.json",
+                     v1 / "holdout-k1-fixrerun-20260831T145852Z" / "slice-manifest.json",
+                     v2 / "validation-k1-20260831T172118Z" / "slice-manifest-corrected2-20260904.json",
+                     v2 / "holdout-k1-20260831T172118Z" / "slice-manifest-corrected2-20260904.json"]
+    secreorder_k4 = [TOOLS / "compute_s7_statistics.py",
+                     v1 / "validation-k4-fixrerun-20260902T111600Z" / "slice-manifest.json",
+                     v1 / "holdout-k4-fixrerun-20260902T111600Z" / "slice-manifest.json",
+                     v2 / "holdout-k4-20260904T090807Z" / "slice-manifest-corrected-20260904.json",
+                     v2 / "validation-k4-20260904T132025Z" / "slice-manifest-corrected-20260904.json"]
     return [
-        {"name": "secreorder-combined-k1-statistics.json",
-         "cmd": [TOOLS / "compute_s7_statistics.py",
-                 # Order matters: the bootstrap resamples in chain-load order with a fixed seed.
-                 v1 / "validation-k1-fixrerun-20260831T145852Z-bib-flake-corrected-20260906.json",
-                 v1 / "holdout-k1-fixrerun-20260831T145852Z" / "slice-manifest.json",
-                 v2 / "validation-k1-20260831T172118Z" / "slice-manifest-corrected2-20260904.json",
-                 v2 / "holdout-k1-20260831T172118Z" / "slice-manifest-corrected2-20260904.json",
-                 *_score_as_failure_args(1)]},
-        {"name": "secreorder-combined-k4-statistics.json",
-         "cmd": [TOOLS / "compute_s7_statistics.py",
-                 v1 / "validation-k4-fixrerun-20260902T111600Z" / "slice-manifest.json",
-                 v1 / "holdout-k4-fixrerun-20260902T111600Z" / "slice-manifest.json",
-                 v2 / "holdout-k4-20260904T090807Z" / "slice-manifest-corrected-20260904.json",
-                 v2 / "validation-k4-20260904T132025Z" / "slice-manifest-corrected-20260904.json",
-                 *_score_as_failure_args(4)]},
+        {"name": "secreorder-combined-k1-statistics.json", "cmd": [*secreorder_k1, *_score_as_failure_args(1)]},
+        {"name": "secreorder-combined-k4-statistics.json", "cmd": [*secreorder_k4, *_score_as_failure_args(4)]},
+        # The same statistics with the Note b chain excluded (the harness's default for every
+        # timeout), reported beside the scored-as-failure numbers because that scoring was
+        # decided after the results were known.
+        {"name": "secreorder-combined-k1-statistics-noteb-excluded.json", "cmd": secreorder_k1},
+        {"name": "secreorder-combined-k4-statistics-noteb-excluded.json", "cmd": secreorder_k4},
         {"name": "multianchor-combined-statistics.json",
          "cmd": [TOOLS / "compute_s7_combined_statistics.py",
                  "--original-manifests", rerun / "primary_holdout" / "slice-manifest.json",
