@@ -1,0 +1,55 @@
+{
+  "secreorder-combined-k1-statistics.json": {
+    "generated_by": "tools\\compute_s7_statistics.py D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7\\validation-k1-fixrerun-20260831T145852Z-bib-flake-corrected-20260906.json D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7\\holdout-k1-fixrerun-20260831T145852Z\\slice-manifest.json D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7-v2-section-reorder\\validation-k1-20260831T172118Z\\slice-manifest-corrected2-20260904.json D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7-v2-section-reorder\\holdout-k1-20260831T172118Z\\slice-manifest-corrected2-20260904.json",
+    "inputs": {
+      "D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7\\validation-k1-fixrerun-20260831T145852Z-bib-flake-corrected-20260906.json": "26e2306eb0c3f0af3d3fccc3b7c78624f20e82a771dff9e323e213aac5148631",
+      "D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7\\holdout-k1-fixrerun-20260831T145852Z\\slice-manifest.json": "a39ed043832091b68bddaf56429f4ab2018d79742f738686c5351ca3f00f8f96",
+      "D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7-v2-section-reorder\\validation-k1-20260831T172118Z\\slice-manifest-corrected2-20260904.json": "5f637e8aa3dfa7d4c87c6c2c03b272a2e1f85e6f05e94b5396ed168f9778e3cf",
+      "D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7-v2-section-reorder\\holdout-k1-20260831T172118Z\\slice-manifest-corrected2-20260904.json": "493df7d1e23cc60482e684f751c580bb7d7678f93508ff2b40e8f253a5437e08"
+    },
+    "sha256": "40dc8eb802037db56ad15c777d3db2d9a16a2c264a277848d28427fbcb5ff8d0"
+  },
+  "secreorder-combined-k4-statistics.json": {
+    "generated_by": "tools\\compute_s7_statistics.py D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7\\validation-k4-fixrerun-20260902T111600Z\\slice-manifest.json D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7\\holdout-k4-fixrerun-20260902T111600Z\\slice-manifest.json D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7-v2-section-reorder\\holdout-k4-20260904T090807Z\\slice-manifest-corrected-20260904.json D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7-v2-section-reorder\\validation-k4-20260904T132025Z\\slice-manifest-corrected-20260904.json",
+    "inputs": {
+      "D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7\\validation-k4-fixrerun-20260902T111600Z\\slice-manifest.json": "0bf0e1b97f7cbd1d20c365eb30ea8d771202bca343535a7b85ad842e6c23ccfa",
+      "D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7\\holdout-k4-fixrerun-20260902T111600Z\\slice-manifest.json": "f5f350bce989cef46b9ebb6e2e9d59f0e4dd73a35cf70d30b002c575615d53f5",
+      "D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7-v2-section-reorder\\holdout-k4-20260904T090807Z\\slice-manifest-corrected-20260904.json": "07928a2297f786e17cfbdc6a9846387b5be9e9fc3c38c33439da95c5092c1235",
+      "D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7-v2-section-reorder\\validation-k4-20260904T132025Z\\slice-manifest-corrected-20260904.json": "2cfd5a0955e8ca33d2e516375b6b96da436cffe3a2e82fb5dd8a995c85f352e8"
+    },
+    "sha256": "da38cdf70b7837d9eeb62266d9498b9e305ccc11ea089ef1b0e4460adca5d51b"
+  },
+  "multianchor-combined-statistics.json": {
+    "generated_by": "tools\\compute_s7_combined_statistics.py --original-manifests D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7-clean-rerun-runpod\\runs\\paper-s7-clean-rerun\\primary_holdout\\slice-manifest.json D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7-clean-rerun-runpod\\runs\\paper-s7-clean-rerun\\validation\\slice-manifest.json --extension-run-root D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7-multi-anchor-extension\\runs --families equation caption",
+    "inputs": {
+      "D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7-clean-rerun-runpod\\runs\\paper-s7-clean-rerun\\primary_holdout\\slice-manifest.json": "cd4772cc1344cafff3d7e3a5d555e70a093d4e31cd2604adfc4e07b9ddec4936",
+      "D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7-clean-rerun-runpod\\runs\\paper-s7-clean-rerun\\validation\\slice-manifest.json": "6220f547aa541afd1e624ecc625a5b990d0580dddb87e27f1868caa2ded8f08a"
+    },
+    "sha256": "45743b3d2e220221c6a45208ea8b274f9f704dc25c7858fe5229f68f2aa42ff9"
+  },
+  "respec-cascade-statistics.json": {
+    "copied_from": "D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s23-final\\statistics.json",
+    "sha256_of_origin": "f0205315dd70102fb69e8dae99d242ace260125aa96e264ced82b1b76e7925e8",
+    "sha256": "f0205315dd70102fb69e8dae99d242ace260125aa96e264ced82b1b76e7925e8"
+  },
+  "respec-cascade-primary-sweep-manifest.json": {
+    "copied_from": "D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s23-final\\primary-sweep-manifest.json",
+    "sha256_of_origin": "79bbeac29f3b9d5a824fd6e76481ac13468a7497ad0ecbbb3b5c02fa909f9ffd",
+    "sha256": "79bbeac29f3b9d5a824fd6e76481ac13468a7497ad0ecbbb3b5c02fa909f9ffd"
+  },
+  "respec-cascade-baseline-sweep-manifest.json": {
+    "copied_from": "D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s23-final\\baseline-sweep-manifest.json",
+    "sha256_of_origin": "f1d3f0817d5d0b5c5554e6032802eead4600c3f007ab5559225945bad17a0d97",
+    "sha256": "f1d3f0817d5d0b5c5554e6032802eead4600c3f007ab5559225945bad17a0d97"
+  },
+  "rerun-runpod-statistics.json": {
+    "copied_from": "D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7-clean-rerun-runpod\\runs\\paper-s7-clean-rerun\\s7-final-statistics-runpod.json",
+    "sha256_of_origin": "5eb522505c71c484bfe4991a6d7f4c73f9187543dafdfa29fda88b4d90b83884",
+    "sha256": "5eb522505c71c484bfe4991a6d7f4c73f9187543dafdfa29fda88b4d90b83884"
+  },
+  "single-edit-k1-fixrerun-statistics.json": {
+    "copied_from": "D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7\\k1-fixrerun-statistics-20260831T145852Z.json",
+    "sha256_of_origin": "c762959a9bcba9b0d4c156bde7185c655db11aefbdc784e095546eb0a99875d7",
+    "sha256": "c762959a9bcba9b0d4c156bde7185c655db11aefbdc784e095546eb0a99875d7"
+  }
+}

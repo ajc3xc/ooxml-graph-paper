@@ -1,0 +1,174 @@
+{
+  "schema": "paper-s7-statistics-v1",
+  "chain_count": 252,
+  "groups": [
+    {
+      "family": "bibliography",
+      "k_pairs": 4,
+      "not_applicable_count": 0,
+      "control_n": 26,
+      "control_pass_rate_ci": {
+        "mean": 1.0,
+        "ci_low": 0.8677253955022458,
+        "ci_high": 1.0,
+        "n": 26,
+        "confidence_level": 0.95,
+        "n_resamples": 2000,
+        "method": "clopper_pearson_exact_fallback"
+      },
+      "treatment_n": 26,
+      "treatment_pass_rate_ci": {
+        "mean": 1.0,
+        "ci_low": 0.8677253955022458,
+        "ci_high": 1.0,
+        "n": 26,
+        "confidence_level": 0.95,
+        "n_resamples": 2000,
+        "method": "clopper_pearson_exact_fallback"
+      },
+      "steady_state_pairs_1_plus": {
+        "note": "Pass rate over pairs[1:] only (excludes the first pair), isolating whether repeated cycling introduces NEW drift once past any known one-time first-use side effect (e.g. bibliography's References-heading residue, which affects both arms equally on pair 0) -- None if k_pairs<2.",
+        "control_n": 26,
+        "control_pass_rate_ci": {
+          "mean": 1.0,
+          "ci_low": 0.8677253955022458,
+          "ci_high": 1.0,
+          "n": 26,
+          "confidence_level": 0.95,
+          "n_resamples": 2000,
+          "method": "clopper_pearson_exact_fallback"
+        },
+        "treatment_n": 26,
+        "treatment_pass_rate_ci": {
+          "mean": 1.0,
+          "ci_low": 0.8677253955022458,
+          "ci_high": 1.0,
+          "n": 26,
+          "confidence_level": 0.95,
+          "n_resamples": 2000,
+          "method": "clopper_pearson_exact_fallback"
+        }
+      },
+      "paired_n": 26,
+      "paired_control_vs_treatment_significance": {
+        "observed_mean_diff": 0.0,
+        "p_value": 1.0,
+        "n_paired_documents": 26,
+        "n_permutations": 2000,
+        "method": "paired sign-flip permutation test"
+      }
+    },
+    {
+      "family": "citation",
+      "k_pairs": 4,
+      "not_applicable_count": 2,
+      "control_n": 25,
+      "control_pass_rate_ci": {
+        "mean": 1.0,
+        "ci_low": 0.8628148284692875,
+        "ci_high": 1.0,
+        "n": 25,
+        "confidence_level": 0.95,
+        "n_resamples": 2000,
+        "method": "clopper_pearson_exact_fallback"
+      },
+      "treatment_n": 25,
+      "treatment_pass_rate_ci": {
+        "mean": 1.0,
+        "ci_low": 0.8628148284692875,
+        "ci_high": 1.0,
+        "n": 25,
+        "confidence_level": 0.95,
+        "n_resamples": 2000,
+        "method": "clopper_pearson_exact_fallback"
+      },
+      "steady_state_pairs_1_plus": {
+        "note": "Pass rate over pairs[1:] only (excludes the first pair), isolating whether repeated cycling introduces NEW drift once past any known one-time first-use side effect (e.g. bibliography's References-heading residue, which affects both arms equally on pair 0) -- None if k_pairs<2.",
+        "control_n": 25,
+        "control_pass_rate_ci": {
+          "mean": 1.0,
+          "ci_low": 0.8628148284692875,
+          "ci_high": 1.0,
+          "n": 25,
+          "confidence_level": 0.95,
+          "n_resamples": 2000,
+          "method": "clopper_pearson_exact_fallback"
+        },
+        "treatment_n": 25,
+        "treatment_pass_rate_ci": {
+          "mean": 1.0,
+          "ci_low": 0.8628148284692875,
+          "ci_high": 1.0,
+          "n": 25,
+          "confidence_level": 0.95,
+          "n_resamples": 2000,
+          "method": "clopper_pearson_exact_fallback"
+        }
+      },
+      "paired_n": 24,
+      "paired_control_vs_treatment_significance": {
+        "observed_mean_diff": 0.0,
+        "p_value": 1.0,
+        "n_paired_documents": 24,
+        "n_permutations": 2000,
+        "method": "paired sign-flip permutation test"
+      }
+    },
+    {
+      "family": "section_reorder",
+      "k_pairs": 4,
+      "not_applicable_count": 37,
+      "control_n": 55,
+      "control_pass_rate_ci": {
+        "mean": 0.6727272727272727,
+        "ci_low": 0.5454545454545454,
+        "ci_high": 0.7818181818181819,
+        "n": 55,
+        "confidence_level": 0.95,
+        "n_resamples": 2000,
+        "method": "percentile_bootstrap"
+      },
+      "treatment_n": 56,
+      "treatment_pass_rate_ci": {
+        "mean": 0.9285714285714286,
+        "ci_low": 0.8571428571428571,
+        "ci_high": 0.9821428571428571,
+        "n": 56,
+        "confidence_level": 0.95,
+        "n_resamples": 2000,
+        "method": "percentile_bootstrap"
+      },
+      "steady_state_pairs_1_plus": {
+        "note": "Pass rate over pairs[1:] only (excludes the first pair), isolating whether repeated cycling introduces NEW drift once past any known one-time first-use side effect (e.g. bibliography's References-heading residue, which affects both arms equally on pair 0) -- None if k_pairs<2.",
+        "control_n": 55,
+        "control_pass_rate_ci": {
+          "mean": 0.8606060606060606,
+          "ci_low": 0.787878787878788,
+          "ci_high": 0.9212121212121211,
+          "n": 55,
+          "confidence_level": 0.95,
+          "n_resamples": 2000,
+          "method": "percentile_bootstrap"
+        },
+        "treatment_n": 56,
+        "treatment_pass_rate_ci": {
+          "mean": 0.9583333333333333,
+          "ci_low": 0.8988095238095238,
+          "ci_high": 1.0,
+          "n": 56,
+          "confidence_level": 0.95,
+          "n_resamples": 2000,
+          "method": "percentile_bootstrap"
+        }
+      },
+      "paired_n": 55,
+      "paired_control_vs_treatment_significance": {
+        "observed_mean_diff": -0.2545454545454545,
+        "p_value": 0.0015,
+        "n_paired_documents": 55,
+        "n_permutations": 2000,
+        "method": "paired sign-flip permutation test"
+      }
+    }
+  ]
+}

@@ -1,0 +1,154 @@
+{
+  "schema": "paper-s23-respec-cascade-primary-sweep-v1",
+  "generated_at": "2026-09-23T05:31:21.050026+00:00",
+  "model": "haiku",
+  "max_anchor_sets": 4,
+  "chain_count": 24,
+  "excluded_anchor_sets": [],
+  "chains_summary": [
+    {
+      "chain_id": "jcshm-manuscript__anchor-94dd2679-respec_cascade-treatment",
+      "doc_label": "jcshm-manuscript__anchor1",
+      "arm": "treatment",
+      "status": "completed"
+    },
+    {
+      "chain_id": "jcshm-manuscript__anchor-32efc58a-respec_cascade-treatment",
+      "doc_label": "jcshm-manuscript__anchor0",
+      "arm": "treatment",
+      "status": "completed"
+    },
+    {
+      "chain_id": "jcshm-manuscript__anchor-9b9c0870-respec_cascade-treatment",
+      "doc_label": "jcshm-manuscript__anchor2",
+      "arm": "treatment",
+      "status": "completed"
+    },
+    {
+      "chain_id": "jcshm-manuscript__anchor-94dd2679-respec_cascade-control",
+      "doc_label": "jcshm-manuscript__anchor1",
+      "arm": "control",
+      "status": "chain_broken_at_step_3.4-inverse"
+    },
+    {
+      "chain_id": "jcshm-manuscript__anchor-9b9c0870-respec_cascade-control",
+      "doc_label": "jcshm-manuscript__anchor2",
+      "arm": "control",
+      "status": "chain_broken_at_step_3.4-inverse"
+    },
+    {
+      "chain_id": "jcshm-manuscript__anchor-cd862ebb-respec_cascade-treatment",
+      "doc_label": "jcshm-manuscript__anchor3",
+      "arm": "treatment",
+      "status": "completed"
+    },
+    {
+      "chain_id": "jcshm-manuscript__anchor-32efc58a-respec_cascade-control",
+      "doc_label": "jcshm-manuscript__anchor0",
+      "arm": "control",
+      "status": "completed_with_failure"
+    },
+    {
+      "chain_id": "jcshm-si__anchor0-b80287bc-respec_cascade-control",
+      "doc_label": "jcshm-si__anchor0",
+      "arm": "control",
+      "status": "completed_with_failure"
+    },
+    {
+      "chain_id": "jcshm-si__anchor2-9e491742-respec_cascade-control",
+      "doc_label": "jcshm-si__anchor2",
+      "arm": "control",
+      "status": "chain_broken_at_step_2.1"
+    },
+    {
+      "chain_id": "jcshm-si__anchor0-b80287bc-respec_cascade-treatment",
+      "doc_label": "jcshm-si__anchor0",
+      "arm": "treatment",
+      "status": "completed"
+    },
+    {
+      "chain_id": "jcshm-manuscript__anchor-cd862ebb-respec_cascade-control",
+      "doc_label": "jcshm-manuscript__anchor3",
+      "arm": "control",
+      "status": "chain_broken_at_step_3.4-inverse"
+    },
+    {
+      "chain_id": "jcshm-si__anchor1-844b5827-respec_cascade-treatment",
+      "doc_label": "jcshm-si__anchor1",
+      "arm": "treatment",
+      "status": "completed"
+    },
+    {
+      "chain_id": "jcshm-si__anchor2-9e491742-respec_cascade-treatment",
+      "doc_label": "jcshm-si__anchor2",
+      "arm": "treatment",
+      "status": "completed"
+    },
+    {
+      "chain_id": "jcshm-si__anchor3-0e61f902-respec_cascade-treatment",
+      "doc_label": "jcshm-si__anchor3",
+      "arm": "treatment",
+      "status": "completed_with_failure"
+    },
+    {
+      "chain_id": "jcshm-si__anchor1-844b5827-respec_cascade-control",
+      "doc_label": "jcshm-si__anchor1",
+      "arm": "control",
+      "status": "completed_with_failure"
+    },
+    {
+      "chain_id": "masters-dissertation-def-88cb3443-respec_cascade-control",
+      "doc_label": "masters-dissertation-defense__anchor0",
+      "arm": "control",
+      "status": "chain_broken_at_step_3.2-inverse"
+    },
+    {
+      "chain_id": "masters-dissertation-def-88cb3443-respec_cascade-treatment",
+      "doc_label": "masters-dissertation-defense__anchor0",
+      "arm": "treatment",
+      "status": "completed_with_failure"
+    },
+    {
+      "chain_id": "masters-dissertation-def-9f1ca5af-respec_cascade-treatment",
+      "doc_label": "masters-dissertation-defense__anchor1",
+      "arm": "treatment",
+      "status": "completed"
+    },
+    {
+      "chain_id": "masters-dissertation-def-9f1ca5af-respec_cascade-control",
+      "doc_label": "masters-dissertation-defense__anchor1",
+      "arm": "control",
+      "status": "completed_with_failure"
+    },
+    {
+      "chain_id": "masters-dissertation-def-3f49c45a-respec_cascade-treatment",
+      "doc_label": "masters-dissertation-defense__anchor2",
+      "arm": "treatment",
+      "status": "completed"
+    },
+    {
+      "chain_id": "masters-dissertation-def-3f49c45a-respec_cascade-control",
+      "doc_label": "masters-dissertation-defense__anchor2",
+      "arm": "control",
+      "status": "completed_with_failure"
+    },
+    {
+      "chain_id": "jcshm-si__anchor3-0e61f902-respec_cascade-control",
+      "doc_label": "jcshm-si__anchor3",
+      "arm": "control",
+      "status": "completed_with_failure"
+    },
+    {
+      "chain_id": "masters-dissertation-def-cb27e8ee-respec_cascade-control",
+      "doc_label": "masters-dissertation-defense__anchor3",
+      "arm": "control",
+      "status": "completed"
+    },
+    {
+      "chain_id": "masters-dissertation-def-cb27e8ee-respec_cascade-treatment",
+      "doc_label": "masters-dissertation-defense__anchor3",
+      "arm": "treatment",
+      "status": "completed"
+    }
+  ]
+}

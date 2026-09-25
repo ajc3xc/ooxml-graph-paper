@@ -12,3 +12,7 @@ model-cache/
 *.log
 .env
 *.env
+
+# consistency hook snapshots and generator scratch output
+.claude/state/
+tools/margin_notes/generated_preview.html

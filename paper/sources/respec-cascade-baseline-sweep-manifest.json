@@ -1,0 +1,856 @@
+{
+  "schema": "paper-s23-respec-cascade-baseline-sweep-v1",
+  "generated_at": "2026-09-23T06:06:32.138188+00:00",
+  "model": "haiku",
+  "families": [
+    "bibliography",
+    "citation",
+    "section_reorder",
+    "equation",
+    "caption"
+  ],
+  "chain_count": 120,
+  "excluded_anchor_sets": [],
+  "chains_summary": [
+    {
+      "chain_id": "jcshm-manuscript__anchor0-citation-treatment-k1",
+      "doc_label": "jcshm-manuscript__anchor0",
+      "family": "citation",
+      "arm": "treatment",
+      "status": "completed"
+    },
+    {
+      "chain_id": "jcshm-manuscript__anchor0-section_reorder-control-k1",
+      "doc_label": "jcshm-manuscript__anchor0",
+      "family": "section_reorder",
+      "arm": "control",
+      "status": "completed_with_failure"
+    },
+    {
+      "chain_id": "jcshm-manuscript__anchor0-bibliography-control-k1",
+      "doc_label": "jcshm-manuscript__anchor0",
+      "family": "bibliography",
+      "arm": "control",
+      "status": "completed_with_failure"
+    },
+    {
+      "chain_id": "jcshm-manuscript__anchor0-bibliography-treatment-k1",
+      "doc_label": "jcshm-manuscript__anchor0",
+      "family": "bibliography",
+      "arm": "treatment",
+      "status": "completed"
+    },
+    {
+      "chain_id": "jcshm-manuscript__anchor0-caption-control-k1",
+      "doc_label": "jcshm-manuscript__anchor0",
+      "family": "caption",
+      "arm": "control",
+      "status": "completed"
+    },
+    {
+      "chain_id": "jcshm-manuscript__anchor0-caption-treatment-k1",
+      "doc_label": "jcshm-manuscript__anchor0",
+      "family": "caption",
+      "arm": "treatment",
+      "status": "completed"
+    },
+    {
+      "chain_id": "jcshm-manuscript__anchor0-equation-treatment-k1",
+      "doc_label": "jcshm-manuscript__anchor0",
+      "family": "equation",
+      "arm": "treatment",
+      "status": "completed"
+    },
+    {
+      "chain_id": "jcshm-manuscript__anchor0-equation-control-k1",
+      "doc_label": "jcshm-manuscript__anchor0",
+      "family": "equation",
+      "arm": "control",
+      "status": "completed"
+    },
+    {
+      "chain_id": "jcshm-manuscript__anchor1-bibliography-control-k1",
+      "doc_label": "jcshm-manuscript__anchor1",
+      "family": "bibliography",
+      "arm": "control",
+      "status": "completed"
+    },
+    {
+      "chain_id": "jcshm-manuscript__anchor1-citation-control-k1",
+      "doc_label": "jcshm-manuscript__anchor1",
+      "family": "citation",
+      "arm": "control",
+      "status": "completed"
+    },
+    {
+      "chain_id": "jcshm-manuscript__anchor1-bibliography-treatment-k1",
+      "doc_label": "jcshm-manuscript__anchor1",
+      "family": "bibliography",
+      "arm": "treatment",
+      "status": "completed"
+    },
+    {
+      "chain_id": "jcshm-manuscript__anchor1-citation-treatment-k1",
+      "doc_label": "jcshm-manuscript__anchor1",
+      "family": "citation",
+      "arm": "treatment",
+      "status": "completed"
+    },
+    {
+      "chain_id": "jcshm-manuscript__anchor1-section_reorder-treatment-k1",
+      "doc_label": "jcshm-manuscript__anchor1",
+      "family": "section_reorder",
+      "arm": "treatment",
+      "status": "completed"
+    },
+    {
+      "chain_id": "jcshm-manuscript__anchor1-section_reorder-control-k1",
+      "doc_label": "jcshm-manuscript__anchor1",
+      "family": "section_reorder",
+      "arm": "control",
+      "status": "completed_with_failure"
+    },
+    {
+      "chain_id": "jcshm-manuscript__anchor1-equation-treatment-k1",
+      "doc_label": "jcshm-manuscript__anchor1",
+      "family": "equation",
+      "arm": "treatment",
+      "status": "completed"
+    },
+    {
+      "chain_id": "jcshm-manuscript__anchor1-equation-control-k1",
+      "doc_label": "jcshm-manuscript__anchor1",
+      "family": "equation",
+      "arm": "control",
+      "status": "completed_with_failure"
+    },
+    {
+      "chain_id": "jcshm-manuscript__anchor0-citation-control-k1",
+      "doc_label": "jcshm-manuscript__anchor0",
+      "family": "citation",
+      "arm": "control",
+      "status": "completed"
+    },
+    {
+      "chain_id": "jcshm-manuscript__anchor0-section_reorder-treatment-k1",
+      "doc_label": "jcshm-manuscript__anchor0",
+      "family": "section_reorder",
+      "arm": "treatment",
+      "status": "completed"
+    },
+    {
+      "chain_id": "jcshm-manuscript__anchor2-bibliography-control-k1",
+      "doc_label": "jcshm-manuscript__anchor2",
+      "family": "bibliography",
+      "arm": "control",
+      "status": "completed"
+    },
+    {
+      "chain_id": "jcshm-manuscript__anchor1-caption-control-k1",
+      "doc_label": "jcshm-manuscript__anchor1",
+      "family": "caption",
+      "arm": "control",
+      "status": "completed"
+    },
+    {
+      "chain_id": "jcshm-manuscript__anchor1-caption-treatment-k1",
+      "doc_label": "jcshm-manuscript__anchor1",
+      "family": "caption",
+      "arm": "treatment",
+      "status": "completed"
+    },
+    {
+      "chain_id": "jcshm-manuscript__anchor2-bibliography-treatment-k1",
+      "doc_label": "jcshm-manuscript__anchor2",
+      "family": "bibliography",
+      "arm": "treatment",
+      "status": "completed"
+    },
+    {
+      "chain_id": "jcshm-manuscript__anchor2-citation-control-k1",
+      "doc_label": "jcshm-manuscript__anchor2",
+      "family": "citation",
+      "arm": "control",
+      "status": "completed"
+    },
+    {
+      "chain_id": "jcshm-manuscript__anchor2-citation-treatment-k1",
+      "doc_label": "jcshm-manuscript__anchor2",
+      "family": "citation",
+      "arm": "treatment",
+      "status": "completed"
+    },
+    {
+      "chain_id": "jcshm-manuscript__anchor2-section_reorder-control-k1",
+      "doc_label": "jcshm-manuscript__anchor2",
+      "family": "section_reorder",
+      "arm": "control",
+      "status": "completed_with_failure"
+    },
+    {
+      "chain_id": "jcshm-manuscript__anchor2-section_reorder-treatment-k1",
+      "doc_label": "jcshm-manuscript__anchor2",
+      "family": "section_reorder",
+      "arm": "treatment",
+      "status": "completed"
+    },
+    {
+      "chain_id": "jcshm-manuscript__anchor2-equation-control-k1",
+      "doc_label": "jcshm-manuscript__anchor2",
+      "family": "equation",
+      "arm": "control",
+      "status": "completed_with_failure"
+    },
+    {
+      "chain_id": "jcshm-manuscript__anchor2-equation-treatment-k1",
+      "doc_label": "jcshm-manuscript__anchor2",
+      "family": "equation",
+      "arm": "treatment",
+      "status": "completed"
+    },
+    {
+      "chain_id": "jcshm-manuscript__anchor2-caption-control-k1",
+      "doc_label": "jcshm-manuscript__anchor2",
+      "family": "caption",
+      "arm": "control",
+      "status": "completed"
+    },
+    {
+      "chain_id": "jcshm-manuscript__anchor2-caption-treatment-k1",
+      "doc_label": "jcshm-manuscript__anchor2",
+      "family": "caption",
+      "arm": "treatment",
+      "status": "completed"
+    },
+    {
+      "chain_id": "jcshm-manuscript__anchor3-bibliography-control-k1",
+      "doc_label": "jcshm-manuscript__anchor3",
+      "family": "bibliography",
+      "arm": "control",
+      "status": "completed"
+    },
+    {
+      "chain_id": "jcshm-manuscript__anchor3-citation-control-k1",
+      "doc_label": "jcshm-manuscript__anchor3",
+      "family": "citation",
+      "arm": "control",
+      "status": "completed"
+    },
+    {
+      "chain_id": "jcshm-manuscript__anchor3-bibliography-treatment-k1",
+      "doc_label": "jcshm-manuscript__anchor3",
+      "family": "bibliography",
+      "arm": "treatment",
+      "status": "completed"
+    },
+    {
+      "chain_id": "jcshm-manuscript__anchor3-citation-treatment-k1",
+      "doc_label": "jcshm-manuscript__anchor3",
+      "family": "citation",
+      "arm": "treatment",
+      "status": "completed"
+    },
+    {
+      "chain_id": "jcshm-manuscript__anchor3-section_reorder-control-k1",
+      "doc_label": "jcshm-manuscript__anchor3",
+      "family": "section_reorder",
+      "arm": "control",
+      "status": "completed_with_failure"
+    },
+    {
+      "chain_id": "jcshm-manuscript__anchor3-section_reorder-treatment-k1",
+      "doc_label": "jcshm-manuscript__anchor3",
+      "family": "section_reorder",
+      "arm": "treatment",
+      "status": "completed_with_failure"
+    },
+    {
+      "chain_id": "jcshm-manuscript__anchor3-equation-treatment-k1",
+      "doc_label": "jcshm-manuscript__anchor3",
+      "family": "equation",
+      "arm": "treatment",
+      "status": "completed"
+    },
+    {
+      "chain_id": "jcshm-manuscript__anchor3-equation-control-k1",
+      "doc_label": "jcshm-manuscript__anchor3",
+      "family": "equation",
+      "arm": "control",
+      "status": "completed"
+    },
+    {
+      "chain_id": "jcshm-manuscript__anchor3-caption-control-k1",
+      "doc_label": "jcshm-manuscript__anchor3",
+      "family": "caption",
+      "arm": "control",
+      "status": "completed"
+    },
+    {
+      "chain_id": "jcshm-manuscript__anchor3-caption-treatment-k1",
+      "doc_label": "jcshm-manuscript__anchor3",
+      "family": "caption",
+      "arm": "treatment",
+      "status": "completed"
+    },
+    {
+      "chain_id": "jcshm-si__anchor0-bibliography-control-k1",
+      "doc_label": "jcshm-si__anchor0",
+      "family": "bibliography",
+      "arm": "control",
+      "status": "completed"
+    },
+    {
+      "chain_id": "jcshm-si__anchor0-bibliography-treatment-k1",
+      "doc_label": "jcshm-si__anchor0",
+      "family": "bibliography",
+      "arm": "treatment",
+      "status": "completed"
+    },
+    {
+      "chain_id": "jcshm-si__anchor0-citation-control-k1",
+      "doc_label": "jcshm-si__anchor0",
+      "family": "citation",
+      "arm": "control",
+      "status": "completed"
+    },
+    {
+      "chain_id": "jcshm-si__anchor0-citation-treatment-k1",
+      "doc_label": "jcshm-si__anchor0",
+      "family": "citation",
+      "arm": "treatment",
+      "status": "completed"
+    },
+    {
+      "chain_id": "jcshm-si__anchor0-section_reorder-control-k1",
+      "doc_label": "jcshm-si__anchor0",
+      "family": "section_reorder",
+      "arm": "control",
+      "status": "completed"
+    },
+    {
+      "chain_id": "jcshm-si__anchor0-section_reorder-treatment-k1",
+      "doc_label": "jcshm-si__anchor0",
+      "family": "section_reorder",
+      "arm": "treatment",
+      "status": "completed"
+    },
+    {
+      "chain_id": "jcshm-si__anchor0-equation-treatment-k1",
+      "doc_label": "jcshm-si__anchor0",
+      "family": "equation",
+      "arm": "treatment",
+      "status": "completed"
+    },
+    {
+      "chain_id": "jcshm-si__anchor0-equation-control-k1",
+      "doc_label": "jcshm-si__anchor0",
+      "family": "equation",
+      "arm": "control",
+      "status": "completed"
+    },
+    {
+      "chain_id": "jcshm-si__anchor0-caption-control-k1",
+      "doc_label": "jcshm-si__anchor0",
+      "family": "caption",
+      "arm": "control",
+      "status": "completed"
+    },
+    {
+      "chain_id": "jcshm-si__anchor0-caption-treatment-k1",
+      "doc_label": "jcshm-si__anchor0",
+      "family": "caption",
+      "arm": "treatment",
+      "status": "completed"
+    },
+    {
+      "chain_id": "jcshm-si__anchor1-bibliography-control-k1",
+      "doc_label": "jcshm-si__anchor1",
+      "family": "bibliography",
+      "arm": "control",
+      "status": "completed"
+    },
+    {
+      "chain_id": "jcshm-si__anchor1-bibliography-treatment-k1",
+      "doc_label": "jcshm-si__anchor1",
+      "family": "bibliography",
+      "arm": "treatment",
+      "status": "completed"
+    },
+    {
+      "chain_id": "jcshm-si__anchor1-citation-treatment-k1",
+      "doc_label": "jcshm-si__anchor1",
+      "family": "citation",
+      "arm": "treatment",
+      "status": "completed"
+    },
+    {
+      "chain_id": "jcshm-si__anchor1-citation-control-k1",
+      "doc_label": "jcshm-si__anchor1",
+      "family": "citation",
+      "arm": "control",
+      "status": "completed"
+    },
+    {
+      "chain_id": "jcshm-si__anchor1-section_reorder-treatment-k1",
+      "doc_label": "jcshm-si__anchor1",
+      "family": "section_reorder",
+      "arm": "treatment",
+      "status": "completed"
+    },
+    {
+      "chain_id": "jcshm-si__anchor1-section_reorder-control-k1",
+      "doc_label": "jcshm-si__anchor1",
+      "family": "section_reorder",
+      "arm": "control",
+      "status": "completed_with_failure"
+    },
+    {
+      "chain_id": "jcshm-si__anchor1-equation-control-k1",
+      "doc_label": "jcshm-si__anchor1",
+      "family": "equation",
+      "arm": "control",
+      "status": "completed"
+    },
+    {
+      "chain_id": "jcshm-si__anchor1-caption-treatment-k1",
+      "doc_label": "jcshm-si__anchor1",
+      "family": "caption",
+      "arm": "treatment",
+      "status": "completed"
+    },
+    {
+      "chain_id": "jcshm-si__anchor1-equation-treatment-k1",
+      "doc_label": "jcshm-si__anchor1",
+      "family": "equation",
+      "arm": "treatment",
+      "status": "completed"
+    },
+    {
+      "chain_id": "jcshm-si__anchor2-bibliography-control-k1",
+      "doc_label": "jcshm-si__anchor2",
+      "family": "bibliography",
+      "arm": "control",
+      "status": "completed"
+    },
+    {
+      "chain_id": "jcshm-si__anchor2-section_reorder-control-k1",
+      "doc_label": "jcshm-si__anchor2",
+      "family": "section_reorder",
+      "arm": "control",
+      "status": "completed_with_failure"
+    },
+    {
+      "chain_id": "jcshm-si__anchor2-bibliography-treatment-k1",
+      "doc_label": "jcshm-si__anchor2",
+      "family": "bibliography",
+      "arm": "treatment",
+      "status": "completed"
+    },
+    {
+      "chain_id": "jcshm-si__anchor2-citation-control-k1",
+      "doc_label": "jcshm-si__anchor2",
+      "family": "citation",
+      "arm": "control",
+      "status": "completed"
+    },
+    {
+      "chain_id": "jcshm-si__anchor2-citation-treatment-k1",
+      "doc_label": "jcshm-si__anchor2",
+      "family": "citation",
+      "arm": "treatment",
+      "status": "completed"
+    },
+    {
+      "chain_id": "jcshm-si__anchor2-caption-control-k1",
+      "doc_label": "jcshm-si__anchor2",
+      "family": "caption",
+      "arm": "control",
+      "status": "completed"
+    },
+    {
+      "chain_id": "jcshm-si__anchor2-section_reorder-treatment-k1",
+      "doc_label": "jcshm-si__anchor2",
+      "family": "section_reorder",
+      "arm": "treatment",
+      "status": "completed_with_failure"
+    },
+    {
+      "chain_id": "jcshm-si__anchor2-equation-control-k1",
+      "doc_label": "jcshm-si__anchor2",
+      "family": "equation",
+      "arm": "control",
+      "status": "completed"
+    },
+    {
+      "chain_id": "jcshm-si__anchor2-equation-treatment-k1",
+      "doc_label": "jcshm-si__anchor2",
+      "family": "equation",
+      "arm": "treatment",
+      "status": "completed"
+    },
+    {
+      "chain_id": "jcshm-si__anchor2-caption-treatment-k1",
+      "doc_label": "jcshm-si__anchor2",
+      "family": "caption",
+      "arm": "treatment",
+      "status": "completed"
+    },
+    {
+      "chain_id": "jcshm-si__anchor3-citation-control-k1",
+      "doc_label": "jcshm-si__anchor3",
+      "family": "citation",
+      "arm": "control",
+      "status": "completed"
+    },
+    {
+      "chain_id": "jcshm-si__anchor3-bibliography-control-k1",
+      "doc_label": "jcshm-si__anchor3",
+      "family": "bibliography",
+      "arm": "control",
+      "status": "completed"
+    },
+    {
+      "chain_id": "jcshm-si__anchor3-section_reorder-control-k1",
+      "doc_label": "jcshm-si__anchor3",
+      "family": "section_reorder",
+      "arm": "control",
+      "status": "completed_with_failure"
+    },
+    {
+      "chain_id": "jcshm-si__anchor3-citation-treatment-k1",
+      "doc_label": "jcshm-si__anchor3",
+      "family": "citation",
+      "arm": "treatment",
+      "status": "completed"
+    },
+    {
+      "chain_id": "jcshm-si__anchor3-bibliography-treatment-k1",
+      "doc_label": "jcshm-si__anchor3",
+      "family": "bibliography",
+      "arm": "treatment",
+      "status": "completed"
+    },
+    {
+      "chain_id": "jcshm-si__anchor1-caption-control-k1",
+      "doc_label": "jcshm-si__anchor1",
+      "family": "caption",
+      "arm": "control",
+      "status": "completed"
+    },
+    {
+      "chain_id": "jcshm-si__anchor3-section_reorder-treatment-k1",
+      "doc_label": "jcshm-si__anchor3",
+      "family": "section_reorder",
+      "arm": "treatment",
+      "status": "completed"
+    },
+    {
+      "chain_id": "jcshm-si__anchor3-caption-control-k1",
+      "doc_label": "jcshm-si__anchor3",
+      "family": "caption",
+      "arm": "control",
+      "status": "completed"
+    },
+    {
+      "chain_id": "jcshm-si__anchor3-equation-treatment-k1",
+      "doc_label": "jcshm-si__anchor3",
+      "family": "equation",
+      "arm": "treatment",
+      "status": "completed"
+    },
+    {
+      "chain_id": "jcshm-si__anchor3-equation-control-k1",
+      "doc_label": "jcshm-si__anchor3",
+      "family": "equation",
+      "arm": "control",
+      "status": "completed"
+    },
+    {
+      "chain_id": "jcshm-si__anchor3-caption-treatment-k1",
+      "doc_label": "jcshm-si__anchor3",
+      "family": "caption",
+      "arm": "treatment",
+      "status": "completed"
+    },
+    {
+      "chain_id": "masters-dissertation-de-88cb3443-section_reorder-treatment-k1",
+      "doc_label": "masters-dissertation-defense__anchor0",
+      "family": "section_reorder",
+      "arm": "treatment",
+      "status": "completed"
+    },
+    {
+      "chain_id": "masters-dissertation-de-88cb3443-section_reorder-control-k1",
+      "doc_label": "masters-dissertation-defense__anchor0",
+      "family": "section_reorder",
+      "arm": "control",
+      "status": "completed_with_failure"
+    },
+    {
+      "chain_id": "masters-dissertation-de-88cb3443-bibliography-treatment-k1",
+      "doc_label": "masters-dissertation-defense__anchor0",
+      "family": "bibliography",
+      "arm": "treatment",
+      "status": "completed"
+    },
+    {
+      "chain_id": "masters-dissertation-de-88cb3443-citation-treatment-k1",
+      "doc_label": "masters-dissertation-defense__anchor0",
+      "family": "citation",
+      "arm": "treatment",
+      "status": "completed"
+    },
+    {
+      "chain_id": "masters-dissertation-de-88cb3443-bibliography-control-k1",
+      "doc_label": "masters-dissertation-defense__anchor0",
+      "family": "bibliography",
+      "arm": "control",
+      "status": "completed"
+    },
+    {
+      "chain_id": "masters-dissertation-de-88cb3443-citation-control-k1",
+      "doc_label": "masters-dissertation-defense__anchor0",
+      "family": "citation",
+      "arm": "control",
+      "status": "completed"
+    },
+    {
+      "chain_id": "masters-dissertation-de-88cb3443-caption-control-k1",
+      "doc_label": "masters-dissertation-defense__anchor0",
+      "family": "caption",
+      "arm": "control",
+      "status": "completed"
+    },
+    {
+      "chain_id": "masters-dissertation-de-9f1ca5af-bibliography-treatment-k1",
+      "doc_label": "masters-dissertation-defense__anchor1",
+      "family": "bibliography",
+      "arm": "treatment",
+      "status": "completed"
+    },
+    {
+      "chain_id": "masters-dissertation-de-9f1ca5af-bibliography-control-k1",
+      "doc_label": "masters-dissertation-defense__anchor1",
+      "family": "bibliography",
+      "arm": "control",
+      "status": "completed_with_failure"
+    },
+    {
+      "chain_id": "masters-dissertation-de-88cb3443-equation-control-k1",
+      "doc_label": "masters-dissertation-defense__anchor0",
+      "family": "equation",
+      "arm": "control",
+      "status": "completed"
+    },
+    {
+      "chain_id": "masters-dissertation-de-88cb3443-caption-treatment-k1",
+      "doc_label": "masters-dissertation-defense__anchor0",
+      "family": "caption",
+      "arm": "treatment",
+      "status": "completed"
+    },
+    {
+      "chain_id": "masters-dissertation-de-88cb3443-equation-treatment-k1",
+      "doc_label": "masters-dissertation-defense__anchor0",
+      "family": "equation",
+      "arm": "treatment",
+      "status": "completed"
+    },
+    {
+      "chain_id": "masters-dissertation-de-9f1ca5af-citation-treatment-k1",
+      "doc_label": "masters-dissertation-defense__anchor1",
+      "family": "citation",
+      "arm": "treatment",
+      "status": "completed"
+    },
+    {
+      "chain_id": "masters-dissertation-de-9f1ca5af-section_reorder-treatment-k1",
+      "doc_label": "masters-dissertation-defense__anchor1",
+      "family": "section_reorder",
+      "arm": "treatment",
+      "status": "completed"
+    },
+    {
+      "chain_id": "masters-dissertation-de-9f1ca5af-citation-control-k1",
+      "doc_label": "masters-dissertation-defense__anchor1",
+      "family": "citation",
+      "arm": "control",
+      "status": "completed"
+    },
+    {
+      "chain_id": "masters-dissertation-de-9f1ca5af-section_reorder-control-k1",
+      "doc_label": "masters-dissertation-defense__anchor1",
+      "family": "section_reorder",
+      "arm": "control",
+      "status": "completed_with_failure"
+    },
+    {
+      "chain_id": "masters-dissertation-de-9f1ca5af-caption-control-k1",
+      "doc_label": "masters-dissertation-defense__anchor1",
+      "family": "caption",
+      "arm": "control",
+      "status": "completed"
+    },
+    {
+      "chain_id": "masters-dissertation-de-9f1ca5af-equation-control-k1",
+      "doc_label": "masters-dissertation-defense__anchor1",
+      "family": "equation",
+      "arm": "control",
+      "status": "completed"
+    },
+    {
+      "chain_id": "masters-dissertation-de-9f1ca5af-equation-treatment-k1",
+      "doc_label": "masters-dissertation-defense__anchor1",
+      "family": "equation",
+      "arm": "treatment",
+      "status": "completed"
+    },
+    {
+      "chain_id": "masters-dissertation-de-3f49c45a-bibliography-treatment-k1",
+      "doc_label": "masters-dissertation-defense__anchor2",
+      "family": "bibliography",
+      "arm": "treatment",
+      "status": "completed"
+    },
+    {
+      "chain_id": "masters-dissertation-de-9f1ca5af-caption-treatment-k1",
+      "doc_label": "masters-dissertation-defense__anchor1",
+      "family": "caption",
+      "arm": "treatment",
+      "status": "completed"
+    },
+    {
+      "chain_id": "masters-dissertation-de-3f49c45a-bibliography-control-k1",
+      "doc_label": "masters-dissertation-defense__anchor2",
+      "family": "bibliography",
+      "arm": "control",
+      "status": "completed"
+    },
+    {
+      "chain_id": "masters-dissertation-de-3f49c45a-citation-treatment-k1",
+      "doc_label": "masters-dissertation-defense__anchor2",
+      "family": "citation",
+      "arm": "treatment",
+      "status": "completed"
+    },
+    {
+      "chain_id": "masters-dissertation-de-3f49c45a-section_reorder-treatment-k1",
+      "doc_label": "masters-dissertation-defense__anchor2",
+      "family": "section_reorder",
+      "arm": "treatment",
+      "status": "completed"
+    },
+    {
+      "chain_id": "masters-dissertation-de-3f49c45a-citation-control-k1",
+      "doc_label": "masters-dissertation-defense__anchor2",
+      "family": "citation",
+      "arm": "control",
+      "status": "completed"
+    },
+    {
+      "chain_id": "masters-dissertation-de-3f49c45a-equation-control-k1",
+      "doc_label": "masters-dissertation-defense__anchor2",
+      "family": "equation",
+      "arm": "control",
+      "status": "completed"
+    },
+    {
+      "chain_id": "masters-dissertation-de-3f49c45a-caption-control-k1",
+      "doc_label": "masters-dissertation-defense__anchor2",
+      "family": "caption",
+      "arm": "control",
+      "status": "completed_with_failure"
+    },
+    {
+      "chain_id": "masters-dissertation-de-cb27e8ee-bibliography-control-k1",
+      "doc_label": "masters-dissertation-defense__anchor3",
+      "family": "bibliography",
+      "arm": "control",
+      "status": "completed"
+    },
+    {
+      "chain_id": "masters-dissertation-de-3f49c45a-equation-treatment-k1",
+      "doc_label": "masters-dissertation-defense__anchor2",
+      "family": "equation",
+      "arm": "treatment",
+      "status": "completed"
+    },
+    {
+      "chain_id": "masters-dissertation-de-3f49c45a-caption-treatment-k1",
+      "doc_label": "masters-dissertation-defense__anchor2",
+      "family": "caption",
+      "arm": "treatment",
+      "status": "completed"
+    },
+    {
+      "chain_id": "masters-dissertation-de-3f49c45a-section_reorder-control-k1",
+      "doc_label": "masters-dissertation-defense__anchor2",
+      "family": "section_reorder",
+      "arm": "control",
+      "status": "completed_with_failure"
+    },
+    {
+      "chain_id": "masters-dissertation-de-cb27e8ee-bibliography-treatment-k1",
+      "doc_label": "masters-dissertation-defense__anchor3",
+      "family": "bibliography",
+      "arm": "treatment",
+      "status": "completed"
+    },
+    {
+      "chain_id": "masters-dissertation-de-cb27e8ee-citation-treatment-k1",
+      "doc_label": "masters-dissertation-defense__anchor3",
+      "family": "citation",
+      "arm": "treatment",
+      "status": "completed"
+    },
+    {
+      "chain_id": "masters-dissertation-de-cb27e8ee-citation-control-k1",
+      "doc_label": "masters-dissertation-defense__anchor3",
+      "family": "citation",
+      "arm": "control",
+      "status": "completed"
+    },
+    {
+      "chain_id": "masters-dissertation-de-cb27e8ee-section_reorder-treatment-k1",
+      "doc_label": "masters-dissertation-defense__anchor3",
+      "family": "section_reorder",
+      "arm": "treatment",
+      "status": "completed"
+    },
+    {
+      "chain_id": "masters-dissertation-de-cb27e8ee-equation-control-k1",
+      "doc_label": "masters-dissertation-defense__anchor3",
+      "family": "equation",
+      "arm": "control",
+      "status": "blocked"
+    },
+    {
+      "chain_id": "masters-dissertation-de-cb27e8ee-caption-control-k1",
+      "doc_label": "masters-dissertation-defense__anchor3",
+      "family": "caption",
+      "arm": "control",
+      "status": "completed"
+    },
+    {
+      "chain_id": "masters-dissertation-de-cb27e8ee-equation-treatment-k1",
+      "doc_label": "masters-dissertation-defense__anchor3",
+      "family": "equation",
+      "arm": "treatment",
+      "status": "completed"
+    },
+    {
+      "chain_id": "masters-dissertation-de-cb27e8ee-caption-treatment-k1",
+      "doc_label": "masters-dissertation-defense__anchor3",
+      "family": "caption",
+      "arm": "treatment",
+      "status": "completed"
+    },
+    {
+      "chain_id": "masters-dissertation-de-cb27e8ee-section_reorder-control-k1",
+      "doc_label": "masters-dissertation-defense__anchor3",
+      "family": "section_reorder",
+      "arm": "control",
+      "status": "completed_with_failure"
+    }
+  ]
+}

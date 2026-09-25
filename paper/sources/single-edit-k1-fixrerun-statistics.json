@@ -1,0 +1,102 @@
+{
+  "schema": "paper-s7-statistics-v1",
+  "chain_count": 156,
+  "groups": [
+    {
+      "family": "bibliography",
+      "k_pairs": 1,
+      "not_applicable_count": 0,
+      "control_n": 26,
+      "control_pass_rate_ci": {
+        "mean": 1.0,
+        "ci_low": 1.0,
+        "ci_high": 1.0,
+        "n": 26,
+        "confidence_level": 0.95,
+        "n_resamples": 2000
+      },
+      "treatment_n": 26,
+      "treatment_pass_rate_ci": {
+        "mean": 0.9615384615384616,
+        "ci_low": 0.8846153846153846,
+        "ci_high": 1.0,
+        "n": 26,
+        "confidence_level": 0.95,
+        "n_resamples": 2000
+      },
+      "steady_state_pairs_1_plus": null,
+      "paired_n": 26,
+      "paired_control_vs_treatment_significance": {
+        "observed_mean_diff": 0.038461538461538464,
+        "p_value": 1.0,
+        "n_paired_documents": 26,
+        "n_permutations": 2000,
+        "method": "paired sign-flip permutation test"
+      }
+    },
+    {
+      "family": "citation",
+      "k_pairs": 1,
+      "not_applicable_count": 0,
+      "control_n": 26,
+      "control_pass_rate_ci": {
+        "mean": 1.0,
+        "ci_low": 1.0,
+        "ci_high": 1.0,
+        "n": 26,
+        "confidence_level": 0.95,
+        "n_resamples": 2000
+      },
+      "treatment_n": 26,
+      "treatment_pass_rate_ci": {
+        "mean": 0.9615384615384616,
+        "ci_low": 0.8846153846153846,
+        "ci_high": 1.0,
+        "n": 26,
+        "confidence_level": 0.95,
+        "n_resamples": 2000
+      },
+      "steady_state_pairs_1_plus": null,
+      "paired_n": 26,
+      "paired_control_vs_treatment_significance": {
+        "observed_mean_diff": 0.038461538461538464,
+        "p_value": 1.0,
+        "n_paired_documents": 26,
+        "n_permutations": 2000,
+        "method": "paired sign-flip permutation test"
+      }
+    },
+    {
+      "family": "section_reorder",
+      "k_pairs": 1,
+      "not_applicable_count": 30,
+      "control_n": 11,
+      "control_pass_rate_ci": {
+        "mean": 0.7272727272727273,
+        "ci_low": 0.45454545454545453,
+        "ci_high": 1.0,
+        "n": 11,
+        "confidence_level": 0.95,
+        "n_resamples": 2000
+      },
+      "treatment_n": 11,
+      "treatment_pass_rate_ci": {
+        "mean": 1.0,
+        "ci_low": 1.0,
+        "ci_high": 1.0,
+        "n": 11,
+        "confidence_level": 0.95,
+        "n_resamples": 2000
+      },
+      "steady_state_pairs_1_plus": null,
+      "paired_n": 11,
+      "paired_control_vs_treatment_significance": {
+        "observed_mean_diff": -0.2727272727272727,
+        "p_value": 0.2395,
+        "n_paired_documents": 11,
+        "n_permutations": 2000,
+        "method": "paired sign-flip permutation test"
+      }
+    }
+  ]
+}

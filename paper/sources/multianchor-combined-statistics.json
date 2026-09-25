@@ -1,0 +1,350 @@
+{
+  "schema": "paper-s7-combined-statistics-v1",
+  "scope": "Original corpus (confirmatory dedicated-host re-run) merged with the multi-anchor extension's new trial points, per document. table_structural and section_reorder are not included -- see module docstring for why.",
+  "families": {
+    "equation": {
+      "tier1_per_document_unweighted": {
+        "control_n_documents": 29,
+        "control_pass_rate_ci": {
+          "mean": 1.0,
+          "ci_low": 0.8805551309304973,
+          "ci_high": 1.0,
+          "n": 29,
+          "confidence_level": 0.95,
+          "n_resamples": 2000,
+          "method": "clopper_pearson_exact_fallback"
+        },
+        "treatment_n_documents": 29,
+        "treatment_pass_rate_ci": {
+          "mean": 1.0,
+          "ci_low": 0.8805551309304973,
+          "ci_high": 1.0,
+          "n": 29,
+          "confidence_level": 0.95,
+          "n_resamples": 2000,
+          "method": "clopper_pearson_exact_fallback"
+        },
+        "paired_n_documents": 29,
+        "paired_significance": {
+          "observed_mean_diff": 0.0,
+          "p_value": 1.0,
+          "n_paired_documents": 29,
+          "n_permutations": 2000,
+          "method": "paired sign-flip permutation test"
+        }
+      },
+      "tier2_anchor_weighted_document_mean": {
+        "control": {
+          "mean": 1.0,
+          "ci_low": 1.0,
+          "ci_high": 1.0,
+          "n_documents": 29,
+          "total_weight": 108,
+          "confidence_level": 0.95,
+          "n_resamples": 2000,
+          "method": "weighted_cluster_bootstrap"
+        },
+        "treatment": {
+          "mean": 1.0,
+          "ci_low": 1.0,
+          "ci_high": 1.0,
+          "n_documents": 29,
+          "total_weight": 108,
+          "confidence_level": 0.95,
+          "n_resamples": 2000,
+          "method": "weighted_cluster_bootstrap"
+        },
+        "paired_significance": {
+          "observed_weighted_mean_diff": 0.0,
+          "p_value": 1.0,
+          "n_paired_documents": 29,
+          "n_permutations": 2000,
+          "method": "weighted paired sign-flip permutation test"
+        }
+      },
+      "tier3_pooled_anchor_level": {
+        "control_naive_pooled_n": 108,
+        "control_pass_rate_ci_naive": {
+          "mean": 1.0,
+          "ci_low": 0.9664204497813456,
+          "ci_high": 1.0,
+          "n": 108,
+          "confidence_level": 0.95,
+          "n_resamples": 2000,
+          "method": "clopper_pearson_exact_fallback"
+        },
+        "control_clustering": {
+          "icc": 0.0,
+          "k0_unbalanced_avg_cluster_size": 3.7175925925925926,
+          "avg_cluster_size": 3.7241379310344827,
+          "design_effect": 1.0,
+          "naive_pooled_n": 108,
+          "effective_n": 108.0,
+          "k_clusters": 29,
+          "method": "one-way random-effects ICC (Shrout-Fleiss ICC(1)), Fleiss (1986) unbalanced-design correction"
+        },
+        "treatment_naive_pooled_n": 108,
+        "treatment_pass_rate_ci_naive": {
+          "mean": 1.0,
+          "ci_low": 0.9664204497813456,
+          "ci_high": 1.0,
+          "n": 108,
+          "confidence_level": 0.95,
+          "n_resamples": 2000,
+          "method": "clopper_pearson_exact_fallback"
+        },
+        "treatment_clustering": {
+          "icc": 0.0,
+          "k0_unbalanced_avg_cluster_size": 3.7175925925925926,
+          "avg_cluster_size": 3.7241379310344827,
+          "design_effect": 1.0,
+          "naive_pooled_n": 108,
+          "effective_n": 108.0,
+          "k_clusters": 29,
+          "method": "one-way random-effects ICC (Shrout-Fleiss ICC(1)), Fleiss (1986) unbalanced-design correction"
+        },
+        "disclosure": "The naive pooled CI above treats every anchor (original single anchor plus every extension anchor) as an independent observation, which OVERSTATES precision -- anchors from the same document share document-level confounds. The *_clustering fields give the ICC-corrected effective N; treat that, not the naive pooled N, as the honest sample size for this tier."
+      },
+      "n_distinct_documents": {
+        "control": 29,
+        "treatment": 29
+      },
+      "anchors_per_document_distribution": {
+        "control": {
+          "docops_v2_l3_009_docx_incident_manual_publication": 4,
+          "atomic__word_008_policy_conflict_reasoning_seed": 4,
+          "atomic__word_012_table_structure_seed": 1,
+          "author_owned__masters_dissertation": 4,
+          "composite_same_type__wordc_005_extract_fields_into_cover_table_and_highlight_seed": 4,
+          "single_doc_workflow__wordwf_005_comprehensive_handbook_publication_seed": 4,
+          "composite_same_type__wordc_009_insert_status_column_from_notes_seed": 4,
+          "composite_same_type__wordc_006_rewrite_letter_and_match_body_style_seed": 4,
+          "composite_same_type__wordc_010_reason_and_rewrite_summary_note_seed": 4,
+          "composite_same_type__wordc_008_reorder_sections_and_apply_blue_heading_theme_seed": 4,
+          "atomic__word_009_clause_highlighting_seed": 4,
+          "single_doc_workflow__wordwf_001_board_memo_publish_pipeline_seed": 4,
+          "atomic__word_010_image_layout_seed": 2,
+          "composite_same_type__wordc_004_insert_status_column_and_formalize_notes_seed": 4,
+          "atomic__word_007_summary_generation_seed": 4,
+          "atomic__word_005_meeting_minutes_extraction_seed": 4,
+          "docops_v2_l3_005_docx_resilience_playbook_release": 4,
+          "atomic__word_006_section_reorder_seed": 4,
+          "docops_v2_l3_006_docx_grant_closeout_release": 4,
+          "single_doc_workflow__wordwf_004_contract_schedule_cleanup_seed": 4,
+          "author_owned__jcshm_si": 4,
+          "single_doc_workflow__wordwf_003_bilingual_report_publication_seed": 4,
+          "composite_same_type__wordc_007_delete_blank_page_and_generate_profile_seed": 1,
+          "docops_v2_l3_008_docx_mobility_board_packet_release": 4,
+          "single_doc_workflow__wordwf_002_policy_manual_resection_and_numbering_seed": 4,
+          "docops_v2_l3_010_docx_policy_exception_cascade": 4,
+          "atomic__word_011_theme_transfer_seed": 4,
+          "docops_v2_l3_007_docx_museum_installation_binder_release": 4,
+          "author_owned__jcshm_manuscript": 4
+        },
+        "treatment": {
+          "docops_v2_l3_009_docx_incident_manual_publication": 4,
+          "atomic__word_008_policy_conflict_reasoning_seed": 4,
+          "atomic__word_012_table_structure_seed": 1,
+          "author_owned__masters_dissertation": 4,
+          "composite_same_type__wordc_005_extract_fields_into_cover_table_and_highlight_seed": 4,
+          "single_doc_workflow__wordwf_005_comprehensive_handbook_publication_seed": 4,
+          "composite_same_type__wordc_009_insert_status_column_from_notes_seed": 4,
+          "composite_same_type__wordc_006_rewrite_letter_and_match_body_style_seed": 4,
+          "composite_same_type__wordc_010_reason_and_rewrite_summary_note_seed": 4,
+          "composite_same_type__wordc_008_reorder_sections_and_apply_blue_heading_theme_seed": 4,
+          "atomic__word_009_clause_highlighting_seed": 4,
+          "single_doc_workflow__wordwf_001_board_memo_publish_pipeline_seed": 4,
+          "atomic__word_010_image_layout_seed": 2,
+          "composite_same_type__wordc_004_insert_status_column_and_formalize_notes_seed": 4,
+          "atomic__word_007_summary_generation_seed": 4,
+          "atomic__word_005_meeting_minutes_extraction_seed": 4,
+          "docops_v2_l3_005_docx_resilience_playbook_release": 4,
+          "atomic__word_006_section_reorder_seed": 4,
+          "docops_v2_l3_006_docx_grant_closeout_release": 4,
+          "single_doc_workflow__wordwf_004_contract_schedule_cleanup_seed": 4,
+          "author_owned__jcshm_si": 4,
+          "single_doc_workflow__wordwf_003_bilingual_report_publication_seed": 4,
+          "composite_same_type__wordc_007_delete_blank_page_and_generate_profile_seed": 1,
+          "docops_v2_l3_008_docx_mobility_board_packet_release": 4,
+          "single_doc_workflow__wordwf_002_policy_manual_resection_and_numbering_seed": 4,
+          "docops_v2_l3_010_docx_policy_exception_cascade": 4,
+          "atomic__word_011_theme_transfer_seed": 4,
+          "docops_v2_l3_007_docx_museum_installation_binder_release": 4,
+          "author_owned__jcshm_manuscript": 4
+        }
+      }
+    },
+    "caption": {
+      "tier1_per_document_unweighted": {
+        "control_n_documents": 29,
+        "control_pass_rate_ci": {
+          "mean": 0.9655172413793104,
+          "ci_low": 0.9224137931034483,
+          "ci_high": 1.0,
+          "n": 29,
+          "confidence_level": 0.95,
+          "n_resamples": 2000,
+          "method": "percentile_bootstrap"
+        },
+        "treatment_n_documents": 29,
+        "treatment_pass_rate_ci": {
+          "mean": 1.0,
+          "ci_low": 0.8805551309304973,
+          "ci_high": 1.0,
+          "n": 29,
+          "confidence_level": 0.95,
+          "n_resamples": 2000,
+          "method": "clopper_pearson_exact_fallback"
+        },
+        "paired_n_documents": 29,
+        "paired_significance": {
+          "observed_mean_diff": -0.034482758620689655,
+          "p_value": 0.252,
+          "n_paired_documents": 29,
+          "n_permutations": 2000,
+          "method": "paired sign-flip permutation test"
+        }
+      },
+      "tier2_anchor_weighted_document_mean": {
+        "control": {
+          "mean": 0.9629629629629629,
+          "ci_low": 0.9166666666666666,
+          "ci_high": 1.0,
+          "n_documents": 29,
+          "total_weight": 108,
+          "confidence_level": 0.95,
+          "n_resamples": 2000,
+          "method": "weighted_cluster_bootstrap"
+        },
+        "treatment": {
+          "mean": 1.0,
+          "ci_low": 1.0,
+          "ci_high": 1.0,
+          "n_documents": 29,
+          "total_weight": 108,
+          "confidence_level": 0.95,
+          "n_resamples": 2000,
+          "method": "weighted_cluster_bootstrap"
+        },
+        "paired_significance": {
+          "observed_weighted_mean_diff": -0.037037037037037035,
+          "p_value": 0.252,
+          "n_paired_documents": 29,
+          "n_permutations": 2000,
+          "method": "weighted paired sign-flip permutation test"
+        }
+      },
+      "tier3_pooled_anchor_level": {
+        "control_naive_pooled_n": 108,
+        "control_pass_rate_ci_naive": {
+          "mean": 0.9629629629629629,
+          "ci_low": 0.9259259259259259,
+          "ci_high": 0.9907407407407407,
+          "n": 108,
+          "confidence_level": 0.95,
+          "n_resamples": 2000,
+          "method": "percentile_bootstrap"
+        },
+        "control_clustering": {
+          "icc": 0.12388166713426224,
+          "k0_unbalanced_avg_cluster_size": 3.7175925925925926,
+          "avg_cluster_size": 3.7241379310344827,
+          "design_effect": 1.3374707484002317,
+          "naive_pooled_n": 108,
+          "effective_n": 80.74942957008994,
+          "k_clusters": 29,
+          "method": "one-way random-effects ICC (Shrout-Fleiss ICC(1)), Fleiss (1986) unbalanced-design correction"
+        },
+        "treatment_naive_pooled_n": 108,
+        "treatment_pass_rate_ci_naive": {
+          "mean": 1.0,
+          "ci_low": 0.9664204497813456,
+          "ci_high": 1.0,
+          "n": 108,
+          "confidence_level": 0.95,
+          "n_resamples": 2000,
+          "method": "clopper_pearson_exact_fallback"
+        },
+        "treatment_clustering": {
+          "icc": 0.0,
+          "k0_unbalanced_avg_cluster_size": 3.7175925925925926,
+          "avg_cluster_size": 3.7241379310344827,
+          "design_effect": 1.0,
+          "naive_pooled_n": 108,
+          "effective_n": 108.0,
+          "k_clusters": 29,
+          "method": "one-way random-effects ICC (Shrout-Fleiss ICC(1)), Fleiss (1986) unbalanced-design correction"
+        },
+        "disclosure": "The naive pooled CI above treats every anchor (original single anchor plus every extension anchor) as an independent observation, which OVERSTATES precision -- anchors from the same document share document-level confounds. The *_clustering fields give the ICC-corrected effective N; treat that, not the naive pooled N, as the honest sample size for this tier."
+      },
+      "n_distinct_documents": {
+        "control": 29,
+        "treatment": 29
+      },
+      "anchors_per_document_distribution": {
+        "control": {
+          "docops_v2_l3_009_docx_incident_manual_publication": 4,
+          "atomic__word_008_policy_conflict_reasoning_seed": 4,
+          "atomic__word_012_table_structure_seed": 1,
+          "author_owned__masters_dissertation": 4,
+          "composite_same_type__wordc_005_extract_fields_into_cover_table_and_highlight_seed": 4,
+          "single_doc_workflow__wordwf_005_comprehensive_handbook_publication_seed": 4,
+          "composite_same_type__wordc_009_insert_status_column_from_notes_seed": 4,
+          "composite_same_type__wordc_006_rewrite_letter_and_match_body_style_seed": 4,
+          "composite_same_type__wordc_010_reason_and_rewrite_summary_note_seed": 4,
+          "composite_same_type__wordc_008_reorder_sections_and_apply_blue_heading_theme_seed": 4,
+          "atomic__word_009_clause_highlighting_seed": 4,
+          "single_doc_workflow__wordwf_001_board_memo_publish_pipeline_seed": 4,
+          "atomic__word_010_image_layout_seed": 2,
+          "composite_same_type__wordc_004_insert_status_column_and_formalize_notes_seed": 4,
+          "atomic__word_007_summary_generation_seed": 4,
+          "atomic__word_005_meeting_minutes_extraction_seed": 4,
+          "docops_v2_l3_005_docx_resilience_playbook_release": 4,
+          "atomic__word_006_section_reorder_seed": 4,
+          "docops_v2_l3_006_docx_grant_closeout_release": 4,
+          "single_doc_workflow__wordwf_004_contract_schedule_cleanup_seed": 4,
+          "author_owned__jcshm_si": 4,
+          "single_doc_workflow__wordwf_003_bilingual_report_publication_seed": 4,
+          "composite_same_type__wordc_007_delete_blank_page_and_generate_profile_seed": 1,
+          "docops_v2_l3_008_docx_mobility_board_packet_release": 4,
+          "single_doc_workflow__wordwf_002_policy_manual_resection_and_numbering_seed": 4,
+          "docops_v2_l3_010_docx_policy_exception_cascade": 4,
+          "atomic__word_011_theme_transfer_seed": 4,
+          "docops_v2_l3_007_docx_museum_installation_binder_release": 4,
+          "author_owned__jcshm_manuscript": 4
+        },
+        "treatment": {
+          "docops_v2_l3_009_docx_incident_manual_publication": 4,
+          "atomic__word_008_policy_conflict_reasoning_seed": 4,
+          "atomic__word_012_table_structure_seed": 1,
+          "author_owned__masters_dissertation": 4,
+          "composite_same_type__wordc_005_extract_fields_into_cover_table_and_highlight_seed": 4,
+          "single_doc_workflow__wordwf_005_comprehensive_handbook_publication_seed": 4,
+          "composite_same_type__wordc_009_insert_status_column_from_notes_seed": 4,
+          "composite_same_type__wordc_006_rewrite_letter_and_match_body_style_seed": 4,
+          "composite_same_type__wordc_010_reason_and_rewrite_summary_note_seed": 4,
+          "composite_same_type__wordc_008_reorder_sections_and_apply_blue_heading_theme_seed": 4,
+          "atomic__word_009_clause_highlighting_seed": 4,
+          "single_doc_workflow__wordwf_001_board_memo_publish_pipeline_seed": 4,
+          "atomic__word_010_image_layout_seed": 2,
+          "composite_same_type__wordc_004_insert_status_column_and_formalize_notes_seed": 4,
+          "atomic__word_007_summary_generation_seed": 4,
+          "atomic__word_005_meeting_minutes_extraction_seed": 4,
+          "docops_v2_l3_005_docx_resilience_playbook_release": 4,
+          "atomic__word_006_section_reorder_seed": 4,
+          "docops_v2_l3_006_docx_grant_closeout_release": 4,
+          "single_doc_workflow__wordwf_004_contract_schedule_cleanup_seed": 4,
+          "author_owned__jcshm_si": 4,
+          "single_doc_workflow__wordwf_003_bilingual_report_publication_seed": 4,
+          "composite_same_type__wordc_007_delete_blank_page_and_generate_profile_seed": 1,
+          "docops_v2_l3_008_docx_mobility_board_packet_release": 4,
+          "single_doc_workflow__wordwf_002_policy_manual_resection_and_numbering_seed": 4,
+          "docops_v2_l3_010_docx_policy_exception_cascade": 4,
+          "atomic__word_011_theme_transfer_seed": 4,
+          "docops_v2_l3_007_docx_museum_installation_binder_release": 4,
+          "author_owned__jcshm_manuscript": 4
+        }
+      }
+    }
+  }
+}

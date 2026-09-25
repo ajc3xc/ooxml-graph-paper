@@ -1,0 +1,23 @@
+#!/bin/sh
+# Paper consistency gate. Install once per clone:
+#   cp tools/hooks/pre-commit .git/hooks/pre-commit
+# Blocks a commit only on hard errors (unknown \val key or \claim id, stale
+# numbers.tex, stale figures, stale margin_notes mirror). The tripwire report
+# of connected statements is printed for review but never blocks.
+changed=$(git diff --cached --name-only)
+case "$changed" in
+  *paper/main.tex*|*paper/numbers.json*|*paper/claims.json*|*paper/numbers.tex*|*paper/figures/*|*tools/margin_notes/*|*tools/make_paper_figures.py*) ;;
+  *) exit 0 ;;
+esac
+
+python paper/gen_numbers.py --check || exit 1
+python paper/consistency.py check || exit 1
+python -c "import sys; sys.path.insert(0, 'paper'); import consistency; p = consistency.figure_staleness(); print(*p, sep='\n'); sys.exit(1 if p else 0)" || exit 1
+if [ -f tools/margin_notes/build_doc_from_tex.py ]; then
+  python tools/margin_notes/build_doc_from_tex.py --check || {
+    echo "margin_notes mirror is stale: run python tools/margin_notes/build_doc_from_tex.py --write"
+    exit 1
+  }
+fi
+python paper/consistency.py tripwire --base HEAD
+exit 0

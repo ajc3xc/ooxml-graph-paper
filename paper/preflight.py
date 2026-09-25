@@ -44,10 +44,23 @@ if pendings:
     for p in pendings:
         print(f"  - {p}")
 
+# Connected-statement consistency: every \val key exists and numbers.tex is
+# fresh, every \claim id is in claims.json and every ledger claim still has a
+# site, and the figures were generated from the current numbers.
+sys.path.insert(0, str(HERE))
+import consistency  # noqa: E402
+
+c_errors, c_warnings = consistency.check(TEX)
+problems.extend(c_errors)
+for w in c_warnings:
+    print(f"NOTE: {w}")
+problems.extend(consistency.figure_staleness())
+
 if problems:
     print("PREFLIGHT FAILED:")
     for p in problems:
         print(f"  - {p}")
     sys.exit(1)
 
-print("Preflight OK (structural checks only -- does not check writing quality; see paper-review-toolkit).")
+print("Preflight OK (structural and consistency checks only -- does not check writing quality; "
+      "see paper-review-toolkit).")

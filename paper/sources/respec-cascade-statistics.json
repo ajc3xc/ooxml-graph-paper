@@ -1,0 +1,2208 @@
+{
+  "schema": "paper-s23-respec-cascade-statistics-v1",
+  "rotation_order": [
+    "bibliography",
+    "citation",
+    "section_reorder",
+    "equation",
+    "caption"
+  ],
+  "seed": 20260828,
+  "n_resamples": 2000,
+  "outcome_measures": {
+    "a_phase3_composite_pass_rate": {
+      "tier1_per_document_unweighted": {
+        "note": "Unweighted per-document mean, N=3 documents max -- demonstration/mechanism-probing strength, not a powered confirmatory test on its own (protocol section 6).",
+        "control_n_documents": 3,
+        "control_pass_rate_ci": {
+          "mean": 0.08333333333333333,
+          "ci_low": 0.0,
+          "ci_high": 0.25,
+          "n": 3,
+          "confidence_level": 0.95,
+          "n_resamples": 2000,
+          "method": "percentile_bootstrap"
+        },
+        "treatment_n_documents": 3,
+        "treatment_pass_rate_ci": {
+          "mean": 0.8333333333333334,
+          "ci_low": 0.75,
+          "ci_high": 1.0,
+          "n": 3,
+          "confidence_level": 0.95,
+          "n_resamples": 2000,
+          "method": "percentile_bootstrap"
+        },
+        "paired_n_documents": 3,
+        "paired_significance": {
+          "observed_mean_diff": -0.75,
+          "p_value": 0.2305,
+          "n_paired_documents": 3,
+          "n_permutations": 2000,
+          "method": "paired sign-flip permutation test"
+        }
+      },
+      "tier2_anchor_weighted_document_mean": {
+        "control": {
+          "mean": 0.09090909090909091,
+          "ci_low": 0.0,
+          "ci_high": 0.25,
+          "n_documents": 3,
+          "total_weight": 11,
+          "confidence_level": 0.95,
+          "n_resamples": 2000,
+          "method": "weighted_cluster_bootstrap"
+        },
+        "treatment": {
+          "mean": 0.8333333333333334,
+          "ci_low": 0.75,
+          "ci_high": 1.0,
+          "n_documents": 3,
+          "total_weight": 12,
+          "confidence_level": 0.95,
+          "n_resamples": 2000,
+          "method": "weighted_cluster_bootstrap"
+        },
+        "paired_significance": {
+          "observed_weighted_mean_diff": -0.75,
+          "p_value": 0.2305,
+          "n_paired_documents": 3,
+          "n_permutations": 2000,
+          "method": "weighted paired sign-flip permutation test"
+        }
+      },
+      "tier3_pooled_anchor_level": {
+        "control_naive_pooled_n": 11,
+        "control_pass_rate_ci_naive": {
+          "mean": 0.09090909090909091,
+          "ci_low": 0.0,
+          "ci_high": 0.2727272727272727,
+          "n": 11,
+          "confidence_level": 0.95,
+          "n_resamples": 2000,
+          "method": "percentile_bootstrap"
+        },
+        "control_clustering": {
+          "icc": 0.0,
+          "k0_unbalanced_avg_cluster_size": 3.6363636363636367,
+          "avg_cluster_size": 3.6666666666666665,
+          "design_effect": 1.0,
+          "naive_pooled_n": 11,
+          "effective_n": 11.0,
+          "k_clusters": 3,
+          "method": "one-way random-effects ICC (Shrout-Fleiss ICC(1)), Fleiss (1986) unbalanced-design correction"
+        },
+        "treatment_naive_pooled_n": 12,
+        "treatment_pass_rate_ci_naive": {
+          "mean": 0.8333333333333334,
+          "ci_low": 0.5833333333333334,
+          "ci_high": 1.0,
+          "n": 12,
+          "confidence_level": 0.95,
+          "n_resamples": 2000,
+          "method": "percentile_bootstrap"
+        },
+        "treatment_clustering": {
+          "icc": 0.0,
+          "k0_unbalanced_avg_cluster_size": 4.0,
+          "avg_cluster_size": 4.0,
+          "design_effect": 1.0,
+          "naive_pooled_n": 12,
+          "effective_n": 12.0,
+          "k_clusters": 3,
+          "method": "one-way random-effects ICC (Shrout-Fleiss ICC(1)), Fleiss (1986) unbalanced-design correction"
+        },
+        "disclosure": "The naive pooled CI above treats every anchor-set (and, for pooled-across-families measures, every family x anchor-set pair) as an independent observation, which OVERSTATES precision. The *_clustering fields give the ICC-corrected effective N; treat that, not the naive pooled N, as the honest sample size for this tier (protocol section 6)."
+      },
+      "n_distinct_documents": {
+        "control": 3,
+        "treatment": 3
+      }
+    },
+    "a_phase3_pass_rate_per_family": {
+      "bibliography": {
+        "tier1_per_document_unweighted": {
+          "note": "Unweighted per-document mean, N=3 documents max -- demonstration/mechanism-probing strength, not a powered confirmatory test on its own (protocol section 6).",
+          "control_n_documents": 3,
+          "control_pass_rate_ci": {
+            "mean": 0.4444444444444444,
+            "ci_low": 0.0,
+            "ci_high": 1.0,
+            "n": 3,
+            "confidence_level": 0.95,
+            "n_resamples": 2000,
+            "method": "percentile_bootstrap"
+          },
+          "treatment_n_documents": 3,
+          "treatment_pass_rate_ci": {
+            "mean": 1.0,
+            "ci_low": 0.2924017738212866,
+            "ci_high": 1.0,
+            "n": 3,
+            "confidence_level": 0.95,
+            "n_resamples": 2000,
+            "method": "clopper_pearson_exact_fallback"
+          },
+          "paired_n_documents": 3,
+          "paired_significance": {
+            "observed_mean_diff": -0.5555555555555556,
+            "p_value": 0.486,
+            "n_paired_documents": 3,
+            "n_permutations": 2000,
+            "method": "paired sign-flip permutation test"
+          }
+        },
+        "tier2_anchor_weighted_document_mean": {
+          "control": {
+            "mean": 0.5,
+            "ci_low": 0.0,
+            "ci_high": 1.0,
+            "n_documents": 3,
+            "total_weight": 6,
+            "confidence_level": 0.95,
+            "n_resamples": 2000,
+            "method": "weighted_cluster_bootstrap"
+          },
+          "treatment": {
+            "mean": 1.0,
+            "ci_low": 1.0,
+            "ci_high": 1.0,
+            "n_documents": 3,
+            "total_weight": 12,
+            "confidence_level": 0.95,
+            "n_resamples": 2000,
+            "method": "weighted_cluster_bootstrap"
+          },
+          "paired_significance": {
+            "observed_weighted_mean_diff": -0.5,
+            "p_value": 0.486,
+            "n_paired_documents": 3,
+            "n_permutations": 2000,
+            "method": "weighted paired sign-flip permutation test"
+          }
+        },
+        "tier3_pooled_anchor_level": {
+          "control_naive_pooled_n": 6,
+          "control_pass_rate_ci_naive": {
+            "mean": 0.5,
+            "ci_low": 0.16666666666666666,
+            "ci_high": 0.8333333333333334,
+            "n": 6,
+            "confidence_level": 0.95,
+            "n_resamples": 2000,
+            "method": "percentile_bootstrap"
+          },
+          "control_clustering": {
+            "icc": 0.3230769230769231,
+            "k0_unbalanced_avg_cluster_size": 1.8333333333333333,
+            "avg_cluster_size": 2.0,
+            "design_effect": 1.323076923076923,
+            "naive_pooled_n": 6,
+            "effective_n": 4.534883720930233,
+            "k_clusters": 3,
+            "method": "one-way random-effects ICC (Shrout-Fleiss ICC(1)), Fleiss (1986) unbalanced-design correction"
+          },
+          "treatment_naive_pooled_n": 12,
+          "treatment_pass_rate_ci_naive": {
+            "mean": 1.0,
+            "ci_low": 0.7353515306029488,
+            "ci_high": 1.0,
+            "n": 12,
+            "confidence_level": 0.95,
+            "n_resamples": 2000,
+            "method": "clopper_pearson_exact_fallback"
+          },
+          "treatment_clustering": {
+            "icc": 0.0,
+            "k0_unbalanced_avg_cluster_size": 4.0,
+            "avg_cluster_size": 4.0,
+            "design_effect": 1.0,
+            "naive_pooled_n": 12,
+            "effective_n": 12.0,
+            "k_clusters": 3,
+            "method": "one-way random-effects ICC (Shrout-Fleiss ICC(1)), Fleiss (1986) unbalanced-design correction"
+          },
+          "disclosure": "The naive pooled CI above treats every anchor-set (and, for pooled-across-families measures, every family x anchor-set pair) as an independent observation, which OVERSTATES precision. The *_clustering fields give the ICC-corrected effective N; treat that, not the naive pooled N, as the honest sample size for this tier (protocol section 6)."
+        },
+        "n_distinct_documents": {
+          "control": 3,
+          "treatment": 3
+        }
+      },
+      "citation": {
+        "tier1_per_document_unweighted": {
+          "note": "Unweighted per-document mean, N=3 documents max -- demonstration/mechanism-probing strength, not a powered confirmatory test on its own (protocol section 6).",
+          "control_n_documents": 3,
+          "control_pass_rate_ci": {
+            "mean": 0.7777777777777778,
+            "ci_low": 0.3333333333333333,
+            "ci_high": 1.0,
+            "n": 3,
+            "confidence_level": 0.95,
+            "n_resamples": 2000,
+            "method": "percentile_bootstrap"
+          },
+          "treatment_n_documents": 3,
+          "treatment_pass_rate_ci": {
+            "mean": 1.0,
+            "ci_low": 0.2924017738212866,
+            "ci_high": 1.0,
+            "n": 3,
+            "confidence_level": 0.95,
+            "n_resamples": 2000,
+            "method": "clopper_pearson_exact_fallback"
+          },
+          "paired_n_documents": 3,
+          "paired_significance": {
+            "observed_mean_diff": -0.22222222222222224,
+            "p_value": 1.0,
+            "n_paired_documents": 3,
+            "n_permutations": 2000,
+            "method": "paired sign-flip permutation test"
+          }
+        },
+        "tier2_anchor_weighted_document_mean": {
+          "control": {
+            "mean": 0.6666666666666666,
+            "ci_low": 0.3333333333333333,
+            "ci_high": 1.0,
+            "n_documents": 3,
+            "total_weight": 6,
+            "confidence_level": 0.95,
+            "n_resamples": 2000,
+            "method": "weighted_cluster_bootstrap"
+          },
+          "treatment": {
+            "mean": 1.0,
+            "ci_low": 1.0,
+            "ci_high": 1.0,
+            "n_documents": 3,
+            "total_weight": 12,
+            "confidence_level": 0.95,
+            "n_resamples": 2000,
+            "method": "weighted_cluster_bootstrap"
+          },
+          "paired_significance": {
+            "observed_weighted_mean_diff": -0.3333333333333333,
+            "p_value": 1.0,
+            "n_paired_documents": 3,
+            "n_permutations": 2000,
+            "method": "weighted paired sign-flip permutation test"
+          }
+        },
+        "tier3_pooled_anchor_level": {
+          "control_naive_pooled_n": 6,
+          "control_pass_rate_ci_naive": {
+            "mean": 0.6666666666666666,
+            "ci_low": 0.3333333333333333,
+            "ci_high": 1.0,
+            "n": 6,
+            "confidence_level": 0.95,
+            "n_resamples": 2000,
+            "method": "percentile_bootstrap"
+          },
+          "control_clustering": {
+            "icc": 0.2142857142857143,
+            "k0_unbalanced_avg_cluster_size": 1.8333333333333333,
+            "avg_cluster_size": 2.0,
+            "design_effect": 1.2142857142857144,
+            "naive_pooled_n": 6,
+            "effective_n": 4.941176470588235,
+            "k_clusters": 3,
+            "method": "one-way random-effects ICC (Shrout-Fleiss ICC(1)), Fleiss (1986) unbalanced-design correction"
+          },
+          "treatment_naive_pooled_n": 12,
+          "treatment_pass_rate_ci_naive": {
+            "mean": 1.0,
+            "ci_low": 0.7353515306029488,
+            "ci_high": 1.0,
+            "n": 12,
+            "confidence_level": 0.95,
+            "n_resamples": 2000,
+            "method": "clopper_pearson_exact_fallback"
+          },
+          "treatment_clustering": {
+            "icc": 0.0,
+            "k0_unbalanced_avg_cluster_size": 4.0,
+            "avg_cluster_size": 4.0,
+            "design_effect": 1.0,
+            "naive_pooled_n": 12,
+            "effective_n": 12.0,
+            "k_clusters": 3,
+            "method": "one-way random-effects ICC (Shrout-Fleiss ICC(1)), Fleiss (1986) unbalanced-design correction"
+          },
+          "disclosure": "The naive pooled CI above treats every anchor-set (and, for pooled-across-families measures, every family x anchor-set pair) as an independent observation, which OVERSTATES precision. The *_clustering fields give the ICC-corrected effective N; treat that, not the naive pooled N, as the honest sample size for this tier (protocol section 6)."
+        },
+        "n_distinct_documents": {
+          "control": 3,
+          "treatment": 3
+        }
+      },
+      "section_reorder": {
+        "tier1_per_document_unweighted": {
+          "note": "Unweighted per-document mean, N=3 documents max -- demonstration/mechanism-probing strength, not a powered confirmatory test on its own (protocol section 6).",
+          "control_n_documents": 3,
+          "control_pass_rate_ci": {
+            "mean": 0.4444444444444444,
+            "ci_low": 0.0,
+            "ci_high": 1.0,
+            "n": 3,
+            "confidence_level": 0.95,
+            "n_resamples": 2000,
+            "method": "percentile_bootstrap"
+          },
+          "treatment_n_documents": 3,
+          "treatment_pass_rate_ci": {
+            "mean": 1.0,
+            "ci_low": 0.2924017738212866,
+            "ci_high": 1.0,
+            "n": 3,
+            "confidence_level": 0.95,
+            "n_resamples": 2000,
+            "method": "clopper_pearson_exact_fallback"
+          },
+          "paired_n_documents": 3,
+          "paired_significance": {
+            "observed_mean_diff": -0.5555555555555556,
+            "p_value": 0.486,
+            "n_paired_documents": 3,
+            "n_permutations": 2000,
+            "method": "paired sign-flip permutation test"
+          }
+        },
+        "tier2_anchor_weighted_document_mean": {
+          "control": {
+            "mean": 0.5,
+            "ci_low": 0.0,
+            "ci_high": 1.0,
+            "n_documents": 3,
+            "total_weight": 6,
+            "confidence_level": 0.95,
+            "n_resamples": 2000,
+            "method": "weighted_cluster_bootstrap"
+          },
+          "treatment": {
+            "mean": 1.0,
+            "ci_low": 1.0,
+            "ci_high": 1.0,
+            "n_documents": 3,
+            "total_weight": 12,
+            "confidence_level": 0.95,
+            "n_resamples": 2000,
+            "method": "weighted_cluster_bootstrap"
+          },
+          "paired_significance": {
+            "observed_weighted_mean_diff": -0.5,
+            "p_value": 0.486,
+            "n_paired_documents": 3,
+            "n_permutations": 2000,
+            "method": "weighted paired sign-flip permutation test"
+          }
+        },
+        "tier3_pooled_anchor_level": {
+          "control_naive_pooled_n": 6,
+          "control_pass_rate_ci_naive": {
+            "mean": 0.5,
+            "ci_low": 0.16666666666666666,
+            "ci_high": 0.8333333333333334,
+            "n": 6,
+            "confidence_level": 0.95,
+            "n_resamples": 2000,
+            "method": "percentile_bootstrap"
+          },
+          "control_clustering": {
+            "icc": 0.3230769230769231,
+            "k0_unbalanced_avg_cluster_size": 1.8333333333333333,
+            "avg_cluster_size": 2.0,
+            "design_effect": 1.323076923076923,
+            "naive_pooled_n": 6,
+            "effective_n": 4.534883720930233,
+            "k_clusters": 3,
+            "method": "one-way random-effects ICC (Shrout-Fleiss ICC(1)), Fleiss (1986) unbalanced-design correction"
+          },
+          "treatment_naive_pooled_n": 12,
+          "treatment_pass_rate_ci_naive": {
+            "mean": 1.0,
+            "ci_low": 0.7353515306029488,
+            "ci_high": 1.0,
+            "n": 12,
+            "confidence_level": 0.95,
+            "n_resamples": 2000,
+            "method": "clopper_pearson_exact_fallback"
+          },
+          "treatment_clustering": {
+            "icc": 0.0,
+            "k0_unbalanced_avg_cluster_size": 4.0,
+            "avg_cluster_size": 4.0,
+            "design_effect": 1.0,
+            "naive_pooled_n": 12,
+            "effective_n": 12.0,
+            "k_clusters": 3,
+            "method": "one-way random-effects ICC (Shrout-Fleiss ICC(1)), Fleiss (1986) unbalanced-design correction"
+          },
+          "disclosure": "The naive pooled CI above treats every anchor-set (and, for pooled-across-families measures, every family x anchor-set pair) as an independent observation, which OVERSTATES precision. The *_clustering fields give the ICC-corrected effective N; treat that, not the naive pooled N, as the honest sample size for this tier (protocol section 6)."
+        },
+        "n_distinct_documents": {
+          "control": 3,
+          "treatment": 3
+        }
+      },
+      "equation": {
+        "tier1_per_document_unweighted": {
+          "note": "Unweighted per-document mean, N=3 documents max -- demonstration/mechanism-probing strength, not a powered confirmatory test on its own (protocol section 6).",
+          "control_n_documents": 3,
+          "control_pass_rate_ci": {
+            "mean": 0.4444444444444444,
+            "ci_low": 0.0,
+            "ci_high": 1.0,
+            "n": 3,
+            "confidence_level": 0.95,
+            "n_resamples": 2000,
+            "method": "percentile_bootstrap"
+          },
+          "treatment_n_documents": 3,
+          "treatment_pass_rate_ci": {
+            "mean": 1.0,
+            "ci_low": 0.2924017738212866,
+            "ci_high": 1.0,
+            "n": 3,
+            "confidence_level": 0.95,
+            "n_resamples": 2000,
+            "method": "clopper_pearson_exact_fallback"
+          },
+          "paired_n_documents": 3,
+          "paired_significance": {
+            "observed_mean_diff": -0.5555555555555556,
+            "p_value": 0.486,
+            "n_paired_documents": 3,
+            "n_permutations": 2000,
+            "method": "paired sign-flip permutation test"
+          }
+        },
+        "tier2_anchor_weighted_document_mean": {
+          "control": {
+            "mean": 0.5,
+            "ci_low": 0.0,
+            "ci_high": 1.0,
+            "n_documents": 3,
+            "total_weight": 6,
+            "confidence_level": 0.95,
+            "n_resamples": 2000,
+            "method": "weighted_cluster_bootstrap"
+          },
+          "treatment": {
+            "mean": 1.0,
+            "ci_low": 1.0,
+            "ci_high": 1.0,
+            "n_documents": 3,
+            "total_weight": 12,
+            "confidence_level": 0.95,
+            "n_resamples": 2000,
+            "method": "weighted_cluster_bootstrap"
+          },
+          "paired_significance": {
+            "observed_weighted_mean_diff": -0.5,
+            "p_value": 0.486,
+            "n_paired_documents": 3,
+            "n_permutations": 2000,
+            "method": "weighted paired sign-flip permutation test"
+          }
+        },
+        "tier3_pooled_anchor_level": {
+          "control_naive_pooled_n": 6,
+          "control_pass_rate_ci_naive": {
+            "mean": 0.5,
+            "ci_low": 0.16666666666666666,
+            "ci_high": 0.8333333333333334,
+            "n": 6,
+            "confidence_level": 0.95,
+            "n_resamples": 2000,
+            "method": "percentile_bootstrap"
+          },
+          "control_clustering": {
+            "icc": 0.3230769230769231,
+            "k0_unbalanced_avg_cluster_size": 1.8333333333333333,
+            "avg_cluster_size": 2.0,
+            "design_effect": 1.323076923076923,
+            "naive_pooled_n": 6,
+            "effective_n": 4.534883720930233,
+            "k_clusters": 3,
+            "method": "one-way random-effects ICC (Shrout-Fleiss ICC(1)), Fleiss (1986) unbalanced-design correction"
+          },
+          "treatment_naive_pooled_n": 12,
+          "treatment_pass_rate_ci_naive": {
+            "mean": 1.0,
+            "ci_low": 0.7353515306029488,
+            "ci_high": 1.0,
+            "n": 12,
+            "confidence_level": 0.95,
+            "n_resamples": 2000,
+            "method": "clopper_pearson_exact_fallback"
+          },
+          "treatment_clustering": {
+            "icc": 0.0,
+            "k0_unbalanced_avg_cluster_size": 4.0,
+            "avg_cluster_size": 4.0,
+            "design_effect": 1.0,
+            "naive_pooled_n": 12,
+            "effective_n": 12.0,
+            "k_clusters": 3,
+            "method": "one-way random-effects ICC (Shrout-Fleiss ICC(1)), Fleiss (1986) unbalanced-design correction"
+          },
+          "disclosure": "The naive pooled CI above treats every anchor-set (and, for pooled-across-families measures, every family x anchor-set pair) as an independent observation, which OVERSTATES precision. The *_clustering fields give the ICC-corrected effective N; treat that, not the naive pooled N, as the honest sample size for this tier (protocol section 6)."
+        },
+        "n_distinct_documents": {
+          "control": 3,
+          "treatment": 3
+        }
+      },
+      "caption": {
+        "tier1_per_document_unweighted": {
+          "note": "Unweighted per-document mean, N=3 documents max -- demonstration/mechanism-probing strength, not a powered confirmatory test on its own (protocol section 6).",
+          "control_n_documents": 3,
+          "control_pass_rate_ci": {
+            "mean": 0.4444444444444444,
+            "ci_low": 0.0,
+            "ci_high": 1.0,
+            "n": 3,
+            "confidence_level": 0.95,
+            "n_resamples": 2000,
+            "method": "percentile_bootstrap"
+          },
+          "treatment_n_documents": 3,
+          "treatment_pass_rate_ci": {
+            "mean": 1.0,
+            "ci_low": 0.2924017738212866,
+            "ci_high": 1.0,
+            "n": 3,
+            "confidence_level": 0.95,
+            "n_resamples": 2000,
+            "method": "clopper_pearson_exact_fallback"
+          },
+          "paired_n_documents": 3,
+          "paired_significance": {
+            "observed_mean_diff": -0.5555555555555556,
+            "p_value": 0.486,
+            "n_paired_documents": 3,
+            "n_permutations": 2000,
+            "method": "paired sign-flip permutation test"
+          }
+        },
+        "tier2_anchor_weighted_document_mean": {
+          "control": {
+            "mean": 0.5,
+            "ci_low": 0.0,
+            "ci_high": 1.0,
+            "n_documents": 3,
+            "total_weight": 6,
+            "confidence_level": 0.95,
+            "n_resamples": 2000,
+            "method": "weighted_cluster_bootstrap"
+          },
+          "treatment": {
+            "mean": 1.0,
+            "ci_low": 1.0,
+            "ci_high": 1.0,
+            "n_documents": 3,
+            "total_weight": 12,
+            "confidence_level": 0.95,
+            "n_resamples": 2000,
+            "method": "weighted_cluster_bootstrap"
+          },
+          "paired_significance": {
+            "observed_weighted_mean_diff": -0.5,
+            "p_value": 0.486,
+            "n_paired_documents": 3,
+            "n_permutations": 2000,
+            "method": "weighted paired sign-flip permutation test"
+          }
+        },
+        "tier3_pooled_anchor_level": {
+          "control_naive_pooled_n": 6,
+          "control_pass_rate_ci_naive": {
+            "mean": 0.5,
+            "ci_low": 0.16666666666666666,
+            "ci_high": 0.8333333333333334,
+            "n": 6,
+            "confidence_level": 0.95,
+            "n_resamples": 2000,
+            "method": "percentile_bootstrap"
+          },
+          "control_clustering": {
+            "icc": 0.3230769230769231,
+            "k0_unbalanced_avg_cluster_size": 1.8333333333333333,
+            "avg_cluster_size": 2.0,
+            "design_effect": 1.323076923076923,
+            "naive_pooled_n": 6,
+            "effective_n": 4.534883720930233,
+            "k_clusters": 3,
+            "method": "one-way random-effects ICC (Shrout-Fleiss ICC(1)), Fleiss (1986) unbalanced-design correction"
+          },
+          "treatment_naive_pooled_n": 12,
+          "treatment_pass_rate_ci_naive": {
+            "mean": 1.0,
+            "ci_low": 0.7353515306029488,
+            "ci_high": 1.0,
+            "n": 12,
+            "confidence_level": 0.95,
+            "n_resamples": 2000,
+            "method": "clopper_pearson_exact_fallback"
+          },
+          "treatment_clustering": {
+            "icc": 0.0,
+            "k0_unbalanced_avg_cluster_size": 4.0,
+            "avg_cluster_size": 4.0,
+            "design_effect": 1.0,
+            "naive_pooled_n": 12,
+            "effective_n": 12.0,
+            "k_clusters": 3,
+            "method": "one-way random-effects ICC (Shrout-Fleiss ICC(1)), Fleiss (1986) unbalanced-design correction"
+          },
+          "disclosure": "The naive pooled CI above treats every anchor-set (and, for pooled-across-families measures, every family x anchor-set pair) as an independent observation, which OVERSTATES precision. The *_clustering fields give the ICC-corrected effective N; treat that, not the naive pooled N, as the honest sample size for this tier (protocol section 6)."
+        },
+        "n_distinct_documents": {
+          "control": 3,
+          "treatment": 3
+        }
+      }
+    },
+    "a_phase3_pass_rate_pooled": {
+      "tier1_per_document_unweighted": {
+        "note": "Unweighted per-document mean, N=3 documents max -- demonstration/mechanism-probing strength, not a powered confirmatory test on its own (protocol section 6).",
+        "control_n_documents": 3,
+        "control_pass_rate_ci": {
+          "mean": 0.5111111111111111,
+          "ci_low": 0.20000000000000004,
+          "ci_high": 1.0,
+          "n": 3,
+          "confidence_level": 0.95,
+          "n_resamples": 2000,
+          "method": "percentile_bootstrap"
+        },
+        "treatment_n_documents": 3,
+        "treatment_pass_rate_ci": {
+          "mean": 1.0,
+          "ci_low": 0.2924017738212866,
+          "ci_high": 1.0,
+          "n": 3,
+          "confidence_level": 0.95,
+          "n_resamples": 2000,
+          "method": "clopper_pearson_exact_fallback"
+        },
+        "paired_n_documents": 3,
+        "paired_significance": {
+          "observed_mean_diff": -0.48888888888888893,
+          "p_value": 0.486,
+          "n_paired_documents": 3,
+          "n_permutations": 2000,
+          "method": "paired sign-flip permutation test"
+        }
+      },
+      "tier2_anchor_weighted_document_mean": {
+        "control": {
+          "mean": 0.5333333333333333,
+          "ci_low": 0.2,
+          "ci_high": 1.0,
+          "n_documents": 3,
+          "total_weight": 30,
+          "confidence_level": 0.95,
+          "n_resamples": 2000,
+          "method": "weighted_cluster_bootstrap"
+        },
+        "treatment": {
+          "mean": 1.0,
+          "ci_low": 1.0,
+          "ci_high": 1.0,
+          "n_documents": 3,
+          "total_weight": 60,
+          "confidence_level": 0.95,
+          "n_resamples": 2000,
+          "method": "weighted_cluster_bootstrap"
+        },
+        "paired_significance": {
+          "observed_weighted_mean_diff": -0.46666666666666673,
+          "p_value": 0.486,
+          "n_paired_documents": 3,
+          "n_permutations": 2000,
+          "method": "weighted paired sign-flip permutation test"
+        }
+      },
+      "tier3_pooled_anchor_level": {
+        "control_naive_pooled_n": 30,
+        "control_pass_rate_ci_naive": {
+          "mean": 0.5333333333333333,
+          "ci_low": 0.36666666666666664,
+          "ci_high": 0.7,
+          "n": 30,
+          "confidence_level": 0.95,
+          "n_resamples": 2000,
+          "method": "percentile_bootstrap"
+        },
+        "control_clustering": {
+          "icc": 0.5189051918735891,
+          "k0_unbalanced_avg_cluster_size": 9.166666666666668,
+          "avg_cluster_size": 10.0,
+          "design_effect": 5.670146726862302,
+          "naive_pooled_n": 30,
+          "effective_n": 5.290868375217716,
+          "k_clusters": 3,
+          "method": "one-way random-effects ICC (Shrout-Fleiss ICC(1)), Fleiss (1986) unbalanced-design correction"
+        },
+        "treatment_naive_pooled_n": 60,
+        "treatment_pass_rate_ci_naive": {
+          "mean": 1.0,
+          "ci_low": 0.9403705077138331,
+          "ci_high": 1.0,
+          "n": 60,
+          "confidence_level": 0.95,
+          "n_resamples": 2000,
+          "method": "clopper_pearson_exact_fallback"
+        },
+        "treatment_clustering": {
+          "icc": 0.0,
+          "k0_unbalanced_avg_cluster_size": 20.0,
+          "avg_cluster_size": 20.0,
+          "design_effect": 1.0,
+          "naive_pooled_n": 60,
+          "effective_n": 60.0,
+          "k_clusters": 3,
+          "method": "one-way random-effects ICC (Shrout-Fleiss ICC(1)), Fleiss (1986) unbalanced-design correction"
+        },
+        "disclosure": "The naive pooled CI above treats every anchor-set (and, for pooled-across-families measures, every family x anchor-set pair) as an independent observation, which OVERSTATES precision. The *_clustering fields give the ICC-corrected effective N; treat that, not the naive pooled N, as the honest sample size for this tier (protocol section 6)."
+      },
+      "n_distinct_documents": {
+        "control": 3,
+        "treatment": 3
+      }
+    },
+    "b_phase2_keep_survival_pass_rate": {
+      "tier1_per_document_unweighted": {
+        "note": "Unweighted per-document mean, N=3 documents max -- demonstration/mechanism-probing strength, not a powered confirmatory test on its own (protocol section 6).",
+        "control_n_documents": 3,
+        "control_pass_rate_ci": {
+          "mean": 0.4444444444444444,
+          "ci_low": 0.25,
+          "ci_high": 0.75,
+          "n": 3,
+          "confidence_level": 0.95,
+          "n_resamples": 2000,
+          "method": "percentile_bootstrap"
+        },
+        "treatment_n_documents": 3,
+        "treatment_pass_rate_ci": {
+          "mean": 1.0,
+          "ci_low": 0.2924017738212866,
+          "ci_high": 1.0,
+          "n": 3,
+          "confidence_level": 0.95,
+          "n_resamples": 2000,
+          "method": "clopper_pearson_exact_fallback"
+        },
+        "paired_n_documents": 3,
+        "paired_significance": {
+          "observed_mean_diff": -0.5555555555555556,
+          "p_value": 0.2305,
+          "n_paired_documents": 3,
+          "n_permutations": 2000,
+          "method": "paired sign-flip permutation test"
+        }
+      },
+      "tier2_anchor_weighted_document_mean": {
+        "control": {
+          "mean": 0.45454545454545453,
+          "ci_low": 0.25,
+          "ci_high": 0.75,
+          "n_documents": 3,
+          "total_weight": 11,
+          "confidence_level": 0.95,
+          "n_resamples": 2000,
+          "method": "weighted_cluster_bootstrap"
+        },
+        "treatment": {
+          "mean": 1.0,
+          "ci_low": 1.0,
+          "ci_high": 1.0,
+          "n_documents": 3,
+          "total_weight": 12,
+          "confidence_level": 0.95,
+          "n_resamples": 2000,
+          "method": "weighted_cluster_bootstrap"
+        },
+        "paired_significance": {
+          "observed_weighted_mean_diff": -0.5454545454545454,
+          "p_value": 0.2305,
+          "n_paired_documents": 3,
+          "n_permutations": 2000,
+          "method": "weighted paired sign-flip permutation test"
+        }
+      },
+      "tier3_pooled_anchor_level": {
+        "control_naive_pooled_n": 11,
+        "control_pass_rate_ci_naive": {
+          "mean": 0.45454545454545453,
+          "ci_low": 0.18181818181818182,
+          "ci_high": 0.7272727272727273,
+          "n": 11,
+          "confidence_level": 0.95,
+          "n_resamples": 2000,
+          "method": "percentile_bootstrap"
+        },
+        "control_clustering": {
+          "icc": 0.009523809523809513,
+          "k0_unbalanced_avg_cluster_size": 3.6363636363636367,
+          "avg_cluster_size": 3.6666666666666665,
+          "design_effect": 1.0253968253968253,
+          "naive_pooled_n": 11,
+          "effective_n": 10.727554179566564,
+          "k_clusters": 3,
+          "method": "one-way random-effects ICC (Shrout-Fleiss ICC(1)), Fleiss (1986) unbalanced-design correction"
+        },
+        "treatment_naive_pooled_n": 12,
+        "treatment_pass_rate_ci_naive": {
+          "mean": 1.0,
+          "ci_low": 0.7353515306029488,
+          "ci_high": 1.0,
+          "n": 12,
+          "confidence_level": 0.95,
+          "n_resamples": 2000,
+          "method": "clopper_pearson_exact_fallback"
+        },
+        "treatment_clustering": {
+          "icc": 0.0,
+          "k0_unbalanced_avg_cluster_size": 4.0,
+          "avg_cluster_size": 4.0,
+          "design_effect": 1.0,
+          "naive_pooled_n": 12,
+          "effective_n": 12.0,
+          "k_clusters": 3,
+          "method": "one-way random-effects ICC (Shrout-Fleiss ICC(1)), Fleiss (1986) unbalanced-design correction"
+        },
+        "disclosure": "The naive pooled CI above treats every anchor-set (and, for pooled-across-families measures, every family x anchor-set pair) as an independent observation, which OVERSTATES precision. The *_clustering fields give the ICC-corrected effective N; treat that, not the naive pooled N, as the honest sample size for this tier (protocol section 6)."
+      },
+      "n_distinct_documents": {
+        "control": 3,
+        "treatment": 3
+      }
+    },
+    "c_fresh_isolated_k1_baseline_pass_rate_per_family": {
+      "bibliography": {
+        "tier1_per_document_unweighted": {
+          "note": "Unweighted per-document mean, N=3 documents max -- demonstration/mechanism-probing strength, not a powered confirmatory test on its own (protocol section 6).",
+          "control_n_documents": 3,
+          "control_pass_rate_ci": {
+            "mean": 0.6666666666666666,
+            "ci_low": 0.5,
+            "ci_high": 0.75,
+            "n": 3,
+            "confidence_level": 0.95,
+            "n_resamples": 2000,
+            "method": "percentile_bootstrap"
+          },
+          "treatment_n_documents": 3,
+          "treatment_pass_rate_ci": {
+            "mean": 1.0,
+            "ci_low": 0.2924017738212866,
+            "ci_high": 1.0,
+            "n": 3,
+            "confidence_level": 0.95,
+            "n_resamples": 2000,
+            "method": "clopper_pearson_exact_fallback"
+          },
+          "paired_n_documents": 3,
+          "paired_significance": {
+            "observed_mean_diff": -0.3333333333333333,
+            "p_value": 0.2305,
+            "n_paired_documents": 3,
+            "n_permutations": 2000,
+            "method": "paired sign-flip permutation test"
+          }
+        },
+        "tier2_anchor_weighted_document_mean": {
+          "control": {
+            "mean": 0.6666666666666666,
+            "ci_low": 0.5,
+            "ci_high": 0.75,
+            "n_documents": 3,
+            "total_weight": 12,
+            "confidence_level": 0.95,
+            "n_resamples": 2000,
+            "method": "weighted_cluster_bootstrap"
+          },
+          "treatment": {
+            "mean": 1.0,
+            "ci_low": 1.0,
+            "ci_high": 1.0,
+            "n_documents": 3,
+            "total_weight": 12,
+            "confidence_level": 0.95,
+            "n_resamples": 2000,
+            "method": "weighted_cluster_bootstrap"
+          },
+          "paired_significance": {
+            "observed_weighted_mean_diff": -0.3333333333333333,
+            "p_value": 0.2305,
+            "n_paired_documents": 3,
+            "n_permutations": 2000,
+            "method": "weighted paired sign-flip permutation test"
+          }
+        },
+        "tier3_pooled_anchor_level": {
+          "control_naive_pooled_n": 12,
+          "control_pass_rate_ci_naive": {
+            "mean": 0.6666666666666666,
+            "ci_low": 0.4166666666666667,
+            "ci_high": 0.9166666666666666,
+            "n": 12,
+            "confidence_level": 0.95,
+            "n_resamples": 2000,
+            "method": "percentile_bootstrap"
+          },
+          "control_clustering": {
+            "icc": 0.0,
+            "k0_unbalanced_avg_cluster_size": 4.0,
+            "avg_cluster_size": 4.0,
+            "design_effect": 1.0,
+            "naive_pooled_n": 12,
+            "effective_n": 12.0,
+            "k_clusters": 3,
+            "method": "one-way random-effects ICC (Shrout-Fleiss ICC(1)), Fleiss (1986) unbalanced-design correction"
+          },
+          "treatment_naive_pooled_n": 12,
+          "treatment_pass_rate_ci_naive": {
+            "mean": 1.0,
+            "ci_low": 0.7353515306029488,
+            "ci_high": 1.0,
+            "n": 12,
+            "confidence_level": 0.95,
+            "n_resamples": 2000,
+            "method": "clopper_pearson_exact_fallback"
+          },
+          "treatment_clustering": {
+            "icc": 0.0,
+            "k0_unbalanced_avg_cluster_size": 4.0,
+            "avg_cluster_size": 4.0,
+            "design_effect": 1.0,
+            "naive_pooled_n": 12,
+            "effective_n": 12.0,
+            "k_clusters": 3,
+            "method": "one-way random-effects ICC (Shrout-Fleiss ICC(1)), Fleiss (1986) unbalanced-design correction"
+          },
+          "disclosure": "The naive pooled CI above treats every anchor-set (and, for pooled-across-families measures, every family x anchor-set pair) as an independent observation, which OVERSTATES precision. The *_clustering fields give the ICC-corrected effective N; treat that, not the naive pooled N, as the honest sample size for this tier (protocol section 6)."
+        },
+        "n_distinct_documents": {
+          "control": 3,
+          "treatment": 3
+        }
+      },
+      "citation": {
+        "tier1_per_document_unweighted": {
+          "note": "Unweighted per-document mean, N=3 documents max -- demonstration/mechanism-probing strength, not a powered confirmatory test on its own (protocol section 6).",
+          "control_n_documents": 3,
+          "control_pass_rate_ci": {
+            "mean": 1.0,
+            "ci_low": 0.2924017738212866,
+            "ci_high": 1.0,
+            "n": 3,
+            "confidence_level": 0.95,
+            "n_resamples": 2000,
+            "method": "clopper_pearson_exact_fallback"
+          },
+          "treatment_n_documents": 3,
+          "treatment_pass_rate_ci": {
+            "mean": 1.0,
+            "ci_low": 0.2924017738212866,
+            "ci_high": 1.0,
+            "n": 3,
+            "confidence_level": 0.95,
+            "n_resamples": 2000,
+            "method": "clopper_pearson_exact_fallback"
+          },
+          "paired_n_documents": 3,
+          "paired_significance": {
+            "observed_mean_diff": 0.0,
+            "p_value": 1.0,
+            "n_paired_documents": 3,
+            "n_permutations": 2000,
+            "method": "paired sign-flip permutation test"
+          }
+        },
+        "tier2_anchor_weighted_document_mean": {
+          "control": {
+            "mean": 1.0,
+            "ci_low": 1.0,
+            "ci_high": 1.0,
+            "n_documents": 3,
+            "total_weight": 12,
+            "confidence_level": 0.95,
+            "n_resamples": 2000,
+            "method": "weighted_cluster_bootstrap"
+          },
+          "treatment": {
+            "mean": 1.0,
+            "ci_low": 1.0,
+            "ci_high": 1.0,
+            "n_documents": 3,
+            "total_weight": 12,
+            "confidence_level": 0.95,
+            "n_resamples": 2000,
+            "method": "weighted_cluster_bootstrap"
+          },
+          "paired_significance": {
+            "observed_weighted_mean_diff": 0.0,
+            "p_value": 1.0,
+            "n_paired_documents": 3,
+            "n_permutations": 2000,
+            "method": "weighted paired sign-flip permutation test"
+          }
+        },
+        "tier3_pooled_anchor_level": {
+          "control_naive_pooled_n": 12,
+          "control_pass_rate_ci_naive": {
+            "mean": 1.0,
+            "ci_low": 0.7353515306029488,
+            "ci_high": 1.0,
+            "n": 12,
+            "confidence_level": 0.95,
+            "n_resamples": 2000,
+            "method": "clopper_pearson_exact_fallback"
+          },
+          "control_clustering": {
+            "icc": 0.0,
+            "k0_unbalanced_avg_cluster_size": 4.0,
+            "avg_cluster_size": 4.0,
+            "design_effect": 1.0,
+            "naive_pooled_n": 12,
+            "effective_n": 12.0,
+            "k_clusters": 3,
+            "method": "one-way random-effects ICC (Shrout-Fleiss ICC(1)), Fleiss (1986) unbalanced-design correction"
+          },
+          "treatment_naive_pooled_n": 12,
+          "treatment_pass_rate_ci_naive": {
+            "mean": 1.0,
+            "ci_low": 0.7353515306029488,
+            "ci_high": 1.0,
+            "n": 12,
+            "confidence_level": 0.95,
+            "n_resamples": 2000,
+            "method": "clopper_pearson_exact_fallback"
+          },
+          "treatment_clustering": {
+            "icc": 0.0,
+            "k0_unbalanced_avg_cluster_size": 4.0,
+            "avg_cluster_size": 4.0,
+            "design_effect": 1.0,
+            "naive_pooled_n": 12,
+            "effective_n": 12.0,
+            "k_clusters": 3,
+            "method": "one-way random-effects ICC (Shrout-Fleiss ICC(1)), Fleiss (1986) unbalanced-design correction"
+          },
+          "disclosure": "The naive pooled CI above treats every anchor-set (and, for pooled-across-families measures, every family x anchor-set pair) as an independent observation, which OVERSTATES precision. The *_clustering fields give the ICC-corrected effective N; treat that, not the naive pooled N, as the honest sample size for this tier (protocol section 6)."
+        },
+        "n_distinct_documents": {
+          "control": 3,
+          "treatment": 3
+        }
+      },
+      "section_reorder": {
+        "tier1_per_document_unweighted": {
+          "note": "Unweighted per-document mean, N=3 documents max -- demonstration/mechanism-probing strength, not a powered confirmatory test on its own (protocol section 6).",
+          "control_n_documents": 3,
+          "control_pass_rate_ci": {
+            "mean": 0.08333333333333333,
+            "ci_low": 0.0,
+            "ci_high": 0.25,
+            "n": 3,
+            "confidence_level": 0.95,
+            "n_resamples": 2000,
+            "method": "percentile_bootstrap"
+          },
+          "treatment_n_documents": 3,
+          "treatment_pass_rate_ci": {
+            "mean": 0.8333333333333334,
+            "ci_low": 0.75,
+            "ci_high": 1.0,
+            "n": 3,
+            "confidence_level": 0.95,
+            "n_resamples": 2000,
+            "method": "percentile_bootstrap"
+          },
+          "paired_n_documents": 3,
+          "paired_significance": {
+            "observed_mean_diff": -0.75,
+            "p_value": 0.2305,
+            "n_paired_documents": 3,
+            "n_permutations": 2000,
+            "method": "paired sign-flip permutation test"
+          }
+        },
+        "tier2_anchor_weighted_document_mean": {
+          "control": {
+            "mean": 0.08333333333333333,
+            "ci_low": 0.0,
+            "ci_high": 0.25,
+            "n_documents": 3,
+            "total_weight": 12,
+            "confidence_level": 0.95,
+            "n_resamples": 2000,
+            "method": "weighted_cluster_bootstrap"
+          },
+          "treatment": {
+            "mean": 0.8333333333333334,
+            "ci_low": 0.75,
+            "ci_high": 1.0,
+            "n_documents": 3,
+            "total_weight": 12,
+            "confidence_level": 0.95,
+            "n_resamples": 2000,
+            "method": "weighted_cluster_bootstrap"
+          },
+          "paired_significance": {
+            "observed_weighted_mean_diff": -0.75,
+            "p_value": 0.2305,
+            "n_paired_documents": 3,
+            "n_permutations": 2000,
+            "method": "weighted paired sign-flip permutation test"
+          }
+        },
+        "tier3_pooled_anchor_level": {
+          "control_naive_pooled_n": 12,
+          "control_pass_rate_ci_naive": {
+            "mean": 0.08333333333333333,
+            "ci_low": 0.0,
+            "ci_high": 0.25,
+            "n": 12,
+            "confidence_level": 0.95,
+            "n_resamples": 2000,
+            "method": "percentile_bootstrap"
+          },
+          "control_clustering": {
+            "icc": 4.1633363423443364e-17,
+            "k0_unbalanced_avg_cluster_size": 4.0,
+            "avg_cluster_size": 4.0,
+            "design_effect": 1.0000000000000002,
+            "naive_pooled_n": 12,
+            "effective_n": 11.999999999999998,
+            "k_clusters": 3,
+            "method": "one-way random-effects ICC (Shrout-Fleiss ICC(1)), Fleiss (1986) unbalanced-design correction"
+          },
+          "treatment_naive_pooled_n": 12,
+          "treatment_pass_rate_ci_naive": {
+            "mean": 0.8333333333333334,
+            "ci_low": 0.5833333333333334,
+            "ci_high": 1.0,
+            "n": 12,
+            "confidence_level": 0.95,
+            "n_resamples": 2000,
+            "method": "percentile_bootstrap"
+          },
+          "treatment_clustering": {
+            "icc": 0.0,
+            "k0_unbalanced_avg_cluster_size": 4.0,
+            "avg_cluster_size": 4.0,
+            "design_effect": 1.0,
+            "naive_pooled_n": 12,
+            "effective_n": 12.0,
+            "k_clusters": 3,
+            "method": "one-way random-effects ICC (Shrout-Fleiss ICC(1)), Fleiss (1986) unbalanced-design correction"
+          },
+          "disclosure": "The naive pooled CI above treats every anchor-set (and, for pooled-across-families measures, every family x anchor-set pair) as an independent observation, which OVERSTATES precision. The *_clustering fields give the ICC-corrected effective N; treat that, not the naive pooled N, as the honest sample size for this tier (protocol section 6)."
+        },
+        "n_distinct_documents": {
+          "control": 3,
+          "treatment": 3
+        }
+      },
+      "equation": {
+        "tier1_per_document_unweighted": {
+          "note": "Unweighted per-document mean, N=3 documents max -- demonstration/mechanism-probing strength, not a powered confirmatory test on its own (protocol section 6).",
+          "control_n_documents": 3,
+          "control_pass_rate_ci": {
+            "mean": 0.8333333333333334,
+            "ci_low": 0.5,
+            "ci_high": 1.0,
+            "n": 3,
+            "confidence_level": 0.95,
+            "n_resamples": 2000,
+            "method": "percentile_bootstrap"
+          },
+          "treatment_n_documents": 3,
+          "treatment_pass_rate_ci": {
+            "mean": 1.0,
+            "ci_low": 0.2924017738212866,
+            "ci_high": 1.0,
+            "n": 3,
+            "confidence_level": 0.95,
+            "n_resamples": 2000,
+            "method": "clopper_pearson_exact_fallback"
+          },
+          "paired_n_documents": 3,
+          "paired_significance": {
+            "observed_mean_diff": -0.16666666666666666,
+            "p_value": 1.0,
+            "n_paired_documents": 3,
+            "n_permutations": 2000,
+            "method": "paired sign-flip permutation test"
+          }
+        },
+        "tier2_anchor_weighted_document_mean": {
+          "control": {
+            "mean": 0.8181818181818182,
+            "ci_low": 0.5,
+            "ci_high": 1.0,
+            "n_documents": 3,
+            "total_weight": 11,
+            "confidence_level": 0.95,
+            "n_resamples": 2000,
+            "method": "weighted_cluster_bootstrap"
+          },
+          "treatment": {
+            "mean": 1.0,
+            "ci_low": 1.0,
+            "ci_high": 1.0,
+            "n_documents": 3,
+            "total_weight": 12,
+            "confidence_level": 0.95,
+            "n_resamples": 2000,
+            "method": "weighted_cluster_bootstrap"
+          },
+          "paired_significance": {
+            "observed_weighted_mean_diff": -0.18181818181818182,
+            "p_value": 1.0,
+            "n_paired_documents": 3,
+            "n_permutations": 2000,
+            "method": "weighted paired sign-flip permutation test"
+          }
+        },
+        "tier3_pooled_anchor_level": {
+          "control_naive_pooled_n": 11,
+          "control_pass_rate_ci_naive": {
+            "mean": 0.8181818181818182,
+            "ci_low": 0.5454545454545454,
+            "ci_high": 1.0,
+            "n": 11,
+            "confidence_level": 0.95,
+            "n_resamples": 2000,
+            "method": "percentile_bootstrap"
+          },
+          "control_clustering": {
+            "icc": 0.29824561403508776,
+            "k0_unbalanced_avg_cluster_size": 3.6363636363636367,
+            "avg_cluster_size": 3.6666666666666665,
+            "design_effect": 1.7953216374269005,
+            "naive_pooled_n": 11,
+            "effective_n": 6.127035830618893,
+            "k_clusters": 3,
+            "method": "one-way random-effects ICC (Shrout-Fleiss ICC(1)), Fleiss (1986) unbalanced-design correction"
+          },
+          "treatment_naive_pooled_n": 12,
+          "treatment_pass_rate_ci_naive": {
+            "mean": 1.0,
+            "ci_low": 0.7353515306029488,
+            "ci_high": 1.0,
+            "n": 12,
+            "confidence_level": 0.95,
+            "n_resamples": 2000,
+            "method": "clopper_pearson_exact_fallback"
+          },
+          "treatment_clustering": {
+            "icc": 0.0,
+            "k0_unbalanced_avg_cluster_size": 4.0,
+            "avg_cluster_size": 4.0,
+            "design_effect": 1.0,
+            "naive_pooled_n": 12,
+            "effective_n": 12.0,
+            "k_clusters": 3,
+            "method": "one-way random-effects ICC (Shrout-Fleiss ICC(1)), Fleiss (1986) unbalanced-design correction"
+          },
+          "disclosure": "The naive pooled CI above treats every anchor-set (and, for pooled-across-families measures, every family x anchor-set pair) as an independent observation, which OVERSTATES precision. The *_clustering fields give the ICC-corrected effective N; treat that, not the naive pooled N, as the honest sample size for this tier (protocol section 6)."
+        },
+        "n_distinct_documents": {
+          "control": 3,
+          "treatment": 3
+        }
+      },
+      "caption": {
+        "tier1_per_document_unweighted": {
+          "note": "Unweighted per-document mean, N=3 documents max -- demonstration/mechanism-probing strength, not a powered confirmatory test on its own (protocol section 6).",
+          "control_n_documents": 3,
+          "control_pass_rate_ci": {
+            "mean": 0.9166666666666666,
+            "ci_low": 0.75,
+            "ci_high": 1.0,
+            "n": 3,
+            "confidence_level": 0.95,
+            "n_resamples": 2000,
+            "method": "percentile_bootstrap"
+          },
+          "treatment_n_documents": 3,
+          "treatment_pass_rate_ci": {
+            "mean": 1.0,
+            "ci_low": 0.2924017738212866,
+            "ci_high": 1.0,
+            "n": 3,
+            "confidence_level": 0.95,
+            "n_resamples": 2000,
+            "method": "clopper_pearson_exact_fallback"
+          },
+          "paired_n_documents": 3,
+          "paired_significance": {
+            "observed_mean_diff": -0.08333333333333333,
+            "p_value": 1.0,
+            "n_paired_documents": 3,
+            "n_permutations": 2000,
+            "method": "paired sign-flip permutation test"
+          }
+        },
+        "tier2_anchor_weighted_document_mean": {
+          "control": {
+            "mean": 0.9166666666666666,
+            "ci_low": 0.75,
+            "ci_high": 1.0,
+            "n_documents": 3,
+            "total_weight": 12,
+            "confidence_level": 0.95,
+            "n_resamples": 2000,
+            "method": "weighted_cluster_bootstrap"
+          },
+          "treatment": {
+            "mean": 1.0,
+            "ci_low": 1.0,
+            "ci_high": 1.0,
+            "n_documents": 3,
+            "total_weight": 12,
+            "confidence_level": 0.95,
+            "n_resamples": 2000,
+            "method": "weighted_cluster_bootstrap"
+          },
+          "paired_significance": {
+            "observed_weighted_mean_diff": -0.08333333333333333,
+            "p_value": 1.0,
+            "n_paired_documents": 3,
+            "n_permutations": 2000,
+            "method": "weighted paired sign-flip permutation test"
+          }
+        },
+        "tier3_pooled_anchor_level": {
+          "control_naive_pooled_n": 12,
+          "control_pass_rate_ci_naive": {
+            "mean": 0.9166666666666666,
+            "ci_low": 0.75,
+            "ci_high": 1.0,
+            "n": 12,
+            "confidence_level": 0.95,
+            "n_resamples": 2000,
+            "method": "percentile_bootstrap"
+          },
+          "control_clustering": {
+            "icc": 4.1633363423443364e-17,
+            "k0_unbalanced_avg_cluster_size": 4.0,
+            "avg_cluster_size": 4.0,
+            "design_effect": 1.0000000000000002,
+            "naive_pooled_n": 12,
+            "effective_n": 11.999999999999998,
+            "k_clusters": 3,
+            "method": "one-way random-effects ICC (Shrout-Fleiss ICC(1)), Fleiss (1986) unbalanced-design correction"
+          },
+          "treatment_naive_pooled_n": 12,
+          "treatment_pass_rate_ci_naive": {
+            "mean": 1.0,
+            "ci_low": 0.7353515306029488,
+            "ci_high": 1.0,
+            "n": 12,
+            "confidence_level": 0.95,
+            "n_resamples": 2000,
+            "method": "clopper_pearson_exact_fallback"
+          },
+          "treatment_clustering": {
+            "icc": 0.0,
+            "k0_unbalanced_avg_cluster_size": 4.0,
+            "avg_cluster_size": 4.0,
+            "design_effect": 1.0,
+            "naive_pooled_n": 12,
+            "effective_n": 12.0,
+            "k_clusters": 3,
+            "method": "one-way random-effects ICC (Shrout-Fleiss ICC(1)), Fleiss (1986) unbalanced-design correction"
+          },
+          "disclosure": "The naive pooled CI above treats every anchor-set (and, for pooled-across-families measures, every family x anchor-set pair) as an independent observation, which OVERSTATES precision. The *_clustering fields give the ICC-corrected effective N; treat that, not the naive pooled N, as the honest sample size for this tier (protocol section 6)."
+        },
+        "n_distinct_documents": {
+          "control": 3,
+          "treatment": 3
+        }
+      },
+      "pooled": {
+        "tier1_per_document_unweighted": {
+          "note": "Unweighted per-document mean, N=3 documents max -- demonstration/mechanism-probing strength, not a powered confirmatory test on its own (protocol section 6).",
+          "control_n_documents": 3,
+          "control_pass_rate_ci": {
+            "mean": 0.6947368421052631,
+            "ci_low": 0.65,
+            "ci_high": 0.75,
+            "n": 3,
+            "confidence_level": 0.95,
+            "n_resamples": 2000,
+            "method": "percentile_bootstrap"
+          },
+          "treatment_n_documents": 3,
+          "treatment_pass_rate_ci": {
+            "mean": 0.9666666666666667,
+            "ci_low": 0.9499999999999998,
+            "ci_high": 1.0,
+            "n": 3,
+            "confidence_level": 0.95,
+            "n_resamples": 2000,
+            "method": "percentile_bootstrap"
+          },
+          "paired_n_documents": 3,
+          "paired_significance": {
+            "observed_mean_diff": -0.27192982456140347,
+            "p_value": 0.2305,
+            "n_paired_documents": 3,
+            "n_permutations": 2000,
+            "method": "paired sign-flip permutation test"
+          }
+        },
+        "tier2_anchor_weighted_document_mean": {
+          "control": {
+            "mean": 0.6949152542372882,
+            "ci_low": 0.65,
+            "ci_high": 0.75,
+            "n_documents": 3,
+            "total_weight": 59,
+            "confidence_level": 0.95,
+            "n_resamples": 2000,
+            "method": "weighted_cluster_bootstrap"
+          },
+          "treatment": {
+            "mean": 0.9666666666666667,
+            "ci_low": 0.95,
+            "ci_high": 1.0,
+            "n_documents": 3,
+            "total_weight": 60,
+            "confidence_level": 0.95,
+            "n_resamples": 2000,
+            "method": "weighted_cluster_bootstrap"
+          },
+          "paired_significance": {
+            "observed_weighted_mean_diff": -0.27118644067796605,
+            "p_value": 0.2305,
+            "n_paired_documents": 3,
+            "n_permutations": 2000,
+            "method": "weighted paired sign-flip permutation test"
+          }
+        },
+        "tier3_pooled_anchor_level": {
+          "control_naive_pooled_n": 59,
+          "control_pass_rate_ci_naive": {
+            "mean": 0.6949152542372882,
+            "ci_low": 0.576271186440678,
+            "ci_high": 0.7966101694915254,
+            "n": 59,
+            "confidence_level": 0.95,
+            "n_resamples": 2000,
+            "method": "percentile_bootstrap"
+          },
+          "control_clustering": {
+            "icc": 0.0,
+            "k0_unbalanced_avg_cluster_size": 19.66101694915254,
+            "avg_cluster_size": 19.666666666666668,
+            "design_effect": 1.0,
+            "naive_pooled_n": 59,
+            "effective_n": 59.0,
+            "k_clusters": 3,
+            "method": "one-way random-effects ICC (Shrout-Fleiss ICC(1)), Fleiss (1986) unbalanced-design correction"
+          },
+          "treatment_naive_pooled_n": 60,
+          "treatment_pass_rate_ci_naive": {
+            "mean": 0.9666666666666667,
+            "ci_low": 0.9166666666666666,
+            "ci_high": 1.0,
+            "n": 60,
+            "confidence_level": 0.95,
+            "n_resamples": 2000,
+            "method": "percentile_bootstrap"
+          },
+          "treatment_clustering": {
+            "icc": 0.0,
+            "k0_unbalanced_avg_cluster_size": 20.0,
+            "avg_cluster_size": 20.0,
+            "design_effect": 1.0,
+            "naive_pooled_n": 60,
+            "effective_n": 60.0,
+            "k_clusters": 3,
+            "method": "one-way random-effects ICC (Shrout-Fleiss ICC(1)), Fleiss (1986) unbalanced-design correction"
+          },
+          "disclosure": "The naive pooled CI above treats every anchor-set (and, for pooled-across-families measures, every family x anchor-set pair) as an independent observation, which OVERSTATES precision. The *_clustering fields give the ICC-corrected effective N; treat that, not the naive pooled N, as the honest sample size for this tier (protocol section 6)."
+        },
+        "n_distinct_documents": {
+          "control": 3,
+          "treatment": 3
+        }
+      }
+    }
+  },
+  "confirm_disconfirm": {
+    "bibliography": {
+      "control_drop": {
+        "observed_mean_diff": 0.0,
+        "p_value": 1.0,
+        "n_paired_documents": 6,
+        "n_permutations": 2000,
+        "method": "paired_permutation_test(cascade Phase-3 outcome, fresh isolated K=1 baseline outcome), matched by doc_label",
+        "n_paired_anchor_sets": 6,
+        "matched_anchor_sets": [
+          "jcshm-manuscript__anchor0",
+          "jcshm-si__anchor0",
+          "jcshm-si__anchor1",
+          "masters-dissertation-defense__anchor1",
+          "masters-dissertation-defense__anchor2",
+          "masters-dissertation-defense__anchor3"
+        ]
+      },
+      "treatment_drop": {
+        "observed_mean_diff": 0.0,
+        "p_value": 1.0,
+        "n_paired_documents": 12,
+        "n_permutations": 2000,
+        "method": "paired_permutation_test(cascade Phase-3 outcome, fresh isolated K=1 baseline outcome), matched by doc_label",
+        "n_paired_anchor_sets": 12,
+        "matched_anchor_sets": [
+          "jcshm-manuscript__anchor0",
+          "jcshm-manuscript__anchor1",
+          "jcshm-manuscript__anchor2",
+          "jcshm-manuscript__anchor3",
+          "jcshm-si__anchor0",
+          "jcshm-si__anchor1",
+          "jcshm-si__anchor2",
+          "jcshm-si__anchor3",
+          "masters-dissertation-defense__anchor0",
+          "masters-dissertation-defense__anchor1",
+          "masters-dissertation-defense__anchor2",
+          "masters-dissertation-defense__anchor3"
+        ]
+      },
+      "direct_control_vs_treatment_phase3": {
+        "observed_mean_diff": -0.5,
+        "p_value": 0.241,
+        "n_paired_documents": 6,
+        "n_permutations": 2000,
+        "method": "paired_permutation_test(control Phase-3 outcome, treatment Phase-3 outcome), matched by doc_label",
+        "n_paired_anchor_sets": 6,
+        "matched_anchor_sets": [
+          "jcshm-manuscript__anchor0",
+          "jcshm-si__anchor0",
+          "jcshm-si__anchor1",
+          "masters-dissertation-defense__anchor1",
+          "masters-dissertation-defense__anchor2",
+          "masters-dissertation-defense__anchor3"
+        ]
+      }
+    },
+    "citation": {
+      "control_drop": {
+        "observed_mean_diff": -0.3333333333333333,
+        "p_value": 0.4905,
+        "n_paired_documents": 6,
+        "n_permutations": 2000,
+        "method": "paired_permutation_test(cascade Phase-3 outcome, fresh isolated K=1 baseline outcome), matched by doc_label",
+        "n_paired_anchor_sets": 6,
+        "matched_anchor_sets": [
+          "jcshm-manuscript__anchor0",
+          "jcshm-si__anchor0",
+          "jcshm-si__anchor1",
+          "masters-dissertation-defense__anchor1",
+          "masters-dissertation-defense__anchor2",
+          "masters-dissertation-defense__anchor3"
+        ]
+      },
+      "treatment_drop": {
+        "observed_mean_diff": 0.0,
+        "p_value": 1.0,
+        "n_paired_documents": 12,
+        "n_permutations": 2000,
+        "method": "paired_permutation_test(cascade Phase-3 outcome, fresh isolated K=1 baseline outcome), matched by doc_label",
+        "n_paired_anchor_sets": 12,
+        "matched_anchor_sets": [
+          "jcshm-manuscript__anchor0",
+          "jcshm-manuscript__anchor1",
+          "jcshm-manuscript__anchor2",
+          "jcshm-manuscript__anchor3",
+          "jcshm-si__anchor0",
+          "jcshm-si__anchor1",
+          "jcshm-si__anchor2",
+          "jcshm-si__anchor3",
+          "masters-dissertation-defense__anchor0",
+          "masters-dissertation-defense__anchor1",
+          "masters-dissertation-defense__anchor2",
+          "masters-dissertation-defense__anchor3"
+        ]
+      },
+      "direct_control_vs_treatment_phase3": {
+        "observed_mean_diff": -0.3333333333333333,
+        "p_value": 0.4905,
+        "n_paired_documents": 6,
+        "n_permutations": 2000,
+        "method": "paired_permutation_test(control Phase-3 outcome, treatment Phase-3 outcome), matched by doc_label",
+        "n_paired_anchor_sets": 6,
+        "matched_anchor_sets": [
+          "jcshm-manuscript__anchor0",
+          "jcshm-si__anchor0",
+          "jcshm-si__anchor1",
+          "masters-dissertation-defense__anchor1",
+          "masters-dissertation-defense__anchor2",
+          "masters-dissertation-defense__anchor3"
+        ]
+      }
+    },
+    "section_reorder": {
+      "control_drop": {
+        "observed_mean_diff": 0.3333333333333333,
+        "p_value": 0.4865,
+        "n_paired_documents": 6,
+        "n_permutations": 2000,
+        "method": "paired_permutation_test(cascade Phase-3 outcome, fresh isolated K=1 baseline outcome), matched by doc_label",
+        "n_paired_anchor_sets": 6,
+        "matched_anchor_sets": [
+          "jcshm-manuscript__anchor0",
+          "jcshm-si__anchor0",
+          "jcshm-si__anchor1",
+          "masters-dissertation-defense__anchor1",
+          "masters-dissertation-defense__anchor2",
+          "masters-dissertation-defense__anchor3"
+        ]
+      },
+      "treatment_drop": {
+        "observed_mean_diff": 0.16666666666666666,
+        "p_value": 0.486,
+        "n_paired_documents": 12,
+        "n_permutations": 2000,
+        "method": "paired_permutation_test(cascade Phase-3 outcome, fresh isolated K=1 baseline outcome), matched by doc_label",
+        "n_paired_anchor_sets": 12,
+        "matched_anchor_sets": [
+          "jcshm-manuscript__anchor0",
+          "jcshm-manuscript__anchor1",
+          "jcshm-manuscript__anchor2",
+          "jcshm-manuscript__anchor3",
+          "jcshm-si__anchor0",
+          "jcshm-si__anchor1",
+          "jcshm-si__anchor2",
+          "jcshm-si__anchor3",
+          "masters-dissertation-defense__anchor0",
+          "masters-dissertation-defense__anchor1",
+          "masters-dissertation-defense__anchor2",
+          "masters-dissertation-defense__anchor3"
+        ]
+      },
+      "direct_control_vs_treatment_phase3": {
+        "observed_mean_diff": -0.5,
+        "p_value": 0.241,
+        "n_paired_documents": 6,
+        "n_permutations": 2000,
+        "method": "paired_permutation_test(control Phase-3 outcome, treatment Phase-3 outcome), matched by doc_label",
+        "n_paired_anchor_sets": 6,
+        "matched_anchor_sets": [
+          "jcshm-manuscript__anchor0",
+          "jcshm-si__anchor0",
+          "jcshm-si__anchor1",
+          "masters-dissertation-defense__anchor1",
+          "masters-dissertation-defense__anchor2",
+          "masters-dissertation-defense__anchor3"
+        ]
+      }
+    },
+    "equation": {
+      "control_drop": {
+        "observed_mean_diff": -0.6,
+        "p_value": 0.246,
+        "n_paired_documents": 5,
+        "n_permutations": 2000,
+        "method": "paired_permutation_test(cascade Phase-3 outcome, fresh isolated K=1 baseline outcome), matched by doc_label",
+        "n_paired_anchor_sets": 5,
+        "matched_anchor_sets": [
+          "jcshm-manuscript__anchor0",
+          "jcshm-si__anchor0",
+          "jcshm-si__anchor1",
+          "masters-dissertation-defense__anchor1",
+          "masters-dissertation-defense__anchor2"
+        ]
+      },
+      "treatment_drop": {
+        "observed_mean_diff": 0.0,
+        "p_value": 1.0,
+        "n_paired_documents": 12,
+        "n_permutations": 2000,
+        "method": "paired_permutation_test(cascade Phase-3 outcome, fresh isolated K=1 baseline outcome), matched by doc_label",
+        "n_paired_anchor_sets": 12,
+        "matched_anchor_sets": [
+          "jcshm-manuscript__anchor0",
+          "jcshm-manuscript__anchor1",
+          "jcshm-manuscript__anchor2",
+          "jcshm-manuscript__anchor3",
+          "jcshm-si__anchor0",
+          "jcshm-si__anchor1",
+          "jcshm-si__anchor2",
+          "jcshm-si__anchor3",
+          "masters-dissertation-defense__anchor0",
+          "masters-dissertation-defense__anchor1",
+          "masters-dissertation-defense__anchor2",
+          "masters-dissertation-defense__anchor3"
+        ]
+      },
+      "direct_control_vs_treatment_phase3": {
+        "observed_mean_diff": -0.5,
+        "p_value": 0.241,
+        "n_paired_documents": 6,
+        "n_permutations": 2000,
+        "method": "paired_permutation_test(control Phase-3 outcome, treatment Phase-3 outcome), matched by doc_label",
+        "n_paired_anchor_sets": 6,
+        "matched_anchor_sets": [
+          "jcshm-manuscript__anchor0",
+          "jcshm-si__anchor0",
+          "jcshm-si__anchor1",
+          "masters-dissertation-defense__anchor1",
+          "masters-dissertation-defense__anchor2",
+          "masters-dissertation-defense__anchor3"
+        ]
+      }
+    },
+    "caption": {
+      "control_drop": {
+        "observed_mean_diff": -0.3333333333333333,
+        "p_value": 0.491,
+        "n_paired_documents": 6,
+        "n_permutations": 2000,
+        "method": "paired_permutation_test(cascade Phase-3 outcome, fresh isolated K=1 baseline outcome), matched by doc_label",
+        "n_paired_anchor_sets": 6,
+        "matched_anchor_sets": [
+          "jcshm-manuscript__anchor0",
+          "jcshm-si__anchor0",
+          "jcshm-si__anchor1",
+          "masters-dissertation-defense__anchor1",
+          "masters-dissertation-defense__anchor2",
+          "masters-dissertation-defense__anchor3"
+        ]
+      },
+      "treatment_drop": {
+        "observed_mean_diff": 0.0,
+        "p_value": 1.0,
+        "n_paired_documents": 12,
+        "n_permutations": 2000,
+        "method": "paired_permutation_test(cascade Phase-3 outcome, fresh isolated K=1 baseline outcome), matched by doc_label",
+        "n_paired_anchor_sets": 12,
+        "matched_anchor_sets": [
+          "jcshm-manuscript__anchor0",
+          "jcshm-manuscript__anchor1",
+          "jcshm-manuscript__anchor2",
+          "jcshm-manuscript__anchor3",
+          "jcshm-si__anchor0",
+          "jcshm-si__anchor1",
+          "jcshm-si__anchor2",
+          "jcshm-si__anchor3",
+          "masters-dissertation-defense__anchor0",
+          "masters-dissertation-defense__anchor1",
+          "masters-dissertation-defense__anchor2",
+          "masters-dissertation-defense__anchor3"
+        ]
+      },
+      "direct_control_vs_treatment_phase3": {
+        "observed_mean_diff": -0.5,
+        "p_value": 0.241,
+        "n_paired_documents": 6,
+        "n_permutations": 2000,
+        "method": "paired_permutation_test(control Phase-3 outcome, treatment Phase-3 outcome), matched by doc_label",
+        "n_paired_anchor_sets": 6,
+        "matched_anchor_sets": [
+          "jcshm-manuscript__anchor0",
+          "jcshm-si__anchor0",
+          "jcshm-si__anchor1",
+          "masters-dissertation-defense__anchor1",
+          "masters-dissertation-defense__anchor2",
+          "masters-dissertation-defense__anchor3"
+        ]
+      }
+    },
+    "pooled": {
+      "control_drop": {
+        "observed_mean_diff": -0.1724137931034483,
+        "p_value": 0.219,
+        "n_paired_documents": 29,
+        "n_permutations": 2000,
+        "method": "paired_permutation_test(cascade Phase-3 outcome, fresh isolated K=1 baseline outcome), matched by doc_label",
+        "n_paired_anchor_sets": 29,
+        "matched_anchor_sets": [
+          "bibliography::jcshm-manuscript__anchor0",
+          "bibliography::jcshm-si__anchor0",
+          "bibliography::jcshm-si__anchor1",
+          "bibliography::masters-dissertation-defense__anchor1",
+          "bibliography::masters-dissertation-defense__anchor2",
+          "bibliography::masters-dissertation-defense__anchor3",
+          "caption::jcshm-manuscript__anchor0",
+          "caption::jcshm-si__anchor0",
+          "caption::jcshm-si__anchor1",
+          "caption::masters-dissertation-defense__anchor1",
+          "caption::masters-dissertation-defense__anchor2",
+          "caption::masters-dissertation-defense__anchor3",
+          "citation::jcshm-manuscript__anchor0",
+          "citation::jcshm-si__anchor0",
+          "citation::jcshm-si__anchor1",
+          "citation::masters-dissertation-defense__anchor1",
+          "citation::masters-dissertation-defense__anchor2",
+          "citation::masters-dissertation-defense__anchor3",
+          "equation::jcshm-manuscript__anchor0",
+          "equation::jcshm-si__anchor0",
+          "equation::jcshm-si__anchor1",
+          "equation::masters-dissertation-defense__anchor1",
+          "equation::masters-dissertation-defense__anchor2",
+          "section_reorder::jcshm-manuscript__anchor0",
+          "section_reorder::jcshm-si__anchor0",
+          "section_reorder::jcshm-si__anchor1",
+          "section_reorder::masters-dissertation-defense__anchor1",
+          "section_reorder::masters-dissertation-defense__anchor2",
+          "section_reorder::masters-dissertation-defense__anchor3"
+        ]
+      },
+      "treatment_drop": {
+        "observed_mean_diff": 0.03333333333333333,
+        "p_value": 0.4895,
+        "n_paired_documents": 60,
+        "n_permutations": 2000,
+        "method": "paired_permutation_test(cascade Phase-3 outcome, fresh isolated K=1 baseline outcome), matched by doc_label",
+        "n_paired_anchor_sets": 60,
+        "matched_anchor_sets": [
+          "bibliography::jcshm-manuscript__anchor0",
+          "bibliography::jcshm-manuscript__anchor1",
+          "bibliography::jcshm-manuscript__anchor2",
+          "bibliography::jcshm-manuscript__anchor3",
+          "bibliography::jcshm-si__anchor0",
+          "bibliography::jcshm-si__anchor1",
+          "bibliography::jcshm-si__anchor2",
+          "bibliography::jcshm-si__anchor3",
+          "bibliography::masters-dissertation-defense__anchor0",
+          "bibliography::masters-dissertation-defense__anchor1",
+          "bibliography::masters-dissertation-defense__anchor2",
+          "bibliography::masters-dissertation-defense__anchor3",
+          "caption::jcshm-manuscript__anchor0",
+          "caption::jcshm-manuscript__anchor1",
+          "caption::jcshm-manuscript__anchor2",
+          "caption::jcshm-manuscript__anchor3",
+          "caption::jcshm-si__anchor0",
+          "caption::jcshm-si__anchor1",
+          "caption::jcshm-si__anchor2",
+          "caption::jcshm-si__anchor3",
+          "caption::masters-dissertation-defense__anchor0",
+          "caption::masters-dissertation-defense__anchor1",
+          "caption::masters-dissertation-defense__anchor2",
+          "caption::masters-dissertation-defense__anchor3",
+          "citation::jcshm-manuscript__anchor0",
+          "citation::jcshm-manuscript__anchor1",
+          "citation::jcshm-manuscript__anchor2",
+          "citation::jcshm-manuscript__anchor3",
+          "citation::jcshm-si__anchor0",
+          "citation::jcshm-si__anchor1",
+          "citation::jcshm-si__anchor2",
+          "citation::jcshm-si__anchor3",
+          "citation::masters-dissertation-defense__anchor0",
+          "citation::masters-dissertation-defense__anchor1",
+          "citation::masters-dissertation-defense__anchor2",
+          "citation::masters-dissertation-defense__anchor3",
+          "equation::jcshm-manuscript__anchor0",
+          "equation::jcshm-manuscript__anchor1",
+          "equation::jcshm-manuscript__anchor2",
+          "equation::jcshm-manuscript__anchor3",
+          "equation::jcshm-si__anchor0",
+          "equation::jcshm-si__anchor1",
+          "equation::jcshm-si__anchor2",
+          "equation::jcshm-si__anchor3",
+          "equation::masters-dissertation-defense__anchor0",
+          "equation::masters-dissertation-defense__anchor1",
+          "equation::masters-dissertation-defense__anchor2",
+          "equation::masters-dissertation-defense__anchor3",
+          "section_reorder::jcshm-manuscript__anchor0",
+          "section_reorder::jcshm-manuscript__anchor1",
+          "section_reorder::jcshm-manuscript__anchor2",
+          "section_reorder::jcshm-manuscript__anchor3",
+          "section_reorder::jcshm-si__anchor0",
+          "section_reorder::jcshm-si__anchor1",
+          "section_reorder::jcshm-si__anchor2",
+          "section_reorder::jcshm-si__anchor3",
+          "section_reorder::masters-dissertation-defense__anchor0",
+          "section_reorder::masters-dissertation-defense__anchor1",
+          "section_reorder::masters-dissertation-defense__anchor2",
+          "section_reorder::masters-dissertation-defense__anchor3"
+        ]
+      },
+      "direct_control_vs_treatment_phase3": {
+        "observed_mean_diff": -0.4666666666666667,
+        "p_value": 0.0,
+        "n_paired_documents": 30,
+        "n_permutations": 2000,
+        "method": "paired_permutation_test(control Phase-3 outcome, treatment Phase-3 outcome), matched by doc_label",
+        "n_paired_anchor_sets": 30,
+        "matched_anchor_sets": [
+          "bibliography::jcshm-manuscript__anchor0",
+          "bibliography::jcshm-si__anchor0",
+          "bibliography::jcshm-si__anchor1",
+          "bibliography::masters-dissertation-defense__anchor1",
+          "bibliography::masters-dissertation-defense__anchor2",
+          "bibliography::masters-dissertation-defense__anchor3",
+          "caption::jcshm-manuscript__anchor0",
+          "caption::jcshm-si__anchor0",
+          "caption::jcshm-si__anchor1",
+          "caption::masters-dissertation-defense__anchor1",
+          "caption::masters-dissertation-defense__anchor2",
+          "caption::masters-dissertation-defense__anchor3",
+          "citation::jcshm-manuscript__anchor0",
+          "citation::jcshm-si__anchor0",
+          "citation::jcshm-si__anchor1",
+          "citation::masters-dissertation-defense__anchor1",
+          "citation::masters-dissertation-defense__anchor2",
+          "citation::masters-dissertation-defense__anchor3",
+          "equation::jcshm-manuscript__anchor0",
+          "equation::jcshm-si__anchor0",
+          "equation::jcshm-si__anchor1",
+          "equation::masters-dissertation-defense__anchor1",
+          "equation::masters-dissertation-defense__anchor2",
+          "equation::masters-dissertation-defense__anchor3",
+          "section_reorder::jcshm-manuscript__anchor0",
+          "section_reorder::jcshm-si__anchor0",
+          "section_reorder::jcshm-si__anchor1",
+          "section_reorder::masters-dissertation-defense__anchor1",
+          "section_reorder::masters-dissertation-defense__anchor2",
+          "section_reorder::masters-dissertation-defense__anchor3"
+        ]
+      }
+    },
+    "keep_survival_significance": {
+      "observed_mean_diff": -0.5454545454545454,
+      "p_value": 0.0305,
+      "n_paired_documents": 11,
+      "n_permutations": 2000,
+      "method": "paired_permutation_test(control Phase-3 outcome, treatment Phase-3 outcome), matched by doc_label",
+      "n_paired_anchor_sets": 11,
+      "matched_anchor_sets": [
+        "jcshm-manuscript__anchor0",
+        "jcshm-manuscript__anchor1",
+        "jcshm-manuscript__anchor2",
+        "jcshm-manuscript__anchor3",
+        "jcshm-si__anchor0",
+        "jcshm-si__anchor1",
+        "jcshm-si__anchor3",
+        "masters-dissertation-defense__anchor0",
+        "masters-dissertation-defense__anchor1",
+        "masters-dissertation-defense__anchor2",
+        "masters-dissertation-defense__anchor3"
+      ]
+    }
+  },
+  "render_gate_timeouts": [],
+  "excluded_observations": [
+    {
+      "measure": "phase3_composite",
+      "doc_label": "jcshm-si__anchor3",
+      "arm": "control",
+      "reason": "completed_with_failure"
+    },
+    {
+      "measure": "phase3_bibliography",
+      "doc_label": "jcshm-manuscript__anchor1",
+      "arm": "control",
+      "reason": "chain_broken_at_step_3.4-inverse"
+    },
+    {
+      "measure": "phase3_bibliography",
+      "doc_label": "jcshm-manuscript__anchor2",
+      "arm": "control",
+      "reason": "chain_broken_at_step_3.4-inverse"
+    },
+    {
+      "measure": "phase3_bibliography",
+      "doc_label": "jcshm-manuscript__anchor3",
+      "arm": "control",
+      "reason": "chain_broken_at_step_3.4-inverse"
+    },
+    {
+      "measure": "phase3_bibliography",
+      "doc_label": "jcshm-si__anchor2",
+      "arm": "control",
+      "reason": "chain_broken_at_step_2.1"
+    },
+    {
+      "measure": "phase3_bibliography",
+      "doc_label": "jcshm-si__anchor3",
+      "arm": "control",
+      "reason": "completed_with_failure"
+    },
+    {
+      "measure": "phase3_bibliography",
+      "doc_label": "masters-dissertation-defense__anchor0",
+      "arm": "control",
+      "reason": "chain_broken_at_step_3.2-inverse"
+    },
+    {
+      "measure": "phase3_citation",
+      "doc_label": "jcshm-manuscript__anchor1",
+      "arm": "control",
+      "reason": "chain_broken_at_step_3.4-inverse"
+    },
+    {
+      "measure": "phase3_citation",
+      "doc_label": "jcshm-manuscript__anchor2",
+      "arm": "control",
+      "reason": "chain_broken_at_step_3.4-inverse"
+    },
+    {
+      "measure": "phase3_citation",
+      "doc_label": "jcshm-manuscript__anchor3",
+      "arm": "control",
+      "reason": "chain_broken_at_step_3.4-inverse"
+    },
+    {
+      "measure": "phase3_citation",
+      "doc_label": "jcshm-si__anchor2",
+      "arm": "control",
+      "reason": "chain_broken_at_step_2.1"
+    },
+    {
+      "measure": "phase3_citation",
+      "doc_label": "jcshm-si__anchor3",
+      "arm": "control",
+      "reason": "completed_with_failure"
+    },
+    {
+      "measure": "phase3_citation",
+      "doc_label": "masters-dissertation-defense__anchor0",
+      "arm": "control",
+      "reason": "chain_broken_at_step_3.2-inverse"
+    },
+    {
+      "measure": "phase3_section_reorder",
+      "doc_label": "jcshm-manuscript__anchor1",
+      "arm": "control",
+      "reason": "chain_broken_at_step_3.4-inverse"
+    },
+    {
+      "measure": "phase3_section_reorder",
+      "doc_label": "jcshm-manuscript__anchor2",
+      "arm": "control",
+      "reason": "chain_broken_at_step_3.4-inverse"
+    },
+    {
+      "measure": "phase3_section_reorder",
+      "doc_label": "jcshm-manuscript__anchor3",
+      "arm": "control",
+      "reason": "chain_broken_at_step_3.4-inverse"
+    },
+    {
+      "measure": "phase3_section_reorder",
+      "doc_label": "jcshm-si__anchor2",
+      "arm": "control",
+      "reason": "chain_broken_at_step_2.1"
+    },
+    {
+      "measure": "phase3_section_reorder",
+      "doc_label": "jcshm-si__anchor3",
+      "arm": "control",
+      "reason": "completed_with_failure"
+    },
+    {
+      "measure": "phase3_section_reorder",
+      "doc_label": "masters-dissertation-defense__anchor0",
+      "arm": "control",
+      "reason": "chain_broken_at_step_3.2-inverse"
+    },
+    {
+      "measure": "phase3_equation",
+      "doc_label": "jcshm-manuscript__anchor1",
+      "arm": "control",
+      "reason": "chain_broken_at_step_3.4-inverse"
+    },
+    {
+      "measure": "phase3_equation",
+      "doc_label": "jcshm-manuscript__anchor2",
+      "arm": "control",
+      "reason": "chain_broken_at_step_3.4-inverse"
+    },
+    {
+      "measure": "phase3_equation",
+      "doc_label": "jcshm-manuscript__anchor3",
+      "arm": "control",
+      "reason": "chain_broken_at_step_3.4-inverse"
+    },
+    {
+      "measure": "phase3_equation",
+      "doc_label": "jcshm-si__anchor2",
+      "arm": "control",
+      "reason": "chain_broken_at_step_2.1"
+    },
+    {
+      "measure": "phase3_equation",
+      "doc_label": "jcshm-si__anchor3",
+      "arm": "control",
+      "reason": "completed_with_failure"
+    },
+    {
+      "measure": "phase3_equation",
+      "doc_label": "masters-dissertation-defense__anchor0",
+      "arm": "control",
+      "reason": "chain_broken_at_step_3.2-inverse"
+    },
+    {
+      "measure": "phase3_caption",
+      "doc_label": "jcshm-manuscript__anchor1",
+      "arm": "control",
+      "reason": "chain_broken_at_step_3.4-inverse"
+    },
+    {
+      "measure": "phase3_caption",
+      "doc_label": "jcshm-manuscript__anchor2",
+      "arm": "control",
+      "reason": "chain_broken_at_step_3.4-inverse"
+    },
+    {
+      "measure": "phase3_caption",
+      "doc_label": "jcshm-manuscript__anchor3",
+      "arm": "control",
+      "reason": "chain_broken_at_step_3.4-inverse"
+    },
+    {
+      "measure": "phase3_caption",
+      "doc_label": "jcshm-si__anchor2",
+      "arm": "control",
+      "reason": "chain_broken_at_step_2.1"
+    },
+    {
+      "measure": "phase3_caption",
+      "doc_label": "jcshm-si__anchor3",
+      "arm": "control",
+      "reason": "completed_with_failure"
+    },
+    {
+      "measure": "phase3_caption",
+      "doc_label": "masters-dissertation-defense__anchor0",
+      "arm": "control",
+      "reason": "chain_broken_at_step_3.2-inverse"
+    },
+    {
+      "measure": "phase2_keep_survival",
+      "doc_label": "jcshm-si__anchor2",
+      "arm": "control",
+      "reason": "chain_broken_at_step_2.1"
+    },
+    {
+      "measure": "baseline_equation",
+      "doc_label": "masters-dissertation-defense__anchor3",
+      "arm": "control",
+      "reason": "blocked"
+    }
+  ],
+  "n_cascade_chains_loaded": 24,
+  "n_baseline_chains_loaded": {
+    "bibliography": 24,
+    "citation": 24,
+    "section_reorder": 24,
+    "equation": 24,
+    "caption": 24
+  },
+  "run_root": "/workspace/ooxml-graph-paper/primary-run",
+  "baseline_run_root": "/workspace/ooxml-graph-paper/primary-run/baselines"
+}
