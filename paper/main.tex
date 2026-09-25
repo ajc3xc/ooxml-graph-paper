@@ -19,6 +19,8 @@
 % \claim{id}{text} marks a statement of a recurring claim listed in claims.json;
 % it prints its text unchanged.
 \DeclareRobustCommand{\claim}[2]{#2}
+% Keep PDF bookmarks readable when a heading contains \claim or \val.
+\pdfstringdefDisableCommands{\def\claim#1#2{#2}\def\val#1{\csname pv@#1\endcsname}}
 
 \newcommand{\todo}[1]{\textcolor{red}{\textbf{[TODO: #1]}}}
 \newcommand{\pending}[1]{\textcolor{orange}{\textbf{[PENDING: #1]}}}
@@ -362,24 +364,21 @@ process-level subprocess timeout) is excluded from the denominator of whichever 
 actually prevented from completing for that document: both arms' when the failure blocks either
 arm's chain from running at all, \claim{section-reorder-combined-corpus-n55-n56}{or a single arm's when only one arm's process was affected, as in
 the two harness-flake cases we report (Appendix~\ref{app:notes}, Notes a--b),} rather than scored as
-a failure.} \claim{per-trial-timeout-history}{This is a single global per-trial subprocess timeout applied to
-every family, not a per-family budget; it started at \val{harness.timeout_initial_s} seconds (an uninstrumented initial
-choice) and \claim{defect-6-numbered-refs}{was raised to \val{harness.timeout_raised_s} seconds on 2026-09-07 as a reactive doubling to survive a specific
-host-contention episode (Section~\ref{sec:defects} defect 6)} -- so families whose trials ran before
-that date saw the \val{harness.timeout_initial_s}s ceiling and families run afterward, predominantly the render-gated ones,
-saw \val{harness.timeout_raised_s}s, but this was an artifact of when each family's trials happened to run, not a deliberate
-per-family design.} \claim{timeout-900-censored-evidence}{We have since derived an evidence-informed value from the corpus's own recorded
-wall-clock times:} aggregating \texttt{wall\_time\_seconds} across all \val{harness.walltime.chain_results.count} recorded chain results
-(\val{harness.walltime.trials_completed.count} of \val{harness.walltime.trials_total.count} trials that completed without hitting either ceiling) gives a 99th-percentile
-completion time of 388.8s and an observed maximum of \val{harness.walltime.rendergated.max_s}s for the two slower render-gated
-families (equation and caption) combined, \claim{per-trial-timeout-history}{right at the old \val{harness.timeout_raised_s}s ceiling -- and \val{harness.timeout_hits.rendergated.count} render-gated trials genuinely hit that ceiling as
-recently as 2026-09-12, confirming \val{harness.timeout_raised_s}s was still insufficient for a real fraction of correct,
-non-infrastructure-failing attempts.} \claim{timeout-900-censored-evidence}{Because the successful-trial data is right-censored at
-whatever ceiling was in effect when each trial ran, this cannot be treated as a closed percentile
-derivation; \claim{per-trial-timeout-history}{the current value, \val{harness.timeout_final_s} seconds, is a reasoned evidence-informed raise (\val{harness.timeout_raise_factor}x, matching
-this project's own earlier evidence-based soffice-timeout raise) that clears the observed maximum
-with headroom rather than sitting on it, not a value derived from an uncensored expected-duration
-analysis.}} \claim{task-failure-scored-not-excluded}{A chain that executed to completion and reports a genuine
+a failure.} \claim{per-trial-timeout-history}{The per-trial subprocess timeout is a single global value applied to
+every family, not a per-family budget. It was \val{harness.timeout_initial_s}s for trials run before 2026-09-07,
+\claim{defect-6-numbered-refs}{when it was doubled to \val{harness.timeout_raised_s}s after a host-contention episode
+(Section~\ref{sec:defects}, defect~\ref{def:seq-fallback})}; which families ran under which ceiling
+follows from when their trials ran (the render-gated families mostly ran later), not from a
+per-family design.} \claim{timeout-900-censored-evidence}{Since 2026-09-18 it has been \val{harness.timeout_final_s}s, set from
+recorded wall-clock times:} across the \val{harness.walltime.chain_results.count} chain results recorded before then (the
+\val{harness.walltime.trials_completed.count} of \val{harness.walltime.trials_total.count} trials that exited cleanly; \val{harness.walltime.timed_out.count} hit a timeout and \val{harness.walltime.crashed.count}
+crashed), the two slower render-gated families (equation and caption) had a 99th-percentile
+completion time of \val{harness.walltime.rendergated.p99_s}s and a maximum of \val{harness.walltime.rendergated.max_s}s,
+\claim{per-trial-timeout-history}{close to the \val{harness.timeout_raised_s}s ceiling, which \val{harness.timeout_hits.rendergated.count} render-gated trials hit as
+recently as 2026-09-12.} \claim{timeout-900-censored-evidence}{Because these times are right-censored at whichever
+ceiling applied, \claim{per-trial-timeout-history}{\val{harness.timeout_final_s}s (\val{harness.timeout_raise_factor}$\times$ the previous value, the same factor as
+this project's earlier soffice-timeout raise) is an evidence-informed setting with headroom above
+the observed maximum, not a percentile derived from uncensored data.}} \claim{task-failure-scored-not-excluded}{A chain that executed to completion and reports a genuine
 task-level failure -- \claim{verification-confound-reliability-cost}{including a write-time structural-verification failure under host
 contention (Section~\ref{sec:render-gate}), since that is a property of the treatment condition
 being measured, not an unrelated infrastructure artifact} -- is scored as a failure at a fixed
@@ -476,7 +475,7 @@ of being undone) -- \claim{checkpoint-b-central-test}{this is the design's centr
 correct execution requires).} \claim{checkpoint-b-central-test}{Every one of the three already-inserted, untouched targets
 (bibliography, equation, caption) must survive RESPEC's two edits completely unchanged --
 Checkpoint B's own keep-survival check,} \claim{grading-exact-order-vs-order-blind}{\claim{defect-8-collateral-check-citation}{\claim{respec-harness-defects-8-9}{scored with the same order-blind multiset comparison as the
-rest of this benchmark's collateral-damage checks (Section~\ref{sec:defects}, defect 8)}}
+rest of this benchmark's collateral-damage checks (Section~\ref{sec:defects}, defect~\ref{def:respec-grader})}}
 specifically because a section move must not by itself count as drift.} Corpus, arms, and grading
 discipline are otherwise identical to the rest of this benchmark: \claim{respec-corpus-author-owned-docs}{the same three real, author-owned
 documents already added under the multi-anchor extension} (Section~\ref{sec:results-multianchor}),
@@ -609,13 +608,14 @@ make,} \claim{k4-uses-same-combined-corpus}{on the same corpus already reported 
 
 \claim{fresh-anchor-resolution-mechanism}{We traced the mechanism directly, using the
 finer per-cycle grading breakdown below;} \claim{k4-uses-same-combined-corpus}{that breakdown covers only the \val{corpus.followup.n}-document follow-up
-sub-corpus, since the full \val{k4.secreorder.control.n}/\val{k4.secreorder.treatment.n} combined corpus is not broken down at this granularity.} \claim{state-drift-generic-degrades}{Of the 12 follow-up-corpus control chains with at least one failing cycle, \claim{grading-exact-order-vs-order-blind}{\val{k4.secreorder_followup.control.order_c2plus.fails} failed specifically
-on exact-order restoration starting from the second cycle onward} -- a real, dominant majority
-pattern, not a universal rule} -- and 2 failed that same check on the very first cycle (one of
-those two then recovering fully on later cycles); the remaining chain's specific failure
-category is not itemized in our current evidence record, a gap we disclose rather than paper
-over. \claim{state-drift-generic-degrades}{The bounded tool showed no equivalent drift on
-any chain, in either sub-corpus.} \claim{fresh-anchor-resolution-mechanism}{This is consistent
+sub-corpus, since the full \val{k4.secreorder.control.n}/\val{k4.secreorder.treatment.n} combined corpus is not broken down at this granularity.} \claim{state-drift-generic-degrades}{Of the \val{k4.secreorder_followup.control.fails} follow-up-corpus control chains that failed, \val{k4.secreorder_followup.control.exact_order.fails} failed the exact-order
+restoration check: \claim{grading-exact-order-vs-order-blind}{\val{k4.secreorder_followup.control.order_c2plus.fails} for the first time on the second cycle or later} -- a dominant majority
+pattern, not a universal rule} -- and \val{k4.secreorder_followup.control.order_c1.fails} already on the first cycle (each passing that check
+again on a later cycle). The other \val{k4.secreorder_followup.control.forward.fails} restored the order on every cycle but failed the
+forward check that the section actually moved, one on its first two cycles and one on its second.
+\claim{state-drift-generic-degrades}{The bounded tool's \val{k4.secreorder_followup.treatment.fails} failing chains in the same sub-corpus each failed on
+its very first cycle; none failed only after a clean first cycle, the pattern behind
+\val{k4.secreorder_followup.control.order_c2plus.fails} of the \val{k4.secreorder_followup.control.fails} control failures.} \claim{fresh-anchor-resolution-mechanism}{This is consistent
 with a specific, plausible cause: \claim{state-drift-generic-degrades}{the bounded tool re-resolves a fresh structural anchor for the
 target section on every call, while the generic-tool agent must reconstruct or remember ``the
 original layout'' itself across calls, and that reconstruction compounds error with repetition.}}
@@ -690,7 +690,7 @@ entirely -- they write raw XML directly, with no independent render-verification
 
 Figure~\ref{fig:rendergate-arch} shows this flow. \claim{defects-all-fixed-status}{\claim{concurrent-fallback-fix-never-shipped}{\claim{sequential-backend-fallback-order}{The verification step tries two independent
 renderer backends in a fixed fallback order, advancing to the second only if the first fails
-\claim{defect-6-numbered-refs}{(Section~\ref{sec:defects}, defect 6, which documents this fallback as sequential rather than
+\claim{defect-6-numbered-refs}{(Section~\ref{sec:defects}, defect~\ref{def:seq-fallback}, which documents this fallback as sequential rather than
 concurrent)}}}} -- \claim{backend-choice-no-effect-on-outcome}{the pass/fail decision is unaffected by which backend succeeds.}
 
 \begin{table}[h]
@@ -726,7 +726,7 @@ Appendix~\ref{app:notes}.}
 \end{table}
 
 As Table~\ref{tab:render-gate} shows, \claim{control-never-invokes-verification}{all three families' control arms never invoke the verification step at all, since they edit raw
-XML directly,} and \claim{six-task-families}{they perform comparably to the other four families (92.3\%--100\%)},
+XML directly,} and they pass at \val{rg.equation.control.rate}\%--\val{rg.caption.control.rate}\% (equation to caption),
 \claim{native-ooxml-structures}{confirming that a capable generic-tool agent can correctly hand-construct the target structures
 (a real \texttt{<m:oMath>} object, a real \texttt{<w:tbl>}, a real SEQ-field caption) without a
 bounded tool's help.} \claim{original-host-two-of-three-depressed}{Treatment's numbers are markedly lower for two of the three and, critically,
@@ -742,7 +742,7 @@ output, while a bare table does not. \claim{render-cost-hypothesis-rejected}{We 
 actual OOXML output found no field-dirtying or document-recalculation mechanism in any of the
 three insertion tools, and a controlled, sequential timing test -- rendering real completed
 output files from all three families, interleaved to control for host-condition drift -- found no
-meaningful difference} (equation \val{timing.equation.mean_s}s, table-structural 8.6s, caption \val{timing.caption.mean_s}s mean, all $\ll$ the \val{harness.render_backend_timeout_s}s
+meaningful difference} (equation \val{timing.equation.mean_s}s, table-structural \val{timing.table.mean_s}s, caption \val{timing.caption.mean_s}s mean, all $\ll$ the \val{harness.render_backend_timeout_s}s
 timeout). \claim{render-cost-hypothesis-rejected}{We reject the task-dependent-verification-cost hypothesis on this direct evidence,} and
 \claim{gap-causes-contention-and-drive}{\claim{gap-was-deployment-artifact}{attribute the gap instead to two independent causes, neither a property of the editing operations
 themselves}: ordinary shared-host scheduling contention (evidently not sufficient alone -- an
@@ -923,7 +923,7 @@ never do, in any of the twelve chains attempted.}
 
 \claim{respec-k1-baseline}{We separately compared each arm's cascade Phase-3 outcome against that same arm's own fresh,
 isolated $K=1$ baseline at the identical anchor} (Section~\ref{sec:methods-respec-cascade}), pooled
-across families (30 anchor-set-level pairs where both a cascade and a baseline outcome exist for
+across families (\val{respec.drop.control.n} anchor-set-level pairs where both a cascade and a baseline outcome exist for
 control, \val{respec.drop.treatment.n} for treatment -- \claim{respec-control-chains-broke}{the counts differ because more control chains never reached a given
 family's Phase-3 step at all, itself part of the finding}). Control's cascade performance runs \val{respec.drop.control.diff_pp}
 points below its own single-edit baseline ($p=\val{respec.drop.control.p}$, $n=\val{respec.drop.control.n}$); treatment shows no such gap
@@ -945,7 +945,7 @@ already traced in
 Section~\ref{sec:section-reorder}: unbounded raw-XML editing degrades further, and more
 catastrophically, as more edits accumulate on the same document.}} \claim{respec-harness-defects-8-9}{\claim{ten-defects-count}{\claim{defect-8-collateral-check-citation}{Two further real defects in this
 extension's own harness were found and fixed during this run, disclosed alongside this benchmark's
-other eight (Section~\ref{sec:defects}, defects 8--9)};}} both were verified directly against the real
+other eight (Section~\ref{sec:defects}, defects~\ref{def:respec-grader}--\ref{def:doclabel-collision})};}} both were verified directly against the real
 checkpoint data before and after the fix.
 
 \section{\claim{defects-all-fixed-status}{\claim{ten-defects-count}{Ten real defects found and fixed}}}
@@ -956,19 +956,19 @@ The reported numbers depend on the harness, evaluator, and infrastructure that p
 rather than fold it silently into a final figure.}
 
 \begin{enumerate}
-\item \claim{com-type-library-cache-defect}{\textbf{Missing type-library cache broke basic Word COM (Component Object Model)
+\item\label{def:typelib-cache} \claim{com-type-library-cache-defect}{\textbf{Missing type-library cache broke basic Word COM (Component Object Model)
   automation.}} \claim{sequential-backend-fallback-order}{The benchmark harness's write-time verification step falls back to Microsoft
   Word's own COM automation interface when the primary renderer is unavailable.} Every real
   trial's temp-directory isolation (itself a fix for an earlier concurrency defect) incidentally
   emptied this cache on every trial, causing a plain dynamic-dispatch COM call to return an
   object missing basic properties. We fixed this by switching to an explicit type-library-bound
   dispatch call; verified live against the real COM backend, not a mock.
-\item \textbf{A COM message-queue starvation bug.} Calling the file-save operation immediately
+\item\label{def:com-queue} \textbf{A COM message-queue starvation bug.} Calling the file-save operation immediately
   after opening a document via COM could deterministically raise a
   ``call rejected by callee'' COM error -- confirmed non-transient via five consecutive failed
   retries with a real delay between each. We fixed this by explicitly servicing the COM message
   queue before the save call; it succeeded on the first attempt after the fix.
-\item \textbf{The confirmatory harness discarded genuinely successful runs.} A changed output
+\item\label{def:discarded-runs} \textbf{The confirmatory harness discarded genuinely successful runs.} A changed output
   file on a trial killed by the harness's own outer timeout is safe, positive evidence the
   underlying edit had genuinely succeeded, \claim{never-persist-corrupt-document}{because the write-time verification step is atomic:
   it restores the original file on any failure and only ever persists a change after independent
@@ -978,7 +978,7 @@ rather than fold it silently into a final figure.}
   attempt grading in that case too, directly recovering two genuinely correct table-insertion
   trials, confirmed by re-grading the real output files against their own pre-write backups, not
   by re-running anything.}
-\item \textbf{A transient network/certificate failure, not a capability finding.} We
+\item\label{def:cert-failure} \textbf{A transient network/certificate failure, not a capability finding.} We
   systematically reviewed every remaining trial's exact failure signature -- return code,
   whether the process timed out, whether the output file changed -- and found a signature not
   previously characterized: \val{defects.cert_failure.count} trials across two families (equation, caption) failed with an
@@ -993,11 +993,11 @@ rather than fold it silently into a final figure.}
   item, Table~\ref{tab:render-gate}'s numbers for these two families had silently included these
   \val{defects.cert_failure.count} as ordinary capability failures -- a disclosure/reporting inconsistency corrected here and
   in that table.}}
-\item \claim{defects-disclosed-in-full}{\claim{ten-defects-count}{\textbf{Two further evaluation-harness defects}} -- an inverse-trial paragraph-id
+\item\label{def:two-harness} \claim{defects-disclosed-in-full}{\claim{ten-defects-count}{\textbf{Two further evaluation-harness defects}} -- an inverse-trial paragraph-id
   resolution bug affecting the citation family, and a statistics-regeneration gap that left a
   stale number published after an unrelated fix -- \claim{supplementary-docs-location}{are described in full in the project's own
   working notes (\texttt{docs/} in the repository below) and omitted here for space.}}
-\item \claim{defect-6-numbered-refs}{\claim{concurrent-fallback-fix-never-shipped}{\textbf{Sequential backend fallback could cost more time than the harness's own outer
+\item\label{def:seq-fallback} \claim{defect-6-numbered-refs}{\claim{concurrent-fallback-fix-never-shipped}{\textbf{Sequential backend fallback could cost more time than the harness's own outer
   budget allowed -- and \claim{defects-all-fixed-status}{the fix for it never actually shipped.}}}} \claim{sequential-backend-fallback-order}{The write-time verification
   step's two backends (Section~\ref{sec:render-gate})
   were tried sequentially,} each with its own retry-bounded \val{harness.render_backend_timeout_s}-second timeout -- discovering that
@@ -1017,7 +1017,7 @@ rather than fold it silently into a final figure.}
   both backends genuinely failed may still have been silently killed by the outer timeout
   mid-verification rather than gracefully reporting "both backends failed," exactly the failure
   mode this fix was meant to prevent.
-\item \claim{rerun-nonroot-account}{\textbf{The confirmatory re-run's CLI silently refused every trial identically, and the
+\item\label{def:root-cli} \claim{rerun-nonroot-account}{\textbf{The confirmatory re-run's CLI silently refused every trial identically, and the
   failure signature was checked directly rather than assumed.}} \claim{rerun-nonroot-account}{The first attempt at the
   dedicated-host confirmatory re-run (Section~\ref{sec:methods-rerun}) reported every one of \val{defects.root_cli.attempted}
   chains as blocked,} each in well under one second -- fast and uniform enough that we
@@ -1032,7 +1032,7 @@ rather than fold it silently into a final figure.}
   trusting the run's aggregate numbers.} \claim{rerun-nonroot-account}{This defect's exposure is a clean, fully-counted bound, not
   an open-ended risk: exactly \val{defects.root_cli.fails} of \val{defects.root_cli.attempted} attempted chains failed this way before the fix, all \val{defects.root_cli.fails}
   were re-run after it, and none failed partially or silently in between.}
-\item \claim{respec-harness-defects-8-9}{\textbf{The \texttt{respec\_cascade} grader miscounted a documented, intended tool
+\item\label{def:respec-grader} \claim{respec-harness-defects-8-9}{\textbf{The \texttt{respec\_cascade} grader miscounted a documented, intended tool
   side-effect as collateral damage.}} \texttt{insert\_bibliography\_entry} locates an existing
   References/Bibliography heading or creates one when a document has none -- documented behavior,
   not a bug in the tool. \claim{defect-8-collateral-check-citation}{The grader's collateral-diff check (Section~\ref{sec:results-respec-cascade})
@@ -1048,7 +1048,7 @@ rather than fold it silently into a final figure.}
   document's own pre-edit paragraph list;} verified directly against the real checkpoint output
   files for both the affected document (the check now passes) and an unaffected one that already
   had a heading under different text (unchanged, confirming no regression).
-\item \claim{respec-harness-defects-8-9}{\textbf{A doc\_label truncation collision silently merged four independent baseline trial
+\item\label{def:doclabel-collision} \claim{respec-harness-defects-8-9}{\textbf{A doc\_label truncation collision silently merged four independent baseline trial
   points into one.}} \texttt{run\_paper\_s7\_benchmark.py}'s \texttt{run\_chain} derives its
   on-disk checkpoint directory from the first \val{defects.doclabel.prefix_chars} characters of its \texttt{doc\_label} argument,
   a Windows path-length safeguard that was safe for every doc\_label this function had previously
@@ -1260,13 +1260,13 @@ throughout the paper.
   itself, excluded from the denominator per Section~\ref{sec:methods}'s harness/infrastructure-failure
   exclusion rule rather than scored as a failure.}
 \item[Note b (Table~\ref{tab:single-edit}, Section reorder combined)] \claim{section-reorder-combined-corpus-n55-n56}{Control $n=\val{single.secreorder_comb.control.n}$, treatment
-  $n=\val{single.secreorder_comb.treatment.n}$: one 1.7MB document's \claim{per-trial-timeout-history}{control-arm chain never completed within the harness's
+  $n=\val{single.secreorder_comb.treatment.n}$: for one \val{notes.secreorder_comb.excluded_doc_size_mb}MB document (\val{notes.secreorder_comb.excluded_doc_xml_mb}MB of main-document XML), the \claim{per-trial-timeout-history}{control-arm chain never completed within the harness's
   \val{harness.timeout_initial_s}-second timeout across six independent attempts} at varying host load (\claim{infra-failure-excluded-from-denominator}{a real,
   document-size-driven control-arm limitation, excluded from control's denominator only, a
   document-level exception to Section~\ref{sec:methods}'s exclusion rule}), while
   its treatment-arm chain completed and passed.}
-\item[Note c (Table~\ref{tab:render-gate}, Equation)] \claim{equation-original-control-unpaired}{Control ($n=\val{rg.equation.control.n}$) comes from an 11-document
-  development-slice corpus run once under this project's confirmatory design\todo{Add the
+\item[Note c (Table~\ref{tab:render-gate}, Equation)] \claim{equation-original-control-unpaired}{Control ($n=\val{rg.equation.control.n}$) comes from the \val{rg.equation.control.n} equation-applicable documents of a
+  \val{corpus.devslice.n}-document development-slice corpus run once under this project's confirmatory design\todo{Add the
   preregistration date and commit hash given for this paper's other corpora in
   Section~\ref{sec:methods}, or state explicitly that this corpus predates preregistration and
   was not itself preregistered.}, not the
@@ -1276,9 +1276,9 @@ throughout the paper.
   \emph{resolved} is not the same as \val{rg.equation.control.n}/\val{rg.equation.control.n} \emph{passed}.
 \item[Note d (Table~\ref{tab:render-gate}, Table structural)] This row's published number
   (\val{rg.table.treatment.rate}\%, \val{rg.table.treatment.passes}/\val{rg.table.treatment.n}) is correct; the stored trial data did not initially reproduce it. \claim{defect-3-table-recovery}{The two chains involved
-  are the same two defect 3 (Section~\ref{sec:defects}) describes recovering by re-grading their
+  are the same two defect~\ref{def:discarded-runs} (Section~\ref{sec:defects}) describes recovering by re-grading their
   output against their own pre-write backups after the harness's outer timeout killed their
-  forward leg} -- that description was accurate, and \claim{defect-3-table-recovery}{defect 3's own fix (attempting grading on a
+  forward leg} -- that description was accurate, and \claim{defect-3-table-recovery}{defect~\ref{def:discarded-runs}'s own fix (attempting grading on a
   changed file even after an outer-timeout kill) is what made the recovery possible at all.} What
   had not happened is that the confirmed forward-leg \emph{pass} verdict was ever written back
   into the stored chain results, which still carried the original timeout's \texttt{not\_run}

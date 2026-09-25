@@ -114,6 +114,17 @@ def test_tripwire_lists_unchanged_sites_of_an_edited_claim():
     assert "Abstract" in text and "Conclusion" in text
 
 
+def test_edited_site_is_reported_as_changed_not_removed():
+    head = TEX.replace("The tool completes", "The bounded tool completes")
+    text = consistency.tripwire(TEX, head, VALUES, VALUES, CLAIMS, CLAIMS)[0]
+    assert "removed" not in text
+
+
+def test_section_titles_strip_claim_wrappers():
+    doc = consistency.Doc("\\section{\\claim{a}{Ten real \\claim{b}{defects}}}\nx \\val{k.x} y\n")
+    assert doc.value_sites()[0].section == "Ten real defects"
+
+
 def test_tripwire_flags_value_change_and_dependent_claims():
     new_vals = dict(VALUES)
     new_vals["respec.composite.treatment.t1.rate"] = {"value": "80.0", "status": "verified"}

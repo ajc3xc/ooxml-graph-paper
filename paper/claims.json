@@ -140,7 +140,7 @@
       ]
     },
     "equation-original-control-unpaired": {
-      "statement": "In the original shared-host results (Table tab:render-gate), Equation's control arm (n=11) came from a separate 11-document development-slice corpus that is not paired with the 26-document corpus the treatment arm used, so no paired significance test is reported for that row. The confirmatory re-run (Table tab:render-gate-clean) runs both arms on the same 26-document corpus, so a paired test is reported for all three families.",
+      "statement": "In the original shared-host results (Table tab:render-gate), Equation's control arm (n=11, the equation-applicable documents of a separate 12-document development-slice corpus) that is not paired with the 26-document corpus the treatment arm used, so no paired significance test is reported for that row. The confirmatory re-run (Table tab:render-gate-clean) runs both arms on the same 26-document corpus, so a paired test is reported for all three families.",
       "depends_on": [
         "corpus.primary.n",
         "rg.equation.control.n",

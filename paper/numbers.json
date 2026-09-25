@@ -22,6 +22,18 @@
    },
    "note": "tools\\margin_notes\\comment_ledger.json (entry c_mu764tn2ci6hs, commit 7a63a31) gives '~12,337 unfetched', which is 18770 - 6433 and does not subtract the 90 sampled docs. 12,247 is the strictly never-fetched count (= docs\\paper-s18's 18,680 unreviewed URLs - 6,433). Both round to the paper's ~12,000."
   },
+  "corpus.devslice.n": {
+   "value": "12",
+   "quantity": "Documents in the development-slice corpus (Note c)",
+   "status": "verified",
+   "source": {
+    "file": "D:/MeridianData/ooxml-graph-paper/manifests/paper-s7-corpus-manifest-v1.json",
+    "format": "text",
+    "locator": "split_counts.development",
+    "source_value": "12"
+   },
+   "note": "11 of the 12 are equation-applicable; the paper previously called it an '11-document' corpus."
+  },
   "corpus.followup.n": {
    "value": "48",
    "quantity": "Total number of documents in the preregistered section-reordering follow-up corpus",
@@ -358,6 +370,17 @@
    },
    "note": "No stored machine-readable aggregate exists. The value is also stated in the claude_pair_runner.py L113-114 comment, commit 7954983's message and tools/margin_notes/comment_ledger.json (c_mu76k3u6sacle). The runs tree now holds 1016 chain-result.json files: the 372 paper-s7-multi-anchor-extension files (2026-09-19) and 1 paper-s23-respec-cascade-smoke file were added after the aggregation. So 643 is correct as a 2026-09-18 snapshot, but 'all ... recorded chain results' is no longer literally true of the current tree. Recomputed read-only with a scratchpad script; no repository files were touched."
   },
+  "harness.walltime.crashed.count": {
+   "value": "5",
+   "quantity": "Trials among the 2460 that exited nonzero without a timeout (Windows process crash codes)",
+   "status": "derived",
+   "source": {
+    "file": "D:/MeridianData/ooxml-graph-paper/runs",
+    "format": "text",
+    "locator": "recomputed over the 643 chain-result.json files under runs/ recorded before the 2026-09-18 timeout raise (mtime < 2026-09-19): 2460 trials; timed_out==false and returncode not in (0, None)",
+    "source_value": "5 (4 x 3221225794, 1 x 3221226505)"
+   }
+  },
   "harness.walltime.rendergated.max_s": {
    "value": "574.8",
    "quantity": "Observed maximum completion time in seconds for completed equation and caption (slower render-gated) trials combined",
@@ -369,6 +392,29 @@
     "source_value": "574.810286283493"
    },
    "note": "Rounds to 574.8. The max is the same whether or not table_structural is pooled (table_structural completed max 301.3, caption max 428.1). The same value also appears in D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7-equation\\holdout-k1-20260907T-with-fix\\slice-manifest.json L7258."
+  },
+  "harness.walltime.rendergated.p99_s": {
+   "value": "392.1",
+   "quantity": "99th-percentile wall-clock time (s) of cleanly exiting trials, equation and caption families combined, before the 900s raise",
+   "status": "derived",
+   "source": {
+    "file": "D:/MeridianData/ooxml-graph-paper/runs",
+    "format": "text",
+    "locator": "recomputed over the 643 chain-result.json files under runs/ recorded before the 2026-09-18 timeout raise (mtime < 2026-09-19): 2460 trials; returncode==0, family in {equation, caption}, linear-interpolation percentile",
+    "source_value": "392.06 (n=425)"
+   },
+   "note": "Corrects a previously printed 388.8, which is the p99 of all three render-gated families (equation, caption, table_structural; 388.80, n=612), not of equation and caption as the text states. Recomputed independently twice."
+  },
+  "harness.walltime.timed_out.count": {
+   "value": "46",
+   "quantity": "Trials among the 2460 that hit a timeout ceiling",
+   "status": "derived",
+   "source": {
+    "file": "D:/MeridianData/ooxml-graph-paper/runs",
+    "format": "text",
+    "locator": "recomputed over the 643 chain-result.json files under runs/ recorded before the 2026-09-18 timeout raise (mtime < 2026-09-19): 2460 trials; timed_out==true",
+    "source_value": "46"
+   }
   },
   "harness.walltime.trials_completed.count": {
    "value": "2409",
@@ -502,6 +548,52 @@
    },
    "note": "No stats JSON on disk stores the K=4 combined numbers; the value is backed only by the ledger plus this recomputation from the chain data. Stats files that do not apply: k4-final-statistics-20260902.json is v1 only (n=11, treatment 1.0); combined-v1-v2-statistics-*.json are K=1. The raw pre-correction v2 K=4 manifests (slice-manifest.json) give 82.6% n=46 and are superseded by the -corrected-20260904 files. The mean does not depend on manifest order."
   },
+  "k4.secreorder_followup.control.exact_order.fails": {
+   "value": "12",
+   "quantity": "Of those, chains that failed the inverse exact-original-order-restored check",
+   "status": "derived",
+   "source": {
+    "file": "D:/MeridianData/ooxml-graph-paper/runs/paper-s7-v2-section-reorder/{holdout-k4-20260904T090807Z,validation-k4-20260904T132025Z}/slice-manifest-corrected-20260904.json",
+    "format": "text",
+    "locator": "control chains with status completed_with_failure (all fail exact_original_order_restored)",
+    "source_value": "12"
+   }
+  },
+  "k4.secreorder_followup.control.fails": {
+   "value": "14",
+   "quantity": "Follow-up-corpus K=4 section-reorder control chains that failed (scored 0 by compute_s7_statistics._chain_outcome)",
+   "status": "derived",
+   "source": {
+    "file": "D:/MeridianData/ooxml-graph-paper/runs/paper-s7-v2-section-reorder/{holdout-k4-20260904T090807Z,validation-k4-20260904T132025Z}/slice-manifest-corrected-20260904.json",
+    "format": "text",
+    "locator": "section_reorder, k_pairs=4, arm=control: 48 chains = 30 pass + 14 fail + 4 excluded (3 not_applicable, 1 blocked)",
+    "source_value": "14"
+   },
+   "note": "Previously printed as 12 'with at least one failing cycle'; 12 is only the exact-order-restoration failures. Verified by enumerating the manifests."
+  },
+  "k4.secreorder_followup.control.forward.fails": {
+   "value": "2",
+   "quantity": "Control chains that restored order on every cycle but failed the forward check that the section actually moved",
+   "status": "derived",
+   "source": {
+    "file": "D:/MeridianData/ooxml-graph-paper/runs/paper-s7-v2-section-reorder/{holdout-k4-20260904T090807Z,validation-k4-20260904T132025Z}/slice-manifest-corrected-20260904.json",
+    "format": "text",
+    "locator": "status completed, forward order_actually_changed fails: s7v2_sr_56b2096fd5ebc854 (cycles 1-2), s7v2_sr_aa0a3c6975b17a82 (cycle 2)",
+    "source_value": "2"
+   }
+  },
+  "k4.secreorder_followup.control.order_c1.fails": {
+   "value": "3",
+   "quantity": "Of those, chains whose first exact-order failure was on the first cycle",
+   "status": "derived",
+   "source": {
+    "file": "D:/MeridianData/ooxml-graph-paper/runs/paper-s7-v2-section-reorder/{holdout-k4-20260904T090807Z,validation-k4-20260904T132025Z}/slice-manifest-corrected-20260904.json",
+    "format": "text",
+    "locator": "first failing pair index 0: s7v2_sr_7a4628ca285e87be, s7v2_sr_09c718282164b363, s7v2_sr_bec8dc134665926f",
+    "source_value": "3"
+   },
+   "note": "Previously printed as 2, with one chain described as unitemized; it is this third first-cycle failure."
+  },
   "k4.secreorder_followup.control.order_c2plus.fails": {
    "value": "9",
    "quantity": "Number of those failing K=4 follow-up-corpus control chains that failed specifically on exact-order restoration starting from the second cycle onward",
@@ -513,6 +605,17 @@
     "source_value": "9"
    },
    "note": "Matches the ledger (paper-s8-final-evidence-v1.md sec 2.4 line 429 '9 of 12'; followup-result doc line 185). No file stores this count; it comes from enumerating the chains. In a494d334101a1c58 the inverse is not_run on pair 1, so its first graded exact-order failure is pair 2; it is still a pair>=1 case."
+  },
+  "k4.secreorder_followup.treatment.fails": {
+   "value": "4",
+   "quantity": "Follow-up-corpus K=4 section-reorder treatment chains that failed; each already failed on its first cycle",
+   "status": "derived",
+   "source": {
+    "file": "D:/MeridianData/ooxml-graph-paper/runs/paper-s7-v2-section-reorder/{holdout-k4-20260904T090807Z,validation-k4-20260904T132025Z}/slice-manifest-corrected-20260904.json",
+    "format": "text",
+    "locator": "arm=treatment: 41 pass + 4 fail + 3 not_applicable; all 4 fail at pair index 0",
+    "source_value": "4"
+   }
   },
   "ma.caption.control.icc": {
    "value": "0.124",
@@ -1053,6 +1156,29 @@
     "source_value": "22 (treatment_naive_pooled_n / treatment_clustering.naive_pooled_n, recomputed)"
    },
    "note": "L410C75 reads 'collapsing the naive pooled $N$ from 22', which is the treatment arm. The control arm's naive pooled N is also 22, so the printed number is correct either way. Same caveat as the ICC: the canonical statistics.json registered in .meridian-outputs-cache no longer exists on disk."
+  },
+  "notes.secreorder_comb.excluded_doc_size_mb": {
+   "value": "2.7",
+   "quantity": "Size (MB) of the one follow-up-corpus .docx whose control-arm chain never completed (Note b)",
+   "status": "verified",
+   "source": {
+    "file": "D:/MeridianData/ooxml-graph-paper/raw/docx-corpus/batch-500-v1/402d26ad8605a5eeb158791fd4b5b77940a5e2f5f99cc0d4aa93d90c4ee82590.docx",
+    "format": "text",
+    "locator": "file size",
+    "source_value": "2693373 bytes"
+   }
+  },
+  "notes.secreorder_comb.excluded_doc_xml_mb": {
+   "value": "1.7",
+   "quantity": "Size (MB) of that document's main XML part (word/document.xml, uncompressed)",
+   "status": "verified",
+   "source": {
+    "file": "D:/MeridianData/ooxml-graph-paper/raw/docx-corpus/batch-500-v1/402d26ad8605a5eeb158791fd4b5b77940a5e2f5f99cc0d4aa93d90c4ee82590.docx",
+    "format": "text",
+    "locator": "zipfile.getinfo('word/document.xml').file_size",
+    "source_value": "about 1.7 MB"
+   },
+   "note": "The paper previously called this a '1.7MB document'; 1.7 MB is the XML part, the file is 2.7 MB."
   },
   "respec.anchorset.diff_pp": {
    "value": "46.7",
@@ -3145,6 +3271,18 @@
     "source_value": "equation             n=3  mean=  8.03s  min=  7.47s  max=  8.41s"
    },
    "note": "L737C33 is in the sentence about the 'controlled, sequential timing test' ('equation 8.0s ... mean'), so the assignment is correct. The mean of the printed per-call values is 24.08/3 = 8.0267, which rounds to 8.0, matching the paper. What was measured: time_renders.py timed render_gate._soffice_render() on completed treatment-arm output files, run sequentially and interleaved round-robin across families. So this is soffice conversion time, not the full check_render_capability path. The on-disk outputs are gone: the scratchpad render_timing_results.json (full-precision elapsed_s) and tasks/bjv9tsxvl.output were deleted when the scratchpad was cleaned. The raw script stdout survives only in the session transcript cited here. No stats JSON under D:\\MeridianData or tools/ holds these numbers."
+  },
+  "timing.table.mean_s": {
+   "value": "8.5",
+   "quantity": "Mean render time (s) of table-structural outputs in the controlled sequential timing test",
+   "status": "doc_only",
+   "source": {
+    "file": "../docs/paper-s7-experiment-status-checkpoint-v1.md",
+    "format": "text",
+    "locator": "line 1143, 'table_structural 8.55s'; per-call 8.33, 8.84, 8.47 s",
+    "source_value": "8.5467"
+   },
+   "note": "Corrects a previously printed 8.6, which rounded the 2-dp summary 8.55 a second time."
   },
   "tools.anchoredit.count": {
    "value": "11",

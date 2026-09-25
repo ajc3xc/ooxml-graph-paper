@@ -88,8 +88,12 @@ class Doc:
         self.src = src
         self.mask = comment_mask(src)
         self.line_starts = [0] + [m.end() for m in re.finditer(r"\n", src)]
-        self.sections = [(m.start(), m.group(1), m.group(2)) for m in
-                         re.finditer(r"\\(section|subsection)\*?\{([^}]*)\}", src)]
+        self.sections = []
+        for m in re.finditer(r"\\(section|subsection)\*?\{", src):
+            if self.mask[m.start()]:
+                continue
+            close = brace_arg(src, m.end() - 1)
+            self.sections.append((m.start(), m.group(1), plain_title(src[m.end():close])))
         a = src.find("\\begin{abstract}")
         b = src.find("\\end{abstract}")
         self.abstract = (a, b) if a >= 0 and b >= 0 else (-1, -1)
@@ -147,6 +151,16 @@ class Doc:
 
 def norm(text: str) -> str:
     return re.sub(r"\s+", " ", text).strip()
+
+
+def plain_title(title: str) -> str:
+    """Heading text with \\claim wrappers removed (their text kept)."""
+    while True:
+        m = re.search(r"\\claim\{[^}]*\}\{", title)
+        if not m:
+            return norm(title)
+        close = brace_arg(title, m.end() - 1)
+        title = title[:m.start()] + title[m.end():close] + title[close + 1:]
 
 
 def load_claims(path: Path | None = None) -> dict[str, dict]:
@@ -280,6 +294,9 @@ def git_show(relpath: str, ref: str = "HEAD") -> str:
         return ""
 
 
+MAX_SITES = 6
+
+
 def fmt_site(s: Site) -> str:
     return f"L{s.line} {s.section or '(preamble)'}: \"{s.excerpt}\""
 
@@ -311,7 +328,7 @@ def tripwire(base_tex: str, head_tex: str, base_vals: dict, head_vals: dict,
                 unchanged.append(s)
             else:
                 changed.append(s)
-        removed = sum(old_pool.values())
+        removed = max(0, len(old) - len(new_sites))
         if not new_sites:
             items.append(f"- {label}: every site was removed. Remove it from claims.json, or restore a site.")
             continue
@@ -321,9 +338,12 @@ def tripwire(base_tex: str, head_tex: str, base_vals: dict, head_vals: dict,
         if removed:
             what.append(f"removed {removed} site(s)")
         if unchanged:
+            shown = unchanged[:MAX_SITES]
+            more = (f"\n    ... and {len(unchanged) - MAX_SITES} more (python paper/consistency.py sites {cid})"
+                    if len(unchanged) > MAX_SITES else "")
             items.append(f"- {label}: you {' and '.join(what)}. These other site(s) state the same claim "
                          f"and were NOT changed -- re-read them and update or confirm:\n"
-                         + "\n".join("    " + fmt_site(s) for s in unchanged))
+                         + "\n".join("    " + fmt_site(s) for s in shown) + more)
         elif removed and changed:
             items.append(f"- {label}: you {' and '.join(what)}; confirm the claim still holds where it remains.")
 
