@@ -1,22 +1,17 @@
 // Build step for the Margin Notes review tool.
 //
 // The Claude Artifact publish pipeline stalls on any single upload roughly
-// above ~300-500KB. margin_notes.html is one file with a single
-// `const DOC = [...]` array holding all manuscript blocks -- if that array
-// grows large (e.g. once this paper's real figures are embedded as base64
-// images, per its own \todo in main.tex), it can't be published directly
-// (confirmed empirically in a sibling project: 5MB/1MB/500KB publishes all
-// fail with "upload stalled", 200-300KB publishes work). As of this file's
-// last generation, margin_notes.html here is ~146KB with no embedded images,
-// so this script is not currently needed -- it's included so it's ready the
-// moment content growth requires it, without re-deriving this logic.
+// above ~300-500KB (confirmed empirically in a sibling project: 5MB/1MB/500KB
+// publishes all fail with "upload stalled", 200-300KB publishes work).
+// margin_notes.html is one file with a single `const DOC = [...]` array
+// holding all manuscript blocks, including base64 figure images, and is now
+// over that limit, so it is published as dist/index.html plus chunk files.
 //
-// This script never needs to be run by hand for normal editing. Edit
-// margin_notes.html directly (it's a complete, ordinary single-file HTML
-// page you can open in a browser) -- then run this script to regenerate
-// dist/, and publish dist/index.html (+ dist/chunks/*.js as `files`) to the
-// live artifact. dist/ is generated output: never hand-edit it, it will be
-// overwritten the next time this runs.
+// The DOC array itself is generated from paper/main.tex by
+// build_doc_from_tex.py (run that with --write first). Then run this script
+// to regenerate dist/, and publish dist/index.html (+ dist/chunks/*.js as
+// `files`) to the live artifact. dist/ is generated output: never hand-edit
+// it, it will be overwritten the next time this runs.
 //
 // Usage: node build_chunks.js
 
