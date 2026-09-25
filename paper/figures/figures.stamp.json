@@ -1,9 +1,9 @@
 {
  "about": "Values each figure was drawn from; paper/consistency.py flags stale figures.",
  "values": {
-  "k4.secreorder.control.ci_hi": "78.2",
-  "k4.secreorder.control.ci_lo": "54.5",
-  "k4.secreorder.control.rate": "67.3",
+  "k4.secreorder.control.ci_hi": "76.8",
+  "k4.secreorder.control.ci_lo": "53.6",
+  "k4.secreorder.control.rate": "66.1",
   "k4.secreorder.p": "0.0015",
   "k4.secreorder.treatment.ci_hi": "98.2",
   "k4.secreorder.treatment.ci_lo": "85.7",
@@ -34,10 +34,10 @@
   "single.cite.treatment.ci_hi": "100",
   "single.cite.treatment.ci_lo": "86.3",
   "single.cite.treatment.rate": "100",
-  "single.secreorder_comb.control.ci_hi": "92.7",
-  "single.secreorder_comb.control.ci_lo": "74.5",
-  "single.secreorder_comb.control.rate": "83.6",
-  "single.secreorder_comb.p": "0.271",
+  "single.secreorder_comb.control.ci_hi": "91.1",
+  "single.secreorder_comb.control.ci_lo": "71.4",
+  "single.secreorder_comb.control.rate": "82.1",
+  "single.secreorder_comb.p": "0.170",
   "single.secreorder_comb.treatment.ci_hi": "98.2",
   "single.secreorder_comb.treatment.ci_lo": "85.7",
   "single.secreorder_comb.treatment.rate": "92.9"

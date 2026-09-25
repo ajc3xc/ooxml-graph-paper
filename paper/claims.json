@@ -8,10 +8,11 @@
       "depends_on": []
     },
     "anchoredit-subset-scope": {
-      "statement": "AnchorEdit, the treatment tool set, is a bounded subset of Meridian Docs (11 of its 86 registered tools). The package's other tools, including the audit tools (audit_document, audit_equation_style) and the indexing and discovery tools (index_document, locate_anchor), are outside this benchmark's scope, and the results are not claimed for the full tool surface.",
+      "statement": "AnchorEdit, the treatment tool set, is a bounded subset of Meridian Docs: 11 of its 29 single-target editing tools, out of 78 tools the server registers in all (main, f92d2710). The server's other tools (discovery, audit, render verification, indexing, batch and configuration) are outside this benchmark's scope, and the results are not claimed for the full tool surface.",
       "depends_on": [
         "tools.anchoredit.count",
-        "tools.meridian_docs.count"
+        "tools.meridian_docs.count",
+        "tools.meridian_docs.editing.count"
       ]
     },
     "anchors-pre-resolved-no-discovery": {
@@ -199,7 +200,7 @@
       "depends_on": []
     },
     "infra-failure-excluded-from-denominator": {
-      "statement": "If a harness- or infrastructure-level failure unrelated to the task (such as a network error or a process-level subprocess timeout) stops a chain from running or finishing, the chain is dropped from the affected arm's denominator instead of being scored as a failure. Note a's inline-citation timeout is excluded under this rule; Note b's control-arm exclusion is a disclosed exception to it. The 29 certificate-error trials in defect 4 were re-run instead of being counted as capability failures.",
+      "statement": "If a harness- or infrastructure-level failure unrelated to the task (such as a network error or a process-level subprocess timeout) stops a chain from running or finishing, the chain is dropped from the affected arm's denominator instead of being scored as a failure. Note a's inline-citation timeout is excluded under this rule; Note b's control-arm timeout is scored as a failure because it reflects the arm's own handling of a large document. The 29 certificate-error trials in defect 4 were re-run instead of being counted as capability failures.",
       "depends_on": [
         "defects.cert_failure.count",
         "harness.timeout_initial_s"
@@ -210,7 +211,7 @@
       "depends_on": []
     },
     "k4-significant-advantage": {
-      "statement": "When section reorder is run through K=4 repeated edit-undo cycles, the bounded (treatment) tool has a statistically significant advantage over the generic tool: 92.9% vs 67.3% steady-state pass rate, p=0.0015. Several sites also call this the benchmark's one or only significant finding.",
+      "statement": "When section reorder is run through K=4 repeated edit-undo cycles, the bounded (treatment) tool has a statistically significant advantage over the generic tool: 92.9% vs 66.1% steady-state pass rate, p=0.0015. Several sites also call this the benchmark's one or only significant finding.",
       "depends_on": [
         "k4.secreorder.control.n",
         "k4.secreorder.control.rate",
@@ -224,7 +225,7 @@
       "depends_on": []
     },
     "k4-uses-same-combined-corpus": {
-      "statement": "The K=4 section-reorder result (Table tab:k4) is run on the same combined original + follow-up section-reorder corpus (11+45=56 paired documents, control n=55 / treatment n=56) as the K=1 combined row of Table tab:single-edit.",
+      "statement": "The K=4 section-reorder result (Table tab:k4) is run on the same combined original + follow-up section-reorder corpus (11+45=56 paired documents, n=56 in both arms) as the K=1 combined row of Table tab:single-edit.",
       "depends_on": [
         "corpus.followup.n",
         "corpus.secreorder_comb.n",
@@ -527,14 +528,6 @@
         "defects.doclabel.prefix_chars"
       ]
     },
-    "section-reorder-combined-corpus-n55-n56": {
-      "statement": "In the combined section-reorder corpus, treatment reports n=56 and control reports n=55: one document's control-arm chain never completed within the timeout and was excluded from the control denominator only (Appendix Note b). This is a disclosed exception to the Methods exclusion rule, not an instance of it.",
-      "depends_on": [
-        "harness.timeout_initial_s",
-        "single.secreorder_comb.control.n",
-        "single.secreorder_comb.treatment.n"
-      ]
-    },
     "section-reorder-destination-validation": {
       "statement": "A section-reorder destination must be a heading at the same or a shallower level. The corpus-build picker (resolve_section_reorder_plan) enforces this, and move_section separately rejects destinations inside the moved section at runtime.",
       "depends_on": []
@@ -549,7 +542,7 @@
       ]
     },
     "section-reorder-k1-directional-not-significant": {
-      "statement": "For a single edit (K=1), section reorder leans toward the bounded tool but the difference is not statistically significant: combined corpus 92.9% vs 83.6%, p=0.271, with overlapping 95% CIs. Only at K=4 does it become significant.",
+      "statement": "For a single edit (K=1), section reorder leans toward the bounded tool but the difference is not statistically significant: combined corpus 92.9% vs 82.1%, p=0.170, with overlapping 95% CIs. Only at K=4 does it become significant.",
       "depends_on": [
         "corpus.followup.n",
         "corpus.secreorder_orig.n",
@@ -568,7 +561,7 @@
       "depends_on": []
     },
     "single-edit-no-advantage": {
-      "statement": "At a single edit (K=1), the bounded tool shows no statistically significant advantage over the generic tools. Bibliography and citation are at literal parity. Section reorder shows a directional but non-significant advantage (combined corpus p=0.271). The advantage becomes significant only under repeated edit-undo cycling.",
+      "statement": "At a single edit (K=1), the bounded tool shows no statistically significant advantage over the generic tools. Bibliography and citation are at literal parity. Section reorder shows a directional but non-significant advantage (combined corpus p=0.170). The advantage becomes significant only under repeated edit-undo cycling.",
       "depends_on": [
         "corpus.followup.n",
         "corpus.secreorder_orig.n",
@@ -630,6 +623,14 @@
     "verification-confound-reliability-cost": {
       "statement": "The write-time render-verification step shared by the equation, table-structural and caption treatment tools confounded the original results. Its reliability depends on host conditions: on the shared, contended host it often could not verify a change and so did not save it, which pushed down treatment pass rates. So the original gap came from the environment, not from what the editing operations can do.",
       "depends_on": []
+    },
+    "section-reorder-combined-corpus-n56": {
+      "statement": "In the combined section-reorder corpus both arms report n=56. One document's control-arm chain never finished within the 300s timeout in six attempts (at K=1 and K=4) while its treatment chain passed; it is scored as a failure, the one timeout the exclusion rule treats as the arm's own task failure (Note b).",
+      "depends_on": [
+        "harness.timeout_initial_s",
+        "single.secreorder_comb.control.n",
+        "single.secreorder_comb.treatment.n"
+      ]
     }
   }
 }

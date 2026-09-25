@@ -17,7 +17,20 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from graph_scorer import bootstrap_ci, paired_permutation_test  # noqa: E402
 
 
-def _chain_outcome(chain: dict[str, Any]) -> float | None:
+def _scored_as_failure(chain: dict[str, Any], score_as_failure: frozenset[str]) -> bool:
+    """True when this chain is on the explicit score-as-failure list. Only a
+    "blocked" (timed-out) chain may be listed: the override exists for a timeout
+    judged to be the arm's own task failure rather than an infrastructure flake
+    (paper Appendix Note b), not to rescore chains that have a grading verdict."""
+    if chain.get("chain_id") not in score_as_failure:
+        return False
+    if chain.get("status") != "blocked":
+        raise ValueError(f"{chain.get('chain_id')}: only a blocked chain can be scored as a failure, "
+                         f"this one is {chain.get('status')!r}")
+    return True
+
+
+def _chain_outcome(chain: dict[str, Any], score_as_failure: frozenset[str] = frozenset()) -> float | None:
     """1.0 if every pair in the chain passed both forward and inverse
     grading, 0.0 if the chain completed but any pair failed, None if the
     chain never executed at all or never finished (not_applicable/blocked/
@@ -34,7 +47,11 @@ def _chain_outcome(chain: dict[str, Any]) -> float | None:
     through to scoring an infra timeout as a real 0.0 task failure. The
     harness's own checkpoint/resume logic (_load_checkpoint) already treats
     "blocked" as never trustworthy for exactly this reason; this function
-    must agree with that, not silently contradict it."""
+    must agree with that, not silently contradict it.
+
+    A blocked chain named in score_as_failure is scored 0.0 instead."""
+    if _scored_as_failure(chain, score_as_failure):
+        return 0.0
     status = chain.get("status")
     if status in ("not_applicable", "harness_exception", "blocked"):
         return None
@@ -63,7 +80,7 @@ def _pair_passed(pair: dict[str, Any]) -> bool:
     return inverse.get("grading", {}).get("verdict") == "pass"
 
 
-def _chain_steady_state_outcome(chain: dict[str, Any]) -> float | None:
+def _chain_steady_state_outcome(chain: dict[str, Any], score_as_failure: frozenset[str] = frozenset()) -> float | None:
     """For K>1 chains only: pass rate over pairs[1:], excluding the first
     pair. Bibliography's first-ever use on a document always fails the
     strict exact-restoration check (the disclosed References-heading
@@ -72,9 +89,12 @@ def _chain_steady_state_outcome(chain: dict[str, Any]) -> float | None:
     bibliography chain register as a flat 0.0 under _chain_outcome and
     obscure whether genuine cumulative drift exists once past that one
     known, one-time side effect. Returns None for k_pairs<2, or for chains
-    that never applied/executed at all."""
+    that never applied/executed at all; 0.0 for a blocked chain named in
+    score_as_failure, which never reached its later pairs."""
     if chain.get("k_pairs", 1) < 2:
         return None
+    if _scored_as_failure(chain, score_as_failure):
+        return 0.0
     status = chain.get("status")
     if status in ("not_applicable", "harness_exception", "blocked"):
         return None
@@ -94,7 +114,11 @@ def load_chains(slice_manifest_paths: list[Path]) -> list[dict[str, Any]]:
     return chains
 
 
-def compute_statistics(chains: list[dict[str, Any]]) -> dict[str, Any]:
+def compute_statistics(chains: list[dict[str, Any]],
+                       score_as_failure: frozenset[str] = frozenset()) -> dict[str, Any]:
+    unknown = score_as_failure - {c.get("chain_id") for c in chains}
+    if unknown:
+        raise ValueError(f"--score-as-failure names chains not in these manifests: {sorted(unknown)}")
     by_group: dict[tuple[str, int], dict[str, dict[str, float]]] = {}
     steady_state_by_group: dict[tuple[str, int], dict[str, dict[str, float]]] = {}
     not_applicable_counts: dict[tuple[str, int], int] = {}
@@ -106,14 +130,14 @@ def compute_statistics(chains: list[dict[str, Any]]) -> dict[str, Any]:
         doc_label = chain["doc_label"]
         key = (family, k)
 
-        outcome = _chain_outcome(chain)
+        outcome = _chain_outcome(chain, score_as_failure)
         if outcome is None:
             not_applicable_counts[key] = not_applicable_counts.get(key, 0) + 1
         else:
             by_group.setdefault(key, {"control": {}, "treatment": {}})
             by_group[key][arm][doc_label] = outcome
 
-        steady_outcome = _chain_steady_state_outcome(chain)
+        steady_outcome = _chain_steady_state_outcome(chain, score_as_failure)
         if steady_outcome is not None:
             steady_state_by_group.setdefault(key, {"control": {}, "treatment": {}})
             steady_state_by_group[key][arm][doc_label] = steady_outcome
@@ -164,21 +188,26 @@ def compute_statistics(chains: list[dict[str, Any]]) -> dict[str, Any]:
             "paired_control_vs_treatment_significance": significance,
         })
 
-    return {
+    stats: dict[str, Any] = {
         "schema": "paper-s7-statistics-v1",
         "chain_count": len(chains),
         "groups": results,
     }
+    if score_as_failure:
+        stats["scored_as_failure"] = sorted(score_as_failure)
+    return stats
 
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("slice_manifests", nargs="+", type=Path)
     parser.add_argument("--out", type=Path, required=True)
+    parser.add_argument("--score-as-failure", action="append", default=[], metavar="CHAIN_ID",
+                        help="score this blocked (timed-out) chain as a failure instead of excluding it; repeatable")
     args = parser.parse_args(argv)
 
     chains = load_chains(args.slice_manifests)
-    stats = compute_statistics(chains)
+    stats = compute_statistics(chains, frozenset(args.score_as_failure))
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(stats, indent=2, ensure_ascii=False), encoding="utf-8")
     print(json.dumps(stats, indent=2, ensure_ascii=False))

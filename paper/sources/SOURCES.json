@@ -1,23 +1,23 @@
 {
   "secreorder-combined-k1-statistics.json": {
-    "generated_by": "tools\\compute_s7_statistics.py D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7\\validation-k1-fixrerun-20260831T145852Z-bib-flake-corrected-20260906.json D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7\\holdout-k1-fixrerun-20260831T145852Z\\slice-manifest.json D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7-v2-section-reorder\\validation-k1-20260831T172118Z\\slice-manifest-corrected2-20260904.json D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7-v2-section-reorder\\holdout-k1-20260831T172118Z\\slice-manifest-corrected2-20260904.json",
+    "generated_by": "tools\\compute_s7_statistics.py D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7\\validation-k1-fixrerun-20260831T145852Z-bib-flake-corrected-20260906.json D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7\\holdout-k1-fixrerun-20260831T145852Z\\slice-manifest.json D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7-v2-section-reorder\\validation-k1-20260831T172118Z\\slice-manifest-corrected2-20260904.json D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7-v2-section-reorder\\holdout-k1-20260831T172118Z\\slice-manifest-corrected2-20260904.json --score-as-failure s7v2_sr_402d26ad8605a5ee-section_reorder-control-k1",
     "inputs": {
       "D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7\\validation-k1-fixrerun-20260831T145852Z-bib-flake-corrected-20260906.json": "26e2306eb0c3f0af3d3fccc3b7c78624f20e82a771dff9e323e213aac5148631",
       "D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7\\holdout-k1-fixrerun-20260831T145852Z\\slice-manifest.json": "a39ed043832091b68bddaf56429f4ab2018d79742f738686c5351ca3f00f8f96",
       "D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7-v2-section-reorder\\validation-k1-20260831T172118Z\\slice-manifest-corrected2-20260904.json": "5f637e8aa3dfa7d4c87c6c2c03b272a2e1f85e6f05e94b5396ed168f9778e3cf",
       "D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7-v2-section-reorder\\holdout-k1-20260831T172118Z\\slice-manifest-corrected2-20260904.json": "493df7d1e23cc60482e684f751c580bb7d7678f93508ff2b40e8f253a5437e08"
     },
-    "sha256": "40dc8eb802037db56ad15c777d3db2d9a16a2c264a277848d28427fbcb5ff8d0"
+    "sha256": "6526fee3f36dfda9c3b2a33a5bc38543fc9690654cd409aff6d63111f0780312"
   },
   "secreorder-combined-k4-statistics.json": {
-    "generated_by": "tools\\compute_s7_statistics.py D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7\\validation-k4-fixrerun-20260902T111600Z\\slice-manifest.json D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7\\holdout-k4-fixrerun-20260902T111600Z\\slice-manifest.json D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7-v2-section-reorder\\holdout-k4-20260904T090807Z\\slice-manifest-corrected-20260904.json D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7-v2-section-reorder\\validation-k4-20260904T132025Z\\slice-manifest-corrected-20260904.json",
+    "generated_by": "tools\\compute_s7_statistics.py D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7\\validation-k4-fixrerun-20260902T111600Z\\slice-manifest.json D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7\\holdout-k4-fixrerun-20260902T111600Z\\slice-manifest.json D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7-v2-section-reorder\\holdout-k4-20260904T090807Z\\slice-manifest-corrected-20260904.json D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7-v2-section-reorder\\validation-k4-20260904T132025Z\\slice-manifest-corrected-20260904.json --score-as-failure s7v2_sr_402d26ad8605a5ee-section_reorder-control-k4",
     "inputs": {
       "D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7\\validation-k4-fixrerun-20260902T111600Z\\slice-manifest.json": "0bf0e1b97f7cbd1d20c365eb30ea8d771202bca343535a7b85ad842e6c23ccfa",
       "D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7\\holdout-k4-fixrerun-20260902T111600Z\\slice-manifest.json": "f5f350bce989cef46b9ebb6e2e9d59f0e4dd73a35cf70d30b002c575615d53f5",
       "D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7-v2-section-reorder\\holdout-k4-20260904T090807Z\\slice-manifest-corrected-20260904.json": "07928a2297f786e17cfbdc6a9846387b5be9e9fc3c38c33439da95c5092c1235",
       "D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7-v2-section-reorder\\validation-k4-20260904T132025Z\\slice-manifest-corrected-20260904.json": "2cfd5a0955e8ca33d2e516375b6b96da436cffe3a2e82fb5dd8a995c85f352e8"
     },
-    "sha256": "da38cdf70b7837d9eeb62266d9498b9e305ccc11ea089ef1b0e4460adca5d51b"
+    "sha256": "640f23ee212f714f7a45fc0abf6264fdb65c7107376519105ba3ca7cdbdcda14"
   },
   "multianchor-combined-statistics.json": {
     "generated_by": "tools\\compute_s7_combined_statistics.py --original-manifests D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7-clean-rerun-runpod\\runs\\paper-s7-clean-rerun\\primary_holdout\\slice-manifest.json D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7-clean-rerun-runpod\\runs\\paper-s7-clean-rerun\\validation\\slice-manifest.json --extension-run-root D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7-multi-anchor-extension\\runs --families equation caption",

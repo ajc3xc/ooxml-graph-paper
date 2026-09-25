@@ -39,9 +39,10 @@ for Agentic Word Document Editing: A Confirmatory Benchmark}
 Agent systems that edit real documents typically do so through generic file-manipulation tools
 (read, write, search-and-replace, shell commands) rather than through primitives designed for
 the document's own format. \claim{tool-surface-only-manipulated-variable}{On the same model and the same documents, we ask whether
-\claim{anchoredit-subset-scope}{\emph{AnchorEdit} -- a bounded, atomic, structurally-aware document-editing tool subset of
-Meridian Docs, a larger document-intelligence package that also covers bibliography-database
-sync and output provenance (\val{tools.anchoredit.count} of that package's \val{tools.meridian_docs.count} registered MCP tools;}
+\claim{anchoredit-subset-scope}{\emph{AnchorEdit} -- a bounded, atomic, structurally-aware subset of the editing tools in
+Meridian Docs, a larger document-intelligence MCP server that also provides discovery, audit,
+render-verification, and indexing tools (\val{tools.anchoredit.count} of its \val{tools.meridian_docs.editing.count} single-target editing tools, out of
+\val{tools.meridian_docs.count} tools in all;}
 Section~\ref{sec:limitations}), for Microsoft Word's Office Open XML (OOXML/\texttt{.docx})
 format -- \claim{arm-tool-surfaces}{changes task correctness relative to an
 agent given only generic tools and raw XML access.}} \claim{six-task-families}{We report a confirmatory benchmark across six task families
@@ -217,8 +218,8 @@ content-reviewed; licensed at the dataset level only, with per-file provenance u
 documents on which that task is structurally applicable; the follow-up corpus itself yields \val{corpus.secreorder_followup.n}
 applicable documents (of \val{corpus.followup.n}), \claim{k4-uses-same-combined-corpus}{so the combined section-reordering corpus reported in
 Table~\ref{tab:single-edit} and Table~\ref{tab:k4} is $\val{corpus.secreorder_orig.n}+\val{corpus.secreorder_followup.n}=\val{corpus.secreorder_comb.n}$ paired documents,}} not
-$\val{corpus.secreorder_orig.n}+\val{corpus.followup.n}=\val{corpus.secreorder_naive.n}$ -- \claim{section-reorder-combined-corpus-n55-n56}{treatment reports the full $n=\val{single.secreorder_comb.treatment.n}$, while control reports $n=\val{single.secreorder_comb.control.n}$ after one further,
-disclosed exclusion (Appendix~\ref{app:notes}, Note b).}
+$\val{corpus.secreorder_orig.n}+\val{corpus.followup.n}=\val{corpus.secreorder_naive.n}$ -- \claim{section-reorder-combined-corpus-n56}{both arms report $n=\val{single.secreorder_comb.treatment.n}$, with one control chain that
+never finished within the timeout scored as a failure (Appendix~\ref{app:notes}, Note b).}
 
 \subsection{Task families}
 \claim{six-task-families}{Six families are reported, each implemented as one forward/inverse tool pair in AnchorEdit on
@@ -380,10 +381,12 @@ recompute from raw data, so we name the gap rather than silently report only the
 harness- or infrastructure-level failure unrelated to the task itself (a network error, a
 process-level subprocess timeout) is excluded from the denominator of whichever arm's chain it
 actually prevented from completing for that document: both arms' when the failure blocks either
-arm's chain from running at all, \claim{section-reorder-combined-corpus-n55-n56}{or a single arm's when only one arm's process was affected, as in
+arm's chain from running at all, \claim{section-reorder-combined-corpus-n56}{or a single arm's when only one arm's process was affected, as in
 the harness-flake case we report (Appendix~\ref{app:notes}, Note a),} rather than scored as
-a failure.} \claim{section-reorder-combined-corpus-n55-n56}{Appendix~\ref{app:notes}'s Note b is not an
-instance of this rule but a disclosed exception to it.} \claim{per-trial-timeout-history}{The per-trial subprocess timeout is a single global value applied to
+a failure.} \claim{section-reorder-combined-corpus-n56}{The one timeout we do
+score as a failure is Note b's (Appendix~\ref{app:notes}): there the control agent never finished a
+large document within the timeout in six attempts while its treatment chain finished quickly and
+passed, so the timeout reflects the arm's own handling of the task, not an infrastructure fault.} \claim{per-trial-timeout-history}{The per-trial subprocess timeout is a single global value applied to
 every family, not a per-family budget. It was \val{harness.timeout_initial_s}s until 2026-09-07,
 when it was doubled to \val{harness.timeout_raised_s}s after a host memory-exhaustion episode (many concurrent sessions on the
 shared host); which families ran under which ceiling
@@ -629,7 +632,7 @@ previous cycle actually left in the file} (solid: a real dependency an undetecte
 \label{fig:drift-mechanism}
 \end{figure}
 
-\claim{k4-significant-advantage}{\claim{k4-uses-same-combined-corpus}{\claim{k4-design-definition}{Run through four repeated edit-undo cycles rather than one,} the same \val{k4.secreorder.control.n}/\val{k4.secreorder.treatment.n}-document combined
+\claim{k4-significant-advantage}{\claim{k4-uses-same-combined-corpus}{\claim{k4-design-definition}{Run through four repeated edit-undo cycles rather than one,} the same \val{k4.secreorder.treatment.n}-document combined
 corpus} produced \claim{k4-the-one-significant-finding}{the one significant comparison among the primary benchmark's final
 results} (Table~\ref{tab:k4}): control's
 pass rate fell to \val{k4.secreorder.control.rate}\% while treatment held at \val{k4.secreorder.treatment.rate}\% ($p=\val{k4.secreorder.p}$).} \claim{preregistration-status}{This is the specific
@@ -638,11 +641,12 @@ make,} \claim{k4-uses-same-combined-corpus}{on the same corpus already reported 
 
 \claim{fresh-anchor-resolution-mechanism}{The finer per-cycle grading breakdown below points to a
 mechanism;} \claim{k4-uses-same-combined-corpus}{that breakdown covers only the \val{corpus.followup.n}-document follow-up
-sub-corpus, since the full \val{k4.secreorder.control.n}/\val{k4.secreorder.treatment.n} combined corpus is not broken down at this granularity.} \claim{state-drift-generic-degrades}{Of the \val{k4.secreorder_followup.control.fails} follow-up-corpus control chains that failed, \val{k4.secreorder_followup.control.exact_order.fails} failed the exact-order
+sub-corpus, since the full \val{k4.secreorder.treatment.n}-document combined corpus is not broken down at this granularity.} \claim{state-drift-generic-degrades}{Of the \val{k4.secreorder_followup.control.fails} follow-up-corpus control chains that failed, \val{k4.secreorder_followup.control.exact_order.fails} failed the exact-order
 restoration check: \claim{grading-exact-order-vs-order-blind}{\val{k4.secreorder_followup.control.order_c2plus.fails} for the first time on the second cycle or later} -- a dominant majority
 pattern, not a universal rule} -- and \val{k4.secreorder_followup.control.order_c1.fails} already on the first cycle (each passing that check
 again on a later cycle). The other \val{k4.secreorder_followup.control.forward.fails} restored the order on every cycle but failed the
-forward check that the section actually moved, one on its first two cycles and one on its second.
+forward check that the section actually moved, one on its first two cycles and one on its second;
+the last never completed its first cycle within the timeout (Appendix~\ref{app:notes}, Note b).
 \claim{state-drift-generic-degrades}{The bounded tool's \val{k4.secreorder_followup.treatment.fails} failing chains in the same sub-corpus each failed on
 its very first cycle; none failed only after a clean first cycle, the pattern behind
 \val{k4.secreorder_followup.control.order_c2plus.fails} of the \val{k4.secreorder_followup.control.fails} control failures.} \claim{fresh-anchor-resolution-mechanism}{This is consistent
@@ -1197,7 +1201,8 @@ defects in Section~\ref{sec:defects}, where it appears only as the cause behind
 defect~\ref{def:cert-failure} --
 \claim{rerun-closed-gap-completely}{though the confirmatory re-run's clean result means it is no longer load-bearing for any number
 in this paper's final reporting.}} \textbf{Fifth}, \claim{anchoredit-subset-scope}{this benchmark exercises AnchorEdit, \val{tools.anchoredit.count} of
-Meridian Docs' \val{tools.meridian_docs.count} registered tools, \claim{six-task-families}{across the six families reported here;} the remaining tools -- other editing
+Meridian Docs' \val{tools.meridian_docs.editing.count} single-target editing tools (\val{tools.meridian_docs.count} tools in all on its main branch, commit
+\texttt{f92d2710}), \claim{six-task-families}{across the six families reported here;} the remaining tools -- other editing
 operations, \claim{audit-tools-out-of-scope}{format/style-compliance audit tools such as \texttt{audit\_document} and
 \texttt{audit\_equation\_style}, and \claim{indexing-tools-out-of-scope}{read-only structural/indexing tools including
 \texttt{locate\_anchor} and \texttt{index\_document} -- are outside this benchmark's scope,}} and we
@@ -1324,12 +1329,13 @@ throughout the paper.
   hit a genuine \val{harness.timeout_initial_s}-second process-level subprocess timeout} unrelated to the citation task
   itself, excluded from the denominator per Section~\ref{sec:methods}'s harness/infrastructure-failure
   exclusion rule rather than scored as a failure.}
-\item[Note b (Table~\ref{tab:single-edit}, Section reorder combined)] \claim{section-reorder-combined-corpus-n55-n56}{Control $n=\val{single.secreorder_comb.control.n}$, treatment
+\item[Note b (Table~\ref{tab:single-edit} and Table~\ref{tab:k4}, Section reorder combined)] \claim{section-reorder-combined-corpus-n56}{Control $n=\val{single.secreorder_comb.control.n}$, treatment
   $n=\val{single.secreorder_comb.treatment.n}$: for one \val{notes.secreorder_comb.excluded_doc_size_mb}MB document (\val{notes.secreorder_comb.excluded_doc_xml_mb}MB of main-document XML), the \claim{per-trial-timeout-history}{control-arm chain never completed within the harness's
-  \val{harness.timeout_initial_s}-second timeout across six independent attempts} at varying host load (\claim{infra-failure-excluded-from-denominator}{a real,
-  document-size-driven control-arm limitation, excluded from control's denominator only, a
-  document-level exception to Section~\ref{sec:methods}'s exclusion rule}), while
-  its treatment-arm chain completed and passed.}
+  \val{harness.timeout_initial_s}-second timeout across six independent attempts} at varying host load, at $K=1$ and at $K=4$,
+  while its treatment-arm chain completed and passed. \claim{infra-failure-excluded-from-denominator}{Because the timeout reflects the control
+  agent's own handling of a large document rather than an infrastructure fault, this chain is
+  scored as a failure in both tables, not excluded -- the one timeout Section~\ref{sec:methods}'s
+  exclusion rule treats this way.}}
 \item[Note c (Table~\ref{tab:render-gate}, Equation)] \claim{equation-original-control-unpaired}{Control ($n=\val{rg.equation.control.n}$) comes from the \val{rg.equation.control.n} equation-applicable documents of a
   \val{corpus.devslice.n}-document development-slice corpus (its document list locked in the same preregistration commit as the primary corpus,
   Section~\ref{sec:methods}; this equation control run, on 2026-09-06, was not itself

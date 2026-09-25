@@ -1,0 +1,337 @@
+{
+  "server": "extensions/meridian-docs/meridian_docs/server.py",
+  "commit": "f92d27108bedb613bf25d61e564659eb4e0652fe",
+  "counts": {
+    "total": 78,
+    "editing": 29,
+    "anchoredit": 11,
+    "by_class": {
+      "annotation": 2,
+      "audit": 7,
+      "batch and draft": 8,
+      "discovery": 11,
+      "editing": 29,
+      "helper": 2,
+      "in-document bibliography reconcile": 1,
+      "index-backed read": 6,
+      "indexing and ingest": 5,
+      "render verification": 4,
+      "style-preset configuration": 1,
+      "whole-document repair": 2
+    }
+  },
+  "tools": {
+    "append_text_run_after_math": {
+      "class": "editing",
+      "anchoredit": false
+    },
+    "apply_and_merge_batch_transform": {
+      "class": "batch and draft",
+      "anchoredit": false
+    },
+    "apply_batch_transform": {
+      "class": "batch and draft",
+      "anchoredit": false
+    },
+    "apply_prose_edit_packets": {
+      "class": "batch and draft",
+      "anchoredit": false
+    },
+    "apply_reviewable_edit_transaction": {
+      "class": "batch and draft",
+      "anchoredit": false
+    },
+    "audit_document": {
+      "class": "audit",
+      "anchoredit": false
+    },
+    "audit_equation_contract": {
+      "class": "audit",
+      "anchoredit": false
+    },
+    "audit_equation_integrity": {
+      "class": "audit",
+      "anchoredit": false
+    },
+    "audit_equation_style": {
+      "class": "audit",
+      "anchoredit": false
+    },
+    "build_prose_edit_packet": {
+      "class": "batch and draft",
+      "anchoredit": false
+    },
+    "check_release_render_gate": {
+      "class": "render verification",
+      "anchoredit": false
+    },
+    "check_render_capability": {
+      "class": "render verification",
+      "anchoredit": false
+    },
+    "compare_equation_structures": {
+      "class": "audit",
+      "anchoredit": false
+    },
+    "copy_section": {
+      "class": "editing",
+      "anchoredit": false
+    },
+    "document_outline": {
+      "class": "discovery",
+      "anchoredit": false
+    },
+    "edit_caption": {
+      "class": "editing",
+      "anchoredit": false
+    },
+    "edit_citation": {
+      "class": "editing",
+      "anchoredit": false
+    },
+    "edit_equation": {
+      "class": "editing",
+      "anchoredit": false
+    },
+    "extract_equations": {
+      "class": "discovery",
+      "anchoredit": false
+    },
+    "find_image_paragraph": {
+      "class": "discovery",
+      "anchoredit": false
+    },
+    "find_orphaned_docx_staged_files": {
+      "class": "helper",
+      "anchoredit": false
+    },
+    "find_references_to": {
+      "class": "discovery",
+      "anchoredit": false
+    },
+    "format_reference": {
+      "class": "helper",
+      "anchoredit": false
+    },
+    "get_document_review": {
+      "class": "audit",
+      "anchoredit": false
+    },
+    "get_equations": {
+      "class": "index-backed read",
+      "anchoredit": false
+    },
+    "get_journal_style_preset": {
+      "class": "style-preset configuration",
+      "anchoredit": false
+    },
+    "get_paragraph": {
+      "class": "index-backed read",
+      "anchoredit": false
+    },
+    "get_section_content": {
+      "class": "discovery",
+      "anchoredit": false
+    },
+    "get_structure": {
+      "class": "index-backed read",
+      "anchoredit": false
+    },
+    "get_structure_elements": {
+      "class": "index-backed read",
+      "anchoredit": false
+    },
+    "highlight_document": {
+      "class": "annotation",
+      "anchoredit": false
+    },
+    "index_document": {
+      "class": "indexing and ingest",
+      "anchoredit": false
+    },
+    "index_document_structure": {
+      "class": "indexing and ingest",
+      "anchoredit": false
+    },
+    "index_equations": {
+      "class": "indexing and ingest",
+      "anchoredit": false
+    },
+    "ingest_local_document": {
+      "class": "indexing and ingest",
+      "anchoredit": false
+    },
+    "ingest_local_document_structure": {
+      "class": "indexing and ingest",
+      "anchoredit": false
+    },
+    "insert_bibliography_entry": {
+      "class": "editing",
+      "anchoredit": true
+    },
+    "insert_caption": {
+      "class": "editing",
+      "anchoredit": true
+    },
+    "insert_citation": {
+      "class": "editing",
+      "anchoredit": true
+    },
+    "insert_column": {
+      "class": "editing",
+      "anchoredit": false
+    },
+    "insert_cross_reference": {
+      "class": "editing",
+      "anchoredit": false
+    },
+    "insert_equation": {
+      "class": "editing",
+      "anchoredit": true
+    },
+    "insert_figure_block": {
+      "class": "editing",
+      "anchoredit": false
+    },
+    "insert_highlighted_note": {
+      "class": "annotation",
+      "anchoredit": false
+    },
+    "insert_image": {
+      "class": "editing",
+      "anchoredit": false
+    },
+    "insert_media_part": {
+      "class": "editing",
+      "anchoredit": false
+    },
+    "insert_table": {
+      "class": "editing",
+      "anchoredit": true
+    },
+    "list_internal_notes": {
+      "class": "index-backed read",
+      "anchoredit": false
+    },
+    "list_render_receipts": {
+      "class": "render verification",
+      "anchoredit": false
+    },
+    "locate_anchor": {
+      "class": "discovery",
+      "anchoredit": false
+    },
+    "locate_anchors": {
+      "class": "discovery",
+      "anchoredit": false
+    },
+    "merge_docx_draft": {
+      "class": "batch and draft",
+      "anchoredit": false
+    },
+    "move_section": {
+      "class": "editing",
+      "anchoredit": true
+    },
+    "parse_document": {
+      "class": "discovery",
+      "anchoredit": false
+    },
+    "plan_batch_transform": {
+      "class": "batch and draft",
+      "anchoredit": false
+    },
+    "read_document_snapshot": {
+      "class": "discovery",
+      "anchoredit": false
+    },
+    "relocate_figure": {
+      "class": "editing",
+      "anchoredit": false
+    },
+    "relocate_table": {
+      "class": "editing",
+      "anchoredit": false
+    },
+    "remove_bibliography_entry": {
+      "class": "editing",
+      "anchoredit": true
+    },
+    "remove_caption": {
+      "class": "editing",
+      "anchoredit": true
+    },
+    "remove_citation": {
+      "class": "editing",
+      "anchoredit": true
+    },
+    "remove_cross_reference": {
+      "class": "editing",
+      "anchoredit": false
+    },
+    "remove_equation": {
+      "class": "editing",
+      "anchoredit": true
+    },
+    "remove_package_part": {
+      "class": "editing",
+      "anchoredit": false
+    },
+    "remove_table": {
+      "class": "editing",
+      "anchoredit": true
+    },
+    "render_with_receipt": {
+      "class": "render verification",
+      "anchoredit": false
+    },
+    "renumber_sequences": {
+      "class": "whole-document repair",
+      "anchoredit": false
+    },
+    "repair_equation_batch": {
+      "class": "batch and draft",
+      "anchoredit": false
+    },
+    "retrofit_plaintext_captions": {
+      "class": "whole-document repair",
+      "anchoredit": false
+    },
+    "scan_citation_keys": {
+      "class": "discovery",
+      "anchoredit": false
+    },
+    "scan_stale_notes": {
+      "class": "audit",
+      "anchoredit": false
+    },
+    "search_document": {
+      "class": "discovery",
+      "anchoredit": false
+    },
+    "search_paragraphs": {
+      "class": "index-backed read",
+      "anchoredit": false
+    },
+    "split_cell": {
+      "class": "editing",
+      "anchoredit": false
+    },
+    "sync_bibliography": {
+      "class": "in-document bibliography reconcile",
+      "anchoredit": false
+    },
+    "transpose_table": {
+      "class": "editing",
+      "anchoredit": false
+    },
+    "update_bibliography_entry": {
+      "class": "editing",
+      "anchoredit": false
+    },
+    "write_section": {
+      "class": "editing",
+      "anchoredit": false
+    }
+  }
+}

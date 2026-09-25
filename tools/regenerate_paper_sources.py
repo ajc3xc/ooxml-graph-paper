@@ -25,6 +25,21 @@ TOOLS = REPO / "tools"
 OUT = REPO / "paper" / "sources"
 
 
+# Timed-out ("blocked") chains are excluded from both arms' denominators as
+# infrastructure failures, except these, which are the arm's own task failure and
+# are scored 0 (paper Appendix Note b): on this 2.7MB document the control agent
+# never finished within the 300s timeout in six attempts, at K=1 and at K=4,
+# while treatment finished in under 20s.
+SCORED_AS_FAILURE = {
+    1: ["s7v2_sr_402d26ad8605a5ee-section_reorder-control-k1"],
+    4: ["s7v2_sr_402d26ad8605a5ee-section_reorder-control-k4"],
+}
+
+
+def _score_as_failure_args(k: int) -> list[str]:
+    return [arg for chain_id in SCORED_AS_FAILURE[k] for arg in ("--score-as-failure", chain_id)]
+
+
 def plan(runs: Path) -> list[dict]:
     v1, v2 = runs / "paper-s7", runs / "paper-s7-v2-section-reorder"
     rerun = runs / "paper-s7-clean-rerun-runpod" / "runs" / "paper-s7-clean-rerun"
@@ -35,13 +50,15 @@ def plan(runs: Path) -> list[dict]:
                  v1 / "validation-k1-fixrerun-20260831T145852Z-bib-flake-corrected-20260906.json",
                  v1 / "holdout-k1-fixrerun-20260831T145852Z" / "slice-manifest.json",
                  v2 / "validation-k1-20260831T172118Z" / "slice-manifest-corrected2-20260904.json",
-                 v2 / "holdout-k1-20260831T172118Z" / "slice-manifest-corrected2-20260904.json"]},
+                 v2 / "holdout-k1-20260831T172118Z" / "slice-manifest-corrected2-20260904.json",
+                 *_score_as_failure_args(1)]},
         {"name": "secreorder-combined-k4-statistics.json",
          "cmd": [TOOLS / "compute_s7_statistics.py",
                  v1 / "validation-k4-fixrerun-20260902T111600Z" / "slice-manifest.json",
                  v1 / "holdout-k4-fixrerun-20260902T111600Z" / "slice-manifest.json",
                  v2 / "holdout-k4-20260904T090807Z" / "slice-manifest-corrected-20260904.json",
-                 v2 / "validation-k4-20260904T132025Z" / "slice-manifest-corrected-20260904.json"]},
+                 v2 / "validation-k4-20260904T132025Z" / "slice-manifest-corrected-20260904.json",
+                 *_score_as_failure_args(4)]},
         {"name": "multianchor-combined-statistics.json",
          "cmd": [TOOLS / "compute_s7_combined_statistics.py",
                  "--original-manifests", rerun / "primary_holdout" / "slice-manifest.json",

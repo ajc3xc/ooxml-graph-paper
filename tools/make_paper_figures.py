@@ -15,6 +15,8 @@ from pathlib import Path
 
 PAPER = Path(__file__).resolve().parent.parent / "paper"
 OUT = PAPER / "figures"
+# No embedded creation date, so an unchanged figure regenerates byte-identical.
+PDF_METADATA = {"CreationDate": None}
 OUT.mkdir(parents=True, exist_ok=True)
 VALUES = json.loads((PAPER / "numbers.json").read_text(encoding="utf-8"))["values"]
 USED: dict[str, str] = {}
@@ -77,7 +79,7 @@ handles = [
 ]
 ax.legend(handles=handles, loc="lower left", bbox_to_anchor=(0, -0.62), ncol=2, frameon=False, fontsize=9)
 fig.tight_layout()
-fig.savefig(OUT / "fig-single-edit-forest.pdf", bbox_inches="tight")
+fig.savefig(OUT / "fig-single-edit-forest.pdf", bbox_inches="tight", metadata=PDF_METADATA)
 plt.close(fig)
 print("wrote fig-single-edit-forest.pdf")
 
@@ -114,7 +116,7 @@ handles = [
 ]
 fig.legend(handles=handles, loc="lower center", bbox_to_anchor=(0.5, -0.08), ncol=2, frameon=False, fontsize=9)
 fig.tight_layout()
-fig.savefig(OUT / "fig-rendergate-dumbbell.pdf", bbox_inches="tight")
+fig.savefig(OUT / "fig-rendergate-dumbbell.pdf", bbox_inches="tight", metadata=PDF_METADATA)
 plt.close(fig)
 print("wrote fig-rendergate-dumbbell.pdf")
 

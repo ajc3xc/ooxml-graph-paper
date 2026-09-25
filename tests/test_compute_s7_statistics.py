@@ -4,6 +4,8 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
+import pytest
+
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools"))
 
 from compute_s7_statistics import _chain_outcome, _chain_steady_state_outcome, compute_statistics  # noqa: E402
@@ -79,6 +81,47 @@ def test_steady_state_outcome_is_none_for_blocked() -> None:
         "pairs": [{"forward": {"returncode": None, "timed_out": True}}],
     }
     assert _chain_steady_state_outcome(chain) is None
+
+
+def _blocked_chain(chain_id: str, doc_label: str, arm: str, k: int = 1) -> dict:
+    return {
+        "chain_id": chain_id, "doc_label": doc_label, "family": "section_reorder", "arm": arm, "k_pairs": k,
+        "status": "blocked",
+        "pairs": [{"forward": {"returncode": None, "timed_out": True, "grading": {"verdict": "not_run"}}}],
+    }
+
+
+def test_blocked_chain_named_in_score_as_failure_is_a_fail() -> None:
+    """Appendix Note b: a timeout judged to be the arm's own task failure is
+    scored 0.0 (and 0.0 steady-state at K>1), not excluded."""
+    chain = _blocked_chain("d1-sr-control-k4", "d1", "control", k=4)
+    assert _chain_outcome(chain, frozenset({"d1-sr-control-k4"})) == 0.0
+    assert _chain_steady_state_outcome(chain, frozenset({"d1-sr-control-k4"})) == 0.0
+    assert _chain_outcome(chain) is None
+
+
+def test_score_as_failure_refuses_a_chain_that_has_a_verdict() -> None:
+    chain = dict(_passing_chain("d1", "section_reorder", "control"), chain_id="d1-sr-control-k1")
+    with pytest.raises(ValueError, match="only a blocked chain"):
+        _chain_outcome(chain, frozenset({"d1-sr-control-k1"}))
+
+
+def test_compute_statistics_scores_named_blocked_chain_and_records_it() -> None:
+    chains = [
+        _blocked_chain("d1-c", "d1", "control"),
+        dict(_passing_chain("d1", "section_reorder", "treatment"), chain_id="d1-t"),
+        dict(_passing_chain("d2", "section_reorder", "control"), chain_id="d2-c"),
+        dict(_passing_chain("d2", "section_reorder", "treatment"), chain_id="d2-t"),
+    ]
+    excluded = compute_statistics(chains)
+    assert excluded["groups"][0]["control_n"] == 1 and "scored_as_failure" not in excluded
+    scored = compute_statistics(chains, frozenset({"d1-c"}))
+    group = scored["groups"][0]
+    assert group["control_n"] == 2 and group["paired_n"] == 2
+    assert group["control_pass_rate_ci"]["mean"] == 0.5
+    assert scored["scored_as_failure"] == ["d1-c"]
+    with pytest.raises(ValueError, match="not in these manifests"):
+        compute_statistics(chains, frozenset({"missing"}))
 
 
 def test_chain_outcome_multi_pair_requires_all_pairs_pass() -> None:
