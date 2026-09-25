@@ -216,7 +216,7 @@ the treatment side:
   requires a same-or-shallower-level heading when constructing each trial, so that case is never
   even proposed to either arm.}
 \item \textbf{Equation} -- insert/remove one native OOXML math object (\texttt{<m:oMath>}), not
-  plain text formatted to resemble an equation.\footnote{A separate, unmerged prototype for
+  plain text formatted to resemble an equation.\footnote{A separate prototype for
   LaTeX-OMML round-trip fidelity and notation-style auditing exists for a different,
   journal-specific conversion use case; it shares no code with the tool exercised here and is out
   of scope for this benchmark.}
@@ -338,9 +338,8 @@ permutation test (2{,}000 resamples) \citep{nichols2002permutation}, with a fixe
 set before any result existed. We report every comparison this benchmark's design specifies (six
 families, at $K=1$, plus the one preregistered $K=4$ depth study) rather than a subset, and do
 not apply a multiple-comparison correction across them: the $K=4$ section-reorder result is the
-one comparison this benchmark's design was built in advance to make (Section~\ref{sec:section-reorder}),
-not one significant finding selected after the fact from many equally-likely candidates, so we
-report it and its p-value directly rather than adjusting it for tests it was never in competition
+sole preregistered comparison this benchmark's design specifies (Section~\ref{sec:section-reorder}),
+so we report it and its p-value directly rather than adjusting it for tests it was never in competition
 with. Per CONSORT's own outcome-reporting guidance for paired designs \citep{schulz2010consort},
 we report each arm's own marginal pass rate with its own CI alongside a paired significance test
 -- both are standard, not redundant. What we do not report is a confidence interval on the paired
@@ -387,8 +386,8 @@ A supplementary extension generalizes the single fixed-percentile anchor above t
 additional anchors per document, using the identical eligibility filter at three further fixed
 percentile positions. \texttt{resolve\_multiple\_body\_anchors} implements
 this for the body-anchor families.
-\texttt{resolve\_multiple\_section\_reorder\_plans} implements the analogous
-extension for section reordering, additionally excluding already-used heading triples across
+The analogous
+extension for section reordering additionally excludes already-used heading triples across
 plans. Both reuse the original single-anchor resolver's own output unchanged as anchor zero. The
 purpose is to grow $N$ using the corpus's own already-eligible candidate positions rather than
 additional documents alone. Because anchors drawn from the same document
@@ -405,8 +404,8 @@ random-effects intraclass correlation estimated directly from the extension's ow
 \citep{rutterford2015clustersamplesize}, so the naive pooled $N$ -- which overstates precision
 whenever anchors within a document are correlated -- is never reported without its
 clustering-aware counterpart beside it \citep{irsova2025spuriousprecision}. For section reordering
-specifically, this clustering correction is not merely a theoretical caveat: computed on the
-extension's own real data, the treatment arm's intraclass correlation is $1.0$ (every anchor within
+specifically, the treatment arm's intraclass correlation, computed on the extension's own real
+data, is $1.0$ (every anchor within
 a document passes or fails together, collapsing the naive pooled $N$ from 22 to an effective $N$ of
 10, identical to the document count), while the control arm shows no such clustering ($\text{ICC}=0$).
 This is consistent with section reordering's extra anchors moving a different heading pair within
@@ -446,15 +445,15 @@ evaluating the same effective verification path the original run already relied 
 exclusively, but a genuine backend effect on the measured pass rates cannot be fully ruled out
 without that ablation. Second, the CLI executing each trial
 refuses to run with permission checks bypassed when invoked as the root user, a restriction the
-original host (a non-root desktop account) never triggered; we created a dedicated non-root
-account on the instance for this reason, verified functionally, and re-ran the affected trials
-that had failed instantly under root before this was found.
+original host (a non-root desktop account) never triggered; we ran all trials under a dedicated
+non-root account created on the instance for this purpose. The trials this restriction caused to
+fail under root were re-run under that account, and only the re-run results are reported.
 
 \subsection{Cross-family cascading edits: \texttt{respec\_cascade}}
 \label{sec:methods-respec-cascade}
 Section~\ref{sec:section-reorder}'s $K=4$ result is this benchmark's one significant finding, but
-it tests only one family repeated against itself. A separate, preregistered protocol
-(\texttt{docs/paper-s23-respec-cascade-protocol-v0.md}, locked 2026-09-20) generalizes it two ways
+it tests only one family repeated against itself. A separate protocol, preregistered
+2026-09-20, generalizes it two ways
 at once: across all five families in a single chain rather than one family alone, and under a
 mid-chain \emph{reversal} of a structural requirement rather than uniform repetition. Each chain is
 one document, one arm, 17 steps in three phases: BUILD (5 steps, one forward insert per family, in
@@ -513,7 +512,7 @@ Inline citation$^{\text{a}}$ & control   & 100\% & [86.8, 100]$^\dagger$ & 26 & 
 Section reorder (original corpus) & control   & 72.7\% & [45.5, 100]  & 11 & \multirow{2}{*}{0.240} \\
                                    & treatment & 100\%  & [71.5, 100]$^\dagger$   & 11 & \\
 \addlinespace
-Section reorder (combined, v1+v2)$^{\text{b}}$ & control   & 83.6\% & [74.5, 92.7] & 55 & \multirow{2}{*}{0.271} \\
+Section reorder (combined, original + follow-up)$^{\text{b}}$ & control   & 83.6\% & [74.5, 92.7] & 55 & \multirow{2}{*}{0.271} \\
                                        & treatment & 92.9\% & [85.7, 98.2] & 56 & \\
 \bottomrule
 \end{tabular}
@@ -600,10 +599,9 @@ found by fishing
 across many cuts of the data -- it is the specific comparison the $K$-sweep design was built to
 make, on the same corpus already reported at $K=1$.
 
-We traced the mechanism directly, rather than inferring it from the p-value alone, using the
-finer per-cycle grading breakdown below; that breakdown covers only the 48-document v2 follow-up
-sub-corpus, since the full 55/56 combined corpus is not broken down at this granularity in this
-draft. Of the 12 v2-corpus control chains with at least one failing cycle, 9 failed specifically
+We traced the mechanism directly, using the
+finer per-cycle grading breakdown below; that breakdown covers only the 48-document follow-up
+sub-corpus, since the full 55/56 combined corpus is not broken down at this granularity. Of the 12 follow-up-corpus control chains with at least one failing cycle, 9 failed specifically
 on exact-order restoration starting from the second cycle onward -- a real, dominant majority
 pattern, not a universal rule -- and 2 failed that same check on the very first cycle (one of
 those two then recovering fully on later cycles); the remaining chain's specific failure
@@ -684,8 +682,8 @@ entirely -- they write raw XML directly, with no independent render-verification
 
 Figure~\ref{fig:rendergate-arch} shows this flow. The verification step tries two independent
 renderer backends in a fixed fallback order, advancing to the second only if the first fails
-(Section~\ref{sec:defects}, defect 6, which also corrects an earlier draft's claim that this
-runs as a concurrent race) -- the pass/fail decision is unaffected by which backend succeeds.
+(Section~\ref{sec:defects}, defect 6, which documents this fallback as sequential rather than
+concurrent) -- the pass/fail decision is unaffected by which backend succeeds.
 
 \begin{table}[h]
 \centering
@@ -781,13 +779,13 @@ another indirect argument for it: identical model, corpus, harness, and grading 
 dedicated single-tenant host instead of a shared, contended one. The gap closes completely.
 Equation rises from 46.2\% to 100\%; caption rises from 7.7\% to 100\%; table-structural, already
 statistically indistinguishable from its control at 96.2\%, also reaches 100\%. All three arms
-now match their own controls exactly ($p=1.0$ throughout). We read this as confirmation, not
-mere consistency with the hypothesis: the original gap in Table~\ref{tab:render-gate} was a
+now match their own controls exactly ($p=1.0$ throughout). The original gap in
+Table~\ref{tab:render-gate} was a
 deployment-environment artifact of the specific shared host these three families' write-time
 verification step happened to be sensitive to, not a limitation of the bounded editing operations
 themselves. We report both tables rather than replacing Table~\ref{tab:render-gate} with
 Table~\ref{tab:render-gate-clean}, because the contrast between them is itself the evidence for
-this section's causal claim, not an inconvenient earlier draft to discard.
+this section's causal claim.
 
 \begin{figure}[h]
 \centering
@@ -814,9 +812,9 @@ verification-reliability reading over a capability-limitation one.
 \subsection{Multi-anchor extension, incorporated: equation and caption}
 \label{sec:results-multianchor}
 Section~\ref{sec:methods-multianchor} described a supplementary extension growing each family's
-$N$ by resolving up to three additional anchors per document, deferred at the time of writing
-pending identification of the exact canonical original-corpus source these new anchors would need
-to be merged against. That source is now verified directly, not assumed: the confirmatory
+$N$ by resolving up to three additional anchors per document, contingent on identifying the exact
+canonical original-corpus source these new anchors must merge against. That source is verified
+directly here, not assumed: the confirmatory
 dedicated-host re-run's own per-document results
 (Section~\ref{sec:methods-rerun}) recompute to the identical numbers already published in
 Table~\ref{tab:render-gate-clean} (equation and caption, both 100\%/100\%, $n=26$, $p=1.0$) before
@@ -864,9 +862,7 @@ across all three tiers, and caption's small control-treatment gap (previously $1
 under host contention, closing to $100\%$ vs $100\%$ on the dedicated host at $n=26$) remains
 directionally present but not significant at $n=29$ ($p=0.252$ across Tiers 1 and 2), consistent
 with -- not contradicting -- the confirmatory re-run's own $p=1.0$ result. The extension does not
-manufacture significance that was not already there, which is itself evidence the tiered
-methodology is behaving as intended rather than as an avenue for finding whatever result more data
-happens to produce.
+manufacture significance that was not already there.
 
 \subsection{Cross-family cascading edits: a generalization of the $K=4$ finding}
 \label{sec:results-respec-cascade}
@@ -935,16 +931,14 @@ sign on all five, not a mix of directions.
 The gap has a concrete, qualitative failure mode behind it, not only a lower pass rate: 5 of the 12
 control chains (41.7\%) broke entirely mid-protocol -- the raw XML edit itself corrupted the
 document badly enough that a later step's package-validity gate refused to continue -- against 0 of
-12 treatment chains. This matches the smoke-test-stage qualitative findings already reported for
-this protocol's design (duplicate-heading and section-position-drift defects, found live during
-harness development and disclosed as evaluation-harness debugging rather than as reported results)
-and is consistent with, not merely analogous to, the mechanism already traced in
+12 treatment chains. This matches defects already observed and fixed during this protocol's own
+development (duplicate-heading and section-position-drift defects), consistent with the mechanism
+already traced in
 Section~\ref{sec:section-reorder}: unbounded raw-XML editing degrades further, and more
 catastrophically, as more edits accumulate on the same document. Two further real defects in this
 extension's own harness were found and fixed during this run, disclosed alongside this benchmark's
 other eight (Section~\ref{sec:defects}, defects 8--9); both were verified directly against the real
-checkpoint data before and after the fix, following the same discipline as every other correction in
-this paper.
+checkpoint data before and after the fix.
 
 \section{Ten real defects found and fixed}
 \label{sec:defects}
@@ -1080,9 +1074,9 @@ drift a generic-tool agent shows under repeated edit-undo cycling. This result i
 informative than any single-edit pass-rate comparison, because it isolates a mechanism -- fresh
 anchor resolution versus accumulated agent-maintained state -- rather than reporting an aggregate
 number. Whether this mechanism generalizes beyond section reordering to other repeated-editing
-workflows, and beyond uniform repetition to genuinely compound, cross-family pressure, was
-untested when this was first written; Section~\ref{sec:results-respec-cascade} tests exactly that,
-on a design built specifically to avoid repeating the same test rather than to confirm it cheaply
+workflows, and beyond uniform repetition to genuinely compound, cross-family pressure, remains
+open; Section~\ref{sec:results-respec-cascade} tests exactly that,
+on a compound, cross-family design
 -- five families in one chain rather than one repeated, plus a mid-chain reversal the original
 $K$-sweep never included -- and finds the same qualitative pattern: the generic-tool arm's edits
 increasingly corrupt the document as more of them accumulate, including into content the arm was
@@ -1091,15 +1085,15 @@ for every conceivable repeated-editing workflow; two independent designs pointin
 direction is stronger evidence than one, not a closed generalization to task families or workflows
 neither design tested.
 
-The write-time-verification-gated families illustrate a different, under-discussed methodological
+The write-time-verification-gated families illustrate a different methodological
 hazard: an architectural choice made for a good reason (never persist a corrupt document) can
 produce a benchmark result that looks like a capability finding but is substantially a
 deployment-environment artifact. Disentangling the two required real, disclosed engineering work
 (Section~\ref{sec:defects}) and a controlled confirmatory re-run (Section~\ref{sec:methods-rerun}),
-not just a larger sample size or a more careful argument. Rejecting the most obvious alternative
+not just a larger sample size or a more careful argument. The alternative
 explanation -- that these tools are simply more expensive to render-verify than table
-insertion is -- was not sufficient on its own; the attribution to shared-host contention and the
-physically unreliable external drive required a direct test, not an inference. Re-running
+insertion is -- does not account for the deficit; the attribution to shared-host contention and the
+physically unreliable external drive rests on a direct test, not an inference. Re-running
 the identical benchmark on a dedicated, single-tenant host closed the gap completely for both
 equation and caption (Table~\ref{tab:render-gate-clean}). The general lesson extends past this
 specific benchmark: a write-time verification step's reported reliability is only as meaningful
@@ -1128,8 +1122,8 @@ mechanism: we make no claim that shared-host contention is never a genuine facto
 write-time-verification designs, only that it fully explains the gap observed here.
 \textbf{Third}, corpus size for section reordering ($n=11$ at $K=1$ on the original corpus) is
 small before the follow-up corpus is combined in. A multi-anchor extension aimed at this exact gap
-is underway (Section~\ref{sec:methods-multianchor}) but not yet merged into any number reported
-here; its own preliminary data already surfaces a real, distinct limitation specific to section
+is described in Section~\ref{sec:methods-multianchor}; its data is not included in any number
+reported here, and its preliminary results already surface a real, distinct limitation specific to section
 reordering -- an intraclass correlation of $1.0$ on the treatment arm, meaning additional anchors
 within the same document are not adding independent evidence for that arm the way they appear to
 for the body-anchor families -- which we report as an open finding, not a solved one. \textbf{Fourth}, one specific piece of our own
@@ -1157,13 +1151,13 @@ type-library cache), not the underlying language model's prompts, weights, or gr
 never varied; and every fix was independently re-verified against real re-run data rather than
 assumed effective. We do not claim these numbers estimate performance on documents this tooling
 has never previously encountered in any form. \textbf{Seventh}, the per-trial subprocess timeout
-was raised twice, from 300s to 600s and now to 900s (Section~\ref{sec:methods}), and the final
-raise is evidence-informed rather than arbitrary -- but the evidence behind it is right-censored at
+is 900s (Section~\ref{sec:methods}), and this ceiling is evidence-informed rather than arbitrary
+-- but the evidence behind it is right-censored at
 whatever ceiling was in effect when each trial ran, so it is not a closed expected-task-duration
 derivation; a genuinely slow but correct chain on either arm could in principle still be
 misclassified as an infrastructure exclusion rather than allowed to finish, and confirming the
 900s ceiling clears the true tail (not just the previously-observed, censored one) needs a
-validation run with headroom above it that this draft does not report.
+validation run with headroom above it that this paper does not report.
 
 \subsection{Artifact availability}
 This benchmark's harness, evaluator, statistics code, and corpus manifests are publicly available
@@ -1193,9 +1187,8 @@ a write-time verification step whose reliability cost proved substantial and
 environment-dependent; a controlled confirmatory re-run on a dedicated, single-tenant host
 resolved that confound completely, closing all three families to 100\% pass for both arms and
 confirming the original gap was a deployment-environment artifact rather than an editing-capability
-limitation. We report both the original and confirmatory numbers, and the live infrastructure
-work connecting them, rather than reporting a single clean number that would understate how much
-of this benchmark's own execution environment turned out to matter.
+limitation. We report both the original and confirmatory numbers because the gap between them is
+itself evidence of how much this benchmark's execution environment affected the original result.
 
 \textbf{Future work.} Whether audit-style tools like \texttt{audit\_document} and
 \texttt{audit\_equation\_style} (Section~\ref{sec:limitations}) help an agent bring a document
@@ -1207,15 +1200,15 @@ built from two sources together -- a venue's own published guidelines for its un
 vaguer clauses -- evaluated with the same treatment-versus-control design used throughout this
 paper, not an ablation in place of one. A small, exploratory pilot along these lines already
 exists: four fixtures, \texttt{audit\_equation\_style} versus generic tools, reported in full in
-the project's own working notes (\texttt{docs/} in the repository linked above under Artifact
-availability) rather than here. Both arms matched on three hand-authored fixtures, but the
+the supplementary documentation (\texttt{docs/} in the repository linked above under Artifact
+availability) rather than in the main text. Both arms matched on three hand-authored fixtures, but the
 one real, organically-occurring document tested surfaced a genuine, previously-unknown bug in the
 audit tool itself that only the unbounded control arm caught. Too small a sample to support any
 claim -- but a concrete argument for running this at confirmatory scale, not a reason to treat the
 question as settled either way.
 
-Bibliography and citation insertion showing parity (Section~\ref{sec:results}) is itself likely a
-correct finding, not a benchmark design flaw: both tools write already-resolved metadata into an
+Bibliography and citation insertion showing parity (Section~\ref{sec:results}) is most plausibly
+explained by the task's mechanical simplicity: both tools write already-resolved metadata into an
 already-valid paragraph, a purely mechanical formatting step a capable generic agent can match. A
 genuinely harder version of this task family exists, structurally analogous to section reorder's
 $K=4$ finding: resolving a citation \emph{against a live external system} (\texttt{resolve\_citations}
@@ -1225,7 +1218,7 @@ discover the local API's protocol and error semantics to close it, not simply wr
 text. We did not test this; it is future work, not a claim.
 
 A genuinely blind confirmatory re-run -- now that the tooling's own defects (Section~\ref{sec:defects})
-are fixed -- is also worth naming explicitly rather than only implying: this benchmark's licensed
+are fixed -- is also worth pursuing: this benchmark's licensed
 DocOps corpus is fully exhausted (every document already used, per Limitations factor Six), but a
 separate, already-PII-screened pool of 35 organic documents from this project's own acquisition
 work sits unused by the editing benchmark, and a further $\sim$12{,}000 candidate documents remain
@@ -1247,8 +1240,8 @@ from this generic-article format to that venue's actual template and page limit.
 \appendix
 \section{Corpus and exclusion notes}
 \label{app:notes}
-Moved here from inline table footnotes, which otherwise float to the bottom of the page
-disconnected from the row that triggers them.
+This section collects per-row notes on the corpus tables, cross-referenced by table and row
+throughout the paper.
 
 \begin{description}
 \item[Note a (Table~\ref{tab:single-edit}, Inline citation)] Treatment $n=25$: one forward call
