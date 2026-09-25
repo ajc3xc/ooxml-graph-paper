@@ -46,37 +46,40 @@ Section~\ref{sec:limitations}), for Microsoft Word's Office Open XML (OOXML/\tex
 format -- \claim{arm-tool-surfaces}{changes task correctness relative to an
 agent given only generic tools and raw XML access.}} \claim{six-task-families}{We report a confirmatory benchmark across six task families
 (bibliography-entry insertion, inline citation insertion, section reordering, equation insertion,
-table-structural insertion, and caption insertion)} \claim{primary-corpus-holdout-status}{on a held-out corpus of real, previously
-unseen \texttt{.docx} documents,} \claim{forward-inverse-chain-pass}{each task run as a forward edit followed by its own inverse and
+table-structural insertion, and caption insertion)} \claim{primary-corpus-holdout-status}{on a corpus of real \texttt{.docx} documents not used to design
+the tooling's original feature set,} \claim{forward-inverse-chain-pass}{each task run as a forward edit followed by its own inverse and
 independently graded against the original document's structure}. \claim{bib-citation-parity}{Two families
 (bibliography, citation) show no measurable difference between arms.} \claim{section-reorder-k1-directional-not-significant}{\claim{single-edit-no-advantage}{One family (section
-reordering) shows no difference on a single edit}} but \claim{k4-significant-advantage}{a statistically significant advantage for
+reordering) shows only a non-significant directional advantage for the bounded tool on a single
+edit}} but \claim{k4-significant-advantage}{a statistically significant advantage for
 the bounded tool under four repeated edit-undo cycles (\val{k4.secreorder.treatment.rate}\% vs.\ \val{k4.secreorder.control.rate}\% pass rate, $p=\val{k4.secreorder.p}$),}
-\claim{state-drift-generic-degrades}{\claim{fresh-anchor-resolution-mechanism}{traced to a specific, data-grounded failure mode in the generic-tool arm: compounding loss of
-the true original document state across repeated cycles,} a pattern consistent with \emph{state
+\claim{state-drift-generic-degrades}{\claim{fresh-anchor-resolution-mechanism}{with per-cycle data consistent with a specific failure mode in the generic-tool arm:
+compounding loss of the true original document state across repeated cycles,} a pattern consistent with \emph{state
 drift}} as described in agentic-LLM settings \citep{wu2026dualanchoring}. \claim{verification-confound-reliability-cost}{\claim{render-gated-three-families}{Three families (equation, table-structural, and caption insertion) share a
-write-time structural-correctness verification step;} on a shared, variably-contended host, two of
+write-time render-verification step;} on a shared, variably-contended host, two of
 the three reported markedly lower pass rates} (equation \val{rg.equation.treatment.rate}\%, caption \val{rg.caption.treatment.rate}\%) while table-structural
 reached \val{rg.table.treatment.rate}\%. \claim{rerun-is-direct-test}{We treated this as a hypothesis rather than a finding and tested it directly:} a
-\claim{render-cost-hypothesis-rejected}{\claim{render-gated-families-slower-vs-no-cost-difference}{controlled, isolated timing test first rejected task-dependent render cost as the explanation},}
-and \claim{rerun-identical-benchmark-dedicated-host}{a full confirmatory re-run of the identical benchmark -- same model, same corpus, same
+\claim{render-cost-hypothesis-rejected}{\claim{render-gated-families-slower-vs-no-cost-difference}{code-level review and a controlled timing test rejected task-dependent render cost as the
+explanation},}
+and \claim{rerun-identical-benchmark-dedicated-host}{a full confirmatory re-run of the benchmark -- same model, same primary corpus, same
 code -- on a dedicated, single-tenant cloud host} \claim{rerun-closed-gap-completely}{closed the gap completely, all three families
 reaching \val{rgclean.all.rate}\% pass for both arms.} \claim{external-drive-unreliable}{\claim{gap-was-deployment-artifact}{\claim{gap-causes-contention-and-drive}{The original numbers were a deployment-environment artifact
 (shared-host scheduling contention and a physically unreliable external drive)}, not an
 editing-capability limitation}}, and \claim{report-both-render-gate-tables}{we report both the original and the
 confirmatory numbers rather than replacing one with the other silently.} \claim{respec-generalization-strength}{\claim{respec-preregistered-two-way-generalization}{\claim{preregistration-status}{\claim{respec-same-direction-magnitude}{A separate, preregistered
-extension generalizes the section-reordering finding two ways at once}} -- \claim{respec-five-families-table-dropped}{across all five
-\claim{respec-17-steps-three-phases}{task families in a single \val{respec.chain.steps}-step chain} rather than one family repeated against itself,} and under
-a mid-chain reversal of a structural requirement rather than uniform repetition}} -- \claim{respec-corpus-author-owned-docs}{on a real,
-previously-unseen three-document corpus.} \claim{respec-chain-completion}{\claim{respec-17-steps-three-phases}{The bounded tool completes the full protocol cleanly on
+extension generalizes the section-reordering finding two ways at once}} -- \claim{respec-five-families-table-dropped}{across five of the six
+\claim{respec-17-steps-three-phases}{task families (all but table-structural) in a single \val{respec.chain.steps}-step chain} rather than
+one family repeated against itself,} and under
+a mid-chain reversal of a structural requirement rather than uniform repetition}} -- \claim{respec-corpus-author-owned-docs}{on three real,
+author-owned documents outside the primary corpus.} \claim{respec-chain-completion}{\claim{respec-17-steps-three-phases}{The bounded tool completes the full protocol cleanly on
 \val{respec.composite.treatment.t1.rate}\% of chains against the generic tool's \val{respec.composite.control.t1.rate}\%};} \claim{respec-anchor-set-gap-p0005}{pooled across \val{respec.anchorset.n} paired anchor-set-level
 observations, the two arms differ by \val{respec.anchorset.diff_pp} percentage points ($p<\val{respec.anchorset.p_bound}$),}
 \claim{checkpoint-b-central-test}{and on the design's own central test -- whether unrelated, already-correct content survives a
 mid-chain reversal of a different requirement untouched} -- \claim{checkpoint-b-leak-p0305}{the generic tool's raw edits leak into
 untouched content while the bounded tool's never do ($p=\val{respec.keepsurvival.anchorset.p}$).} \claim{defects-all-fixed-status}{\claim{ten-defects-count}{Separately, we
 document ten
-infrastructure and evaluation-harness defects that this benchmark's own development surfaced and
-fixed}} -- \claim{defects-materially-changed-numbers}{several of which materially changed the reported numbers} -- \claim{defects-disclosed-in-full}{disclosed in full rather
+infrastructure and evaluation-harness defects that this benchmark's own development surfaced,
+nine of them fixed}} -- \claim{defects-materially-changed-numbers}{several of which materially changed the reported numbers} -- \claim{defects-disclosed-in-full}{disclosed in full rather
 than silently corrected.}
 \end{abstract}
 
@@ -119,7 +122,7 @@ results:
 \item[RQ2] \claim{k4-design-definition}{Under four repeated edit-undo cycles on the same document, does either arm's
   correctness compound or decay with repetition?} (Section~\ref{sec:section-reorder},
   Table~\ref{tab:k4})
-\item[RQ3] If a write-time structural-verification step produces a large gap between arms, is
+\item[RQ3] If a write-time render-verification step produces a large gap between arms, is
   that gap attributable to the editing operations themselves or to the deployment environment
   they were measured in? (Section~\ref{sec:render-gate}, Section~\ref{sec:methods-rerun})
 \end{description}
@@ -134,9 +137,9 @@ entry) and its own \emph{inverse} (remove that same entry), run in sequence agai
 document, so that a correct round trip leaves the document's original content unchanged.} \claim{tool-surface-only-manipulated-variable}{Every
 task is run twice on the same starting document under the same model:} \claim{arm-tool-surfaces}{once with a \textbf{control}
 arm restricted to generic \texttt{Read}/\texttt{Write}/\texttt{Edit}/\texttt{Bash} tools and
-direct access to the document's raw XML, and once with a \textbf{treatment} arm restricted to
-exactly one bounded, purpose-built tool pair for that family and no generic editing tools at
-all.} \claim{tool-surface-only-manipulated-variable}{\claim{model-scope-sonnet-except-respec-haiku}{Both arms use the same underlying language model (\texttt{claude-sonnet-5});} the only
+direct access to the document's raw XML, and once with a \textbf{treatment} arm that has no generic editing tools at all and is
+directed to exactly one bounded, purpose-built tool pair for that family, plus read-only
+\texttt{Read}.} \claim{tool-surface-only-manipulated-variable}{\claim{model-scope-sonnet-except-respec-haiku}{Both arms use the same underlying language model (\texttt{claude-sonnet-5});} the only
 manipulated variable is which tool surface the agent can act through.} \claim{grading-external-from-docx}{Grading (Section~\ref{sec:methods})
 is performed entirely outside the agent, never by trusting its own transcript claim of success.}
 
@@ -144,21 +147,22 @@ is performed entirely outside the agent, never by trusting its own transcript cl
 
 \begin{itemize}
 \item \claim{six-task-families}{We present a confirmatory, paired benchmark across six real document-editing task
-  families,} \claim{primary-corpus-holdout-status}{on a held-out corpus never used during the tooling's own development}
+  families,} \claim{primary-corpus-holdout-status}{on a corpus of real documents not used to design the tooling's
+  original feature set}
   (Section~\ref{sec:results}), \claim{report-every-comparison}{with per-family sample sizes and paired significance tests
   reported honestly, including families where the two arms show no measurable difference.}
-\item \claim{section-reorder-k1-directional-not-significant}{\claim{single-edit-no-advantage}{We demonstrate that bounded structural tools show no advantage on a single edit}} \claim{k4-significant-advantage}{but a
-  significant advantage under repeated edit-undo cycling,} \claim{fresh-anchor-resolution-mechanism}{\claim{state-drift-generic-degrades}{and identify the mechanism: the
+\item \claim{section-reorder-k1-directional-not-significant}{\claim{single-edit-no-advantage}{We find that bounded structural tools show no significant advantage on a single edit}} \claim{k4-significant-advantage}{but a
+  significant advantage under repeated edit-undo cycling,} \claim{fresh-anchor-resolution-mechanism}{\claim{state-drift-generic-degrades}{and show that the
   generic-tool arm's correctness degrades with repetition (state drift) while the bounded
-  tool's does not}} (Section~\ref{sec:section-reorder}).
-\item \claim{verification-confound-reliability-cost}{We identify a confound introduced by a write-time structural-verification step shared by
-  \claim{six-task-families}{three of the six families}}, and \claim{rerun-is-direct-test}{\claim{rerun-identical-benchmark-dedicated-host}{resolve it with a controlled confirmatory re-run of the
-  identical benchmark on a dedicated, single-tenant host},} \claim{rerun-closed-gap-completely}{which closes the gap completely} and
+  tool's does not, with per-cycle data pointing to a plausible cause}} (Section~\ref{sec:section-reorder}).
+\item \claim{verification-confound-reliability-cost}{We identify a confound introduced by a write-time render-verification step shared by
+  \claim{six-task-families}{three of the six families}}, and \claim{rerun-is-direct-test}{\claim{rerun-identical-benchmark-dedicated-host}{resolve it with a confirmatory re-run of the
+  benchmark on a dedicated, single-tenant host},} \claim{rerun-closed-gap-completely}{which closes the gap completely} and
   \claim{gap-was-deployment-artifact}{confirms the confound was a deployment-environment artifact, not an editing-capability
   limitation} (Section~\ref{sec:render-gate}).
 \item We show that a confirmatory benchmark's own numbers are only as trustworthy as its
-  harness: \claim{defects-all-fixed-status}{\claim{ten-defects-count}{of the ten infrastructure and evaluation-harness defects found during this
-  project,} \claim{defects-materially-changed-numbers}{several silently altered an already-reported result before independent
+  harness: \claim{defects-all-fixed-status}{\claim{ten-defects-count}{of the ten infrastructure and evaluation-harness defects this paper
+  documents,} \claim{defects-materially-changed-numbers}{several silently altered an already-reported result before independent
   re-verification caught them} -- \claim{defect-fixes-reverified}{\claim{defects-disclosed-in-full}{each disclosed with its root cause, fix, and re-verification}}}
   (Section~\ref{sec:defects}).
 \end{itemize}
@@ -193,20 +197,23 @@ itself.}
 \label{sec:methods}
 
 \subsection{Corpus}
-\claim{licensed-docops-corpus}{The primary corpus is a \val{corpus.primary.n}-document, previously licensed and audited slice of the DocOps
-benchmark corpus} (real, unmodified business records such as internal memos, written policies,
-and meeting minutes, not hand-authored fixtures), split into a \val{corpus.primary_holdout.n}-document primary holdout and a
+\claim{licensed-docops-corpus}{The primary corpus is a \val{corpus.primary.n}-document, audited slice of the public DocOps
+benchmark corpus (Apache-2.0)} (business documents such as internal memos, written policies, and
+meeting minutes, written by the DocOps benchmark's own authors for its tasks rather than
+collected from real organizations, and not written by us), split into a \val{corpus.primary_holdout.n}-document primary holdout and a
 \val{corpus.validation.n}-document validation set, pooled into the flat $n=\val{corpus.primary.n}$ reported throughout this paper. This
 corpus's own construction is independently preregistered, prior to any trial reported
-here.\footnote{2026-08-27, commit \texttt{1061e0e}, this project's evaluation-harness repository.}
+here.\footnote{2026-08-30, commit \texttt{1061e0e}, this project's evaluation-harness repository.}
 \claim{primary-corpus-holdout-status}{Neither subset was used to design the tooling's original feature set, but \claim{defect-fixes-code-only-grading-unchanged}{\claim{ten-defects-count}{several of the ten
 defects cataloged in Section~\ref{sec:defects}} were subsequently found by observing this corpus's
 own trial outcomes during the benchmark's execution and fixed directly in the tooling,} \claim{defect-fixes-reverified}{with every
-affected chain then independently re-run and re-graded rather than assumed fixed.} \claim{defects-disclosed-in-full}{We disclose this
+affected chain then independently re-run or re-graded rather than assumed fixed.} \claim{defects-disclosed-in-full}{We disclose this
 iterative debug-and-rerun cycle in full} (Section~\ref{sec:defects}, Section~\ref{sec:limitations})
 rather than describe either subset as a blind holdout in the machine-learning sense -- it is not
 one.} \claim{follow-up-corpus-48-preregistered}{\claim{corpus-preregistration}{An independently preregistered (2026-08-31, \texttt{e813cd7}) \val{corpus.followup.n}-document follow-up corpus
-was built specifically for the section-reordering family,} because the primary corpus yields only \val{corpus.secreorder_orig.n}
+was built specifically for the section-reordering family,} drawn from a different source: the
+public-web \texttt{docx-corpus} pool (real documents, screened for personal information and
+content-reviewed; licensed at the dataset level only, with per-file provenance unverified), because the primary corpus yields only \val{corpus.secreorder_orig.n}
 documents on which that task is structurally applicable; the follow-up corpus itself yields \val{corpus.secreorder_followup.n}
 applicable documents (of \val{corpus.followup.n}), \claim{k4-uses-same-combined-corpus}{so the combined section-reordering corpus reported in
 Table~\ref{tab:single-edit} and Table~\ref{tab:k4} is $\val{corpus.secreorder_orig.n}+\val{corpus.secreorder_followup.n}=\val{corpus.secreorder_comb.n}$ paired documents,}} not
@@ -277,19 +284,25 @@ deployment needs (this benchmark's harness bypasses it -- Section~\ref{sec:metho
 itself is a shared step for all six families;} \claim{render-gated-three-families}{render-gate verification is a sequential,
 conditional step layered on \emph{after} the edit, only for the three render-gated families,}
 detailed in Figure~\ref{fig:rendergate-arch} -- not an independent alternative path chosen from
-the start. \claim{original-host-two-of-three-depressed}{This split is exactly the property that Section~\ref{sec:render-gate} shows produces
-markedly different reliability behavior.}}
+the start. \claim{original-host-two-of-three-depressed}{On the original shared host, two of the three
+render-gated families showed markedly different reliability behavior
+(Section~\ref{sec:render-gate}).}}
 \label{fig:architecture}
 \end{figure}
 
 \subsection{Arms and isolation}
 \claim{arm-tool-surfaces}{The control arm receives \texttt{Read}, \texttt{Write}, \texttt{Edit}, and \texttt{Bash}, with
-no access to any purpose-built document-editing tool. The treatment arm receives exactly one
-bounded tool pair and \texttt{Read}, with no generic write access at all} -- \claim{table-tool-pair-vs-manifest}{for the
-table-structural family, for example, \texttt{insert\_table} and \texttt{remove\_table}.} We
+no access to any purpose-built document-editing tool. The treatment arm has no generic write
+access at all (\texttt{Write}, \texttt{Edit}, \texttt{Bash}, and similar tools are disabled); it is
+connected to the Meridian Docs server and directed to exactly one bounded tool pair and
+\texttt{Read}} -- \claim{table-tool-pair-vs-manifest}{for the
+table-structural family, for example, \texttt{insert\_table} and \texttt{remove\_table}.} The
+server's other tools remain callable, so the one-pair boundary is enforced by the transcript
+audit that follows rather than by the tool list itself. We
 audited every trial's transcript post hoc for isolation
 violations -- \claim{arm-tool-surfaces}{a control transcript referencing a purpose-built tool name, or a treatment
-transcript referencing any tool outside its one declared pair, would indicate a harness leak} --
+transcript referencing any tool outside its one declared pair and \texttt{Read}, would indicate a
+harness leak} --
 and found no such violation in any reported trial. \claim{anchors-pre-resolved-no-discovery}{\claim{indexing-tools-out-of-scope}{Neither arm's tool set includes a
 structure-discovery tool (e.g., \texttt{locate\_anchor}, \texttt{document\_outline}): the target
 anchor for each forward edit is resolved once, at corpus-build time, and supplied directly in the
@@ -315,14 +328,17 @@ Discovery and editing share the same tool surface deliberately, not incidentally
 \claim{anchor-id-stability}{\texttt{locate\_anchor} and \texttt{document\_outline} return the same identifier format
 (\texttt{w14:paraId}, or a content-derived fallback for paragraphs without one) that the editing
 tools themselves accept as a target,} so a call to one composes directly with a call to the
-other. \claim{anchors-pre-resolved-no-discovery}{\claim{fresh-anchor-resolution-mechanism}{Leaving discovery to the agent's own reading instead, as the control arm does, means
-locating a target by prose/structural interpretation rather than by a structurally valid id --
-\claim{state-drift-generic-degrades}{exactly the fragile targeting this benchmark's state-drift finding
-(Figure~\ref{fig:drift-mechanism}) traces the control arm's failures to.}}} Nor does staying correct
-across edits require any scheduled reindexing: \texttt{locate\_anchor} keeps no persistent index
+other. \claim{anchors-pre-resolved-no-discovery}{\claim{fresh-anchor-resolution-mechanism}{The control arm receives the same pre-resolved target id but no tool that resolves it: it
+must find the identified element in the raw XML itself and, across repeated cycles, keep track of
+the document's original state on its own --
+\claim{state-drift-generic-degrades}{the difference the state-drift finding
+(Figure~\ref{fig:drift-mechanism}) points to.}}} Staying correct across edits also requires no
+scheduled reindexing: \texttt{locate\_anchor} keeps no persistent index
 at all, re-parsing the live file fresh on every call, and \claim{anchor-id-stability}{the native \texttt{w14:paraId}
 identifier itself is not an externally-maintained index but an attribute OOXML stores directly on
-each paragraph, persisting automatically through ordinary saves.} \claim{indexing-tools-out-of-scope}{\claim{anchoredit-subset-scope}{A separate part of Meridian
+each paragraph, persisting automatically through ordinary saves. A content-derived fallback id,
+used where a paragraph has no \texttt{w14:paraId}, is instead recomputed from the document on each
+call (Section~\ref{sec:limitations}).} \claim{indexing-tools-out-of-scope}{\claim{anchoredit-subset-scope}{A separate part of Meridian
 Docs, \texttt{index\_document}, does maintain a persisted index for broader search/outline
 features outside this benchmark's scope};} it handles staleness by content-hash/mtime detection
 that fails closed on a mismatch, not a fixed reindexing schedule.
@@ -343,7 +359,9 @@ percentile method is degenerate (every possible resample is identical to the ori
 the interval collapses to a zero-width $[100,100]$ or $[0,0]$ and represents no real uncertainty)
 and we report the exact Clopper-Pearson interval instead, leaving every other row's percentile
 interval untouched; tables marked $^\dagger$ throughout this paper use this exact interval for
-that reason.} \claim{paired-permutation-test-2000}{Paired
+that reason. The one exception is Tier 2 of the multi-anchor tables (an anchor-weighted
+per-document mean, Section~\ref{sec:methods-multianchor}), which has no single binomial count to
+base an exact interval on, so its degenerate interval is shown as computed.} \claim{paired-permutation-test-2000}{Paired
 arms are compared with a paired sign-flip
 permutation test (\val{harness.permutations} resamples)} \citep{nichols2002permutation}, with a fixed random seed
 set before any result existed. \claim{report-every-comparison}{\claim{six-task-families}{\claim{preregistration-status}{We report every comparison this benchmark's design specifies (six
@@ -363,11 +381,12 @@ harness- or infrastructure-level failure unrelated to the task itself (a network
 process-level subprocess timeout) is excluded from the denominator of whichever arm's chain it
 actually prevented from completing for that document: both arms' when the failure blocks either
 arm's chain from running at all, \claim{section-reorder-combined-corpus-n55-n56}{or a single arm's when only one arm's process was affected, as in
-the two harness-flake cases we report (Appendix~\ref{app:notes}, Notes a--b),} rather than scored as
-a failure.} \claim{per-trial-timeout-history}{The per-trial subprocess timeout is a single global value applied to
-every family, not a per-family budget. It was \val{harness.timeout_initial_s}s for trials run before 2026-09-07,
-\claim{defect-6-numbered-refs}{when it was doubled to \val{harness.timeout_raised_s}s after a host-contention episode
-(Section~\ref{sec:defects}, defect~\ref{def:seq-fallback})}; which families ran under which ceiling
+the harness-flake case we report (Appendix~\ref{app:notes}, Note a),} rather than scored as
+a failure.} \claim{section-reorder-combined-corpus-n55-n56}{Appendix~\ref{app:notes}'s Note b is not an
+instance of this rule but a disclosed exception to it.} \claim{per-trial-timeout-history}{The per-trial subprocess timeout is a single global value applied to
+every family, not a per-family budget. It was \val{harness.timeout_initial_s}s until 2026-09-07,
+when it was doubled to \val{harness.timeout_raised_s}s after a host memory-exhaustion episode (many concurrent sessions on the
+shared host); which families ran under which ceiling
 follows from when their trials ran (the render-gated families mostly ran later), not from a
 per-family design.} \claim{timeout-900-censored-evidence}{Since 2026-09-18 it has been \val{harness.timeout_final_s}s, set from
 recorded wall-clock times:} across the \val{harness.walltime.chain_results.count} chain results recorded before then (the
@@ -379,7 +398,7 @@ recently as 2026-09-12.} \claim{timeout-900-censored-evidence}{Because these tim
 ceiling applied, \claim{per-trial-timeout-history}{\val{harness.timeout_final_s}s (\val{harness.timeout_raise_factor}$\times$ the previous value, the same factor as
 this project's earlier soffice-timeout raise) is an evidence-informed setting with headroom above
 the observed maximum, not a percentile derived from uncensored data.}} \claim{task-failure-scored-not-excluded}{A chain that executed to completion and reports a genuine
-task-level failure -- \claim{verification-confound-reliability-cost}{including a write-time structural-verification failure under host
+task-level failure -- \claim{verification-confound-reliability-cost}{including a write-time render-verification failure under host
 contention (Section~\ref{sec:render-gate}), since that is a property of the treatment condition
 being measured, not an unrelated infrastructure artifact} -- is scored as a failure at a fixed
 denominator.} \claim{k4-design-definition}{The one repeated-cycling ($K=4$) design compares steady-state pass rate (the
@@ -413,14 +432,15 @@ random-effects intraclass correlation estimated directly from the extension's ow
 whenever anchors within a document are correlated -- is never reported without its
 clustering-aware counterpart beside it}} \citep{irsova2025spuriousprecision}. \claim{section-reorder-icc-open-finding}{For section reordering
 specifically, \claim{multianchor-tier3-neff}{the treatment arm's intraclass correlation, computed on the extension's own real
-data, is $\val{maext.secreorder.treatment.icc}$ (every anchor within
+but preliminary, not-yet-merged data, is $\val{maext.secreorder.treatment.icc}$ (every anchor within
 a document passes or fails together, collapsing the naive pooled $N$ from \val{maext.secreorder.treatment.pooled.n} to an effective $N$ of
 \val{maext.secreorder.treatment.neff.n}, identical to the document count}), while the control arm shows no such clustering ($\text{ICC}=\val{maext.secreorder.control.icc}$).}
 \claim{section-reorder-icc-open-finding}{This is consistent with section reordering's extra anchors moving a different heading pair within
 the \emph{same} underlying document and content, a structurally different, more document-bound
-kind of additional sample than the body-anchor families' spatially distinct insertion points --
-and the asymmetry between arms suggests this may be a property of the treatment condition, not
-merely of the family.} \claim{multianchor-equation-caption-merged}{For equation and caption, this extension's tiered outcomes are merged into
+kind of additional sample than the body-anchor families' spatially distinct insertion points.
+Equation's and caption's treatment arms show no such clustering
+(Table~\ref{tab:render-gate-multianchor}), so this looks specific to the family rather than to the
+treatment condition in general.} \claim{multianchor-equation-caption-merged}{For equation and caption, this extension's tiered outcomes are merged into
 the confirmatory corpus's own reported numbers in Section~\ref{sec:results-multianchor}, once the
 exact canonical original-corpus source was identified and independently verified rather than
 assumed.} \claim{multianchor-sr-table-not-merged}{Section reordering's own combined-corpus number (Section~\ref{sec:single-edit}) has a
@@ -434,13 +454,14 @@ guess (Section~\ref{sec:limitations}).}
 \claim{original-host-two-of-three-depressed}{\claim{verification-confound-reliability-cost}{The three write-time-verification-gated families (Section~\ref{sec:render-gate}) were originally
 run on a shared Windows host also used for other concurrent work, and their pass rates were
 markedly lower for two of the three.}} \claim{rerun-is-direct-test}{To test whether that reflected the editing operations
-themselves or the host, we re-ran the identical benchmark} -- unchanged model, corpus, harness,
-and grading code -- on a dedicated, single-tenant cloud CPU instance (4 dedicated vCPUs, no other
+themselves or the host, we re-ran the benchmark} -- unchanged model, harness, and grading code,
+on the same primary corpus, which now also supplies equation's control arm
+(Appendix~\ref{app:notes}, Note c) -- on a dedicated, single-tenant cloud CPU instance (4 dedicated vCPUs, no other
 tenant or process competing for the same physical resources). \claim{rerun-identical-benchmark-dedicated-host}{Two environment differences were
 necessary and are disclosed here rather than left implicit.} First, the instance runs Linux, so
 the write-time verification step's Microsoft Word COM backend (Windows-only) is unavailable; only
 \claim{sequential-backend-fallback-order}{its LibreOffice/\texttt{soffice} backend runs (\claim{concurrent-fallback-fix-never-shipped}{tried first in the fallback order described in
-Section~\ref{sec:defects}; Word COM is invoked only if it fails}).} \claim{backend-choice-no-effect-on-outcome}{This does not change what is
+Section~\ref{sec:defects}; Word COM is invoked only if it fails}).} \claim{backend-choice-no-effect-on-outcome}{We do not expect this to change what is
 being measured: an audit of every persisted chain result across the original host's full run
 history found the Word COM backend never succeeded on its own in any recorded chain} (it only
 ever appears in failure records where both backends failed together). We are explicit that this
@@ -459,24 +480,26 @@ fail under root were re-run under that account, and only the re-run results are 
 
 \subsection{Cross-family cascading edits: \texttt{respec\_cascade}}
 \label{sec:methods-respec-cascade}
-\claim{k4-significant-advantage}{\claim{k4-the-one-significant-finding}{Section~\ref{sec:section-reorder}'s $K=4$ result is this benchmark's one significant finding},} but
-it tests only one family repeated against itself. \claim{respec-generalization-strength}{\claim{respec-preregistered-two-way-generalization}{\claim{preregistration-status}{A separate protocol, preregistered
+\claim{k4-significant-advantage}{\claim{k4-the-one-significant-finding}{Section~\ref{sec:section-reorder}'s $K=4$ result is the one significant comparison among the
+primary benchmark's final results (the six families, excluding the superseded
+Table~\ref{tab:render-gate} and this extension)},} but it tests only one family repeated against
+itself. \claim{respec-generalization-strength}{\claim{respec-preregistered-two-way-generalization}{\claim{preregistration-status}{A separate protocol, preregistered
 2026-09-20, generalizes it two ways
 at once}: \claim{respec-five-families-table-dropped}{across all five families in a single chain rather than one family alone,} and under a
 mid-chain \emph{reversal} of a structural requirement rather than uniform repetition.}} \claim{respec-17-steps-three-phases}{Each chain is
 one document, one arm, \val{respec.chain.steps} steps in three phases: BUILD (\val{respec.build_phase.steps} steps, one forward insert per family, in
 \claim{respec-five-families-table-dropped}{the fixed rotation $R' = [\text{bibliography}, \text{citation}, \text{section reorder},
 \text{equation}, \text{caption}]$; \claim{table-tool-pair-vs-manifest}{table-structural is dropped from this rotation because
-\texttt{insert\_table}/\texttt{remove\_table} are confirmed absent from the live Meridian Docs tool
-manifest at corpus-build time}}); RESPEC (\val{respec.respec_phase.steps} steps, injected mid-chain: the citation inserted in BUILD
+\texttt{insert\_table}/\texttt{remove\_table} were missing from the Meridian Docs tool manifest the
+protocol checked at corpus-build time -- which, we later found, was a stale build of a separately
+installed copy of the server, not the harness's own server, which does expose both tools}}); RESPEC (\val{respec.respec_phase.steps} steps, injected mid-chain: the citation inserted in BUILD
 is removed, and the section moved in BUILD is redirected to a second, different destination instead
 of being undone) -- \claim{checkpoint-b-central-test}{this is the design's central, novel test, explained below;} and SECOND EXPOSURE
 (\val{respec.second_exposure_phase.steps} steps, forward then inverse for every family again, confirming the chain still ends where a
 correct execution requires).} \claim{checkpoint-b-central-test}{Every one of the three already-inserted, untouched targets
 (bibliography, equation, caption) must survive RESPEC's two edits completely unchanged --
-Checkpoint B's own keep-survival check,} \claim{grading-exact-order-vs-order-blind}{\claim{defect-8-collateral-check-citation}{\claim{respec-harness-defects-8-9}{scored with the same order-blind multiset comparison as the
-rest of this benchmark's collateral-damage checks (Section~\ref{sec:defects}, defect~\ref{def:respec-grader})}}
-specifically because a section move must not by itself count as drift.} Corpus, arms, and grading
+Checkpoint B's own keep-survival check,} \claim{grading-exact-order-vs-order-blind}{scored with an order-blind multiset comparison, adopted
+before any trial ran specifically because a section move must not by itself count as drift.} Corpus, arms, and grading
 discipline are otherwise identical to the rest of this benchmark: \claim{respec-corpus-author-owned-docs}{the same three real, author-owned
 documents already added under the multi-anchor extension} (Section~\ref{sec:results-multianchor}),
 \claim{respec-anchor-sets-none-excluded}{up to four anchor-sets per document (all twelve usable, none excluded)}, the same isolated
@@ -492,7 +515,8 @@ needed on a metered cloud host;} \claim{respec-model-change-interpretation}{this
 \claim{respec-k1-baseline}{A fresh, isolated $K=1$ baseline is run separately for every (document, anchor-set, family, arm)
 combination -- one single forward/inverse trial at the identical anchor used in that chain's own
 Phase 1/3}, on a fresh copy of the pristine document, \claim{run-chain-reused-unmodified}{reusing \texttt{run\_paper\_s7\_benchmark.py}'s
-own \texttt{run\_chain} completely unmodified} (\claim{respec-five-families-table-dropped}{\val{respec.baseline.n} trials: \val{corpus.personal.n} documents $\times$ \val{respec.anchorsets_per_doc.n} anchor-sets
+own \texttt{run\_chain}, unchanged except for the checkpoint-path fix in
+defect~\ref{def:doclabel-collision}} (\claim{respec-five-families-table-dropped}{\val{respec.baseline.n} trials: \val{corpus.personal.n} documents $\times$ \val{respec.anchorsets_per_doc.n} anchor-sets
 $\times$ \val{respec.chain.families} families $\times$ 2 arms}). This is what makes the two numbers this design reports
 meaningful together rather than separately: \claim{respec-k1-baseline}{whether a chain's Phase-3 outcome is lower than that
 same arm's own uncontested single-edit performance at the identical anchor (\emph{control\_drop},
@@ -524,8 +548,8 @@ Section reorder (combined, original + follow-up)$^{\text{b}}$ & control   & \val
                                        & treatment & \val{single.secreorder_comb.treatment.rate}\% & [\val{single.secreorder_comb.treatment.ci_lo}, \val{single.secreorder_comb.treatment.ci_hi}] & \val{single.secreorder_comb.treatment.n} & \\
 \bottomrule
 \end{tabular}
-\caption{\claim{render-gated-three-families}{Single-edit ($K=1$) results for the three families not gated by write-time
-structural-verification,} \claim{four-rows-two-corpus-stages}{shown across four rows since section reorder appears at two corpus
+\caption{\claim{render-gated-three-families}{Single-edit ($K=1$) results for the three families without write-time
+render verification,} \claim{four-rows-two-corpus-stages}{shown across four rows since section reorder appears at two corpus
 stages.} \claim{bib-citation-parity}{Bibliography and citation show a genuine, literal parity between arms.}
 \claim{section-reorder-k1-directional-not-significant}{\claim{single-edit-no-advantage}{Section reorder shows a directionally consistent but not-yet-significant advantage for the
 bounded tool at $K=1$};} see Section~\ref{sec:section-reorder} \claim{k4-uses-same-combined-corpus}{for the $K=4$ result on the same
@@ -537,14 +561,19 @@ express any uncertainty there.} Notes a--b: Appendix~\ref{app:notes}.}
 \end{table}
 
 \claim{bib-citation-parity}{Table~\ref{tab:single-edit} shows bibliography and citation with no measurable difference
-between arms: both reached a literal \val{single.bib.control.rate}\%/\val{single.bib.treatment.rate}\% parity} \claim{defects-disclosed-in-full}{once two real
-evaluation-harness defects (described in Section~\ref{sec:defects}) were found and fixed.}
+between arms: both reached a literal \val{single.bib.control.rate}\%/\val{single.bib.treatment.rate}\% parity} \claim{defects-disclosed-in-full}{once the causes of
+their earlier gaps were fixed. For bibliography, a tool gap failed every chain in both arms:
+\texttt{remove\_bibliography\_entry} left behind the References heading that
+\texttt{insert\_bibliography\_entry} creates when a document has none. We fixed the tool and gave
+control's prompt the same complete round trip to perform; separately, one treatment trial whose
+MCP server never loaded was re-run (the harness now retries that specific failure once). For
+citation, the fix was the two evaluation-harness defects of defect~\ref{def:two-harness}.}
 \claim{section-reorder-k1-directional-not-significant}{\claim{single-edit-no-advantage}{\claim{section-reorder-original-underpowered}{Section reordering's original \val{corpus.secreorder_orig.n}-document result looked directionally favorable to the bounded
 tool but was underpowered}
 ($p=\val{single.secreorder_orig.p}$); \claim{follow-up-corpus-48-preregistered}{\claim{corpus-preregistration}{a larger, independently preregistered \val{corpus.followup.n}-document follow-up corpus, combined with
 the original,}} narrowed but did not close that gap at $K=1$ ($p=\val{single.secreorder_comb.p}$)}.}
 
-\subsection{\claim{k4-the-one-significant-finding}{\claim{k4-significant-advantage}{Repeated cycling: the one significant finding}}}
+\subsection{\claim{k4-significant-advantage}{Repeated cycling: the bounded tool's significant advantage}}
 \label{sec:section-reorder}
 
 \begin{table}[h]
@@ -592,22 +621,23 @@ bottom row.}}
 \draw[arr] (c2) -- (c3);
 \draw[arr] (c3) -- (c4);
 \end{tikzpicture}
-\caption{\claim{fresh-anchor-resolution-mechanism}{The mechanism behind Table~\ref{tab:k4}'s result. \emph{C1--C4} label the four repeated
+\caption{\claim{fresh-anchor-resolution-mechanism}{The proposed mechanism behind Table~\ref{tab:k4}'s result. \emph{C1--C4} label the four repeated
 edit-undo cycles. \claim{anchor-id-stability}{Treatment re-resolves its target by
-a stable structural id fresh each cycle} (dashed: no real dependency between cycles). Control has
-no such anchor, so each cycle's unchecked edit builds on whatever the previous cycle actually
-left in the file} (solid: a real dependency an undetected mistake can cross).}
+structural id fresh each cycle} (dashed: no real dependency between cycles). Control is given the
+same id but no tool that re-resolves it, so each cycle's unchecked edit builds on whatever the
+previous cycle actually left in the file} (solid: a real dependency an undetected mistake can cross).}
 \label{fig:drift-mechanism}
 \end{figure}
 
 \claim{k4-significant-advantage}{\claim{k4-uses-same-combined-corpus}{\claim{k4-design-definition}{Run through four repeated edit-undo cycles rather than one,} the same \val{k4.secreorder.control.n}/\val{k4.secreorder.treatment.n}-document combined
-corpus} produced the single significant result in this benchmark (Table~\ref{tab:k4}): control's
+corpus} produced \claim{k4-the-one-significant-finding}{the one significant comparison among the primary benchmark's final
+results} (Table~\ref{tab:k4}): control's
 pass rate fell to \val{k4.secreorder.control.rate}\% while treatment held at \val{k4.secreorder.treatment.rate}\% ($p=\val{k4.secreorder.p}$).} \claim{preregistration-status}{This is the specific
 comparison the $K$-sweep design was built to
 make,} \claim{k4-uses-same-combined-corpus}{on the same corpus already reported at $K=1$.}
 
-\claim{fresh-anchor-resolution-mechanism}{We traced the mechanism directly, using the
-finer per-cycle grading breakdown below;} \claim{k4-uses-same-combined-corpus}{that breakdown covers only the \val{corpus.followup.n}-document follow-up
+\claim{fresh-anchor-resolution-mechanism}{The finer per-cycle grading breakdown below points to a
+mechanism;} \claim{k4-uses-same-combined-corpus}{that breakdown covers only the \val{corpus.followup.n}-document follow-up
 sub-corpus, since the full \val{k4.secreorder.control.n}/\val{k4.secreorder.treatment.n} combined corpus is not broken down at this granularity.} \claim{state-drift-generic-degrades}{Of the \val{k4.secreorder_followup.control.fails} follow-up-corpus control chains that failed, \val{k4.secreorder_followup.control.exact_order.fails} failed the exact-order
 restoration check: \claim{grading-exact-order-vs-order-blind}{\val{k4.secreorder_followup.control.order_c2plus.fails} for the first time on the second cycle or later} -- a dominant majority
 pattern, not a universal rule} -- and \val{k4.secreorder_followup.control.order_c1.fails} already on the first cycle (each passing that check
@@ -624,19 +654,20 @@ original layout'' itself across calls, and that reconstruction compounds error w
 \begin{figure}[h]
 \centering
 \includegraphics[width=0.85\textwidth]{figures/fig-single-edit-forest.pdf}
-\caption{\claim{render-gated-three-families}{Pass rate and 95\% CI by arm for the three families not gated by write-time
-structural-verification,} \claim{four-rows-two-corpus-stages}{shown across four rows since section reorder appears at two corpus
-stages (Table~\ref{tab:single-edit}, Table~\ref{tab:k4}).} \claim{forest-figure-ci-overlap}{\claim{bib-citation-parity}{Bibliography and
-citation show literal overlap;} \claim{section-reorder-k1-directional-not-significant}{\claim{single-edit-no-advantage}{section reorder's confidence intervals narrow but still overlap at
-$K=1$}} and separate cleanly at $K=4$,} \claim{k4-the-one-significant-finding}{the benchmark's one significant single-family comparison.}}
+\caption{\claim{render-gated-three-families}{Pass rate and 95\% CI by arm for the three families without write-time
+render verification,} \claim{four-rows-two-corpus-stages}{shown across four rows since section reorder appears at two cycling
+depths, $K=1$ and $K=4$, both on the combined corpus (Table~\ref{tab:single-edit}, Table~\ref{tab:k4}).} \claim{forest-figure-ci-overlap}{\claim{bib-citation-parity}{Bibliography and
+citation show literal overlap;} \claim{section-reorder-k1-directional-not-significant}{\claim{single-edit-no-advantage}{section reorder's confidence intervals overlap partly at
+$K=1$}} and separate cleanly at $K=4$,} \claim{k4-the-one-significant-finding}{the one significant comparison among the primary
+benchmark's final results.}}
 \label{fig:single-edit}
 \end{figure}
 
-\claim{forest-figure-ci-overlap}{Figure~\ref{fig:single-edit} shows this pattern directly: \claim{four-rows-two-corpus-stages}{\claim{section-reorder-k1-directional-not-significant}{\claim{single-edit-no-advantage}{\claim{bib-citation-parity}{three of the four comparisons show
-near-total overlap between arms,} while section reorder's confidence intervals separate cleanly
-only once cycling reaches $K=4$}.}}}
+\claim{forest-figure-ci-overlap}{Figure~\ref{fig:single-edit} shows this pattern directly: \claim{four-rows-two-corpus-stages}{\claim{section-reorder-k1-directional-not-significant}{\claim{single-edit-no-advantage}{\claim{bib-citation-parity}{bibliography and citation show
+near-total overlap between arms,} section reorder's confidence intervals overlap only partly at
+$K=1$, and they separate cleanly only once cycling reaches $K=4$}.}}}
 
-\subsection{Write-time structurally-verified families}
+\subsection{Write-time render-verified families}
 \label{sec:render-gate}
 
 \claim{render-gated-three-families}{The remaining three families (equation, table, caption) share one architectural property the
@@ -653,8 +684,9 @@ insertion each construct a brand-new, schema-fragile structure from scratch -- a
 \texttt{<m:oMath>} tree, a \texttt{<w:tbl>} grid whose child element order OOXML validates
 strictly, or a SEQ-numbered field wrapped in a document-unique bookmark pair} -- where a structural
 re-parse can confirm the result is well-formed XML but not that Word will actually open it.
-\claim{render-gated-three-families}{\claim{bib-citation-mechanical-simplicity}{Bibliography and citation insertion instead append or create only plain runs or an
-already-proven complex-field idiom onto an already-valid paragraph, and section reordering
+\claim{render-gated-three-families}{\claim{bib-citation-mechanical-simplicity}{Bibliography insertion instead adds only a plain-run paragraph (plus, when
+a document has none, a plain References heading), citation insertion adds only plain runs or an
+already-proven complex-field idiom within an already-valid paragraph, and section reordering
 relocates already-valid elements without synthesizing any new XML shape at all: none of the other
 three families introduces a genuinely novel structural risk, so they are gated with structural
 verification alone, or not at all, rather than paying render-gate's latency cost.}}
@@ -691,7 +723,8 @@ entirely -- they write raw XML directly, with no independent render-verification
 Figure~\ref{fig:rendergate-arch} shows this flow. \claim{defects-all-fixed-status}{\claim{concurrent-fallback-fix-never-shipped}{\claim{sequential-backend-fallback-order}{The verification step tries two independent
 renderer backends in a fixed fallback order, advancing to the second only if the first fails
 \claim{defect-6-numbered-refs}{(Section~\ref{sec:defects}, defect~\ref{def:seq-fallback}, which documents this fallback as sequential rather than
-concurrent)}}}} -- \claim{backend-choice-no-effect-on-outcome}{the pass/fail decision is unaffected by which backend succeeds.}
+concurrent)}}}} -- \claim{backend-choice-no-effect-on-outcome}{a success from either backend counts as a pass (whether the backend
+itself affects outcomes is discussed in Section~\ref{sec:methods-rerun}).}
 
 \begin{table}[h]
 \centering
@@ -710,7 +743,7 @@ Caption         & control   & \val{rg.caption.control.rate}\%  & [\val{rg.captio
                 & treatment & \val{rg.caption.treatment.rate}\%  & [\val{rg.caption.treatment.ci_lo}, \val{rg.caption.treatment.ci_hi}]  & \val{rg.caption.treatment.n} & & \\
 \bottomrule
 \end{tabular}
-\caption{Write-time structurally-verified families as originally measured, on a shared,
+\caption{Write-time render-verified families as originally measured, on a shared,
 variably-contended host. \claim{control-never-invokes-verification}{\claim{verification-confound-reliability-cost}{Control never invokes the verification step (it edits raw XML
 directly) and is unaffected by host contention.}} \claim{equation-original-control-unpaired}{Equation's treatment $n=\val{rg.equation.treatment.n}$ has no paired
 significance test here because its control arm comes from a different, unpaired corpus (note
@@ -732,8 +765,9 @@ XML directly,} and they pass at \val{rg.equation.control.rate}\%--\val{rg.captio
 bounded tool's help.} \claim{original-host-two-of-three-depressed}{Treatment's numbers are markedly lower for two of the three and, critically,
 \emph{not comparable to one another}: \claim{table-structural-close-originally}{table-structural insertion reaches \val{rg.table.treatment.rate}\% -- statistically
 indistinguishable from its own control (\val{rg.table.control.rate}\%, paired $p=\val{rg.table.p}$)} -- while equation and caption
-insertion remain far lower.} \claim{render-gate-retry-history}{\claim{defects-materially-changed-numbers}{Section~\ref{sec:defects} reports
-why these numbers moved substantially over the course of this project.}}
+insertion remain far lower.} \claim{render-gate-retry-history}{\claim{defects-materially-changed-numbers}{Section~\ref{sec:defects}
+(defects~\ref{def:discarded-runs} and~\ref{def:cert-failure}) reports why these numbers moved over
+the course of this project.}}
 
 A plausible alternative explanation is that this gap reflects a real difference in
 rendering-verification cost between task types -- e.g., that inserting a numbered caption field
@@ -749,8 +783,9 @@ themselves}: ordinary shared-host scheduling contention (evidently not sufficien
 isolated, single-worker re-run of caption's remaining chains still failed almost completely), and
 \claim{external-drive-unreliable}{a physically unreliable external drive on the test host that disconnected twice during this
 project (confirmed via Windows disk-layer I/O retry/error events, not inferred from missing files
-alone).}} \claim{rerun-is-direct-test}{Section~\ref{sec:methods-rerun} tests this attribution directly with a controlled re-run
-rather than resting on it as an inference from indirect evidence.}
+alone).}} \claim{rerun-is-direct-test}{Section~\ref{sec:methods-rerun} tests this attribution directly with a re-run on a
+dedicated host rather than resting on it as an inference from indirect evidence; because that
+host removes both causes at once, the re-run does not separate them.}
 
 \begin{table}[h]
 \centering
@@ -768,7 +803,7 @@ Caption             & control   & \val{rgclean.caption.control.rate}\% & [\val{r
                     & treatment & \val{rgclean.caption.treatment.rate}\% & [\val{rgclean.caption.treatment.ci_lo}, \val{rgclean.caption.treatment.ci_hi}]$^\dagger$ & \val{rgclean.caption.treatment.n} & & \\
 \bottomrule
 \end{tabular}
-\caption{\claim{rerun-identical-benchmark-dedicated-host}{The identical benchmark -- same model, same \val{corpus.primary.n}-document corpus, same harness and
+\caption{\claim{rerun-identical-benchmark-dedicated-host}{The benchmark -- same model, same \val{corpus.primary.n}-document corpus, same harness and
 grading code -- re-run on a dedicated, single-tenant host} (Section~\ref{sec:methods-rerun}). \claim{rerun-closed-gap-completely}{All
 three families close completely: every one of the \val{rgclean.chains.n} chains (3 families $\times$ 2 arms
 $\times$ \val{corpus.primary.n} documents) independently graded pass,} \claim{rerun-verified-live-wall-times}{with real, varied per-trial wall times (e.g.\
@@ -782,9 +817,10 @@ percentile method itself cannot express any uncertainty there.}}
 \label{tab:render-gate-clean}
 \end{table}
 
-\claim{rerun-is-direct-test}{\claim{gap-causes-contention-and-drive}{Table~\ref{tab:render-gate-clean} is the direct test of the host-contention hypothesis, not
-another indirect argument for it}:} \claim{rerun-identical-benchmark-dedicated-host}{identical model, corpus, harness, and grading code, on a
-dedicated single-tenant host instead of a shared, contended one.} \claim{rerun-closed-gap-completely}{The gap closes completely.
+\claim{rerun-is-direct-test}{\claim{gap-causes-contention-and-drive}{Table~\ref{tab:render-gate-clean} is the direct test of the host-environment attribution, not
+another indirect argument for it}:} \claim{rerun-identical-benchmark-dedicated-host}{the same model, harness, and grading code on a dedicated
+single-tenant host instead of a shared, contended one, with the environment differences disclosed
+in Section~\ref{sec:methods-rerun} and equation's control now drawn from the primary corpus.} \claim{rerun-closed-gap-completely}{The gap closes completely.
 \claim{original-host-two-of-three-depressed}{Equation rises from \val{rg.equation.treatment.rate}\% to \val{rgclean.equation.treatment.rate}\%; caption rises from \val{rg.caption.treatment.rate}\% to \val{rgclean.caption.treatment.rate}\%; \claim{table-structural-close-originally}{table-structural, already
 statistically indistinguishable from its control at \val{rg.table.treatment.rate}\%, also reaches \val{rgclean.table.treatment.rate}\%.}} All three arms
 now match their own controls exactly ($p=\val{rgclean.all.p}$ throughout).} \claim{gap-was-deployment-artifact}{\claim{verification-confound-reliability-cost}{The original gap in
@@ -813,7 +849,7 @@ task, does it correctly; here, \claim{never-persist-corrupt-document}{\claim{ver
 persist a change at all whenever it cannot confirm correctness under the host conditions of the
 moment,} which is a gap in \emph{how often the arm successfully persists a change}, not in
 \emph{whether a persisted change is correct}.} \claim{rerun-is-direct-test}{This distinction makes a specific, falsifiable
-prediction: removing host contention should close the gap.} \claim{rerun-closed-gap-completely}{\claim{rerun-identical-benchmark-dedicated-host}{It does -- on a dedicated host,
+prediction: removing the original host conditions should close the gap.} \claim{rerun-closed-gap-completely}{\claim{rerun-identical-benchmark-dedicated-host}{It does -- on a dedicated host,
 caption's treatment reaches the identical \val{rgclean.caption.treatment.rate}\% as its control} ($p=\val{rgclean.caption.p}$),} \claim{gap-was-deployment-artifact}{confirming the
 verification-reliability reading over a capability-limitation one.}
 
@@ -827,7 +863,7 @@ dedicated-host re-run's own per-document results
 (Section~\ref{sec:methods-rerun}) recompute to the identical numbers already published in
 Table~\ref{tab:render-gate-clean} \claim{rerun-closed-gap-completely}{(equation and caption, both \val{rgclean.equation.control.rate}\%/\val{rgclean.equation.treatment.rate}\%, $n=\val{rgclean.equation.control.n}$, $p=\val{rgclean.equation.p}$)} before
 any extension data is added, which is what makes merging the two sources onto the same
-per-document identity trustworthy rather than a guess.} \claim{multianchor-sr-table-not-merged}{table-structural and section reordering are
+per-document identity trustworthy rather than a guess.} \claim{multianchor-sr-table-not-merged}{Table-structural and section reordering are
 not included here: the former has no multi-anchor extension run at all, and the latter's
 currently-published number is itself already a two-corpus merge (Table~\ref{tab:single-edit},
 Section~\ref{sec:single-edit}) with a more complex provenance question not yet resolved with the
@@ -860,7 +896,9 @@ control \val{ma.caption.control.t1.rate}\% [\val{ma.caption.control.t1.ci_lo}, \
 \val{ma.caption.treatment.t1.rate}\% [\val{ma.caption.treatment.t1.ci_lo}, \val{ma.caption.treatment.t1.ci_hi}] / [\val{ma.caption.treatment.t2.ci_lo}, \val{ma.caption.treatment.t2.ci_hi}] / [\val{ma.caption.treatment.t3.ci_lo}, \val{ma.caption.treatment.t3.ci_hi}] (Tiers 1/2/3 respectively).} Paired $p$ is reported
 per tier in the order Tier 1 / Tier 2 / Tier 3, with a dash where a tier's own paired test is
 not separately computed (Tier 3's naive pooled data is not paired at the trial level, only the
-per-document Tier 1/2 means are). \claim{clopper-pearson-at-degenerate-rates}{$^\dagger$Exact Clopper-Pearson interval (Section~\ref{sec:methods-statistics}).}}
+per-document Tier 1/2 means are). \claim{clopper-pearson-at-degenerate-rates}{$^\dagger$Exact Clopper-Pearson interval (Section~\ref{sec:methods-statistics});
+every Tier 3 interval at 100\% is also exact Clopper-Pearson, and a Tier 2 interval at 100\% is the
+degenerate $[100, 100]$.}}
 \label{tab:render-gate-multianchor}
 \end{table}
 
@@ -893,17 +931,19 @@ Checkpoint B keep-survival & control   & \val{respec.keepsurvival.control.t1.rat
 \caption{\texttt{respec\_cascade}: \claim{respec-anchor-sets-none-excluded}{\val{respec.chains.n} chains (\val{corpus.personal.n} documents $\times$ \val{respec.anchorsets_per_doc.n} anchor-sets $\times$ 2 arms,
 all twelve anchor-sets usable).} \claim{respec-17-steps-three-phases}{``Whole-chain composite pass'' requires all three phases
 (BUILD, RESPEC, SECOND EXPOSURE) to pass;} \claim{task-failure-scored-not-excluded}{\claim{respec-control-chains-broke}{\claim{respec-anchor-sets-none-excluded}{a chain that froze mid-protocol on a package-validity
-gate is scored as a failure here, not excluded}}} (Section~\ref{sec:methods-respec-cascade}).
+gate is scored as a failure here, not excluded}}} (Section~\ref{sec:methods-statistics}). One control chain whose
+Phase-3 grading returned no verdict is left out of the Tier 2 and Tier 3 composite denominators;
+scored as a failure instead, both would match Tier 1's \val{respec.composite.control.t1.rate}\%.
 \claim{checkpoint-b-central-test}{``Checkpoint B keep-survival'' is whether the three already-inserted, untouched targets
 (bibliography, equation, caption) survive RESPEC's two edits completely unchanged.} Full 95\% CIs:
 composite control \val{respec.composite.control.t1.rate}\% [\val{respec.composite.control.t1.ci_lo}, \val{respec.composite.control.t1.ci_hi}] / \val{respec.composite.control.t2.rate}\% [\val{respec.composite.control.t2.ci_lo}, \val{respec.composite.control.t2.ci_hi}] / \val{respec.composite.control.t3.rate}\% [\val{respec.composite.control.t3.ci_lo}, \val{respec.composite.control.t3.ci_hi}], composite treatment \val{respec.composite.treatment.t1.rate}\%
 [\val{respec.composite.treatment.t1.ci_lo}, \val{respec.composite.treatment.t1.ci_hi}] / \val{respec.composite.treatment.t2.rate}\% [\val{respec.composite.treatment.t2.ci_lo}, \val{respec.composite.treatment.t2.ci_hi}] / \val{respec.composite.treatment.t3.rate}\% [\val{respec.composite.treatment.t3.ci_lo}, \val{respec.composite.treatment.t3.ci_hi}]; keep-survival control \val{respec.keepsurvival.control.t1.rate}\% [\val{respec.keepsurvival.control.t1.ci_lo}, \val{respec.keepsurvival.control.t1.ci_hi}] / \val{respec.keepsurvival.control.t2.rate}\%
 [\val{respec.keepsurvival.control.t2.ci_lo}, \val{respec.keepsurvival.control.t2.ci_hi}] / \val{respec.keepsurvival.control.t3.rate}\% [\val{respec.keepsurvival.control.t3.ci_lo}, \val{respec.keepsurvival.control.t3.ci_hi}], \claim{clopper-pearson-at-degenerate-rates}{keep-survival treatment \val{respec.keepsurvival.treatment.t1.rate}\% [\val{respec.keepsurvival.treatment.t1.ci_lo}, \val{respec.keepsurvival.treatment.t1.ci_hi}] / \val{respec.keepsurvival.treatment.t2.rate}\% [\val{respec.keepsurvival.treatment.t2.ci_lo}, \val{respec.keepsurvival.treatment.t2.ci_hi}] /
 \val{respec.keepsurvival.treatment.t3.rate}\% [\val{respec.keepsurvival.treatment.t3.ci_lo}, \val{respec.keepsurvival.treatment.t3.ci_hi}] (Tiers 1/2/3 respectively).} \claim{clopper-pearson-at-degenerate-rates}{$^\dagger$Exact Clopper-Pearson interval
-(Section~\ref{sec:methods-statistics}).} \claim{checkpoint-b-leak-p0305}{\claim{respec-tier12-underpowered}{Both measures' Tier 1/2 paired tests are underpowered at
-$N=\val{corpus.personal.n}$ documents, the same limitation already disclosed for every Tier-1 comparison in this paper
-(Section~\ref{sec:methods-multianchor}); the anchor-set-level tests below are the properly-powered
-versions of the same two comparisons.}}}
+(Section~\ref{sec:methods-statistics}); every Tier 3 interval at 100\% is also exact
+Clopper-Pearson, and a Tier 2 interval at 100\% is the degenerate $[100, 100]$.} \claim{checkpoint-b-leak-p0305}{\claim{respec-tier12-underpowered}{Both measures' Tier 1/2 paired tests have only
+$N=\val{corpus.personal.n}$ documents and are underpowered; the anchor-set-level tests below are higher-powered
+versions of the same two comparisons, though no formal power analysis was run.}}}
 \label{tab:respec-cascade-headline}
 \end{table}
 
@@ -928,8 +968,8 @@ control, \val{respec.drop.treatment.n} for treatment -- \claim{respec-control-ch
 family's Phase-3 step at all, itself part of the finding}). Control's cascade performance runs \val{respec.drop.control.diff_pp}
 points below its own single-edit baseline ($p=\val{respec.drop.control.p}$, $n=\val{respec.drop.control.n}$); treatment shows no such gap
 (+\val{respec.drop.treatment.diff_pp} points, $p=\val{respec.drop.treatment.p}$, $n=\val{respec.drop.treatment.n}$) -- \claim{state-drift-generic-degrades}{not significant on its own at this $N$, but the same direction
-Section~\ref{sec:discussion} already argues for mechanistically: \claim{fresh-anchor-resolution-mechanism}{a tool that re-resolves its target
-fresh each call does not accumulate the compounding state-drift risk a generic-tool agent
+as the mechanism proposed in Section~\ref{sec:section-reorder}: \claim{fresh-anchor-resolution-mechanism}{a tool that re-resolves its target
+fresh each call should not accumulate the compounding state-drift risk a generic-tool agent
 reconstructing document state across many edits does.}} \claim{clopper-pearson-at-degenerate-rates}{Per-family, treatment's Tier-1 pass rate is a
 literal \val{respec.perfamily.treatment.t1.rate}\% (Clopper-Pearson $[\val{respec.perfamily.treatment.t1.ci_lo}, \val{respec.perfamily.treatment.t1.ci_hi}]$) \claim{respec-five-families-table-dropped}{on every one of the five families}}; control ranges from
 \val{respec.perfamily.control.t1.rate_min}\% (bibliography, section reorder, equation, caption) to \val{respec.perfamily.control.t1.rate_max}\% (citation) -- \claim{respec-tier12-underpowered}{none individually
@@ -941,14 +981,14 @@ control chains (\val{respec.broken.control.rate}\%) broke entirely mid-protocol 
 document badly enough that a later step's package-validity gate refused to continue -- against \val{respec.broken.treatment.count} of
 \val{respec.chains.treatment.n} treatment chains.} This matches defects already observed and fixed during this protocol's own
 development (duplicate-heading and section-position-drift defects), \claim{fresh-anchor-resolution-mechanism}{\claim{state-drift-generic-degrades}{consistent with the mechanism
-already traced in
-Section~\ref{sec:section-reorder}: unbounded raw-XML editing degrades further, and more
-catastrophically, as more edits accumulate on the same document.}} \claim{respec-harness-defects-8-9}{\claim{ten-defects-count}{\claim{defect-8-collateral-check-citation}{Two further real defects in this
+proposed in Section~\ref{sec:section-reorder}, though not a direct test of it: this design's
+direct test of degradation as edits accumulate, control's cascade performance against its own
+single-edit baseline, is not significant at this $N$ (above).}} \claim{respec-harness-defects-8-9}{\claim{ten-defects-count}{\claim{defect-8-collateral-check-citation}{Two further real defects in this
 extension's own harness were found and fixed during this run, disclosed alongside this benchmark's
 other eight (Section~\ref{sec:defects}, defects~\ref{def:respec-grader}--\ref{def:doclabel-collision})};}} both were verified directly against the real
 checkpoint data before and after the fix.
 
-\section{\claim{defects-all-fixed-status}{\claim{ten-defects-count}{Ten real defects found and fixed}}}
+\section{\claim{defects-all-fixed-status}{\claim{ten-defects-count}{Ten real defects found and disclosed}}}
 \label{sec:defects}
 
 The reported numbers depend on the harness, evaluator, and infrastructure that produced them, and
@@ -987,18 +1027,26 @@ rather than fold it silently into a final figure.}
   external drive documented in Section~\ref{sec:limitations} (Limitations, factor Four),} and the API's certificate was confirmed to verify correctly again
   immediately afterward. \claim{render-gate-retry-history}{\claim{infra-failure-excluded-from-denominator}{We re-ran these \val{defects.cert_failure.count} trials under confirmed-healthy network conditions
   rather than counting them as capability failures:} equation ultimately recovered from \val{defects.cert_equation.treatment.passes_before}/\val{rg.equation.treatment.n} to
-  \val{rg.equation.treatment.passes}/\val{rg.equation.treatment.n} and caption from \val{defects.cert_caption.treatment.passes_before}/\val{rg.caption.treatment.n} to \val{rg.caption.treatment.passes}/\val{rg.caption.treatment.n} (Table~\ref{tab:render-gate}, across several subsequent
-  retry rounds -- see Section~\ref{sec:render-gate} for the full account;} this item's own retries
-  are what first exposed the drive problem). \claim{render-gate-retry-history}{\claim{defects-materially-changed-numbers}{Before this
+  \val{rg.equation.treatment.passes}/\val{rg.equation.treatment.n} and caption from \val{defects.cert_caption.treatment.passes_before}/\val{rg.caption.treatment.n} to \val{rg.caption.treatment.passes}/\val{rg.caption.treatment.n} (Table~\ref{tab:render-gate}), over several retry rounds;} this item's own retries
+  are what first exposed the drive problem. \claim{render-gate-retry-history}{\claim{defects-materially-changed-numbers}{Before this
   item, Table~\ref{tab:render-gate}'s numbers for these two families had silently included these
   \val{defects.cert_failure.count} as ordinary capability failures -- a disclosure/reporting inconsistency corrected here and
   in that table.}}
-\item\label{def:two-harness} \claim{defects-disclosed-in-full}{\claim{ten-defects-count}{\textbf{Two further evaluation-harness defects}} -- an inverse-trial paragraph-id
-  resolution bug affecting the citation family, and a statistics-regeneration gap that left a
-  stale number published after an unrelated fix -- \claim{supplementary-docs-location}{are described in full in the project's own
-  working notes (\texttt{docs/} in the repository below) and omitted here for space.}}
-\item\label{def:seq-fallback} \claim{defect-6-numbered-refs}{\claim{concurrent-fallback-fix-never-shipped}{\textbf{Sequential backend fallback could cost more time than the harness's own outer
-  budget allowed -- and \claim{defects-all-fixed-status}{the fix for it never actually shipped.}}}} \claim{sequential-backend-fallback-order}{The write-time verification
+\item\label{def:two-harness} \claim{defects-disclosed-in-full}{\claim{ten-defects-count}{\textbf{Two further evaluation-harness defects}}, both affecting the citation family.}
+  First, an inverse-trial paragraph-id bug: the harness resolved the citation anchor's id once,
+  from the unedited document, and reused it for the inverse call. The original-corpus documents
+  carry no native \texttt{w14:paraId}, so every citation anchor used a content-derived fallback
+  id, and the forward edit's own marker changed that paragraph's text and with it the id, leaving
+  the inverse call a stale one. Control, which locates the paragraph by a fresh text search, was
+  unaffected. We fixed the harness to build the inverse call only after the forward step,
+  re-resolving the id from the forward output, and re-ran both corpus splits in full: no inverse
+  marker-removal failure remained. Second, a statistics-regeneration gap: after the statistics
+  code was fixed to exclude a timed-out chain rather than score it as a failure
+  (Section~\ref{sec:methods-statistics}), citation's reported numbers were never regenerated, so
+  a \val{harness.timeout_initial_s}-second timeout still counted as a failure. A later audit re-ran the fixed script on the same
+  run data, moving citation's treatment arm to \val{single.cite.treatment.rate}\% ($n=\val{single.cite.treatment.n}$); no code changed.
+\item\label{def:seq-fallback} \claim{defect-6-numbered-refs}{\claim{concurrent-fallback-fix-never-shipped}{\textbf{Sequential backend fallback could use a large share of the harness's outer
+  per-trial budget -- and \claim{defects-all-fixed-status}{the fix for it never actually shipped.}}}} \claim{sequential-backend-fallback-order}{The write-time verification
   step's two backends (Section~\ref{sec:render-gate})
   were tried sequentially,} each with its own retry-bounded \val{harness.render_backend_timeout_s}-second timeout -- discovering that
   both failed could cost up to their combined worst case (approximately \val{defects.fallback_sequential.worst_s} seconds), \claim{per-trial-timeout-history}{over half
@@ -1014,7 +1062,7 @@ rather than fold it silently into a final figure.}
   or chained -- so this correction changes no reported pass/fail number: \claim{rerun-identical-benchmark-dedicated-host}{a dedicated,
   uncontended confirmatory host has no double-backend-timeout latency problem to race against
   in the first place.} What it does mean is that on the original contended host, a chain whose
-  both backends genuinely failed may still have been silently killed by the outer timeout
+  both backends genuinely failed, across the agent's repeated tool calls within one trial, may still have been silently killed by the outer timeout
   mid-verification rather than gracefully reporting "both backends failed," exactly the failure
   mode this fix was meant to prevent.
 \item\label{def:root-cli} \claim{rerun-nonroot-account}{\textbf{The confirmatory re-run's CLI silently refused every trial identically, and the
@@ -1070,25 +1118,26 @@ rather than fold it silently into a final figure.}
   was computed from it.
 \end{enumerate}
 
-\claim{defect-fixes-reverified}{\claim{defects-all-fixed-status}{Every defect above was independently re-verified against real output data -- either by
-re-running the affected trial live, or by re-deriving the grading verdict directly from the
-already-collected output file -- rather than assumed fixed once the code changed.}}
+\claim{defect-fixes-reverified}{\claim{defects-all-fixed-status}{Every fix above that shipped was independently re-verified against real output data --
+either by re-running the affected trial live, or by re-deriving the grading verdict directly from
+the already-collected output file -- rather than assumed effective once the code changed; the one
+fix that never shipped (defect~\ref{def:seq-fallback}) was caught by exactly such a re-audit.}}
 
 \section{Discussion}
 \label{sec:discussion}
 
 \claim{state-drift-generic-degrades}{\claim{k4-significant-advantage}{This benchmark's central capability finding is that bounded structural tools resist the state
 drift a generic-tool agent shows under repeated edit-undo cycling.}} This result is more
-informative than any single-edit pass-rate comparison, \claim{fresh-anchor-resolution-mechanism}{because it isolates a mechanism -- fresh
-anchor resolution versus accumulated agent-maintained state} -- rather than reporting an aggregate
-number. \claim{respec-generalization-strength}{Whether this mechanism generalizes beyond section reordering to other repeated-editing
-workflows, and beyond uniform repetition to genuinely compound, cross-family pressure, remains
-open; \claim{respec-preregistered-two-way-generalization}{Section~\ref{sec:results-respec-cascade} tests exactly that,
-on a compound, cross-family design
+informative than any single-edit pass-rate comparison, \claim{fresh-anchor-resolution-mechanism}{because its per-cycle data point to a
+mechanism -- fresh anchor resolution versus accumulated agent-maintained state} -- rather than
+only an aggregate number, though the arms differ in their whole tool surface, so the design does
+not isolate that mechanism on its own. \claim{respec-generalization-strength}{Whether this mechanism generalizes beyond section reordering to other repeated-editing
+workflows remains open. \claim{respec-preregistered-two-way-generalization}{Section~\ref{sec:results-respec-cascade} tests one step
+beyond uniform repetition, on a compound, cross-family design
 -- \claim{respec-five-families-table-dropped}{five families in one chain rather than one repeated,} plus a mid-chain reversal the original
-$K$-sweep never included} -- and finds the same qualitative pattern:} \claim{respec-control-chains-broke}{the generic-tool arm's edits
-increasingly corrupt the document as more of them accumulate, \claim{checkpoint-b-leak-p0305}{including into content the arm was
-never asked to touch, while the bounded tool's do not.}} \claim{respec-generalization-strength}{We still make no claim this mechanism holds
+$K$-sweep never included} -- and finds the same direction:} \claim{respec-control-chains-broke}{the generic-tool arm's chains
+break mid-protocol (\val{respec.broken.control.count} of \val{respec.chains.control.n}, against \val{respec.broken.treatment.count} of \val{respec.chains.treatment.n}), \claim{checkpoint-b-leak-p0305}{and its raw edits leak into
+content the arm was never asked to touch, while the bounded tool's do not.}} \claim{respec-generalization-strength}{We still make no claim this mechanism holds
 for every conceivable repeated-editing workflow; \claim{respec-same-direction-magnitude}{two independent designs pointing the same
 direction is stronger evidence than one, not a closed generalization to task families or workflows
 neither design tested.}}
@@ -1101,8 +1150,10 @@ deployment-environment artifact.}} \claim{rerun-is-direct-test}{Disentangling th
 not just a larger sample size or a more careful argument.} \claim{render-cost-hypothesis-rejected}{\claim{render-gated-families-slower-vs-no-cost-difference}{The alternative
 explanation -- that these tools are simply more expensive to render-verify than table
 insertion is -- does not account for the deficit};} \claim{external-drive-unreliable}{\claim{rerun-is-direct-test}{\claim{gap-was-deployment-artifact}{\claim{gap-causes-contention-and-drive}{the attribution to shared-host contention and the
-physically unreliable external drive rests on a direct test, not an inference.}}}} \claim{rerun-closed-gap-completely}{\claim{original-host-two-of-three-depressed}{\claim{rerun-identical-benchmark-dedicated-host}{Re-running
-the identical benchmark on a dedicated, single-tenant host} closed the gap completely for both
+physically unreliable external drive rests on a direct test -- a re-run on a dedicated host --
+though that test removes both causes at once and also changed the operating system and
+verification backend (Section~\ref{sec:methods-rerun}).}}}} \claim{rerun-closed-gap-completely}{\claim{original-host-two-of-three-depressed}{\claim{rerun-identical-benchmark-dedicated-host}{Re-running
+the benchmark on a dedicated, single-tenant host} closed the gap completely for both
 equation and caption (Table~\ref{tab:render-gate-clean}).}} The general lesson extends past this
 specific benchmark: \claim{verification-confound-reliability-cost}{a write-time verification step's reported reliability is only as meaningful
 as the host it was measured on,} and a benchmark result that looks like a capability finding is
@@ -1115,23 +1166,25 @@ Seven factors limit generalization. \textbf{First}, \claim{model-scope-sonnet-ex
 the \texttt{claude-sonnet-5} model and does not claim the results generalize across models --
 with one disclosed exception: the \texttt{respec\_cascade} extension
 (Section~\ref{sec:methods-respec-cascade}) runs on the \texttt{claude} CLI's \texttt{haiku} model
-alias instead, chosen for cost and throughput on a larger, metered job count,} \claim{respec-generalization-strength}{\claim{respec-model-change-interpretation}{\claim{respec-same-direction-magnitude}{\claim{respec-preregistered-two-way-generalization}{so its result is
-evidence the section-reordering mechanism generalizes across at least one model change as well as
-across task families}}, not a same-model replication of the rest of this paper's numbers.}}
+alias instead, chosen for cost and throughput on a larger, metered job count,} \claim{respec-model-change-interpretation}{so its result is not a same-model replication of the rest of this paper's
+numbers, and because the model, the family mix, and the mid-chain reversal all changed at once,
+it is not evidence about generalization across models either.}
 \textbf{Second}, \claim{original-host-two-of-three-depressed}{\claim{verification-confound-reliability-cost}{the write-time-verification-gated families' originally-reported numbers
 (Table~\ref{tab:render-gate}) were collected on a single, shared, variably-contended host rather
 than a dedicated one, \claim{gap-was-deployment-artifact}{and that host condition materially depressed two of the three families'
-numbers}}} -- \claim{rerun-is-direct-test}{confirmed, not merely argued, by the confirmatory re-run in
+numbers}}} -- \claim{rerun-is-direct-test}{tested directly by the confirmatory re-run in
 Table~\ref{tab:render-gate-clean},} \claim{rerun-closed-gap-completely}{which closes the gap completely on a dedicated host.} \claim{report-both-render-gate-tables}{We
 therefore treat Table~\ref{tab:render-gate-clean} as the load-bearing result for these three
-families and Table~\ref{tab:render-gate} as evidence for the host-contention claim rather than as
+families and Table~\ref{tab:render-gate} as evidence for the host-environment claim rather than as
 a competing final number.} This resolution does not extend past this specific verification
-mechanism: \claim{rerun-closed-gap-completely}{\claim{gap-was-deployment-artifact}{\claim{gap-causes-contention-and-drive}{we make no claim that shared-host contention is never a genuine factor for other
-write-time-verification designs, only that it fully explains the gap observed here.}}}
+mechanism: \claim{rerun-closed-gap-completely}{\claim{gap-was-deployment-artifact}{\claim{gap-causes-contention-and-drive}{we make no claim about other write-time-verification designs, only that the
+original host environment -- scheduling contention together with the unreliable external drive
+(Fourth) -- accounts for the gap observed here; the re-run removed both at once and does not
+separate them.}}}
 \claim{follow-up-corpus-48-preregistered}{\textbf{Third}, \claim{section-reorder-original-underpowered}{corpus size for section reordering ($n=\val{corpus.secreorder_orig.n}$ at $K=1$ on the original corpus) is
 small before the follow-up corpus is combined in.}} \claim{multianchor-up-to-three-anchors}{A multi-anchor extension aimed at this exact gap
-is described in Section~\ref{sec:methods-multianchor};} \claim{multianchor-sr-table-not-merged}{its section-reordering data is not included
-in any number reported here} \claim{multianchor-equation-caption-merged}{(its equation and caption data are, in
+is described in Section~\ref{sec:methods-multianchor};} \claim{multianchor-sr-table-not-merged}{its section-reordering data is not merged
+into any pass rate or significance test reported here} \claim{multianchor-equation-caption-merged}{(its equation and caption data are, in
 Section~\ref{sec:results-multianchor}),} and \claim{section-reorder-icc-open-finding}{its preliminary results already surface a real, distinct
 limitation specific to section
 reordering -- an intraclass correlation of $\val{maext.secreorder.treatment.icc}$ on the treatment arm, meaning additional anchors
@@ -1139,7 +1192,9 @@ within the same document are not adding independent evidence for that arm the wa
 for the body-anchor families -- which we report as an open finding, not a solved one.} \claim{external-drive-unreliable}{\textbf{Fourth}, one specific piece of our own
 test infrastructure -- an external drive holding all run data -- proved physically unreliable,
 disconnecting twice during this project (confirmed via Windows disk-layer I/O retry/error events,
-not inferred); \claim{defects-all-fixed-status}{this remains a real defect in our original test environment (Section~\ref{sec:defects}),}
+not inferred); this remains a real defect in our original test environment -- not one of the ten tooling
+defects in Section~\ref{sec:defects}, where it appears only as the cause behind
+defect~\ref{def:cert-failure} --
 \claim{rerun-closed-gap-completely}{though the confirmatory re-run's clean result means it is no longer load-bearing for any number
 in this paper's final reporting.}} \textbf{Fifth}, \claim{anchoredit-subset-scope}{this benchmark exercises AnchorEdit, \val{tools.anchoredit.count} of
 Meridian Docs' \val{tools.meridian_docs.count} registered tools, \claim{six-task-families}{across the six families reported here;} the remaining tools -- other editing
@@ -1149,17 +1204,23 @@ operations, \claim{audit-tools-out-of-scope}{format/style-compliance audit tools
 do not claim these results generalize to the full tool surface.} Relatedly, \claim{anchors-pre-resolved-no-discovery}{every trial reported
 here receives its target anchor pre-resolved at corpus-build time (Section~\ref{sec:methods});
 \claim{indexing-tools-out-of-scope}{the live anchor-resolution tools' own reliability under real, uncontrolled use is a real question this
-benchmark does not measure}} -- \claim{anchor-id-stability}{their content-derived synthetic ids are explicitly documented as
-shifting if an earlier paragraph with the same text is edited, inserted, or removed elsewhere in
-the document.} \textbf{Sixth}, \claim{primary-corpus-holdout-status}{this corpus is not a blind holdout in the machine-learning sense:
+benchmark does not measure}} -- \claim{anchor-id-stability}{a content-derived fallback id changes when its own paragraph's text is
+edited, and shifts when an earlier paragraph with the same text is inserted or removed. This
+benchmark itself relied on fallback ids wherever a document has no native \texttt{w14:paraId},
+which includes every original-corpus document: the citation defect in
+defect~\ref{def:two-harness} is exactly this instability, and in the $K=4$ section-reorder chains
+nearly every fallback id points to a paragraph whose text is unique in its document, where no
+shift can occur (the one exception passed every cycle).} \textbf{Sixth}, \claim{primary-corpus-holdout-status}{this corpus is not a blind holdout in the machine-learning sense:
 several defects (Section~\ref{sec:defects}) were found by observing trial outcomes on this same
 \val{corpus.primary.n}-document corpus during the benchmark's own execution, \claim{defect-fixes-reverified}{then fixed directly in the tooling and
-the affected chains re-run} (Section~\ref{sec:methods}).} We mitigate, but do not eliminate, the
+the affected chains re-run or re-graded} (Section~\ref{sec:methods}).} We mitigate, but do not eliminate, the
 resulting risk in two ways that distinguish this from conditioning a statistical model on its own
-test set: \claim{defect-fixes-code-only-grading-unchanged}{\claim{com-type-library-cache-defect}{every fix targets a deterministic code defect (a wrong file path, a missing COM
-type-library cache),} not the underlying language model's prompts, weights, or grading criteria, which
-never varied;} and \claim{defect-fixes-reverified}{every fix was independently re-verified against real re-run data rather than
-assumed effective.} \claim{primary-corpus-holdout-status}{We do not claim these numbers estimate performance on documents this tooling
+test set: \claim{defect-fixes-code-only-grading-unchanged}{\claim{com-type-library-cache-defect}{every fix targets deterministic harness or tooling code (a wrong file path, a missing COM
+type-library cache),} never the language model's prompts or weights; two fixes changed how the
+harness applied an unchanged grading criterion (defects~\ref{def:discarded-runs}
+and~\ref{def:respec-grader}), the closest this comes to conditioning on observed outcomes;} and
+\claim{defect-fixes-reverified}{every fix that shipped was independently re-verified against real output data
+rather than assumed effective.} \claim{primary-corpus-holdout-status}{We do not claim these numbers estimate performance on documents this tooling
 has never previously encountered in any form.} \textbf{Seventh}, \claim{per-trial-timeout-history}{the per-trial subprocess timeout
 is \val{harness.timeout_final_s}s (Section~\ref{sec:methods}), and this ceiling is evidence-informed rather than arbitrary}
 -- but the evidence behind it is right-censored at
@@ -1174,10 +1235,12 @@ This benchmark's harness, evaluator, statistics code, and corpus manifests are p
 at \url{https://github.com/meridianmcp/ooxml-graph-paper} under the Meridian Source License 1.0
 (MSL-1.0) -- source-available rather than OSI-approved, permitting research, academic, and
 internal commercial use freely, restricting only competing hosted-service use during a five-year
-protection period, after which each version automatically converts to MIT. \claim{licensed-docops-corpus}{The underlying
-\texttt{.docx} corpus documents themselves are a licensed slice of the DocOps benchmark corpus
-and are not redistributed;} the released manifests identify which documents were used (by hash)
-without including their content.
+protection period, after which each version automatically converts to MIT. \claim{licensed-docops-corpus}{The primary corpus's
+\texttt{.docx} documents are available from the public DocOps benchmark itself;} the follow-up
+corpus's documents (from \texttt{docx-corpus}, per-file licensing unverified) and the three
+author-owned documents are not redistributed. The released manifests identify which documents
+were used (by hash) without including their content.\todo{Publish the corpus hash manifests in
+the repository; they currently live only in the local run-data store.}
 
 \section{Conclusion}
 \label{sec:conclusion}
@@ -1185,17 +1248,18 @@ without including their content.
 \claim{single-edit-no-advantage}{\claim{section-reorder-k1-directional-not-significant}{Bounded, structurally-aware editing primitives like AnchorEdit show no statistically
 significant advantage over generic file tools for a single edit, on the task families and model
 tested here (though section reorder trends in that direction at $K=1$;} Table~\ref{tab:single-edit})},
-\claim{fresh-anchor-resolution-mechanism}{\claim{k4-significant-advantage}{but show a significant, mechanistically-traced advantage under repeated edit-undo cycling}} -- the
+\claim{fresh-anchor-resolution-mechanism}{\claim{k4-significant-advantage}{but show a significant advantage under repeated edit-undo cycling, with per-cycle data
+pointing to a plausible mechanism}} -- the
 more realistic condition for an agent maintaining a document over time. \claim{respec-same-direction-magnitude}{\claim{respec-preregistered-two-way-generalization}{\claim{preregistration-status}{\claim{respec-generalization-strength}{A separate, preregistered
-extension confirms this is not an artifact of testing one family alone:}} \claim{respec-five-families-table-dropped}{run across all five task
+extension is evidence this is not an artifact of testing one family alone:}} \claim{respec-five-families-table-dropped}{run across five of the six task
 families in a single compound chain,} with a mid-chain reversal the original design never included,}
-the same advantage reappears at a larger magnitude} (\val{respec.composite.treatment.t1.rate}\% vs.\ \val{respec.composite.control.t1.rate}\% chain completion; \claim{respec-anchor-set-gap-p0005}{a
+an advantage in the same direction appears, on a different model (Section~\ref{sec:limitations})} (\val{respec.composite.treatment.t1.rate}\% vs.\ \val{respec.composite.control.t1.rate}\% chain completion; \claim{respec-anchor-set-gap-p0005}{a
 \val{respec.anchorset.diff_pp}-point gap across \val{respec.anchorset.n} paired anchor-set-level observations, $p<\val{respec.anchorset.p_bound}$}) \claim{checkpoint-b-leak-p0305}{and \claim{checkpoint-b-central-test}{on the extension's
 own central test -- whether unrelated content survives untouched
 through a mid-chain reversal} -- reaches significance on its own ($p=\val{respec.keepsurvival.anchorset.p}$;}
-Section~\ref{sec:results-respec-cascade}). \claim{original-host-two-of-three-depressed}{\claim{verification-confound-reliability-cost}{\claim{render-gated-three-families}{Three further task families were initially confounded by
-a write-time verification step whose reliability cost proved substantial and
-environment-dependent;}}} \claim{rerun-closed-gap-completely}{\claim{rerun-is-direct-test}{\claim{rerun-identical-benchmark-dedicated-host}{a controlled confirmatory re-run on a dedicated, single-tenant host}
+Section~\ref{sec:results-respec-cascade}). \claim{original-host-two-of-three-depressed}{\claim{verification-confound-reliability-cost}{\claim{render-gated-three-families}{Three further task families share a write-time verification
+step whose reliability cost, for two of them on the original shared host, proved substantial and
+environment-dependent;}}} \claim{rerun-closed-gap-completely}{\claim{rerun-is-direct-test}{\claim{rerun-identical-benchmark-dedicated-host}{a confirmatory re-run on a dedicated, single-tenant host}
 resolved that confound completely,} closing all three families to \val{rgclean.all.rate}\% pass for both arms} and
 \claim{gap-was-deployment-artifact}{confirming the original gap was a deployment-environment artifact rather than an editing-capability
 limitation.} \claim{report-both-render-gate-tables}{We report both the original and confirmatory numbers because the gap between them is
@@ -1219,8 +1283,9 @@ claim -- but a concrete argument for running this at confirmatory scale, not a r
 question as settled either way.
 
 \claim{bib-citation-mechanical-simplicity}{\claim{bib-citation-parity}{Bibliography and citation insertion showing parity (Section~\ref{sec:results})} is most plausibly
-explained by the task's mechanical simplicity: both tools write already-resolved metadata into an
-already-valid paragraph, a purely mechanical formatting step a capable generic agent can match.} A
+explained by the task's mechanical simplicity: both tools write already-resolved metadata as plain
+text -- a new plain paragraph for a bibliography entry, runs within an existing paragraph for a
+citation -- a purely mechanical formatting step a capable generic agent can match.} A
 genuinely harder version of this task family exists, structurally analogous to section reorder's
 $K=4$ finding: resolving a citation \emph{against a live external system} (\texttt{resolve\_citations}
 against a local Zotero library) rather than formatting metadata already supplied in the prompt.
@@ -1229,7 +1294,7 @@ discover the local API's protocol and error semantics to close it, not simply wr
 text. We did not test this; it is future work, not a claim.
 
 A genuinely blind confirmatory re-run -- \claim{defects-all-fixed-status}{now that the tooling's own defects (Section~\ref{sec:defects})
-are fixed} -- is also worth pursuing: \claim{licensed-docops-corpus}{this benchmark's licensed
+are fixed, except defect~\ref{def:seq-fallback}} -- is also worth pursuing: \claim{licensed-docops-corpus}{this benchmark's
 DocOps corpus is fully exhausted (every document already used, per Limitations factor Six),} but a
 separate, already-PII-screened pool of \val{corpus.organic_pool.n} organic documents from this project's own acquisition
 work sits unused by the editing benchmark, and a further $\sim$\val{corpus.candidates_unfetched.n} candidate documents remain
@@ -1266,14 +1331,12 @@ throughout the paper.
   document-level exception to Section~\ref{sec:methods}'s exclusion rule}), while
   its treatment-arm chain completed and passed.}
 \item[Note c (Table~\ref{tab:render-gate}, Equation)] \claim{equation-original-control-unpaired}{Control ($n=\val{rg.equation.control.n}$) comes from the \val{rg.equation.control.n} equation-applicable documents of a
-  \val{corpus.devslice.n}-document development-slice corpus run once under this project's confirmatory design\todo{Add the
-  preregistration date and commit hash given for this paper's other corpora in
-  Section~\ref{sec:methods}, or state explicitly that this corpus predates preregistration and
-  was not itself preregistered.}, not the
+  \val{corpus.devslice.n}-document development-slice corpus (its document list locked in the same preregistration commit as the primary corpus,
+  Section~\ref{sec:methods}; this equation control run, on 2026-09-06, was not itself
+  preregistered), not the
   \val{corpus.primary.n}-document primary corpus treatment uses; the two are not paired and no significance
-  test is reported for this row.} \val{rg.equation.control.passes} of \val{rg.equation.control.n} resolved chains passed; the 11th resolved (did not
-  block on the verification step) but failed grading on a genuine task mistake -- \val{rg.equation.control.resolved}/\val{rg.equation.control.n}
-  \emph{resolved} is not the same as \val{rg.equation.control.n}/\val{rg.equation.control.n} \emph{passed}.
+  test is reported for this row.} \val{rg.equation.control.passes} of \val{rg.equation.control.n} chains passed; the remaining chain completed but
+  failed grading on a genuine task mistake.
 \item[Note d (Table~\ref{tab:render-gate}, Table structural)] This row's published number
   (\val{rg.table.treatment.rate}\%, \val{rg.table.treatment.passes}/\val{rg.table.treatment.n}) is correct; the stored trial data did not initially reproduce it. \claim{defect-3-table-recovery}{The two chains involved
   are the same two defect~\ref{def:discarded-runs} (Section~\ref{sec:defects}) describes recovering by re-grading their

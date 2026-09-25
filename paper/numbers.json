@@ -293,7 +293,7 @@
    "source": {
     "file": "C:\\Users\\13144\\Documents\\Meridian\\repository\\extensions\\meridian-docs\\meridian_docs\\render_gate.py",
     "format": "text",
-    "locator": "render_gate.py L323 _SOFFICE_TIMEOUT_SECONDS (raised 60->90 2026-09-07, d4a1f2c8) and L537 _WORD_COM_TIMEOUT_SECONDS (raised 60->90 2026-09-09, d3f8a291)",
+    "locator": "render_gate.py L323 _SOFFICE_TIMEOUT_SECONDS (raised 60->90 2026-09-07, commit 0a50251f) and L537 _WORD_COM_TIMEOUT_SECONDS (raised 60->90 2026-09-09, commit 5e10df36)",
     "source_value": "_SOFFICE_TIMEOUT_SECONDS = 90.0 ; _WORD_COM_TIMEOUT_SECONDS = 90.0"
    },
    "note": "Both write-time verification backends (LibreOffice soffice and Word COM) use a 90s per-attempt bound. L995C60 ('each with its own retry-bounded 90-second timeout') and L737C95 ('all << the 90s timeout', the render-timing test) both refer to this. The ~360s combined worst case in L996 is consistent with 2 backends x 2 attempts x 90s. The harness's separate Word-COM render receipts also use 90.0 (tools/run_paper_s7_benchmark.py L74 _WORD_RECEIPT_TIMEOUT_SECONDS; chain-result word_com_receipts[*].render_receipt.timeout_seconds = 90.0), but that is a different mechanism from the render gate."
@@ -2248,18 +2248,6 @@
     "source_value": "bootstrap_ci mean = 0.9090909090909091"
    },
    "note": "Matches the development-slice control, as Note c says. AUTHOR FLAG: the primary-corpus equation runs that supply the treatment arm (holdout-k1-20260907T-with-fix and validation-k1-20260907T-with-fix, same host, sonnet, run 2026-09-07) also contain 26 control chains, and all 26 pass. That is 26/26 = 100%, Clopper-Pearson [86.8, 100], paired sign-flip p=0.0 versus the 12/26 treatment. It contradicts the claim at L707-709 and in Note c that equation's original control exists only as an unpaired 11-document corpus. The superseded haiku attempt (development-k1-20260906T-confirmatory-attempt1, model=haiku) gives control 7/9 when blocked chains are excluded."
-  },
-  "rg.equation.control.resolved": {
-   "value": "11",
-   "quantity": "Number of equation-family control-arm chains in the original render-gate table that resolved (did not block on the verification step)",
-   "status": "verified",
-   "source": {
-    "file": "D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7-equation\\development-k1-20260906T-confirmatory-attempt2-sonnet\\slice-manifest.json",
-    "format": "text",
-    "locator": "count equation control chains with status in {completed, completed_with_failure} (i.e. not blocked, not not_applicable): 10 + 1",
-    "source_value": "11"
-   },
-   "note": "The one completed_with_failure chain (docops_v2_l3_001_docx_controlled) failed inverse-leg grading. That matches Note c's 'failed grading on a genuine task mistake'."
   },
   "rg.equation.treatment.ci_hi": {
    "value": "65.4",
