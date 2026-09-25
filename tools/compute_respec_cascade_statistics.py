@@ -3,9 +3,10 @@ five-family contingency per section 1.2a / 2.3): Tier 1/2/3 aggregation for
 `respec_cascade` chain results.
 
 Rotation `R' = [bibliography, citation, section_reorder, equation, caption]`
-(`table_structural` dropped -- `insert_table`/`remove_table` confirmed absent
-from the live `meridian-docs` tool manifest at corpus-build time, section
-1.2a item 2).
+(`table_structural` dropped because `insert_table`/`remove_table` were missing
+from the `meridian-docs` tool manifest checked at corpus-build time, section
+1.2a item 2 -- that manifest later turned out to be a stale, separately
+installed build of the server; the harness's own server exposes both tools).
 
 This module deliberately does NOT reimplement any statistical primitive.
 `bootstrap_ci`/`paired_permutation_test` (`tools/graph_scorer.py`) and
@@ -317,6 +318,18 @@ def _baseline_outcome(chain: dict[str, Any]) -> float | None:
 # recorded (never silently dropped, per section 6).
 # ---------------------------------------------------------------------------
 
+def _exclusion_reason(chain: dict[str, Any]) -> str:
+    """Why a chain has no outcome for a measure. A phase grader that raised
+    leaves a `_safe_call` stub ({"status": "grading_raised_exception"}) and makes
+    the orchestrator mark the whole chain `completed_with_failure`, so the chain
+    status alone would misreport a grader crash as a task failure."""
+    for phase in ("phase1_result", "phase2_result", "phase3_result"):
+        result = chain.get(phase)
+        if isinstance(result, dict) and result.get("status") == "grading_raised_exception":
+            return f"{phase.split('_')[0]}_grading_raised_exception: {result.get('reason', '')}".rstrip(": ")
+    return chain.get("status") or "outcome_unavailable"
+
+
 def _group_by_document(
     chains: list[dict[str, Any]],
     outcome_fn: Callable[[dict[str, Any]], float | None],
@@ -332,7 +345,7 @@ def _group_by_document(
         if outcome is None:
             excluded.append({
                 "measure": measure, "doc_label": chain.get("doc_label"), "arm": arm,
-                "reason": chain.get("status") or "outcome_unavailable",
+                "reason": _exclusion_reason(chain),
             })
             continue
         grouped[arm].setdefault(_original_doc_label(chain), []).append(outcome)
