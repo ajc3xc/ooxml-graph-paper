@@ -25,7 +25,7 @@ Write-Host "== pdflatex pass 3 (resolve refs) =="
 Invoke-Checked "pdflatex" @("-interaction=nonstopmode", "-halt-on-error", "main.tex")
 
 Write-Host "== preflight =="
-python preflight.py
+Invoke-Checked "python" @("preflight.py")
 
 if (Test-Path "main.pdf") {
     Write-Host "Build succeeded: $PSScriptRoot\main.pdf"

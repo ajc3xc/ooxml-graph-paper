@@ -59,7 +59,8 @@ extension generalizes the section-reordering finding two ways at once -- across 
 task families in a single 17-step chain rather than one family repeated against itself, and under
 a mid-chain reversal of a structural requirement rather than uniform repetition -- on a real,
 previously-unseen three-document corpus. The bounded tool completes the full protocol cleanly on
-83.3\% of chains against the generic tool's 8.3\% (pooled anchor-set-level comparison, $p<0.0005$),
+83.3\% of chains against the generic tool's 8.3\%; pooled across 30 paired anchor-set-level
+observations, the two arms differ by 46.7 percentage points ($p<0.0005$),
 and on the design's own central test -- whether unrelated, already-correct content survives a
 mid-chain reversal of a different requirement untouched -- the generic tool's raw edits leak into
 untouched content while the bounded tool's never do ($p=0.0305$). Separately, we
@@ -1121,8 +1122,10 @@ mechanism: we make no claim that shared-host contention is never a genuine facto
 write-time-verification designs, only that it fully explains the gap observed here.
 \textbf{Third}, corpus size for section reordering ($n=11$ at $K=1$ on the original corpus) is
 small before the follow-up corpus is combined in. A multi-anchor extension aimed at this exact gap
-is described in Section~\ref{sec:methods-multianchor}; its data is not included in any number
-reported here, and its preliminary results already surface a real, distinct limitation specific to section
+is described in Section~\ref{sec:methods-multianchor}; its section-reordering data is not included
+in any number reported here (its equation and caption data are, in
+Section~\ref{sec:results-multianchor}), and its preliminary results already surface a real, distinct
+limitation specific to section
 reordering -- an intraclass correlation of $1.0$ on the treatment arm, meaning additional anchors
 within the same document are not adding independent evidence for that arm the way they appear to
 for the body-anchor families -- which we report as an open finding, not a solved one. \textbf{Fourth}, one specific piece of our own
@@ -1178,8 +1181,9 @@ but show a significant, mechanistically-traced advantage under repeated edit-und
 more realistic condition for an agent maintaining a document over time. A separate, preregistered
 extension confirms this is not an artifact of testing one family alone: run across all five task
 families in a single compound chain, with a mid-chain reversal the original design never included,
-the same advantage reappears at a larger magnitude (83.3\% vs.\ 8.3\% chain completion,
-$p<0.0005$) and on the extension's own central test -- whether unrelated content survives untouched
+the same advantage reappears at a larger magnitude (83.3\% vs.\ 8.3\% chain completion; a
+46.7-point gap across 30 paired anchor-set-level observations, $p<0.0005$) and on the extension's
+own central test -- whether unrelated content survives untouched
 through a mid-chain reversal -- reaches significance on its own ($p=0.0305$;
 Section~\ref{sec:results-respec-cascade}). Three further task families were initially confounded by
 a write-time verification step whose reliability cost proved substantial and
