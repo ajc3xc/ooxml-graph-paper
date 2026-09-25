@@ -1,16 +1,39 @@
 #!/usr/bin/env python3
-"""Generate the two result figures for paper/main.tex from the exact numbers
-already reported in Table 1-4 (paper/main.tex) -- not a re-analysis, a
-visualization of already-verified numbers. Regenerate by hand if those
-numbers ever change; nothing here reads run data live, so it will silently
-go stale if main.tex's tables are edited without re-running this."""
+"""Generate the two result figures for paper/main.tex from paper/numbers.json,
+the same source main.tex reads its numbers from -- a visualization of the
+reported values, not a re-analysis. Writes paper/figures/figures.stamp.json
+recording every value drawn, so preflight fails if a value changes and the
+figures are not regenerated.
+
+Run: pixi run python tools/make_paper_figures.py"""
+import json
+
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from pathlib import Path
 
-OUT = Path(__file__).resolve().parent.parent / "paper" / "figures"
+PAPER = Path(__file__).resolve().parent.parent / "paper"
+OUT = PAPER / "figures"
 OUT.mkdir(parents=True, exist_ok=True)
+VALUES = json.loads((PAPER / "numbers.json").read_text(encoding="utf-8"))["values"]
+USED: dict[str, str] = {}
+
+
+def val(key: str) -> str:
+    USED[key] = VALUES[key]["value"]
+    return VALUES[key]["value"]
+
+
+def num(key: str) -> float:
+    return float(val(key).replace("{,}", ""))
+
+
+def row(label: str, prefix: str) -> tuple:
+    return (label,
+            num(f"{prefix}.control.rate"), num(f"{prefix}.control.ci_lo"), num(f"{prefix}.control.ci_hi"),
+            num(f"{prefix}.treatment.rate"), num(f"{prefix}.treatment.ci_lo"), num(f"{prefix}.treatment.ci_hi"),
+            f"p={val(prefix + '.p')}")
 
 plt.rcParams.update({
     "font.family": "serif",
@@ -25,11 +48,12 @@ TREATMENT_COLOR = "#1f5fa8"
 # ---------- Figure 1: single-edit + repeated-cycling forest plot ----------
 # (family_label, control_rate, control_lo, control_hi, treatment_rate, treatment_lo, treatment_hi, p_label)
 ROWS_1 = [
-    ("Bibliography entry",            100.0, 100.0, 100.0, 100.0, 100.0, 100.0, "p=1.0"),
-    ("Inline citation",               100.0, 100.0, 100.0, 100.0, 100.0, 100.0, "p=1.0"),
-    ("Section reorder (K=1)",          83.6,  74.5,  92.7,  92.9,  85.7,  98.2, "p=0.271"),
-    ("Section reorder (K=4)",          67.3,  54.5,  78.2,  92.9,  85.7,  98.2, "p=0.0015"),
+    row("Bibliography entry", "single.bib"),
+    row("Inline citation", "single.cite"),
+    row("Section reorder (K=1)", "single.secreorder_comb"),
+    row("Section reorder (K=4)", "k4.secreorder"),
 ]
+SIGNIFICANT = ROWS_1[3][7]
 
 fig, ax = plt.subplots(figsize=(6.5, 2.6))
 y = list(range(len(ROWS_1)))[::-1]
@@ -38,7 +62,7 @@ for yi, (label, c, clo, chi, t, tlo, thi, p) in zip(y, ROWS_1):
     ax.plot(c, yi + 0.12, "o", color=CONTROL_COLOR, ms=5, zorder=3)
     ax.plot([tlo, thi], [yi - 0.12, yi - 0.12], color=TREATMENT_COLOR, lw=1.4, solid_capstyle="butt")
     ax.plot(t, yi - 0.12, "s", color=TREATMENT_COLOR, ms=5, zorder=3)
-    weight = "bold" if p == "p=0.0015" else "normal"
+    weight = "bold" if p == SIGNIFICANT else "normal"
     ax.text(102, yi, p, va="center", ha="left", fontsize=9, fontweight=weight)
 
 ax.set_yticks(y)
@@ -49,7 +73,7 @@ ax.set_xlabel("Pass rate (%), 95% CI")
 ax.axvline(100, color="#dddddd", lw=0.8, zorder=0)
 handles = [
     plt.Line2D([0], [0], marker="o", color=CONTROL_COLOR, linestyle="", label="Control (generic tools)"),
-    plt.Line2D([0], [0], marker="s", color=TREATMENT_COLOR, linestyle="", label="Treatment (Meridian Docs)"),
+    plt.Line2D([0], [0], marker="s", color=TREATMENT_COLOR, linestyle="", label="Treatment (AnchorEdit)"),
 ]
 ax.legend(handles=handles, loc="lower left", bbox_to_anchor=(0, -0.62), ncol=2, frameon=False, fontsize=9)
 fig.tight_layout()
@@ -60,9 +84,9 @@ print("wrote fig-single-edit-forest.pdf")
 # ---------- Figure 2: render-gate before/after dumbbell ----------
 # (family, orig_control, orig_treatment, clean_control, clean_treatment)
 ROWS_2 = [
-    ("Equation",           90.9, 46.2, 100.0, 100.0),
-    ("Table (structural)",  92.3, 96.2, 100.0, 100.0),
-    ("Caption",            100.0,  7.7, 100.0, 100.0),
+    (label, num(f"rg.{fam}.control.rate"), num(f"rg.{fam}.treatment.rate"),
+     num(f"rgclean.{fam}.control.rate"), num(f"rgclean.{fam}.treatment.rate"))
+    for label, fam in (("Equation", "equation"), ("Table (structural)", "table"), ("Caption", "caption"))
 ]
 
 fig, axes = plt.subplots(1, 2, figsize=(7.5, 2.6), sharey=True)
@@ -93,3 +117,8 @@ fig.tight_layout()
 fig.savefig(OUT / "fig-rendergate-dumbbell.pdf", bbox_inches="tight")
 plt.close(fig)
 print("wrote fig-rendergate-dumbbell.pdf")
+
+(OUT / "figures.stamp.json").write_text(
+    json.dumps({"about": "Values each figure was drawn from; paper/consistency.py flags stale figures.",
+                "values": dict(sorted(USED.items()))}, indent=1) + "\n", encoding="utf-8")
+print(f"wrote figures.stamp.json ({len(USED)} values)")

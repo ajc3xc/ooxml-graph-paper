@@ -12,6 +12,9 @@ function Invoke-Checked {
     }
 }
 
+Write-Host "== numbers.tex from numbers.json =="
+Invoke-Checked "python" @("gen_numbers.py")
+
 Write-Host "== pdflatex pass 1 =="
 Invoke-Checked "pdflatex" @("-interaction=nonstopmode", "-halt-on-error", "main.tex")
 

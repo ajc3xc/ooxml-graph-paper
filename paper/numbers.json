@@ -1,0 +1,3174 @@
+{
+ "_meta": {
+  "about": "Single source of truth for every reported value in paper/main.tex (written there as \\val{key}). Edit a value here, never in main.tex; gen_numbers.py regenerates numbers.tex.",
+  "status_meanings": {
+   "verified": "a stored source file holds this value (machine-checked when source.format is json: python paper/gen_numbers.py --verify-sources)",
+   "derived": "computed from verified values or recomputed from raw run data; see source.locator",
+   "doc_only": "stated only in an evidence/ledger document, no machine-readable output",
+   "mismatch": "the source disagrees with the printed value (should not remain after corrections)",
+   "untraceable": "no source found"
+  }
+ },
+ "values": {
+  "corpus.candidates_unfetched.n": {
+   "value": "12{,}000",
+   "quantity": "Approximate number of identified but never-fetched candidate documents available for future acquisition",
+   "status": "derived",
+   "source": {
+    "file": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\filtered_candidates.json",
+    "format": "text",
+    "locator": "len(filtered_candidates.json)=18770 - fetched batches (manifests\\docxcorpus-batch-500-v1.json 500 + docxcorpus-batch-2-v1.json 3133 + docxcorpus-batch-3-v1.json 2800 = 6433 entries) - raw\\docx-corpus\\sample_90_ids.json 90 (fetched earlier, no overlap with the batches) = 12247, printed as ~12,000",
+    "source_value": "18770 records"
+   },
+   "note": "tools\\margin_notes\\comment_ledger.json (entry c_mu764tn2ci6hs, commit 7a63a31) gives '~12,337 unfetched', which is 18770 - 6433 and does not subtract the 90 sampled docs. 12,247 is the strictly never-fetched count (= docs\\paper-s18's 18,680 unreviewed URLs - 6,433). Both round to the paper's ~12,000."
+  },
+  "corpus.followup.n": {
+   "value": "48",
+   "quantity": "Total number of documents in the preregistered section-reordering follow-up corpus",
+   "status": "verified",
+   "source": {
+    "file": "D:\\MeridianData\\ooxml-graph-paper\\manifests\\paper-s7-corpus-manifest-v2-section-reorder-followup.json",
+    "format": "text",
+    "locator": "total_documents (len(documents)=48). Cross-checks: v2 run slice manifests holdout-k1-20260831T172118Z document_count 38 + validation-k1-20260831T172118Z document_count 10 = 48; v2-statistics-*.json chain_count=96 (48 x 2 arms)",
+    "source_value": "48"
+   },
+   "note": "All 5 tokens are the 48-document follow-up corpus: L198, L201 '(of 48)', L203 '11+48', L537, L603 (per-cycle breakdown covers only the 48-doc follow-up)."
+  },
+  "corpus.merged.n": {
+   "value": "29",
+   "quantity": "Number of documents in the merged original + multi-anchor-extension corpus (26 original + 3 author-owned personal documents), also restated as n=29 in the multi-anchor results prose",
+   "status": "derived",
+   "source": {
+    "file": "D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7-multi-anchor-extension\\runs\\caption\\doc_label_mapping.json",
+    "format": "text",
+    "locator": "corpus.primary.n + corpus.personal.n = 26 + 3 = 29. Reproduced as the union of doc_label from runpod paper-s7-clean-rerun\\{primary_holdout,validation}\\slice-manifest.json (26) and distinct original_doc_label in the extension doc_label_mapping.json for caption and equation (27 = 24 existing-corpus + 3 author_owned): union = 29 for both families",
+    "source_value": "26 original doc_labels + 3 author_owned original_doc_labels"
+   },
+   "note": "The machine-readable output (combined-statistics.json from tools/compute_s7_combined_statistics.py, n_distinct_documents) is registered in .meridian-outputs-cache\\artifact_registry.json at a scratchpad path (...\\scratchpad\\multianchor-extension\\combined-statistics.json) that no longer exists. docs\\paper-s7-experiment-status-checkpoint-v1.md (2026-09-20 follow-up) states 'n=29 documents (26 original + 3 author-owned personal)'. Both tokens (L844C63, L863C49) are document counts."
+  },
+  "corpus.organic_pool.n": {
+   "value": "35",
+   "quantity": "Number of already-PII-screened organic documents in the unused acquisition pool proposed for a blind re-run",
+   "status": "verified",
+   "source": {
+    "file": "D:\\MeridianData\\ooxml-graph-paper\\manifests\\s6-organic-candidates-adjudication-v1.json",
+    "format": "text",
+    "locator": "summary.cleared_for_admission_pipeline (total_organic_candidates=36, not_admitted_personal_pii=1)",
+    "source_value": "35"
+   },
+   "note": "Also stated in docs\\paper-s6-organic-omml-round2-3-result-v1.md ('35 of 36 raw hits cleared'). I checked the 'unused by the editing benchmark' claim: none of the 35 cleared candidate IDs matches any of the 48 follow-up corpus docs (16-hex id prefix and URL), even though both came from the same docx-corpus batches."
+  },
+  "corpus.personal.n": {
+   "value": "3",
+   "quantity": "Number of documents used in respec_cascade (the multi-anchor extension's three author-owned documents), restated in the headline table caption",
+   "status": "verified",
+   "source": {
+    "file": "D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s23-final\\statistics.json",
+    "format": "text",
+    "locator": "outcome_measures.a_phase3_composite_pass_rate.n_distinct_documents = {control: 3, treatment: 3}; tier1_per_document_unweighted.paired_n_documents = 3; anchor-schedules.json keys = jcshm-manuscript, jcshm-si, masters-dissertation-defense; n_baseline_chains_loaded = 24 per family x 5 = 120 (backs L488's 120 trials)",
+    "source_value": "3"
+   },
+   "note": "L844C92 is in the multi-anchor table caption, not respec_cascade. It refers to the same three author-owned documents: D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7-multi-anchor-extension\\runs\\{caption,equation}\\doc_label_mapping.json source=author_owned_personal gives author_owned__jcshm_manuscript, author_owned__jcshm_si, author_owned__masters_dissertation. So the assignment is OK. L488, L885, L896, L928 are respec_cascade document counts (N=3 per family at L928)."
+  },
+  "corpus.primary.n": {
+   "value": "26",
+   "quantity": "Number of documents in the original (confirmatory) benchmark corpus",
+   "status": "verified",
+   "source": {
+    "file": "D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7-clean-rerun-runpod\\runs\\paper-s7-clean-rerun\\s7-final-statistics-runpod.json",
+    "format": "text",
+    "locator": "groups[*] (caption, equation, table_structural).paired_n; chain_count=156 (= 3 families x 2 arms x 26, backs L765-766). Cross-checks: D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7\\k1-fixrerun-statistics-20260831T145852Z.json groups[0].paired_n=26; D:\\MeridianData\\ooxml-graph-paper\\manifests\\paper-s7-corpus-manifest-v1.json split_counts validation 12 + primary_holdout 14 = 26",
+    "source_value": "26"
+   },
+   "note": "All 8 tokens read in context. Each means the 26-document primary/confirmatory corpus: L186 (Methods intro), L189 (pooled n=26), L763/L766/L769 (runpod re-run table caption), L844 (26 original in the n=29 merge), L1148 (Limitations: not a blind holdout), L1265 (Note c: treatment's corpus)."
+  },
+  "corpus.primary_holdout.n": {
+   "value": "14",
+   "quantity": "Number of documents in the primary-holdout subset of the primary corpus",
+   "status": "verified",
+   "source": {
+    "file": "D:\\MeridianData\\ooxml-graph-paper\\manifests\\paper-s7-corpus-manifest-v1.json",
+    "format": "text",
+    "locator": "split_counts.primary_holdout; also D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7\\holdout-k1-fixrerun-20260831T145852Z\\slice-manifest.json document_count (split=primary_holdout); runpod primary_holdout slice-manifest document_count=14",
+    "source_value": "14"
+   },
+   "note": "L188C64 '14-document primary holdout'."
+  },
+  "corpus.secreorder_comb.n": {
+   "value": "56",
+   "quantity": "Combined section-reordering corpus size in paired documents (applicable primary plus applicable follow-up)",
+   "status": "derived",
+   "source": {
+    "file": "../docs/paper-s8-final-evidence-v1.md",
+    "format": "text",
+    "locator": "corpus.secreorder_orig.n + corpus.secreorder_followup.n = 11 + 45 = 56; the doc's section 2.3 'Combined v1+v2' table, treatment row, has N=56",
+    "source_value": "56"
+   },
+   "note": "L202C62. Equals the combined treatment n. Control is 55 after the Note b exclusion. The superseded combined-v1-v2-statistics-corrected-20260904.json has 57 (stale)."
+  },
+  "corpus.secreorder_followup.n": {
+   "value": "45",
+   "quantity": "Number of follow-up-corpus documents on which the section-reordering task is structurally applicable",
+   "status": "derived",
+   "source": {
+    "file": "D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7-v2-section-reorder\\holdout-k1-20260831T172118Z\\slice-manifest-corrected2-20260904.json",
+    "format": "text",
+    "locator": "count of distinct doc_label whose section_reorder chains are not status=not_applicable: holdout-k1-20260831T172118Z\\slice-manifest-corrected2-20260904.json (36 of 38) + validation-k1-20260831T172118Z\\slice-manifest-corrected2-20260904.json (9 of 10) = 45 = 48 - 3 NA docs (s7v2_sr_57279c6d7cebe942, s7v2_sr_420667e3de324403, s7v2_sr_0f0ec662b71bb10a)",
+    "source_value": "36 + 9 applicable doc_labels (per arm)"
+   },
+   "note": "No stats JSON stores 45. The doc C:\\Users\\13144\\Documents\\Meridian\\ooxml-graph-paper\\docs\\paper-s8-final-evidence-v1.md section 2.3 states v2 treatment_n=45 / control_n=44. SUPERSEDED, do not use: v2-statistics-corrected-20260904.json has control_n=treatment_n=46 (not_applicable_count=4), and combined-v1-v2-statistics-corrected-20260904.json has 57. Both predate the blank-heading correction that made s7v2_sr_0f0ec662b71bb10a not_applicable (blank-heading-rerun-validation-20260904T152741Z). The 44-vs-45 control/treatment gap is one blocked control chain, s7v2_sr_402d26ad8605a5ee (the 1.7MB doc in Note b). The checkpoint doc's '11 + 44 v2-applicable = 55' is that control-side count. Side finding: the corrected2 manifests may be the unfound source for the published section_reorder 55/56 numbers (docs/paper-s7-experiment-status-checkpoint-v1.md, 2026-09-20 follow-up)."
+  },
+  "corpus.secreorder_naive.n": {
+   "value": "59",
+   "quantity": "Counterfactual combined section-reordering count if every follow-up document were applicable (applicable primary plus full follow-up size)",
+   "status": "derived",
+   "source": {
+    "file": "D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7-v2-section-reorder\\combined-v1-v2-statistics-20260831T172118Z.json",
+    "format": "text",
+    "locator": "corpus.secreorder_orig.n + corpus.followup.n = 11 + 48 = 59. The superseded pre-correction file stores exactly this counterfactual: groups[2] (section_reorder).paired_n = 59 (control_n=59, treatment_n=59), from when all 48 follow-up docs were treated as applicable",
+    "source_value": "59"
+   },
+   "note": "L203C8. Counterfactual count used only to explain why the combined n is 56, not 59."
+  },
+  "corpus.secreorder_orig.n": {
+   "value": "11",
+   "quantity": "Number of primary-corpus documents on which the section-reordering task is structurally applicable",
+   "status": "verified",
+   "source": {
+    "file": "D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7\\k1-fixrerun-statistics-20260831T145852Z.json",
+    "format": "text",
+    "locator": "groups[2] (family=section_reorder, k_pairs=1).paired_n (control_n=11, treatment_n=11, not_applicable_count=30 = 15 non-applicable docs x 2 arms); same group p_value=0.2395 matches the paper's p=0.240",
+    "source_value": "11"
+   },
+   "note": "Reproduced from raw holdout/validation-k1-fixrerun slice manifests: 11 of 26 v1 docs have a section_reorder chain that is not not_applicable. k4-final-statistics-20260902.json groups[2].paired_n=11 agrees. All 5 tokens (L199, L202, L203, L535, L1123) are this quantity."
+  },
+  "corpus.validation.n": {
+   "value": "12",
+   "quantity": "Number of documents in the validation subset of the primary corpus",
+   "status": "verified",
+   "source": {
+    "file": "D:\\MeridianData\\ooxml-graph-paper\\manifests\\paper-s7-corpus-manifest-v1.json",
+    "format": "text",
+    "locator": "split_counts.validation; also D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7\\validation-k1-fixrerun-20260831T145852Z\\slice-manifest.json document_count (split=validation)",
+    "source_value": "12"
+   },
+   "note": "L189C1 '12-document validation set'. The development split is also 12 in the same manifest, but the token clearly refers to validation."
+  },
+  "defects.cert_caption.treatment.passes_before": {
+   "value": "1",
+   "quantity": "Caption-family treatment-arm passing trials on the original shared host before the certificate-failure trials were re-run",
+   "status": "derived",
+   "source": {
+    "file": "D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7-caption\\holdout-k1-20260908T-first-attempt and \\validation-k1-20260908T-first-attempt (each *-caption-treatment-k1\\chain-result.json)",
+    "format": "text",
+    "locator": "count of completed treatment chains finished before the 2026-09-11 certificate retry = 1: validation atomic__word_011_theme_transfer_-caption-treatment-k1. Its forward leg started 2026-09-10T07:58, and it carries manually_recovered_inverse_leg with the inverse at 2026-09-10T15:12. The only other completed chain, composite_same_type__wordc_005_e, started 2026-09-11T04:12, which is the certificate-retry recovery.",
+    "source_value": "1 (docs: 'caption 0/26 -> **1/26 (3.8%)**' and 'caption 1/26 -> 2/26 (7.7%)' in paper-s8-final-evidence-v1.md lines 42 and 55; §2.8 line 832)"
+   },
+   "note": "L982C26 '1/26' is the caption treatment count before the certificate retry. The current total of 2/26 matches tab:render-gate's 7.7%."
+  },
+  "defects.cert_equation.treatment.passes_before": {
+   "value": "4",
+   "quantity": "Equation-family treatment-arm passing trials on the original shared host before the certificate-failure trials were re-run",
+   "status": "derived",
+   "source": {
+    "file": "D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7-equation\\holdout-k1-20260907T-with-fix and \\validation-k1-20260907T-with-fix (each *-equation-treatment-k1\\chain-result.json)",
+    "format": "text",
+    "locator": "count of treatment chains with status=='completed' AND pairs[0].forward.started_at before the cert-failure window (2026-09-10T07:53Z) = 4: atomic__word_006_section_reorder (2026-09-10T07:18), atomic__word_012_table_structure (07:24), composite_same_type__wordc_005_e (07:28), composite_same_type__wordc_010_r (2026-09-07T18:58). The other 8 completed chains started 2026-09-11, during the certificate-error and BadZipFile retries.",
+    "source_value": "4 (docs: 'equation 1/26 -> **4/26 (15.4%)**' and 'equation 4/26 -> 11/26 (42.3%)' in paper-s8-final-evidence-v1.md lines 42 and 55)"
+   },
+   "note": "L981C88 '4/26' is the equation treatment count before the certificate retry. Table render-gate is the treatment arm. The ledger's post-retry final of 11/26 is superseded: the current chain-result.json files show 12/26 completed, which matches the paper's 12/26 (L982) and the 46.2% in tab:render-gate and in the checkpoint doc's 2026-09-13 table."
+  },
+  "defects.cert_failure.count": {
+   "value": "29",
+   "quantity": "Number of trials (equation and caption families) that failed with the transient API-level certificate verification error and were re-run",
+   "status": "doc_only",
+   "source": {
+    "file": "../docs/paper-s8-final-evidence-v1.md",
+    "format": "text",
+    "locator": "Header summary, 'The tenth update (2026-09-10/11)' paragraph (lines 49-54). Also §2.5 update (line 609: 16 equation chains), §2.8 update (line 835: 13 caption chains), and docs\\paper-s7-experiment-status-checkpoint-v1.md 'CORRECTION, same day' bucketing block (lines 358-375: 'returncode=1, not_run -> 16' equation / '-> 13' caption, 'All 29 cluster tightly ... 07:53-08:17 UTC')",
+    "source_value": "29 trials (16 equation, 13 caption)"
+   },
+   "note": "All four occurrences (L976C29, L977C93, L980C42, L986C3) are this count: failed, clustered, re-ran, and previously counted as capability failures. No machine-readable record of the 29 remains. A grep of every non-docx file under D:\\MeridianData\\ooxml-graph-paper\\runs finds no UNKNOWN_CERTIFICATE_VERIFICATION_ERROR, because later retries (2026-09-11 and 2026-09-12) overwrote each chain-result.json. The current chain-result.json timestamps are consistent with the docs' pre-retry blocked counts (equation 22 = 26-4, caption 25 = 26-1). They cannot recover the 16/13 split."
+  },
+  "defects.doclabel.prefix_chars": {
+   "value": "32",
+   "quantity": "Number of leading doc_label characters run_chain uses to derive its checkpoint directory (truncation length behind the collision defect)",
+   "status": "verified",
+   "source": {
+    "file": "../tools/run_paper_s7_benchmark.py",
+    "format": "text",
+    "locator": "run_chain: line 320 `if len(doc_label) > 32:` (post-fix, commit 435abb5); pre-fix `short_doc_label = doc_label[:32]` (435abb5^, blob 5721ada)",
+    "source_value": "doc_label[:32] / if len(doc_label) > 32"
+   },
+   "note": "All three occurrences (L1045C47, L1050C63, L1057C77) are this truncation length. D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s23-final\\baseline-sweep-manifest.json confirms it: the labels masters-dissertation-defense__anchor0 to anchor3 are 37 characters and share the 32-character prefix 'masters-dissertation-defense__an'. The post-fix chain_ids read 'masters-dissertation-de-<8hex>-...', i.e. doc_label[:23] + '-' + 8-char sha256, which matches the paper's 8-character hash suffix. Minor inaccuracies outside the paper: the code comment and commit message quote the shared prefix as 'masters-dissertation-defense__a' (31 characters). They also say the base label is '>=32 chars', but the base label is 28 characters; the collision happens only because of the '__anchorN' suffix."
+  },
+  "defects.fallback_concurrent.worst_s": {
+   "value": "180",
+   "quantity": "Approximate worst-case time (seconds) for a double backend failure under the intended concurrent race (slower of the two backends)",
+   "status": "derived",
+   "source": {
+    "file": "C:\\Users\\13144\\Documents\\Meridian\\repository\\extensions\\meridian-docs\\meridian_docs\\render_gate.py",
+    "format": "text",
+    "locator": "max over the 2 raced backends of (1 + max_retries=1) x 90 s = max(180, 180) = 180 s (same constants as the sequential case)",
+    "source_value": "_SOFFICE_TIMEOUT_SECONDS = 90.0; _WORD_COM_TIMEOUT_SECONDS = 90.0; max_retries: int = 1"
+   },
+   "note": "No doc states 180 s explicitly. The checkpoint doc (lines 1342-1357) describes the concurrent race but gives no figure. The race implementation (_attempt_backend_with_retries) is not in any ref of C:\\Users\\13144\\Documents\\Meridian\\repository or in the other local Meridian worktrees, which fits the paper's statement that it was never merged. The upper-bound caveat from the sequential case also applies here."
+  },
+  "defects.fallback_sequential.worst_s": {
+   "value": "360",
+   "quantity": "Approximate worst-case time (seconds) for both render-verification backends failing under the sequential fallback",
+   "status": "derived",
+   "source": {
+    "file": "C:\\Users\\13144\\Documents\\Meridian\\repository\\extensions\\meridian-docs\\meridian_docs\\render_gate.py",
+    "format": "text",
+    "locator": "2 backends (soffice, word-com; sequential `for backend in available:` loop in check_render_capability) x (1 + max_retries=1 [check_render_capability default]) x 90 s (_SOFFICE_TIMEOUT_SECONDS L323, _WORD_COM_TIMEOUT_SECONDS L537) = 360 s, plus 2 x 2 s _RENDER_RETRY_BACKOFF_SECONDS",
+    "source_value": "_SOFFICE_TIMEOUT_SECONDS = 90.0; _WORD_COM_TIMEOUT_SECONDS = 90.0; max_retries: int = 1; _RENDER_RETRY_BACKOFF_SECONDS = 2.0"
+   },
+   "note": "docs\\paper-s7-experiment-status-checkpoint-v1.md line 1344 states the same figure: 'up to ~360s combined just to discover both fail'. 360 s is an upper bound. Both backends raise timeouts with retryable=False, so two plain timeouts cost about 180 s in sequence. Reaching 360 s needs each backend's first attempt to use about 90 s and fail with a retryable (non-timeout) class, then time out on the retry. The paper's 'approximately' and 'retry-bounded' wording covers this."
+  },
+  "defects.root_cli.attempted": {
+   "value": "156",
+   "quantity": "Chains attempted in the first, failed (root-user) launch of the confirmatory re-run",
+   "status": "doc_only",
+   "source": {
+    "file": "../docs/paper-s7-experiment-status-checkpoint-v1.md",
+    "format": "text",
+    "locator": "section '2026-09-13 -- RunPod confirmatory re-run', Provisioning bullet (line 1433)",
+    "source_value": "First full-benchmark launch (as root, the container's default user) failed **all 156 chains instantly** (~0.4s each, `status: blocked`)"
+   },
+   "note": "Same record as defects.root_cli.fails: the root-user launch attempted and blocked every chain of the confirmatory re-run."
+  },
+  "defects.root_cli.fails": {
+   "value": "156",
+   "quantity": "Number of confirmatory re-run chains that failed because the CLI refused to run as root before the fix (all of which were then re-run)",
+   "status": "doc_only",
+   "source": {
+    "file": "../docs/paper-s7-experiment-status-checkpoint-v1.md",
+    "format": "text",
+    "locator": "section '2026-09-13 -- RunPod confirmatory re-run', Provisioning bullet (line 1433)",
+    "source_value": "First full-benchmark launch (as root, the container's default user) failed **all 156 chains instantly** (~0.4s each, `status: blocked`)"
+   },
+   "note": "L1025C31 ('exactly 156 of 156') and L1025C95 ('all 156 were re-run') both mean this count. The first 'of 156' (L1025C38) and L1014 'every one of 156' are the total chain count, not listed under this key. Machine data confirms only the total: D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7-clean-rerun-runpod\\s7_clean_rerun.log shows {\"completed\": 84} + {\"completed\": 72} = 156. The archive and the extracted runs\\paper-s7-clean-rerun hold 156 chain-result.json files, all status 'completed'. The failed root attempt's records were not kept (its run log and chain results were overwritten)."
+  },
+  "harness.bootstrap_resamples": {
+   "value": "2{,}000",
+   "quantity": "Number of bootstrap resamples used for per-family percentile confidence intervals",
+   "status": "verified",
+   "source": {
+    "file": "../tools/graph_scorer.py",
+    "format": "text",
+    "locator": "graph_scorer.py L84 module constant _BOOTSTRAP_RESAMPLES (default n_resamples of bootstrap_ci, L949); also stored in every stats JSON, e.g. D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7\\k1-fixrerun-statistics-20260831T145852Z.json groups[*].control_pass_rate_ci.n_resamples / treatment_pass_rate_ci.n_resamples, and D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s23-final\\statistics.json top-level n_resamples",
+    "source_value": "_BOOTSTRAP_RESAMPLES = 2000 ; JSON \"n_resamples\": 2000"
+   },
+   "note": "L330C84 is the '2{,}000 resamples' for the per-family percentile bootstrap CIs in Methods > Statistics. Every stats JSON checked (k1-fixrerun, k4-final-statistics-20260902, combined-v1-v2-statistics-corrected-20260904, s7-final-statistics-runpod, paper-s23-final/statistics.json with 85 occurrences) stores n_resamples = 2000. compute_multianchor_extension_statistics.py _RESAMPLES = 2000 and compute_respec_cascade_statistics.py (_RESAMPLES, 2000) agree. Protocol docs (paper-s7-protocol-v1.md L148 and others) agree."
+  },
+  "harness.permutations": {
+   "value": "2{,}000",
+   "quantity": "Number of resamples in the paired sign-flip permutation test",
+   "status": "verified",
+   "source": {
+    "file": "../tools/graph_scorer.py",
+    "format": "text",
+    "locator": "graph_scorer.py L85 _PERMUTATION_RESAMPLES (default n_permutations of paired_permutation_test, L991). L909 occurrence: D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s23-final\\statistics.json confirm_disconfirm.pooled.direct_control_vs_treatment_phase3.n_permutations",
+    "source_value": "_PERMUTATION_RESAMPLES = 2000 ; JSON \"n_permutations\": 2000"
+   },
+   "note": "L338C19 is the Methods sign-flip permutation-test resample count. L909C27 is the respec_cascade anchor-set-level Phase-3 control-vs-treatment test: that JSON entry has n_paired_anchor_sets 30, observed_mean_diff -0.4667 (46.7 pp), p_value 0.0, n_permutations 2000, which matches the paper's '30 paired ... p<0.0005, 2,000 permutations, zero as extreme'. All stats JSONs store n_permutations = 2000 (47 occurrences in paper-s23-final/statistics.json, 3 each in the S7 JSONs)."
+  },
+  "harness.render_backend_timeout_s": {
+   "value": "90",
+   "quantity": "Per-backend retry-bounded render-verification timeout in seconds (the 90s timeout; restated as '90-second timeout' in the defects section)",
+   "status": "verified",
+   "source": {
+    "file": "C:\\Users\\13144\\Documents\\Meridian\\repository\\extensions\\meridian-docs\\meridian_docs\\render_gate.py",
+    "format": "text",
+    "locator": "render_gate.py L323 _SOFFICE_TIMEOUT_SECONDS (raised 60->90 2026-09-07, d4a1f2c8) and L537 _WORD_COM_TIMEOUT_SECONDS (raised 60->90 2026-09-09, d3f8a291)",
+    "source_value": "_SOFFICE_TIMEOUT_SECONDS = 90.0 ; _WORD_COM_TIMEOUT_SECONDS = 90.0"
+   },
+   "note": "Both write-time verification backends (LibreOffice soffice and Word COM) use a 90s per-attempt bound. L995C60 ('each with its own retry-bounded 90-second timeout') and L737C95 ('all << the 90s timeout', the render-timing test) both refer to this. The ~360s combined worst case in L996 is consistent with 2 backends x 2 attempts x 90s. The harness's separate Word-COM render receipts also use 90.0 (tools/run_paper_s7_benchmark.py L74 _WORD_RECEIPT_TIMEOUT_SECONDS; chain-result word_com_receipts[*].render_receipt.timeout_seconds = 90.0), but that is a different mechanism from the render gate."
+  },
+  "harness.timeout_final_s": {
+   "value": "900",
+   "quantity": "Current (final) global per-trial subprocess timeout in seconds",
+   "status": "verified",
+   "source": {
+    "file": "../tools/claude_pair_runner.py",
+    "format": "text",
+    "locator": "L129 module constant _TIMEOUT_SECONDS (used as subprocess timeout at L331); set by commit 7954983 (2026-09-18, 600.0 -> 900.0)",
+    "source_value": "_TIMEOUT_SECONDS = 900.0"
+   },
+   "note": "All three occurrences (L371 Methods, L1156 and L1161 Limitations 'Seventh') refer to the current global per-trial timeout. HEAD and the working tree both hold 900.0."
+  },
+  "harness.timeout_hits.rendergated.count": {
+   "value": "37",
+   "quantity": "Number of render-gated trials that hit the 600s timeout ceiling (as recently as 2026-09-12)",
+   "status": "derived",
+   "source": {
+    "file": "D:\\MeridianData\\ooxml-graph-paper\\runs",
+    "format": "text",
+    "locator": "over the 643 pre-2026-09-19 chain-result.json files: count of trials with timed_out==true and wall_time_seconds of about 600 (600.0-601.5)",
+    "source_value": "37 (recomputed: 25 table_structural + 11 equation + 1 caption; latest started_at 2026-09-12T16:14:13Z)"
+   },
+   "note": "Reproduces exactly, including the 'as recently as 2026-09-12' date. The same breakdown is stated in the claude_pair_runner.py L118-120 comment (46 total timeouts, 37 at 600s). The 37 includes 25 table_structural trials, a render-gated family. The paper's text sits right next to 'the two slower render-gated families (equation and caption)', but it correctly says just 'render-gated trials' here, so the assignment is fine."
+  },
+  "harness.timeout_initial_s": {
+   "value": "300",
+   "quantity": "Initial global per-trial subprocess timeout in seconds (before the 2026-09-07 raise)",
+   "status": "verified",
+   "source": {
+    "file": "../tools/claude_pair_runner.py",
+    "format": "text",
+    "locator": "git history of tools/claude_pair_runner.py: commit 35ae41f (2026-08-30) added `_TIMEOUT_SECONDS = 300.0`; commit be19deb (2026-09-07 15:44 -0500) changed 300.0 -> 600.0. Current file comment L94 'Raised 300s -> 600s 2026-09-07'",
+    "source_value": "_TIMEOUT_SECONDS = 300.0"
+   },
+   "note": "Raw data agrees: among the 2460 trials in the 643 pre-2026-09-19 chain-result.json files, 9 timed-out trials have wall_time_seconds of about 300.1-300.3 (1 citation, 4 section_reorder, 2 equation, 2 table_structural). L1251C17 (Note a, inline-citation treatment forward call hit a 300s timeout) matches the single 300s citation timeout. L1256C3 (Note b, section-reorder combined control chain) matches the pre-09-07 ceiling that was in effect for the v2 section-reorder run (Aug 31). All four occurrences refer to this initial 300s ceiling."
+  },
+  "harness.timeout_raise_factor": {
+   "value": "1.5",
+   "quantity": "Multiplicative factor of the final timeout raise (final timeout over the prior 600s timeout), derived from other keyed values",
+   "status": "derived",
+   "source": {
+    "file": "../tools/claude_pair_runner.py",
+    "format": "text",
+    "locator": "harness.timeout_final_s / harness.timeout_raised_s = 900/600 (L129 current vs be19deb value); also stated in the comment at L122 '900s (1.5x, matching this project's own prior evidence-based soffice 60s->90s raise)'",
+    "source_value": "1.5"
+   },
+   "note": "900/600 = 1.5 exactly. The 'matching' claim also checks out: the render_gate.py soffice timeout went 60 -> 90 (1.5x)."
+  },
+  "harness.timeout_raised_s": {
+   "value": "600",
+   "quantity": "Global per-trial subprocess timeout in seconds after the 2026-09-07 reactive raise",
+   "status": "verified",
+   "source": {
+    "file": "../tools/claude_pair_runner.py",
+    "format": "text",
+    "locator": "git commit be19deb (2026-09-07 15:44:10 -0500, 'PAPER-S7: raise the outer claude -p subprocess timeout 300s -> 600s') diff: -_TIMEOUT_SECONDS = 300.0 / +_TIMEOUT_SECONDS = 600.0; superseded by commit 7954983 (600.0 -> 900.0)",
+    "source_value": "_TIMEOUT_SECONDS = 600.0"
+   },
+   "note": "The date 2026-09-07 is confirmed by the commit timestamp and the current comment at L94. Raw data: 37 timed-out trials have wall_time_seconds of about 600.0-601.5. L997C17 ('the harness's 600-second outer per-trial timeout') is a historical at-the-time value in the defects narrative. The Word COM render timeout became 90s on 2026-09-09, after the 600s raise, and 360s is 'over half' of 600, so 600 is the right value for that occurrence, though the current value is 900. All five occurrences are this quantity."
+  },
+  "harness.walltime.chain_results.count": {
+   "value": "643",
+   "quantity": "Number of recorded chain results aggregated for the wall-clock timeout derivation",
+   "status": "derived",
+   "source": {
+    "file": "D:\\MeridianData\\ooxml-graph-paper\\runs",
+    "format": "text",
+    "locator": "count of **/chain-result.json under runs/ with mtime < 2026-09-19 (the snapshot at the 2026-09-18 timeout raise, commit 7954983): paper-s7 156 + paper-s7-clean-rerun-runpod 156 + paper-s7-v2-section-reorder 116 + paper-s7-equation 100 + paper-s7-caption 52 + paper-s7-table-structural 52 + paper-s7-hard-fixtures-v2 4 + paper-s7-table-structural-smoke 4 + paper-s7-sequencing-isolation-test 2 + paper-s7-bibliography-flake-rerun 1 = 643",
+    "source_value": "643 (recomputed)"
+   },
+   "note": "No stored machine-readable aggregate exists. The value is also stated in the claude_pair_runner.py L113-114 comment, commit 7954983's message and tools/margin_notes/comment_ledger.json (c_mu76k3u6sacle). The runs tree now holds 1016 chain-result.json files: the 372 paper-s7-multi-anchor-extension files (2026-09-19) and 1 paper-s23-respec-cascade-smoke file were added after the aggregation. So 643 is correct as a 2026-09-18 snapshot, but 'all ... recorded chain results' is no longer literally true of the current tree. Recomputed read-only with a scratchpad script; no repository files were touched."
+  },
+  "harness.walltime.rendergated.max_s": {
+   "value": "574.8",
+   "quantity": "Observed maximum completion time in seconds for completed equation and caption (slower render-gated) trials combined",
+   "status": "verified",
+   "source": {
+    "file": "D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7-equation\\holdout-k1-20260907T-with-fix\\composite_same_type__wordc_007_d-equation-treatment-k1\\chain-result.json",
+    "format": "text",
+    "locator": "pairs[0].forward.wall_time_seconds (returncode 0, timed_out false); it is the maximum over all completed equation+caption trials, and over all 2409 completed trials, in the 643-file set",
+    "source_value": "574.810286283493"
+   },
+   "note": "Rounds to 574.8. The max is the same whether or not table_structural is pooled (table_structural completed max 301.3, caption max 428.1). The same value also appears in D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7-equation\\holdout-k1-20260907T-with-fix\\slice-manifest.json L7258."
+  },
+  "harness.walltime.trials_completed.count": {
+   "value": "2409",
+   "quantity": "Number of trials in the wall-clock aggregation that completed without hitting either timeout ceiling",
+   "status": "derived",
+   "source": {
+    "file": "D:\\MeridianData\\ooxml-graph-paper\\runs",
+    "format": "text",
+    "locator": "over the 643 pre-2026-09-19 chain-result.json files: count of pairs[*].{forward,inverse} with returncode == 0",
+    "source_value": "2409 (recomputed)"
+   },
+   "note": "Reproduces exactly: of 2460 trials, 46 have timed_out=true (returncode None) and 5 have timed_out=false with a nonzero returncode (4 x 3221225794, 1 x 3221226505, which are Windows process crash codes). 2460-46-5 = 2409. Counting only timed_out==false gives 2414, so the paper's gloss 'completed without hitting either ceiling' is slightly loose, because it also excludes 5 non-timeout crashes. The value is also stated in the claude_pair_runner.py L114-115 comment and commit 7954983."
+  },
+  "harness.walltime.trials_total.count": {
+   "value": "2460",
+   "quantity": "Total number of trials in the wall-clock aggregation",
+   "status": "derived",
+   "source": {
+    "file": "D:\\MeridianData\\ooxml-graph-paper\\runs",
+    "format": "text",
+    "locator": "over the 643 pre-2026-09-19 chain-result.json files: count of pairs[*].forward + pairs[*].inverse trial records (all carry wall_time_seconds)",
+    "source_value": "2460 (recomputed)"
+   },
+   "note": "Reproduces exactly. The value is also stated in the claude_pair_runner.py L114 comment and commit 7954983's message."
+  },
+  "k4.secreorder.control.ci_hi": {
+   "value": "78.2",
+   "quantity": "K=4 section-reorder (combined corpus) pass rate 95% bootstrap CI upper bound, control arm",
+   "status": "verified",
+   "source": {
+    "file": "sources/secreorder-combined-k4-statistics.json",
+    "format": "json",
+    "locator": "groups[family=section_reorder,k_pairs=4].control_pass_rate_ci.ci_high",
+    "source_value": "0.7818181818181819"
+   },
+   "note": "This bound depends on the order the manifests are concatenated, because bootstrap resampling indexes into the value list in that order. Across all 24 orderings it comes out 0.7818 (78.2) in 12 and 0.8000 (80.0) in 12. The order v1 then v2-holdout-before-validation reproduces every ledger CI at once: control [54.5, 78.2], treatment [85.7, 98.2], steady-state [78.8, 92.1] / [89.9, 100]. The ledger's v2-alone row likewise matches only holdout-before-validation (steady-state treatment lower bound 88.1). So 78.2 is reproducible, but it is sensitive to the bootstrap seed and ordering: the natural validation-then-holdout order for both corpora gives 80.0."
+  },
+  "k4.secreorder.control.ci_lo": {
+   "value": "54.5",
+   "quantity": "K=4 section-reorder (combined corpus) pass rate 95% bootstrap CI lower bound, control arm",
+   "status": "verified",
+   "source": {
+    "file": "sources/secreorder-combined-k4-statistics.json",
+    "format": "json",
+    "locator": "groups[family=section_reorder,k_pairs=4].control_pass_rate_ci.ci_low",
+    "source_value": "0.5454545454545454"
+   },
+   "note": "The lower bound is 0.5454545454545454 in all 24 manifest orderings, so it is stable."
+  },
+  "k4.secreorder.control.n": {
+   "value": "55",
+   "quantity": "K=4 section-reorder (combined corpus) sample size n, control arm",
+   "status": "verified",
+   "source": {
+    "file": "sources/secreorder-combined-k4-statistics.json",
+    "format": "json",
+    "locator": "groups[family=section_reorder,k_pairs=4].control_n",
+    "source_value": "55"
+   },
+   "note": "All 3 tokens refer to the K=4 combined corpus. L549C73 is the table n. L596C70 and L604C28 are the '55' in '55/56'. The K=1 combined n is also 55/56, so the L596 text holds either way."
+  },
+  "k4.secreorder.control.rate": {
+   "value": "67.3",
+   "quantity": "K=4 section-reorder whole-chain pass rate (all four edit-undo cycles pass), control arm, combined original + follow-up corpus (Table tab:k4)",
+   "status": "verified",
+   "source": {
+    "file": "sources/secreorder-combined-k4-statistics.json",
+    "format": "json",
+    "locator": "groups[family=section_reorder,k_pairs=4].control_pass_rate_ci.mean",
+    "source_value": "0.6727272727272727"
+   },
+   "note": "No stats JSON on disk stores this value; it rests on the ledger plus the recomputation. The superseded raw v2 K=4 manifests give v2 control 62.2% n=45. The v1-only k4-final-statistics-20260902.json gives 0.6364 n=11, which is not the combined figure. The mean does not depend on manifest order."
+  },
+  "k4.secreorder.p": {
+   "value": "0.0015",
+   "quantity": "Paired sign-flip permutation p-value for the K=4 section-reorder control vs treatment comparison (Table tab:k4)",
+   "status": "verified",
+   "source": {
+    "file": "sources/secreorder-combined-k4-statistics.json",
+    "format": "json",
+    "locator": "groups[family=section_reorder,k_pairs=4].paired_control_vs_treatment_significance.p_value",
+    "source_value": "0.0015"
+   },
+   "note": "All 4 tokens (L44C89, L549C102, L554C38, L598C61) are this paired p-value. Paired documents are sorted before the test, so the value does not depend on manifest order (same result in all 24 orderings tried). For comparison, v1 alone at K=4 gives p=0.119 (k4-final-statistics-20260902.json) and v2 alone gives p=0.026. No stats JSON stores 0.0015 (grep of runs/*.json found none)."
+  },
+  "k4.secreorder.treatment.ci_hi": {
+   "value": "98.2",
+   "quantity": "Upper bound of the 95% CI on the K=4 section-reorder treatment-arm pass rate (Table tab:k4)",
+   "status": "verified",
+   "source": {
+    "file": "sources/secreorder-combined-k4-statistics.json",
+    "format": "json",
+    "locator": "groups[family=section_reorder,k_pairs=4].treatment_pass_rate_ci.ci_high",
+    "source_value": "0.9821428571428571"
+   },
+   "note": "The value is the same in all 24 manifest orderings."
+  },
+  "k4.secreorder.treatment.ci_lo": {
+   "value": "85.7",
+   "quantity": "Lower bound of the 95% CI on the K=4 section-reorder treatment-arm pass rate (Table tab:k4)",
+   "status": "verified",
+   "source": {
+    "file": "sources/secreorder-combined-k4-statistics.json",
+    "format": "json",
+    "locator": "groups[family=section_reorder,k_pairs=4].treatment_pass_rate_ci.ci_low",
+    "source_value": "0.8571428571428571"
+   },
+   "note": "The value is the same in all 24 manifest orderings. The K=1 combined treatment CI (combined-v1-v2-statistics-corrected-20260904.json and the ledger sec 2.3) happens to be the same [85.7, 98.2], but the token sits in tab:k4 and is the K=4 value."
+  },
+  "k4.secreorder.treatment.n": {
+   "value": "56",
+   "quantity": "Number of treatment-arm chains analyzed in the K=4 section-reorder comparison (Table tab:k4)",
+   "status": "verified",
+   "source": {
+    "file": "sources/secreorder-combined-k4-statistics.json",
+    "format": "json",
+    "locator": "groups[family=section_reorder,k_pairs=4].treatment_n",
+    "source_value": "56"
+   },
+   "note": "L550C74 is the table n. L596C73 and L604C31 are the '56' in '55/56'. The description says 'chains analyzed'; the chains are also documents, since there is one chain per document per arm."
+  },
+  "k4.secreorder.treatment.rate": {
+   "value": "92.9",
+   "quantity": "K=4 section-reorder whole-chain pass rate (all four edit-undo cycles pass), treatment arm, combined original + follow-up corpus (Table tab:k4)",
+   "status": "verified",
+   "source": {
+    "file": "sources/secreorder-combined-k4-statistics.json",
+    "format": "json",
+    "locator": "groups[family=section_reorder,k_pairs=4].treatment_pass_rate_ci.mean",
+    "source_value": "0.9285714285714286"
+   },
+   "note": "No stats JSON on disk stores the K=4 combined numbers; the value is backed only by the ledger plus this recomputation from the chain data. Stats files that do not apply: k4-final-statistics-20260902.json is v1 only (n=11, treatment 1.0); combined-v1-v2-statistics-*.json are K=1. The raw pre-correction v2 K=4 manifests (slice-manifest.json) give 82.6% n=46 and are superseded by the -corrected-20260904 files. The mean does not depend on manifest order."
+  },
+  "k4.secreorder_followup.control.order_c2plus.fails": {
+   "value": "9",
+   "quantity": "Number of those failing K=4 follow-up-corpus control chains that failed specifically on exact-order restoration starting from the second cycle onward",
+   "status": "derived",
+   "source": {
+    "file": "D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7-v2-section-reorder\\holdout-k4-20260904T090807Z\\slice-manifest-corrected-20260904.json",
+    "format": "text",
+    "locator": "Enumerated per-pair grading of the v2 K=4 control chains in this file plus validation-k4-20260904T132025Z\\slice-manifest-corrected-20260904.json: count of chains whose first failing inverse exact_original_order_restored check is at pair_index>=1 and that pass forward on every pair. The 9 are c74ca756f49995a1 (p2), 4cfacfb2fca2d566 (p1), 5f26f5eb8c4be7dc (p1,p3), 776a89b181f5903d (p1-3), e05389e69cebf04e (p1-2), af94e0e534a21ef6 (p2), a494d334101a1c58 (p1 inverse not_run, p2-3 fail), f55e12990dd485d5 (p1), a57b22818d61ba52 (p2).",
+    "source_value": "9"
+   },
+   "note": "Matches the ledger (paper-s8-final-evidence-v1.md sec 2.4 line 429 '9 of 12'; followup-result doc line 185). No file stores this count; it comes from enumerating the chains. In a494d334101a1c58 the inverse is not_run on pair 1, so its first graded exact-order failure is pair 2; it is still a pair>=1 case."
+  },
+  "ma.caption.control.icc": {
+   "value": "0.124",
+   "quantity": "Intraclass correlation (one-way random-effects) computed on the merged multi-anchor data for caption's control arm, used for Tier 3 effective-n correction in Table tab:render-gate-multianchor (placed under ma, not maext, because it is a result of that table's data)",
+   "status": "verified",
+   "source": {
+    "file": "sources/multianchor-combined-statistics.json",
+    "format": "json",
+    "locator": "families.caption.tier3_pooled_anchor_level.control_clustering.icc",
+    "source_value": "0.12388166713426224"
+   },
+   "note": "Rounds to 0.124. It is deterministic. It differs from the extension-only ICC of 0.099 (checkpoint line 1549), which has a different scope and is not the source. See the common note on ma.equation.control.t1.rate."
+  },
+  "ma.caption.control.neff.n": {
+   "value": "80.7",
+   "quantity": "ICC-corrected effective n for the Tier 3 pooled estimate, multi-anchor merged, caption family, control arm",
+   "status": "verified",
+   "source": {
+    "file": "sources/multianchor-combined-statistics.json",
+    "format": "json",
+    "locator": "families.caption.tier3_pooled_anchor_level.control_clustering.effective_n",
+    "source_value": "80.74942957008994"
+   },
+   "note": "Rounds to 80.7. It is deterministic because ICC does not depend on order. See the common note on ma.equation.control.t1.rate."
+  },
+  "ma.caption.control.t1.ci_hi": {
+   "value": "100",
+   "quantity": "Upper 95% CI bound of multi-anchor merged caption pass rate, control arm, Tier 1",
+   "status": "verified",
+   "source": {
+    "file": "sources/multianchor-combined-statistics.json",
+    "format": "json",
+    "locator": "families.caption.tier1_per_document_unweighted.control_pass_rate_ci.ci_high",
+    "source_value": "1.0"
+   },
+   "note": "Recomputed; see the common note on ma.equation.control.t1.rate."
+  },
+  "ma.caption.control.t1.ci_lo": {
+   "value": "92.2",
+   "quantity": "Lower 95% CI bound of multi-anchor merged caption pass rate, control arm, Tier 1",
+   "status": "verified",
+   "source": {
+    "file": "sources/multianchor-combined-statistics.json",
+    "format": "json",
+    "locator": "families.caption.tier1_per_document_unweighted.control_pass_rate_ci.ci_low",
+    "source_value": "0.9224137931034483"
+   },
+   "note": "Rounds to 92.2. It is stable across 16 PYTHONHASHSEEDs. In principle it depends on the set-iteration order of documents in combine(): in a random-shuffle test, 4 of 200 orderings gave 91.4. See the common note on ma.equation.control.t1.rate."
+  },
+  "ma.caption.control.t1.rate": {
+   "value": "96.6",
+   "quantity": "Multi-anchor merged pass rate, caption family, control arm, Tier 1 (unweighted per-document mean)",
+   "status": "verified",
+   "source": {
+    "file": "sources/multianchor-combined-statistics.json",
+    "format": "json",
+    "locator": "families.caption.tier1_per_document_unweighted.control_pass_rate_ci.mean",
+    "source_value": "0.9655172413793104"
+   },
+   "note": "Rounds to 96.6. docs\\paper-s7-experiment-status-checkpoint-v1.md line 1561 also states 'control 96.6% / 96.3% / 96.3%'. See the common note on ma.equation.control.t1.rate."
+  },
+  "ma.caption.control.t2.ci_hi": {
+   "value": "100",
+   "quantity": "Upper 95% CI bound of multi-anchor merged caption pass rate, control arm, Tier 2",
+   "status": "verified",
+   "source": {
+    "file": "sources/multianchor-combined-statistics.json",
+    "format": "json",
+    "locator": "families.caption.tier2_anchor_weighted_document_mean.control.ci_high",
+    "source_value": "1.0"
+   },
+   "note": "It is 1.0 under every hash seed tested (1000 orderings). See the common note on ma.equation.control.t1.rate."
+  },
+  "ma.caption.control.t2.ci_lo": {
+   "value": "91.5",
+   "quantity": "Lower 95% CI bound of multi-anchor merged caption pass rate, control arm, Tier 2",
+   "status": "derived",
+   "source": {
+    "file": "C:\\Users\\13144\\AppData\\Local\\Temp\\claude\\C--Users-13144-Documents-Meridian-ooxml-graph-paper\\b425ba47-4f00-4009-b058-0371b1939e57\\scratchpad\\ma_recompute_out.json",
+    "format": "text",
+    "locator": "families.caption.tier2_anchor_weighted_document_mean.control.ci_low (weighted_cluster_bootstrap, seed 20260828)",
+    "source_value": "0.9158878504672897 (PYTHONHASHSEED=0; 0.91509 under PYTHONHASHSEED=36)"
+   },
+   "note": "NOT DETERMINISTIC. compute_s7_combined_statistics.combine() builds the document order by iterating a Python set, so the resample order depends on the string-hash seed. Across PYTHONHASHSEED 0-79 this bound rounded to 91.2 (1 seed), 91.3 (3), 91.4 (20), 91.5 (8), 91.6 (19), 91.7 (19) and 91.8 (10). The published 91.5 is a legitimate output: under seed 36 every published caption number reproduces at once (92.2 / 91.5 / 92.6-99.1 / p=0.252). But a default re-run most likely prints a different digit (seed 0 gives 91.6). The original output file is lost, so the exact published run cannot be confirmed. Suggested fix: sort the documents in combine() or compute_combined_tiers(). See the common note on ma.equation.control.t1.rate."
+  },
+  "ma.caption.control.t2.rate": {
+   "value": "96.3",
+   "quantity": "Multi-anchor merged pass rate, caption family, control arm, Tier 2 (anchor-count-weighted per-document mean)",
+   "status": "verified",
+   "source": {
+    "file": "sources/multianchor-combined-statistics.json",
+    "format": "json",
+    "locator": "families.caption.tier2_anchor_weighted_document_mean.control.mean",
+    "source_value": "0.9629629629629629"
+   },
+   "note": "Rounds to 96.3. The checkpoint doc line 1561 agrees. See the common note on ma.equation.control.t1.rate."
+  },
+  "ma.caption.control.t3.ci_hi": {
+   "value": "99.1",
+   "quantity": "Upper 95% CI bound of multi-anchor merged caption pass rate, control arm, Tier 3",
+   "status": "verified",
+   "source": {
+    "file": "sources/multianchor-combined-statistics.json",
+    "format": "json",
+    "locator": "families.caption.tier3_pooled_anchor_level.control_pass_rate_ci_naive.ci_high",
+    "source_value": "0.9907407407407407"
+   },
+   "note": "Rounds to 99.1. This is a naive (not ICC-corrected) CI. It is stable across hash seeds tested. See the common note on ma.equation.control.t1.rate."
+  },
+  "ma.caption.control.t3.ci_lo": {
+   "value": "92.6",
+   "quantity": "Lower 95% CI bound of multi-anchor merged caption pass rate, control arm, Tier 3",
+   "status": "verified",
+   "source": {
+    "file": "sources/multianchor-combined-statistics.json",
+    "format": "json",
+    "locator": "families.caption.tier3_pooled_anchor_level.control_pass_rate_ci_naive.ci_low",
+    "source_value": "0.9259259259259259"
+   },
+   "note": "Rounds to 92.6. It is stable across 16 hash seeds (193 of 200 random orderings). Caveat: this is the NAIVE pooled CI at n=108, not a CI adjusted to n_eff=80.7, although the table's Tier 3 column is labelled with n_eff. See the common note on ma.equation.control.t1.rate."
+  },
+  "ma.caption.control.t3.rate": {
+   "value": "96.3",
+   "quantity": "Multi-anchor merged pass rate, caption family, control arm, Tier 3 (pooled anchor-level)",
+   "status": "verified",
+   "source": {
+    "file": "sources/multianchor-combined-statistics.json",
+    "format": "json",
+    "locator": "families.caption.tier3_pooled_anchor_level.control_pass_rate_ci_naive.mean",
+    "source_value": "0.9629629629629629"
+   },
+   "note": "Rounds to 96.3. The checkpoint doc agrees. See the common note on ma.equation.control.t1.rate."
+  },
+  "ma.caption.p_t1": {
+   "value": "0.252",
+   "quantity": "Paired control-vs-treatment p-value, multi-anchor merged, caption family, Tier 1 aggregation",
+   "status": "verified",
+   "source": {
+    "file": "sources/multianchor-combined-statistics.json",
+    "format": "json",
+    "locator": "families.caption.tier1_per_document_unweighted.paired_significance.p_value",
+    "source_value": "0.252"
+   },
+   "note": "Deterministic: it is identical across 16+ PYTHONHASHSEEDs because paired_docs is sorted. L863C57 '$p=0.252$ across Tiers 1 and 2' is a joint statement that also covers p_t2. The checkpoint doc line 1561 says 'p=0.252'. See the common note on ma.equation.control.t1.rate."
+  },
+  "ma.caption.p_t2": {
+   "value": "0.252",
+   "quantity": "Paired control-vs-treatment p-value, multi-anchor merged, caption family, Tier 2 aggregation",
+   "status": "verified",
+   "source": {
+    "file": "sources/multianchor-combined-statistics.json",
+    "format": "json",
+    "locator": "families.caption.tier2_anchor_weighted_document_mean.paired_significance.p_value",
+    "source_value": "0.252"
+   },
+   "note": "Deterministic across hash seeds. See the common note on ma.equation.control.t1.rate."
+  },
+  "ma.caption.treatment.neff.n": {
+   "value": "108",
+   "quantity": "ICC-corrected effective n for the Tier 3 pooled estimate, multi-anchor merged, caption family, treatment arm",
+   "status": "verified",
+   "source": {
+    "file": "sources/multianchor-combined-statistics.json",
+    "format": "json",
+    "locator": "families.caption.tier3_pooled_anchor_level.treatment_clustering.effective_n",
+    "source_value": "108.0"
+   },
+   "note": "Recomputed; see the common note on ma.equation.control.t1.rate."
+  },
+  "ma.caption.treatment.t1.ci_hi": {
+   "value": "100",
+   "quantity": "Upper 95% CI bound of multi-anchor merged caption pass rate, treatment arm, Tier 1",
+   "status": "verified",
+   "source": {
+    "file": "sources/multianchor-combined-statistics.json",
+    "format": "json",
+    "locator": "families.caption.tier1_per_document_unweighted.treatment_pass_rate_ci.ci_high",
+    "source_value": "1.0"
+   },
+   "note": "Recomputed; see the common note on ma.equation.control.t1.rate."
+  },
+  "ma.caption.treatment.t1.ci_lo": {
+   "value": "88.1",
+   "quantity": "Lower 95% CI bound (exact Clopper-Pearson) of multi-anchor merged caption pass rate, treatment arm, Tier 1",
+   "status": "verified",
+   "source": {
+    "file": "sources/multianchor-combined-statistics.json",
+    "format": "json",
+    "locator": "families.caption.tier1_per_document_unweighted.treatment_pass_rate_ci.ci_low",
+    "source_value": "0.8805551309304973"
+   },
+   "note": "Rounds to 88.1. It is deterministic. See the common note on ma.equation.control.t1.rate."
+  },
+  "ma.caption.treatment.t1.rate": {
+   "value": "100",
+   "quantity": "Multi-anchor merged pass rate, caption family, treatment arm, Tier 1 (unweighted per-document mean)",
+   "status": "verified",
+   "source": {
+    "file": "sources/multianchor-combined-statistics.json",
+    "format": "json",
+    "locator": "families.caption.tier1_per_document_unweighted.treatment_pass_rate_ci.mean",
+    "source_value": "1.0"
+   },
+   "note": "L852C1 is the joint all-tier statement for caption treatment. The dagger is correct: method=clopper_pearson_exact_fallback. The checkpoint doc says 'treatment 100%/100%/100%'. See the common note on ma.equation.control.t1.rate."
+  },
+  "ma.caption.treatment.t2.ci_hi": {
+   "value": "100",
+   "quantity": "Upper 95% CI bound of multi-anchor merged caption pass rate, treatment arm, Tier 2",
+   "status": "verified",
+   "source": {
+    "file": "sources/multianchor-combined-statistics.json",
+    "format": "json",
+    "locator": "families.caption.tier2_anchor_weighted_document_mean.treatment.ci_high",
+    "source_value": "1.0"
+   },
+   "note": "Recomputed; see the common note on ma.equation.control.t1.rate."
+  },
+  "ma.caption.treatment.t2.ci_lo": {
+   "value": "100",
+   "quantity": "Lower 95% CI bound of multi-anchor merged caption pass rate, treatment arm, Tier 2",
+   "status": "verified",
+   "source": {
+    "file": "sources/multianchor-combined-statistics.json",
+    "format": "json",
+    "locator": "families.caption.tier2_anchor_weighted_document_mean.treatment.ci_low",
+    "source_value": "1.0"
+   },
+   "note": "Recomputed; see the common note on ma.equation.control.t1.rate."
+  },
+  "ma.caption.treatment.t2.rate": {
+   "value": "100",
+   "quantity": "Multi-anchor merged pass rate, caption family, treatment arm, Tier 2 (anchor-count-weighted per-document mean)",
+   "status": "verified",
+   "source": {
+    "file": "sources/multianchor-combined-statistics.json",
+    "format": "json",
+    "locator": "families.caption.tier2_anchor_weighted_document_mean.treatment.mean",
+    "source_value": "1.0"
+   },
+   "note": "Recomputed; see the common note on ma.equation.control.t1.rate."
+  },
+  "ma.caption.treatment.t3.ci_hi": {
+   "value": "100",
+   "quantity": "Upper 95% CI bound of multi-anchor merged caption pass rate, treatment arm, Tier 3",
+   "status": "verified",
+   "source": {
+    "file": "sources/multianchor-combined-statistics.json",
+    "format": "json",
+    "locator": "families.caption.tier3_pooled_anchor_level.treatment_pass_rate_ci_naive.ci_high",
+    "source_value": "1.0"
+   },
+   "note": "Recomputed; see the common note on ma.equation.control.t1.rate."
+  },
+  "ma.caption.treatment.t3.ci_lo": {
+   "value": "96.6",
+   "quantity": "Lower 95% CI bound of multi-anchor merged caption pass rate, treatment arm, Tier 3",
+   "status": "verified",
+   "source": {
+    "file": "sources/multianchor-combined-statistics.json",
+    "format": "json",
+    "locator": "families.caption.tier3_pooled_anchor_level.treatment_pass_rate_ci_naive.ci_low",
+    "source_value": "0.9664204497813456"
+   },
+   "note": "Rounds to 96.6. This is the naive pooled CI; with ICC=0 it is identical to the corrected one. See the common note on ma.equation.control.t1.rate."
+  },
+  "ma.caption.treatment.t3.rate": {
+   "value": "100",
+   "quantity": "Multi-anchor merged pass rate, caption family, treatment arm, Tier 3 (pooled anchor-level)",
+   "status": "verified",
+   "source": {
+    "file": "sources/multianchor-combined-statistics.json",
+    "format": "json",
+    "locator": "families.caption.tier3_pooled_anchor_level.treatment_pass_rate_ci_naive.mean",
+    "source_value": "1.0"
+   },
+   "note": "Recomputed; see the common note on ma.equation.control.t1.rate."
+  },
+  "ma.equation.control.icc": {
+   "value": "0",
+   "quantity": "Intraclass correlation in the multi-anchor merged data, stated once (ICC=0) jointly for equation control, equation treatment and caption treatment; keyed to equation control, the first-named cell (distinct from caption control's ICC)",
+   "status": "verified",
+   "source": {
+    "file": "sources/multianchor-combined-statistics.json",
+    "format": "json",
+    "locator": "families.equation.tier3_pooled_anchor_level.control_clustering.icc",
+    "source_value": "0.0"
+   },
+   "note": "The joint statement 'ICC=0 for equation on both arms and for caption's treatment arm' holds for all three cells (all-pass data gives ICC 0). See the common note on ma.equation.control.t1.rate."
+  },
+  "ma.equation.control.neff.n": {
+   "value": "108",
+   "quantity": "ICC-corrected effective n for the Tier 3 pooled estimate, multi-anchor merged, equation family, control arm",
+   "status": "verified",
+   "source": {
+    "file": "sources/multianchor-combined-statistics.json",
+    "format": "json",
+    "locator": "families.equation.tier3_pooled_anchor_level.control_clustering.effective_n",
+    "source_value": "108.0"
+   },
+   "note": "Recomputed; see the common note on ma.equation.control.t1.rate."
+  },
+  "ma.equation.control.t1.ci_hi": {
+   "value": "100",
+   "quantity": "Upper 95% CI bound of multi-anchor merged equation pass rate, Tier 1; stated once for both arms, keyed to control arm",
+   "status": "verified",
+   "source": {
+    "file": "sources/multianchor-combined-statistics.json",
+    "format": "json",
+    "locator": "families.equation.tier1_per_document_unweighted.control_pass_rate_ci.ci_high",
+    "source_value": "1.0"
+   },
+   "note": "Recomputed; see the common note on ma.equation.control.t1.rate."
+  },
+  "ma.equation.control.t1.ci_lo": {
+   "value": "88.1",
+   "quantity": "Lower 95% CI bound of multi-anchor merged equation pass rate, Tier 1 (exact Clopper-Pearson); stated once for both arms, keyed to control arm",
+   "status": "verified",
+   "source": {
+    "file": "sources/multianchor-combined-statistics.json",
+    "format": "json",
+    "locator": "families.equation.tier1_per_document_unweighted.control_pass_rate_ci.ci_low",
+    "source_value": "0.8805551309304973"
+   },
+   "note": "Rounds to 88.1. It is deterministic (exact CP). See the common note on ma.equation.control.t1.rate."
+  },
+  "ma.equation.control.t1.rate": {
+   "value": "100",
+   "quantity": "Multi-anchor merged (Table tab:render-gate-multianchor) pass rate, equation family, control arm, Tier 1 (unweighted per-document mean)",
+   "status": "verified",
+   "source": {
+    "file": "sources/multianchor-combined-statistics.json",
+    "format": "json",
+    "locator": "families.equation.tier1_per_document_unweighted.control_pass_rate_ci.mean",
+    "source_value": "1.0"
+   },
+   "note": "COMMON PROVENANCE (applies to every ma.* key): the script's real output, combined-statistics.json (meridian-outputs artifact c2be6115-3350-5d95-9fa2-7985a5afb4cd, sha256 f5bc5b8f..., listed in C:\\Users\\13144\\Documents\\Meridian\\ooxml-graph-paper\\.meridian-outputs-cache\\artifact_registry.json under a scratchpad\\multianchor-extension\\ path), no longer exists anywhere on C: or D:. So I recomputed it read-only, in memory. I used the committed script, whose statistics code has not changed since paper commit 4183cd8 (graph_scorer.py only gained new functions). Raw inputs: extension chain-result.json files under D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7-multi-anchor-extension\\runs\\{equation,caption}; the archive sha256 c3ddc1c6... matches the checkpoint doc, and there are 372 chains. Original corpus: D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7-clean-rerun-runpod\\runs\\paper-s7-clean-rerun\\{primary_holdout,validation}\\slice-manifest.json. Only my scratch output was written, nothing in the repo. docs\\paper-s7-experiment-status-checkpoint-v1.md line 1561 also states that 'equation stays a clean 100%/100% parity across all three tiers'. The earlier extension-only table (checkpoint lines 1545-1549, e.g. equation [87.2,100] N=27) is a different scope, not this table's source. Occurrences: L835C24 is the table cell. L850C1 is the joint equation statement for both arms and all tiers. L860C76 is control in '100%/100% parity across all three tiers'. All three are this quantity, stated jointly."
+  },
+  "ma.equation.control.t2.ci_hi": {
+   "value": "100",
+   "quantity": "Upper 95% CI bound of multi-anchor merged equation pass rate, Tier 2; stated once for both arms, keyed to control arm",
+   "status": "verified",
+   "source": {
+    "file": "sources/multianchor-combined-statistics.json",
+    "format": "json",
+    "locator": "families.equation.tier2_anchor_weighted_document_mean.control.ci_high",
+    "source_value": "1.0"
+   },
+   "note": "Recomputed; see the common note on ma.equation.control.t1.rate."
+  },
+  "ma.equation.control.t2.ci_lo": {
+   "value": "100",
+   "quantity": "Lower 95% CI bound of multi-anchor merged equation pass rate, Tier 2; stated once for both arms, keyed to control arm",
+   "status": "verified",
+   "source": {
+    "file": "sources/multianchor-combined-statistics.json",
+    "format": "json",
+    "locator": "families.equation.tier2_anchor_weighted_document_mean.control.ci_low",
+    "source_value": "1.0"
+   },
+   "note": "The degenerate [100,100] is by design: weighted_bootstrap_ci has no Clopper-Pearson fallback (see its docstring). See the common note on ma.equation.control.t1.rate."
+  },
+  "ma.equation.control.t2.rate": {
+   "value": "100",
+   "quantity": "Multi-anchor merged pass rate, equation family, control arm, Tier 2 (anchor-count-weighted per-document mean)",
+   "status": "verified",
+   "source": {
+    "file": "sources/multianchor-combined-statistics.json",
+    "format": "json",
+    "locator": "families.equation.tier2_anchor_weighted_document_mean.control.mean",
+    "source_value": "1.0"
+   },
+   "note": "Recomputed; see the common provenance note on ma.equation.control.t1.rate."
+  },
+  "ma.equation.control.t3.ci_hi": {
+   "value": "100",
+   "quantity": "Upper 95% CI bound of multi-anchor merged equation pass rate, Tier 3; stated once for both arms, keyed to control arm",
+   "status": "verified",
+   "source": {
+    "file": "sources/multianchor-combined-statistics.json",
+    "format": "json",
+    "locator": "families.equation.tier3_pooled_anchor_level.control_pass_rate_ci_naive.ci_high",
+    "source_value": "1.0"
+   },
+   "note": "Naive pooled CI, not ICC-corrected (see t3.ci_lo). See the common note on ma.equation.control.t1.rate."
+  },
+  "ma.equation.control.t3.ci_lo": {
+   "value": "96.6",
+   "quantity": "Lower 95% CI bound of multi-anchor merged equation pass rate, Tier 3 (pooled, ICC-corrected); stated once for both arms, keyed to control arm",
+   "status": "verified",
+   "source": {
+    "file": "sources/multianchor-combined-statistics.json",
+    "format": "json",
+    "locator": "families.equation.tier3_pooled_anchor_level.control_pass_rate_ci_naive.ci_low",
+    "source_value": "0.9664204497813456"
+   },
+   "note": "Rounds to 96.6. Registry description caveat: this CI is the NAIVE pooled CI at n=108, not ICC-corrected. It matches here only because ICC=0 (n_eff=108). The paper also does not dagger this Tier 3 CI even though it is Clopper-Pearson. See the common note on ma.equation.control.t1.rate."
+  },
+  "ma.equation.control.t3.rate": {
+   "value": "100",
+   "quantity": "Multi-anchor merged pass rate, equation family, control arm, Tier 3 (pooled anchor-level)",
+   "status": "verified",
+   "source": {
+    "file": "sources/multianchor-combined-statistics.json",
+    "format": "json",
+    "locator": "families.equation.tier3_pooled_anchor_level.control_pass_rate_ci_naive.mean",
+    "source_value": "1.0"
+   },
+   "note": "Recomputed; see the common note on ma.equation.control.t1.rate."
+  },
+  "ma.equation.p_t1": {
+   "value": "1.0",
+   "quantity": "Paired control-vs-treatment p-value, multi-anchor merged, equation family, Tier 1 aggregation",
+   "status": "verified",
+   "source": {
+    "file": "sources/multianchor-combined-statistics.json",
+    "format": "json",
+    "locator": "families.equation.tier1_per_document_unweighted.paired_significance.p_value",
+    "source_value": "1.0"
+   },
+   "note": "Deterministic because the paired docs are sorted. The checkpoint doc line 1561 also says 'p=1.0 throughout'. See the common note on ma.equation.control.t1.rate."
+  },
+  "ma.equation.p_t2": {
+   "value": "1.0",
+   "quantity": "Paired control-vs-treatment p-value, multi-anchor merged, equation family, Tier 2 aggregation",
+   "status": "verified",
+   "source": {
+    "file": "sources/multianchor-combined-statistics.json",
+    "format": "json",
+    "locator": "families.equation.tier2_anchor_weighted_document_mean.paired_significance.p_value",
+    "source_value": "1.0"
+   },
+   "note": "Recomputed; see the common note on ma.equation.control.t1.rate."
+  },
+  "ma.equation.treatment.neff.n": {
+   "value": "108",
+   "quantity": "ICC-corrected effective n for the Tier 3 pooled estimate, multi-anchor merged, equation family, treatment arm",
+   "status": "verified",
+   "source": {
+    "file": "sources/multianchor-combined-statistics.json",
+    "format": "json",
+    "locator": "families.equation.tier3_pooled_anchor_level.treatment_clustering.effective_n",
+    "source_value": "108.0"
+   },
+   "note": "Recomputed; see the common note on ma.equation.control.t1.rate."
+  },
+  "ma.equation.treatment.t1.rate": {
+   "value": "100",
+   "quantity": "Multi-anchor merged pass rate, equation family, treatment arm, Tier 1 (unweighted per-document mean)",
+   "status": "verified",
+   "source": {
+    "file": "sources/multianchor-combined-statistics.json",
+    "format": "json",
+    "locator": "families.equation.tier1_per_document_unweighted.treatment_pass_rate_ci.mean",
+    "source_value": "1.0"
+   },
+   "note": "L860C82 is the treatment side of '100%/100% parity across all three tiers'. The dagger (Clopper-Pearson) is correct: method=clopper_pearson_exact_fallback. See the common note on ma.equation.control.t1.rate."
+  },
+  "ma.equation.treatment.t2.rate": {
+   "value": "100",
+   "quantity": "Multi-anchor merged pass rate, equation family, treatment arm, Tier 2 (anchor-count-weighted per-document mean)",
+   "status": "verified",
+   "source": {
+    "file": "sources/multianchor-combined-statistics.json",
+    "format": "json",
+    "locator": "families.equation.tier2_anchor_weighted_document_mean.treatment.mean",
+    "source_value": "1.0"
+   },
+   "note": "Recomputed; see the common note on ma.equation.control.t1.rate."
+  },
+  "ma.equation.treatment.t3.rate": {
+   "value": "100",
+   "quantity": "Multi-anchor merged pass rate, equation family, treatment arm, Tier 3 (pooled anchor-level)",
+   "status": "verified",
+   "source": {
+    "file": "sources/multianchor-combined-statistics.json",
+    "format": "json",
+    "locator": "families.equation.tier3_pooled_anchor_level.treatment_pass_rate_ci_naive.mean",
+    "source_value": "1.0"
+   },
+   "note": "Recomputed; see the common note on ma.equation.control.t1.rate."
+  },
+  "ma.naive_pooled.n": {
+   "value": "108",
+   "quantity": "Naive pooled trial-point count (uncorrected Tier 3 n) for every row of the multi-anchor merged table",
+   "status": "derived",
+   "source": {
+    "file": "C:\\Users\\13144\\AppData\\Local\\Temp\\claude\\C--Users-13144-Documents-Meridian-ooxml-graph-paper\\b425ba47-4f00-4009-b058-0371b1939e57\\scratchpad\\ma_recompute_out.json",
+    "format": "text",
+    "locator": "families.{equation,caption}.tier3_pooled_anchor_level.{control,treatment}_naive_pooled_n (all four = 108; = 26 original K=1 points + 82 extension points, which also equals tier2 total_weight)",
+    "source_value": "108"
+   },
+   "note": "'for every row' is correct: all four arm/family rows are 108. The checkpoint doc lines 1523-1529 give the 82 extension points per arm. See the common note on ma.equation.control.t1.rate."
+  },
+  "maext.secreorder.control.icc": {
+   "value": "0",
+   "quantity": "Intraclass correlation for the section-reordering multi-anchor extension, control arm",
+   "status": "derived",
+   "source": {
+    "file": "D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7-multi-anchor-extension\\runs\\section_reorder",
+    "format": "text",
+    "locator": "Control arm, section_reorder: estimate_icc_and_effective_n(control_by_doc)['icc'] in tools\\compute_multianchor_extension_statistics.py. Raw ICC(1) = (MSB - MSW) / (MSB + (k0 - 1) * MSW) = (0.09343 - 0.14583) / (0.09343 + 1.1212 * 0.14583) = -0.2039, which the estimator clamps to 0.0 (icc = max(0.0, icc)). Design effect 1.0, effective N 22.0. Recomputed in memory. Ledger docs\\paper-s7-experiment-status-checkpoint-v1.md, Tier 3 table row 'Section_reorder', column 'Tier 3 control ICC / effective N' = '0.0 / 22.0 (no clustering)'.",
+    "source_value": "0.0 (tier3_pooled_anchor_level.control_clustering.icc, recomputed; unclamped estimate -0.2039); ledger: '0.0 / 22.0 (no clustering)'"
+   },
+   "note": "L411C99 reads 'the control arm shows no such clustering ($\\text{ICC}=0$)', so the assignment is correct. The printed 0 is a clamped value. The raw one-way ANOVA estimate is negative (-0.204) and the script floors it at 0 by design, as its docstring says. 'No detectable clustering' is therefore accurate, but the ICC is not literally zero before clamping. Control outcomes by document: jcshm_manuscript [1,1,1,1], masters_dissertation [0,1,1,1], jcshm_si [0,1,0,1], and 7 other docs all 1. The canonical statistics.json is missing from disk (see the ICC entry)."
+  },
+  "maext.secreorder.treatment.icc": {
+   "value": "1.0",
+   "quantity": "Intraclass correlation for the section-reordering multi-anchor extension, treatment arm",
+   "status": "derived",
+   "source": {
+    "file": "D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7-multi-anchor-extension\\runs\\section_reorder",
+    "format": "text",
+    "locator": "Treatment arm, section_reorder: estimate_icc_and_effective_n(treatment_by_doc)['icc'] in C:\\Users\\13144\\Documents\\Meridian\\ooxml-graph-paper\\tools\\compute_multianchor_extension_statistics.py. This is the one-way ANOVA ICC(1) with the Fleiss k0 correction, (MSB-MSW)/(MSB+(k0-1)*MSW), clamped at 0. Inputs: 22 treatment chain-result.json files grouped into 10 documents by doc_label_mapping.json; outcome from compute_s7_statistics._chain_outcome. I recomputed it in memory without writing output (script: scratchpad\\maext_recompute.py). The same value appears in the ledger C:\\Users\\13144\\Documents\\Meridian\\ooxml-graph-paper\\docs\\paper-s7-experiment-status-checkpoint-v1.md, section 'Follow-up (2026-09-20): pod vanished AGAIN...', table row 'Section_reorder', column 'Tier 3 treatment ICC / effective N' = '**1.0 / 10.0**'.",
+    "source_value": "1.0 (tier3_pooled_anchor_level.treatment_clustering.icc, recomputed); ledger: '1.0 / 10.0'"
+   },
+   "note": "Both occurrences refer to the section-reordering extension's treatment-arm ICC. L409C11 is in Methods (sec:methods-multianchor) and L1129C45 is in Limitations (Third). Within-document treatment outcomes are uniform: the 3 author_owned docs are all 0 across 4 anchors each, and the 7 existing-corpus docs are all 1. So MSW=0 and ICC=1.0 exactly. The canonical machine-readable output is gone. The .meridian-outputs-cache artifact_registry.json lists statistics.json (sha256 e0317d01...) at scratchpad\\multianchor-extension\\statistics.json, but that file no longer exists. The archive multianchor-extension-archive.tar.gz holds only chain results, mappings and logs; I listed its contents but did not extract it. The recompute also reproduces the ledger's Tier 1 figures (92.5% / 70%, p=0.237), which confirms the on-disk chain data matches what the ledger used."
+  },
+  "maext.secreorder.treatment.neff.n": {
+   "value": "10",
+   "quantity": "Design-effect-corrected effective N for the section-reordering multi-anchor extension, treatment arm (equals document count)",
+   "status": "derived",
+   "source": {
+    "file": "D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7-multi-anchor-extension\\runs\\section_reorder",
+    "format": "text",
+    "locator": "effective_n = naive_pooled_n / design_effect, with design_effect = 1 + (avg_cluster_size - 1) * ICC = 1 + (2.2 - 1) * 1.0 = 2.2. That gives 22 / 2.2 = 10.0, which equals k_clusters = 10. Function: estimate_icc_and_effective_n in tools\\compute_multianchor_extension_statistics.py; recomputed in memory. Ledger docs\\paper-s7-experiment-status-checkpoint-v1.md, Tier 3 table row 'Section_reorder', column 'Tier 3 treatment ICC / effective N' = '**1.0 / 10.0**'.",
+    "source_value": "10.0 (tier3_pooled_anchor_level.treatment_clustering.effective_n, recomputed; k_clusters=10, design_effect=2.2)"
+   },
+   "note": "L411C1 reads '10, identical to the document count'. The treatment document count (n_distinct_documents.treatment) is also 10, so the paper's 'identical to the document count' claim holds. The paper prints 10 for the stored 10.0. The canonical statistics.json is missing from disk (see the ICC entry)."
+  },
+  "maext.secreorder.treatment.pooled.n": {
+   "value": "22",
+   "quantity": "Naive pooled anchor-level N for the section-reordering multi-anchor extension, treatment arm",
+   "status": "derived",
+   "source": {
+    "file": "D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7-multi-anchor-extension\\runs\\section_reorder",
+    "format": "text",
+    "locator": "tier3_pooled_anchor_level.treatment_naive_pooled_n = count of treatment-arm chain-result.json files with non-None _chain_outcome that map to the extension's doc_label_mapping.json, which is 22 (44 chain dirs = 22 control + 22 treatment). I recomputed it in memory with the paper's own compute_family_tiers. The ledger docs\\paper-s7-experiment-status-checkpoint-v1.md, section 'Follow-up (2026-09-20): pod vanished AGAIN...', prose says 'collapsing the naive pooled N from 22 down to an effective N of 10'. The cumulative-fidelity table in the preceding section, row 'Section_reorder (extension)', shows treatment 22/22.",
+    "source_value": "22 (treatment_naive_pooled_n / treatment_clustering.naive_pooled_n, recomputed)"
+   },
+   "note": "L410C75 reads 'collapsing the naive pooled $N$ from 22', which is the treatment arm. The control arm's naive pooled N is also 22, so the printed number is correct either way. Same caveat as the ICC: the canonical statistics.json registered in .meridian-outputs-cache no longer exists on disk."
+  },
+  "respec.anchorset.diff_pp": {
+   "value": "46.7",
+   "quantity": "Treatment minus control difference in percentage points in the respec_cascade anchor-set-level pooled comparison",
+   "status": "verified",
+   "source": {
+    "file": "D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s23-final\\statistics.json",
+    "format": "text",
+    "locator": "confirm_disconfirm.pooled.direct_control_vs_treatment_phase3.observed_mean_diff",
+    "source_value": "-0.4666666666666667"
+   },
+   "note": "The difference is control minus treatment (graph_scorer.paired_permutation_test takes A-B). The paper reports the magnitude, 46.7 pp."
+  },
+  "respec.anchorset.n": {
+   "value": "30",
+   "quantity": "Number of paired (family, anchor-set) observations in the respec_cascade anchor-set-level composite comparison",
+   "status": "verified",
+   "source": {
+    "file": "sources/respec-cascade-statistics.json",
+    "format": "json",
+    "locator": "confirm_disconfirm.pooled.direct_control_vs_treatment_phase3.n_paired_anchor_sets",
+    "source_value": "30"
+   },
+   "note": "All 3 tokens (L62, L908, L1185) print 30. These are (family x anchor-set) control-vs-treatment Phase-3 pairs."
+  },
+  "respec.anchorset.p_bound": {
+   "value": "0.0005",
+   "quantity": "Upper bound on the permutation p-value for the respec_cascade anchor-set-level pooled comparison (p < bound)",
+   "status": "derived",
+   "source": {
+    "file": "D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s23-final\\statistics.json",
+    "format": "text",
+    "locator": "bound = 1/n_permutations = 1/2000 = 0.0005, given confirm_disconfirm.pooled.direct_control_vs_treatment_phase3.p_value = 0.0 and n_permutations = 2000",
+    "source_value": "0.0"
+   },
+   "note": "The stored p is 0.0 because no permutation was as extreme as observed. The paper states it as p<0.0005 (L909 says '2,000 permutations, zero as extreme as observed'). This is consistent."
+  },
+  "respec.anchorsets_per_doc.n": {
+   "value": "4",
+   "quantity": "Number of anchor-sets per document used in respec_cascade (4), restated in the headline table caption",
+   "status": "verified",
+   "source": {
+    "file": "sources/respec-cascade-primary-sweep-manifest.json",
+    "format": "json",
+    "locator": "max_anchor_sets",
+    "source_value": "4"
+   },
+   "note": "anchor-schedules.json in the same directory has 4 entries per document, all usable:true. excluded_anchor_sets is []."
+  },
+  "respec.baseline.n": {
+   "value": "120",
+   "quantity": "Number of isolated K=1 baseline trials in the respec_cascade baseline sweep (120)",
+   "status": "verified",
+   "source": {
+    "file": "sources/respec-cascade-baseline-sweep-manifest.json",
+    "format": "json",
+    "locator": "chain_count",
+    "source_value": "120"
+   },
+   "note": "statistics.json n_baseline_chains_loaded is 24 per family x 5 = 120. One of the 120 trials (equation, masters-dissertation-defense__anchor3, control) has status 'blocked', so 119 are usable. All 3 tokens print 120."
+  },
+  "respec.broken.control.count": {
+   "value": "5",
+   "quantity": "Number of respec_cascade control chains that broke entirely mid-protocol (package-validity gate refused to continue)",
+   "status": "derived",
+   "source": {
+    "file": "D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s23-final\\primary-sweep-manifest.json",
+    "format": "text",
+    "locator": "count of chains_summary entries with arm=='control' and status starting 'chain_broken_at_step_' = 5",
+    "source_value": "chain_broken_at_step_3.4-inverse (jcshm-manuscript__anchor1/2/3), chain_broken_at_step_2.1 (jcshm-si__anchor2), chain_broken_at_step_3.2-inverse (masters-dissertation-defense__anchor0)"
+   },
+   "note": "This matches the distinct chain_broken doc_labels in statistics.json excluded_observations."
+  },
+  "respec.broken.control.rate": {
+   "value": "41.7",
+   "quantity": "Percentage of respec_cascade control chains that broke entirely mid-protocol",
+   "status": "derived",
+   "source": {
+    "file": "D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s23-final\\primary-sweep-manifest.json",
+    "format": "text",
+    "locator": "5 broken control chains / 12 control chains = 0.41667 -> 41.7%",
+    "source_value": "5 of 12 control chains_summary statuses start with 'chain_broken_at_step_'"
+   }
+  },
+  "respec.broken.treatment.count": {
+   "value": "0",
+   "quantity": "Number of respec_cascade treatment chains that broke entirely mid-protocol",
+   "status": "derived",
+   "source": {
+    "file": "D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s23-final\\primary-sweep-manifest.json",
+    "format": "text",
+    "locator": "count of chains_summary entries with arm=='treatment' and status starting 'chain_broken_at_step_' = 0",
+    "source_value": "treatment statuses: 10 'completed', 2 'completed_with_failure'"
+   },
+   "note": "statistics.json has no treatment-arm excluded_observations and render_gate_timeouts is []."
+  },
+  "respec.build_phase.steps": {
+   "value": "5",
+   "quantity": "Number of steps in the respec_cascade BUILD phase (one forward insert per family)",
+   "status": "verified",
+   "source": {
+    "file": "../tools/run_respec_cascade_family.py",
+    "format": "text",
+    "locator": "comment L357 'PHASE 1 -- BUILD (5 steps, forward-only, order R')'; step ids 1.1-1.5",
+    "source_value": "5 steps"
+   },
+   "note": "This is a design constant. Also stated in the protocol doc sec 2.3: 'Phase 1 = 5 steps'."
+  },
+  "respec.chain.families": {
+   "value": "5",
+   "quantity": "Number of task families in the respec_cascade rotation (5), restated as the 5-family chain in the headline table",
+   "status": "derived",
+   "source": {
+    "file": "D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s23-final\\statistics.json",
+    "format": "text",
+    "locator": "len(rotation_order) = 5",
+    "source_value": "[\"bibliography\", \"citation\", \"section_reorder\", \"equation\", \"caption\"]"
+   },
+   "note": "The same 5-item list is in baseline-sweep-manifest.json families and in the FAMILIES constant of tools/compute_respec_cascade_statistics.py."
+  },
+  "respec.chain.steps": {
+   "value": "17",
+   "quantity": "Number of steps in each respec_cascade chain (17-step, 5-family chain; restated in methods and Table tab:respec-cascade-headline)",
+   "status": "verified",
+   "source": {
+    "file": "../tools/run_respec_cascade_family.py",
+    "format": "text",
+    "locator": "docstring L130 ('otherwise-completed 17-step chain'); the step ids in the _freeze calls are 1.1-1.5, 2.1, 2.3, 3.1-3.5 forward/inverse (3.3a/3.3b), 17 in total",
+    "source_value": "17-step chain"
+   },
+   "note": "This is a design constant, not a run output. The per-chain chain-result.json files (steps_run) are not available locally; run_root was /workspace/ooxml-graph-paper/primary-run. It is corroborated by docs/paper-s23-respec-cascade-protocol-v0.md sec 2.3: 'Phase 1 = 5 steps, Phase 2 = 2 steps, Phase 3 = 5 forward+inverse steps' (5+2+10). All 3 tokens print 17."
+  },
+  "respec.chains.control.n": {
+   "value": "12",
+   "quantity": "Number of control-arm respec_cascade chains (denominator of the Tier 1 composite pass rate)",
+   "status": "derived",
+   "source": {
+    "file": "D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s23-final\\primary-sweep-manifest.json",
+    "format": "text",
+    "locator": "count of chains_summary entries with arm=='control' = 12 (chain_count 24 split 12/12)",
+    "source_value": "24"
+   },
+   "note": "12 is the number of control chains run. It is not the statistic's composite denominator: control_naive_pooled_n = 11, because jcshm-si__anchor3 (completed_with_failure) was excluded as outcome-unavailable rather than scored as a failure. The T1 8.3% is a per-document mean (0.25, 0, 0) that happens to equal 1/12. Both tokens (L905, L931) print 12."
+  },
+  "respec.chains.n": {
+   "value": "24",
+   "quantity": "Number of respec_cascade cascade chains run (24), restated in the tab:respec-cascade-headline caption",
+   "status": "verified",
+   "source": {
+    "file": "sources/respec-cascade-primary-sweep-manifest.json",
+    "format": "json",
+    "locator": "chain_count",
+    "source_value": "24"
+   },
+   "note": "Also statistics.json n_cascade_chains_loaded = 24. There are 12 chains per arm and excluded_anchor_sets is []."
+  },
+  "respec.chains.treatment.n": {
+   "value": "12",
+   "quantity": "Number of treatment-arm respec_cascade chains (denominator of the Tier 1 composite pass rate)",
+   "status": "verified",
+   "source": {
+    "file": "sources/respec-cascade-statistics.json",
+    "format": "json",
+    "locator": "outcome_measures.a_phase3_composite_pass_rate.tier3_pooled_anchor_level.treatment_naive_pooled_n",
+    "source_value": "12"
+   },
+   "note": "Also primary-sweep-manifest.json chains_summary has 12 entries with arm=='treatment'. Both tokens (L904, L934) print 12."
+  },
+  "respec.composite.control.neff.n": {
+   "value": "11.0",
+   "quantity": "ICC-corrected effective n for Tier 3 of respec_cascade whole-chain composite pass, control arm",
+   "status": "verified",
+   "source": {
+    "file": "sources/respec-cascade-statistics.json",
+    "format": "json",
+    "locator": "outcome_measures.a_phase3_composite_pass_rate.tier3_pooled_anchor_level.control_clustering.effective_n",
+    "source_value": "11.0"
+   },
+   "note": "icc=0.0 and design_effect=1.0."
+  },
+  "respec.composite.control.passes": {
+   "value": "1",
+   "quantity": "Number of control-arm respec_cascade chains that pass the whole-chain composite (1 of 12)",
+   "status": "derived",
+   "source": {
+    "file": "D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s23-final\\statistics.json",
+    "format": "text",
+    "locator": "outcome_measures.a_phase3_composite_pass_rate.tier3_pooled_anchor_level: control_pass_rate_ci_naive.mean (1/11) x control_naive_pooled_n (11) = 1",
+    "source_value": "0.09090909090909091"
+   },
+   "note": "Corroborated by primary-sweep-manifest.json: exactly one control chain, masters-dissertation-defense__anchor3, has status 'completed'."
+  },
+  "respec.composite.control.t1.ci_hi": {
+   "value": "25",
+   "quantity": "Upper 95% CI bound of respec_cascade whole-chain composite pass rate, control arm, Tier 1",
+   "status": "verified",
+   "source": {
+    "file": "sources/respec-cascade-statistics.json",
+    "format": "json",
+    "locator": "outcome_measures.a_phase3_composite_pass_rate.tier1_per_document_unweighted.control_pass_rate_ci.ci_high",
+    "source_value": "0.25"
+   }
+  },
+  "respec.composite.control.t1.ci_lo": {
+   "value": "0",
+   "quantity": "Lower 95% CI bound of respec_cascade whole-chain composite pass rate, control arm, Tier 1",
+   "status": "verified",
+   "source": {
+    "file": "sources/respec-cascade-statistics.json",
+    "format": "json",
+    "locator": "outcome_measures.a_phase3_composite_pass_rate.tier1_per_document_unweighted.control_pass_rate_ci.ci_low",
+    "source_value": "0.0"
+   }
+  },
+  "respec.composite.control.t1.rate": {
+   "value": "8.3",
+   "quantity": "respec_cascade whole-chain composite pass rate, control arm, Tier 1 aggregation",
+   "status": "verified",
+   "source": {
+    "file": "sources/respec-cascade-statistics.json",
+    "format": "json",
+    "locator": "outcome_measures.a_phase3_composite_pass_rate.tier1_per_document_unweighted.control_pass_rate_ci.mean",
+    "source_value": "0.08333333333333333"
+   },
+   "note": "T1 is the mean of the per-document rates (0.25, 0, 0). The statistic excludes one control chain (jcshm-si__anchor3, status completed_with_failure, outcome unavailable; see excluded_observations[0]), so the control composite n is 11 and the pooled rate is 1/11 = 9.1% (T3). The paper's '1 of 12 (8.3%)' at L905 equals this T1 value numerically. That one of 12 control chains passed is true per primary-sweep-manifest. However, the caption says only frozen chains are scored as failures, and it does not mention this one excluded non-frozen chain."
+  },
+  "respec.composite.control.t2.ci_hi": {
+   "value": "25",
+   "quantity": "Upper 95% CI bound of respec_cascade whole-chain composite pass rate, control arm, Tier 2",
+   "status": "verified",
+   "source": {
+    "file": "sources/respec-cascade-statistics.json",
+    "format": "json",
+    "locator": "outcome_measures.a_phase3_composite_pass_rate.tier2_anchor_weighted_document_mean.control.ci_high",
+    "source_value": "0.25"
+   }
+  },
+  "respec.composite.control.t2.ci_lo": {
+   "value": "0",
+   "quantity": "Lower 95% CI bound of respec_cascade whole-chain composite pass rate, control arm, Tier 2",
+   "status": "verified",
+   "source": {
+    "file": "sources/respec-cascade-statistics.json",
+    "format": "json",
+    "locator": "outcome_measures.a_phase3_composite_pass_rate.tier2_anchor_weighted_document_mean.control.ci_low",
+    "source_value": "0.0"
+   }
+  },
+  "respec.composite.control.t2.rate": {
+   "value": "9.1",
+   "quantity": "respec_cascade whole-chain composite pass rate, control arm, Tier 2 aggregation",
+   "status": "verified",
+   "source": {
+    "file": "sources/respec-cascade-statistics.json",
+    "format": "json",
+    "locator": "outcome_measures.a_phase3_composite_pass_rate.tier2_anchor_weighted_document_mean.control.mean",
+    "source_value": "0.09090909090909091"
+   },
+   "note": "total_weight=11, i.e. 1/11. It rounds to 9.1."
+  },
+  "respec.composite.control.t3.ci_hi": {
+   "value": "27.3",
+   "quantity": "Upper 95% CI bound of respec_cascade whole-chain composite pass rate, control arm, Tier 3",
+   "status": "verified",
+   "source": {
+    "file": "sources/respec-cascade-statistics.json",
+    "format": "json",
+    "locator": "outcome_measures.a_phase3_composite_pass_rate.tier3_pooled_anchor_level.control_pass_rate_ci_naive.ci_high",
+    "source_value": "0.2727272727272727"
+   },
+   "note": "It rounds to 27.3."
+  },
+  "respec.composite.control.t3.ci_lo": {
+   "value": "0",
+   "quantity": "Lower 95% CI bound of respec_cascade whole-chain composite pass rate, control arm, Tier 3",
+   "status": "verified",
+   "source": {
+    "file": "sources/respec-cascade-statistics.json",
+    "format": "json",
+    "locator": "outcome_measures.a_phase3_composite_pass_rate.tier3_pooled_anchor_level.control_pass_rate_ci_naive.ci_low",
+    "source_value": "0.0"
+   }
+  },
+  "respec.composite.control.t3.rate": {
+   "value": "9.1",
+   "quantity": "respec_cascade whole-chain composite pass rate, control arm, Tier 3 (pooled) aggregation",
+   "status": "verified",
+   "source": {
+    "file": "sources/respec-cascade-statistics.json",
+    "format": "json",
+    "locator": "outcome_measures.a_phase3_composite_pass_rate.tier3_pooled_anchor_level.control_pass_rate_ci_naive.mean",
+    "source_value": "0.09090909090909091"
+   },
+   "note": "naive n=11. It rounds to 9.1."
+  },
+  "respec.composite.p_t1": {
+   "value": "0.2305",
+   "quantity": "respec_cascade whole-chain composite pass paired p-value (control vs treatment), Tier 1",
+   "status": "verified",
+   "source": {
+    "file": "sources/respec-cascade-statistics.json",
+    "format": "json",
+    "locator": "outcome_measures.a_phase3_composite_pass_rate.tier1_per_document_unweighted.paired_significance.p_value",
+    "source_value": "0.2305"
+   }
+  },
+  "respec.composite.p_t2": {
+   "value": "0.2305",
+   "quantity": "respec_cascade whole-chain composite pass paired p-value (control vs treatment), Tier 2",
+   "status": "verified",
+   "source": {
+    "file": "sources/respec-cascade-statistics.json",
+    "format": "json",
+    "locator": "outcome_measures.a_phase3_composite_pass_rate.tier2_anchor_weighted_document_mean.paired_significance.p_value",
+    "source_value": "0.2305"
+   }
+  },
+  "respec.composite.treatment.neff.n": {
+   "value": "12.0",
+   "quantity": "ICC-corrected effective n for Tier 3 of respec_cascade whole-chain composite pass, treatment arm",
+   "status": "verified",
+   "source": {
+    "file": "sources/respec-cascade-statistics.json",
+    "format": "json",
+    "locator": "outcome_measures.a_phase3_composite_pass_rate.tier3_pooled_anchor_level.treatment_clustering.effective_n",
+    "source_value": "12.0"
+   }
+  },
+  "respec.composite.treatment.passes": {
+   "value": "10",
+   "quantity": "Number of treatment-arm respec_cascade chains that pass the whole-chain composite (10 of 12)",
+   "status": "derived",
+   "source": {
+    "file": "D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s23-final\\statistics.json",
+    "format": "text",
+    "locator": "outcome_measures.a_phase3_composite_pass_rate.tier3_pooled_anchor_level: treatment_pass_rate_ci_naive.mean (0.8333) x treatment_naive_pooled_n (12) = 10",
+    "source_value": "0.8333333333333334"
+   },
+   "note": "Corroborated by primary-sweep-manifest.json chains_summary: 10 treatment chains have status 'completed' and 2 have 'completed_with_failure' (jcshm-si__anchor3, masters-dissertation-defense__anchor0)."
+  },
+  "respec.composite.treatment.t1.ci_hi": {
+   "value": "100",
+   "quantity": "Upper 95% CI bound of respec_cascade whole-chain composite pass rate, treatment arm, Tier 1",
+   "status": "verified",
+   "source": {
+    "file": "sources/respec-cascade-statistics.json",
+    "format": "json",
+    "locator": "outcome_measures.a_phase3_composite_pass_rate.tier1_per_document_unweighted.treatment_pass_rate_ci.ci_high",
+    "source_value": "1.0"
+   }
+  },
+  "respec.composite.treatment.t1.ci_lo": {
+   "value": "75",
+   "quantity": "Lower 95% CI bound of respec_cascade whole-chain composite pass rate, treatment arm, Tier 1",
+   "status": "verified",
+   "source": {
+    "file": "sources/respec-cascade-statistics.json",
+    "format": "json",
+    "locator": "outcome_measures.a_phase3_composite_pass_rate.tier1_per_document_unweighted.treatment_pass_rate_ci.ci_low",
+    "source_value": "0.75"
+   }
+  },
+  "respec.composite.treatment.t1.rate": {
+   "value": "83.3",
+   "quantity": "respec_cascade whole-chain composite pass rate, treatment arm, Tier 1 aggregation",
+   "status": "verified",
+   "source": {
+    "file": "sources/respec-cascade-statistics.json",
+    "format": "json",
+    "locator": "outcome_measures.a_phase3_composite_pass_rate.tier1_per_document_unweighted.treatment_pass_rate_ci.mean",
+    "source_value": "0.8333333333333334"
+   },
+   "note": "This is the mean of the per-document rates (1.0, 0.75, 0.75). It also equals the pooled 10/12. All 5 tokens (abstract, table, caption CI list, results text, conclusion) print 83.3. paper-s23-final/statistics.json is the only respec statistics file found."
+  },
+  "respec.composite.treatment.t2.ci_hi": {
+   "value": "100",
+   "quantity": "Upper 95% CI bound of respec_cascade whole-chain composite pass rate, treatment arm, Tier 2",
+   "status": "verified",
+   "source": {
+    "file": "sources/respec-cascade-statistics.json",
+    "format": "json",
+    "locator": "outcome_measures.a_phase3_composite_pass_rate.tier2_anchor_weighted_document_mean.treatment.ci_high",
+    "source_value": "1.0"
+   }
+  },
+  "respec.composite.treatment.t2.ci_lo": {
+   "value": "75",
+   "quantity": "Lower 95% CI bound of respec_cascade whole-chain composite pass rate, treatment arm, Tier 2",
+   "status": "verified",
+   "source": {
+    "file": "sources/respec-cascade-statistics.json",
+    "format": "json",
+    "locator": "outcome_measures.a_phase3_composite_pass_rate.tier2_anchor_weighted_document_mean.treatment.ci_low",
+    "source_value": "0.75"
+   }
+  },
+  "respec.composite.treatment.t2.rate": {
+   "value": "83.3",
+   "quantity": "respec_cascade whole-chain composite pass rate, treatment arm, Tier 2 aggregation",
+   "status": "verified",
+   "source": {
+    "file": "sources/respec-cascade-statistics.json",
+    "format": "json",
+    "locator": "outcome_measures.a_phase3_composite_pass_rate.tier2_anchor_weighted_document_mean.treatment.mean",
+    "source_value": "0.8333333333333334"
+   }
+  },
+  "respec.composite.treatment.t3.ci_hi": {
+   "value": "100",
+   "quantity": "Upper 95% CI bound of respec_cascade whole-chain composite pass rate, treatment arm, Tier 3",
+   "status": "verified",
+   "source": {
+    "file": "sources/respec-cascade-statistics.json",
+    "format": "json",
+    "locator": "outcome_measures.a_phase3_composite_pass_rate.tier3_pooled_anchor_level.treatment_pass_rate_ci_naive.ci_high",
+    "source_value": "1.0"
+   }
+  },
+  "respec.composite.treatment.t3.ci_lo": {
+   "value": "58.3",
+   "quantity": "Lower 95% CI bound of respec_cascade whole-chain composite pass rate, treatment arm, Tier 3",
+   "status": "verified",
+   "source": {
+    "file": "sources/respec-cascade-statistics.json",
+    "format": "json",
+    "locator": "outcome_measures.a_phase3_composite_pass_rate.tier3_pooled_anchor_level.treatment_pass_rate_ci_naive.ci_low",
+    "source_value": "0.5833333333333334"
+   },
+   "note": "It rounds to 58.3."
+  },
+  "respec.composite.treatment.t3.rate": {
+   "value": "83.3",
+   "quantity": "respec_cascade whole-chain composite pass rate, treatment arm, Tier 3 (pooled) aggregation",
+   "status": "verified",
+   "source": {
+    "file": "sources/respec-cascade-statistics.json",
+    "format": "json",
+    "locator": "outcome_measures.a_phase3_composite_pass_rate.tier3_pooled_anchor_level.treatment_pass_rate_ci_naive.mean",
+    "source_value": "0.8333333333333334"
+   },
+   "note": "naive n=12."
+  },
+  "respec.drop.control.diff_pp": {
+   "value": "17.2",
+   "quantity": "respec_cascade control arm: percentage points by which the cascade Phase-3 pass rate falls below that arm's own isolated K=1 baseline at the identical anchor, pooled across families (control_drop)",
+   "status": "verified",
+   "source": {
+    "file": "D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s23-final\\statistics.json",
+    "format": "text",
+    "locator": "confirm_disconfirm.pooled.control_drop.observed_mean_diff",
+    "source_value": "-0.1724137931034483"
+   },
+   "note": "The difference is cascade minus baseline (paired_permutation_test takes A-B, with A=cascade). -17.24 pp means the cascade is 17.2 points below the baseline. Computed over 29 pairs."
+  },
+  "respec.drop.control.n": {
+   "value": "29",
+   "quantity": "Number of anchor-set-level (cascade Phase-3 vs isolated K=1 baseline) pairs available for the control arm in the respec_cascade compounding-drop comparison",
+   "status": "verified",
+   "source": {
+    "file": "sources/respec-cascade-statistics.json",
+    "format": "json",
+    "locator": "confirm_disconfirm.pooled.control_drop.n_paired_anchor_sets",
+    "source_value": "29"
+   },
+   "note": "The source gives 29 pairs: 30 control Phase-3 per-family observations minus the one baseline trial with status 'blocked' (baseline_equation, masters-dissertation-defense__anchor3, control). Per-family control_drop n is bib 6, cit 6, sr 6, eq 5, cap 6. L921C58 (n=29) matches; L918C18 (30) does not."
+  },
+  "respec.drop.control.p": {
+   "value": "0.219",
+   "quantity": "respec_cascade p-value for the control arm's cascade-vs-own-K=1-baseline difference (control_drop)",
+   "status": "verified",
+   "source": {
+    "file": "sources/respec-cascade-statistics.json",
+    "format": "json",
+    "locator": "confirm_disconfirm.pooled.control_drop.p_value",
+    "source_value": "0.219"
+   }
+  },
+  "respec.drop.treatment.diff_pp": {
+   "value": "3.3",
+   "quantity": "respec_cascade treatment arm: percentage-point difference of cascade Phase-3 pass rate relative to its own isolated K=1 baseline, pooled across families (+3.3, i.e. above baseline; treatment_drop)",
+   "status": "verified",
+   "source": {
+    "file": "sources/respec-cascade-statistics.json",
+    "format": "json",
+    "locator": "confirm_disconfirm.pooled.treatment_drop.observed_mean_diff",
+    "source_value": "0.03333333333333333"
+   },
+   "note": "This is cascade minus baseline = +3.3 pp, i.e. above baseline."
+  },
+  "respec.drop.treatment.n": {
+   "value": "60",
+   "quantity": "Number of anchor-set-level (cascade Phase-3 vs isolated K=1 baseline) pairs available for the treatment arm in the respec_cascade compounding-drop comparison",
+   "status": "verified",
+   "source": {
+    "file": "sources/respec-cascade-statistics.json",
+    "format": "json",
+    "locator": "confirm_disconfirm.pooled.treatment_drop.n_paired_anchor_sets",
+    "source_value": "60"
+   },
+   "note": "Both tokens (L919C10, L922C30) print 60."
+  },
+  "respec.drop.treatment.p": {
+   "value": "0.4895",
+   "quantity": "respec_cascade p-value for the treatment arm's cascade-vs-own-K=1-baseline difference (treatment_drop)",
+   "status": "verified",
+   "source": {
+    "file": "sources/respec-cascade-statistics.json",
+    "format": "json",
+    "locator": "confirm_disconfirm.pooled.treatment_drop.p_value",
+    "source_value": "0.4895"
+   }
+  },
+  "respec.keepsurvival.anchorset.n": {
+   "value": "11",
+   "quantity": "Number of paired chains in the respec_cascade Checkpoint B keep-survival anchor-set-level comparison (after one control chain excluded)",
+   "status": "verified",
+   "source": {
+    "file": "sources/respec-cascade-statistics.json",
+    "format": "json",
+    "locator": "confirm_disconfirm.keep_survival_significance.n_paired_anchor_sets",
+    "source_value": "11"
+   },
+   "note": "The excluded control chain is jcshm-si__anchor2 (chain_broken_at_step_2.1; excluded_observations measure phase2_keep_survival). This matches 'breaking before Checkpoint B'."
+  },
+  "respec.keepsurvival.anchorset.p": {
+   "value": "0.0305",
+   "quantity": "Permutation p-value for the respec_cascade Checkpoint B keep-survival anchor-set-level comparison (11 paired chains)",
+   "status": "verified",
+   "source": {
+    "file": "sources/respec-cascade-statistics.json",
+    "format": "json",
+    "locator": "confirm_disconfirm.keep_survival_significance.p_value",
+    "source_value": "0.0305"
+   },
+   "note": "n_paired_anchor_sets=11. All 3 tokens print 0.0305."
+  },
+  "respec.keepsurvival.control.neff.n": {
+   "value": "10.7",
+   "quantity": "ICC-corrected effective n for Tier 3 of respec_cascade Checkpoint B keep-survival, control arm",
+   "status": "verified",
+   "source": {
+    "file": "sources/respec-cascade-statistics.json",
+    "format": "json",
+    "locator": "outcome_measures.b_phase2_keep_survival_pass_rate.tier3_pooled_anchor_level.control_clustering.effective_n",
+    "source_value": "10.727554179566564"
+   },
+   "note": "It rounds to 10.7. icc=0.0095 and design_effect=1.0254."
+  },
+  "respec.keepsurvival.control.t1.ci_hi": {
+   "value": "75",
+   "quantity": "Upper 95% CI bound of respec_cascade keep-survival pass rate, control arm, Tier 1",
+   "status": "verified",
+   "source": {
+    "file": "sources/respec-cascade-statistics.json",
+    "format": "json",
+    "locator": "outcome_measures.b_phase2_keep_survival_pass_rate.tier1_per_document_unweighted.control_pass_rate_ci.ci_high",
+    "source_value": "0.75"
+   }
+  },
+  "respec.keepsurvival.control.t1.ci_lo": {
+   "value": "25",
+   "quantity": "Lower 95% CI bound of respec_cascade keep-survival pass rate, control arm, Tier 1",
+   "status": "verified",
+   "source": {
+    "file": "sources/respec-cascade-statistics.json",
+    "format": "json",
+    "locator": "outcome_measures.b_phase2_keep_survival_pass_rate.tier1_per_document_unweighted.control_pass_rate_ci.ci_low",
+    "source_value": "0.25"
+   }
+  },
+  "respec.keepsurvival.control.t1.rate": {
+   "value": "44.4",
+   "quantity": "respec_cascade Checkpoint B keep-survival rate, control arm, Tier 1 aggregation",
+   "status": "verified",
+   "source": {
+    "file": "sources/respec-cascade-statistics.json",
+    "format": "json",
+    "locator": "outcome_measures.b_phase2_keep_survival_pass_rate.tier1_per_document_unweighted.control_pass_rate_ci.mean",
+    "source_value": "0.4444444444444444"
+   }
+  },
+  "respec.keepsurvival.control.t2.ci_hi": {
+   "value": "75",
+   "quantity": "Upper 95% CI bound of respec_cascade keep-survival pass rate, control arm, Tier 2",
+   "status": "verified",
+   "source": {
+    "file": "sources/respec-cascade-statistics.json",
+    "format": "json",
+    "locator": "outcome_measures.b_phase2_keep_survival_pass_rate.tier2_anchor_weighted_document_mean.control.ci_high",
+    "source_value": "0.75"
+   }
+  },
+  "respec.keepsurvival.control.t2.ci_lo": {
+   "value": "25",
+   "quantity": "Lower 95% CI bound of respec_cascade keep-survival pass rate, control arm, Tier 2",
+   "status": "verified",
+   "source": {
+    "file": "sources/respec-cascade-statistics.json",
+    "format": "json",
+    "locator": "outcome_measures.b_phase2_keep_survival_pass_rate.tier2_anchor_weighted_document_mean.control.ci_low",
+    "source_value": "0.25"
+   }
+  },
+  "respec.keepsurvival.control.t2.rate": {
+   "value": "45.5",
+   "quantity": "respec_cascade Checkpoint B keep-survival rate, control arm, Tier 2 aggregation",
+   "status": "verified",
+   "source": {
+    "file": "sources/respec-cascade-statistics.json",
+    "format": "json",
+    "locator": "outcome_measures.b_phase2_keep_survival_pass_rate.tier2_anchor_weighted_document_mean.control.mean",
+    "source_value": "0.45454545454545453"
+   }
+  },
+  "respec.keepsurvival.control.t3.ci_hi": {
+   "value": "72.7",
+   "quantity": "Upper 95% CI bound of respec_cascade keep-survival pass rate, control arm, Tier 3",
+   "status": "verified",
+   "source": {
+    "file": "sources/respec-cascade-statistics.json",
+    "format": "json",
+    "locator": "outcome_measures.b_phase2_keep_survival_pass_rate.tier3_pooled_anchor_level.control_pass_rate_ci_naive.ci_high",
+    "source_value": "0.7272727272727273"
+   },
+   "note": "It rounds to 72.7."
+  },
+  "respec.keepsurvival.control.t3.ci_lo": {
+   "value": "18.2",
+   "quantity": "Lower 95% CI bound of respec_cascade keep-survival pass rate, control arm, Tier 3",
+   "status": "verified",
+   "source": {
+    "file": "sources/respec-cascade-statistics.json",
+    "format": "json",
+    "locator": "outcome_measures.b_phase2_keep_survival_pass_rate.tier3_pooled_anchor_level.control_pass_rate_ci_naive.ci_low",
+    "source_value": "0.18181818181818182"
+   },
+   "note": "It rounds to 18.2."
+  },
+  "respec.keepsurvival.control.t3.rate": {
+   "value": "45.5",
+   "quantity": "respec_cascade Checkpoint B keep-survival rate, control arm, Tier 3 (pooled) aggregation",
+   "status": "verified",
+   "source": {
+    "file": "sources/respec-cascade-statistics.json",
+    "format": "json",
+    "locator": "outcome_measures.b_phase2_keep_survival_pass_rate.tier3_pooled_anchor_level.control_pass_rate_ci_naive.mean",
+    "source_value": "0.45454545454545453"
+   },
+   "note": "naive n=11. jcshm-si__anchor2 is excluded because it broke at step 2.1."
+  },
+  "respec.keepsurvival.p_t1": {
+   "value": "0.2305",
+   "quantity": "respec_cascade Checkpoint B keep-survival paired p-value (control vs treatment), Tier 1",
+   "status": "verified",
+   "source": {
+    "file": "sources/respec-cascade-statistics.json",
+    "format": "json",
+    "locator": "outcome_measures.b_phase2_keep_survival_pass_rate.tier1_per_document_unweighted.paired_significance.p_value",
+    "source_value": "0.2305"
+   }
+  },
+  "respec.keepsurvival.p_t2": {
+   "value": "0.2305",
+   "quantity": "respec_cascade Checkpoint B keep-survival paired p-value (control vs treatment), Tier 2",
+   "status": "verified",
+   "source": {
+    "file": "sources/respec-cascade-statistics.json",
+    "format": "json",
+    "locator": "outcome_measures.b_phase2_keep_survival_pass_rate.tier2_anchor_weighted_document_mean.paired_significance.p_value",
+    "source_value": "0.2305"
+   }
+  },
+  "respec.keepsurvival.treatment.neff.n": {
+   "value": "12.0",
+   "quantity": "respec_cascade Checkpoint B keep-survival Tier 3 effective sample size (n_eff), treatment arm (table cell in parentheses)",
+   "status": "verified",
+   "source": {
+    "file": "sources/respec-cascade-statistics.json",
+    "format": "json",
+    "locator": "outcome_measures.b_phase2_keep_survival_pass_rate.tier3_pooled_anchor_level.treatment_clustering.effective_n",
+    "source_value": "12.0"
+   }
+  },
+  "respec.keepsurvival.treatment.t1.ci_hi": {
+   "value": "100",
+   "quantity": "Upper 95% exact Clopper-Pearson CI bound of respec_cascade keep-survival pass rate, treatment arm, Tier 1",
+   "status": "verified",
+   "source": {
+    "file": "sources/respec-cascade-statistics.json",
+    "format": "json",
+    "locator": "outcome_measures.b_phase2_keep_survival_pass_rate.tier1_per_document_unweighted.treatment_pass_rate_ci.ci_high",
+    "source_value": "1.0"
+   }
+  },
+  "respec.keepsurvival.treatment.t1.ci_lo": {
+   "value": "29.2",
+   "quantity": "Lower 95% exact Clopper-Pearson CI bound of respec_cascade keep-survival pass rate, treatment arm, Tier 1",
+   "status": "verified",
+   "source": {
+    "file": "sources/respec-cascade-statistics.json",
+    "format": "json",
+    "locator": "outcome_measures.b_phase2_keep_survival_pass_rate.tier1_per_document_unweighted.treatment_pass_rate_ci.ci_low",
+    "source_value": "0.2924017738212866"
+   },
+   "note": "The method is clopper_pearson_exact_fallback. It rounds to 29.2."
+  },
+  "respec.keepsurvival.treatment.t1.rate": {
+   "value": "100",
+   "quantity": "respec_cascade Checkpoint B keep-survival pass rate, treatment arm, Tier 1 aggregation (Table tab:respec-cascade-headline cell, exact Clopper-Pearson dagger)",
+   "status": "verified",
+   "source": {
+    "file": "sources/respec-cascade-statistics.json",
+    "format": "json",
+    "locator": "outcome_measures.b_phase2_keep_survival_pass_rate.tier1_per_document_unweighted.treatment_pass_rate_ci.mean",
+    "source_value": "1.0"
+   },
+   "note": "The CI method is clopper_pearson_exact_fallback, which is consistent with the dagger."
+  },
+  "respec.keepsurvival.treatment.t2.ci_hi": {
+   "value": "100",
+   "quantity": "Upper 95% CI bound of respec_cascade keep-survival pass rate, treatment arm, Tier 2",
+   "status": "verified",
+   "source": {
+    "file": "sources/respec-cascade-statistics.json",
+    "format": "json",
+    "locator": "outcome_measures.b_phase2_keep_survival_pass_rate.tier2_anchor_weighted_document_mean.treatment.ci_high",
+    "source_value": "1.0"
+   }
+  },
+  "respec.keepsurvival.treatment.t2.ci_lo": {
+   "value": "100",
+   "quantity": "Lower 95% CI bound of respec_cascade keep-survival pass rate, treatment arm, Tier 2",
+   "status": "verified",
+   "source": {
+    "file": "sources/respec-cascade-statistics.json",
+    "format": "json",
+    "locator": "outcome_measures.b_phase2_keep_survival_pass_rate.tier2_anchor_weighted_document_mean.treatment.ci_low",
+    "source_value": "1.0"
+   },
+   "note": "The method is weighted_cluster_bootstrap, a degenerate [100, 100] interval."
+  },
+  "respec.keepsurvival.treatment.t2.rate": {
+   "value": "100",
+   "quantity": "respec_cascade Checkpoint B keep-survival pass rate, treatment arm, Tier 2 aggregation (table cell)",
+   "status": "verified",
+   "source": {
+    "file": "sources/respec-cascade-statistics.json",
+    "format": "json",
+    "locator": "outcome_measures.b_phase2_keep_survival_pass_rate.tier2_anchor_weighted_document_mean.treatment.mean",
+    "source_value": "1.0"
+   }
+  },
+  "respec.keepsurvival.treatment.t3.ci_hi": {
+   "value": "100",
+   "quantity": "Upper 95% CI bound of respec_cascade keep-survival pass rate, treatment arm, Tier 3",
+   "status": "verified",
+   "source": {
+    "file": "sources/respec-cascade-statistics.json",
+    "format": "json",
+    "locator": "outcome_measures.b_phase2_keep_survival_pass_rate.tier3_pooled_anchor_level.treatment_pass_rate_ci_naive.ci_high",
+    "source_value": "1.0"
+   }
+  },
+  "respec.keepsurvival.treatment.t3.ci_lo": {
+   "value": "73.5",
+   "quantity": "Lower 95% CI bound of respec_cascade keep-survival pass rate, treatment arm, Tier 3",
+   "status": "verified",
+   "source": {
+    "file": "sources/respec-cascade-statistics.json",
+    "format": "json",
+    "locator": "outcome_measures.b_phase2_keep_survival_pass_rate.tier3_pooled_anchor_level.treatment_pass_rate_ci_naive.ci_low",
+    "source_value": "0.7353515306029488"
+   },
+   "note": "It rounds to 73.5. This interval is also clopper_pearson_exact_fallback, but the caption's dagger marks only the T1 cell as Clopper-Pearson. Minor disclosure gap, not a value error."
+  },
+  "respec.keepsurvival.treatment.t3.rate": {
+   "value": "100",
+   "quantity": "respec_cascade Checkpoint B keep-survival pass rate, treatment arm, Tier 3 aggregation (table cell)",
+   "status": "verified",
+   "source": {
+    "file": "sources/respec-cascade-statistics.json",
+    "format": "json",
+    "locator": "outcome_measures.b_phase2_keep_survival_pass_rate.tier3_pooled_anchor_level.treatment_pass_rate_ci_naive.mean",
+    "source_value": "1.0"
+   }
+  },
+  "respec.perfamily.control.t1.rate_max": {
+   "value": "77.8",
+   "quantity": "Highest respec_cascade per-family control-arm Tier-1 pass rate across the five families (the citation family)",
+   "status": "verified",
+   "source": {
+    "file": "sources/respec-cascade-statistics.json",
+    "format": "json",
+    "locator": "outcome_measures.a_phase3_pass_rate_per_family.citation.tier1_per_document_unweighted.control_pass_rate_ci.mean",
+    "source_value": "0.7777777777777778"
+   },
+   "note": "It rounds to 77.8."
+  },
+  "respec.perfamily.control.t1.rate_min": {
+   "value": "44.4",
+   "quantity": "Lowest respec_cascade per-family control-arm Tier-1 pass rate across the five families (shared by bibliography, section reorder, equation and caption)",
+   "status": "verified",
+   "source": {
+    "file": "D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s23-final\\statistics.json",
+    "format": "text",
+    "locator": "outcome_measures.a_phase3_pass_rate_per_family.{bibliography,section_reorder,equation,caption}.tier1_per_document_unweighted.control_pass_rate_ci.mean",
+    "source_value": "0.4444444444444444"
+   },
+   "note": "The same value holds for exactly the four families the paper names."
+  },
+  "respec.perfamily.p_t1_max": {
+   "value": "1.0",
+   "quantity": "Largest per-family Tier-1 paired p-value (control vs treatment) across the five respec_cascade families",
+   "status": "verified",
+   "source": {
+    "file": "sources/respec-cascade-statistics.json",
+    "format": "json",
+    "locator": "outcome_measures.a_phase3_pass_rate_per_family.citation.tier1_per_document_unweighted.paired_significance.p_value",
+    "source_value": "1.0"
+   }
+  },
+  "respec.perfamily.p_t1_min": {
+   "value": "0.486",
+   "quantity": "Smallest per-family Tier-1 paired p-value (control vs treatment) across the five respec_cascade families",
+   "status": "verified",
+   "source": {
+    "file": "D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s23-final\\statistics.json",
+    "format": "text",
+    "locator": "outcome_measures.a_phase3_pass_rate_per_family.{bibliography,section_reorder,equation,caption}.tier1_per_document_unweighted.paired_significance.p_value",
+    "source_value": "0.486"
+   }
+  },
+  "respec.perfamily.treatment.t1.ci_hi": {
+   "value": "100",
+   "quantity": "Upper bound of the Clopper-Pearson 95% CI on the respec_cascade per-family treatment Tier-1 pass rate",
+   "status": "verified",
+   "source": {
+    "file": "D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s23-final\\statistics.json",
+    "format": "text",
+    "locator": "outcome_measures.a_phase3_pass_rate_per_family.<family>.tier1_per_document_unweighted.treatment_pass_rate_ci.ci_high",
+    "source_value": "1.0"
+   }
+  },
+  "respec.perfamily.treatment.t1.ci_lo": {
+   "value": "29.2",
+   "quantity": "Lower bound of the Clopper-Pearson 95% CI on the respec_cascade per-family treatment Tier-1 pass rate (N=3 documents per family)",
+   "status": "verified",
+   "source": {
+    "file": "D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s23-final\\statistics.json",
+    "format": "text",
+    "locator": "outcome_measures.a_phase3_pass_rate_per_family.<family>.tier1_per_document_unweighted.treatment_pass_rate_ci.ci_low",
+    "source_value": "0.2924017738212866"
+   },
+   "note": "The method is clopper_pearson_exact_fallback, identical for all 5 families. It rounds to 29.2."
+  },
+  "respec.perfamily.treatment.t1.rate": {
+   "value": "100",
+   "quantity": "respec_cascade per-family Tier-1 pass rate for the treatment arm, identical (100%) on each of the five families",
+   "status": "verified",
+   "source": {
+    "file": "D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s23-final\\statistics.json",
+    "format": "text",
+    "locator": "outcome_measures.a_phase3_pass_rate_per_family.<family>.tier1_per_document_unweighted.treatment_pass_rate_ci.mean, for all 5 families",
+    "source_value": "1.0"
+   },
+   "note": "The value is 1.0 for bibliography, citation, section_reorder, equation and caption alike."
+  },
+  "respec.respec_phase.steps": {
+   "value": "2",
+   "quantity": "Number of steps in the respec_cascade RESPEC phase (mid-chain reversal edits)",
+   "status": "verified",
+   "source": {
+    "file": "../tools/run_respec_cascade_family.py",
+    "format": "text",
+    "locator": "comment L444 'PHASE 2 -- RESPEC (2 steps: citation inverse, section redirect)'; step ids 2.1 and 2.3",
+    "source_value": "2 steps"
+   },
+   "note": "This is a design constant. Also stated in the protocol doc sec 2.3: 'Phase 2 = 2 steps'."
+  },
+  "respec.second_exposure_phase.steps": {
+   "value": "10",
+   "quantity": "Number of steps in the respec_cascade SECOND EXPOSURE phase (forward then inverse per family)",
+   "status": "verified",
+   "source": {
+    "file": "../tools/run_respec_cascade_family.py",
+    "format": "text",
+    "locator": "comment L514 'PHASE 3 -- SECOND EXPOSURE (10 steps: ...)'; step ids 3.1-3.5 forward/inverse, with 3.3a/3.3b for section_reorder",
+    "source_value": "10 steps"
+   },
+   "note": "This is a design constant. The protocol doc sec 2.3 says 'Phase 3 = 5 forward+inverse steps', which is 10 steps."
+  },
+  "rg.caption.control.ci_hi": {
+   "value": "100",
+   "quantity": "Upper bound of the exact Clopper-Pearson 95% CI on the caption control-arm pass rate, original shared-host run (Table tab:render-gate)",
+   "status": "derived",
+   "source": {
+    "file": "D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7-caption\\holdout-k1-20260908T-first-attempt\\slice-manifest.json",
+    "format": "text",
+    "locator": "_clopper_pearson_boundary_ci(26, 26) upper bound",
+    "source_value": "1.0"
+   },
+   "note": "Printed as 100."
+  },
+  "rg.caption.control.ci_lo": {
+   "value": "86.8",
+   "quantity": "Lower bound of the exact Clopper-Pearson 95% CI on the caption control-arm pass rate, original shared-host run (Table tab:render-gate)",
+   "status": "derived",
+   "source": {
+    "file": "D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7-caption\\holdout-k1-20260908T-first-attempt\\slice-manifest.json",
+    "format": "text",
+    "locator": "graph_scorer._clopper_pearson_boundary_ci(26, 26) = 0.025**(1/26), via the bootstrap_ci clopper_pearson_exact_fallback",
+    "source_value": "0.8677253955022458"
+   },
+   "note": "Rounds to 86.8. The method is exact Clopper-Pearson, as the dagger note says."
+  },
+  "rg.caption.control.n": {
+   "value": "26",
+   "quantity": "Number of control-arm caption chains in the original shared-host run (Table tab:render-gate)",
+   "status": "verified",
+   "source": {
+    "file": "D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7-caption\\holdout-k1-20260908T-first-attempt\\slice-manifest.json",
+    "format": "text",
+    "locator": "control chains: holdout 14 + validation-k1-20260908T-first-attempt 12",
+    "source_value": "14 + 12 = 26"
+   }
+  },
+  "rg.caption.control.rate": {
+   "value": "100",
+   "quantity": "Caption-insertion pass rate, control arm, original shared-host run (Table tab:render-gate)",
+   "status": "derived",
+   "source": {
+    "file": "D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7-caption\\holdout-k1-20260908T-first-attempt\\slice-manifest.json",
+    "format": "text",
+    "locator": "26/26: holdout 14 completed pass/pass + validation-k1-20260908T-first-attempt 12 completed pass/pass",
+    "source_value": "bootstrap_ci mean = 1.0"
+   },
+   "note": "The checkpoint doc says '26/26 (100%) pass'. L701 and L861 are the same quantity."
+  },
+  "rg.caption.p_bound": {
+   "value": "0.001",
+   "quantity": "Upper bound on the paired p-value (p < bound) for caption control vs treatment, original shared-host run (Table tab:render-gate)",
+   "status": "derived",
+   "source": {
+    "file": "D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7-caption\\validation-k1-20260908T-first-attempt\\slice-manifest.json",
+    "format": "text",
+    "locator": "graph_scorer.paired_permutation_test(caption control, treatment; 26 paired docs, blocked=0, 2000 sign-flips).p_value = 0/2000, so p < 1/2000 = 0.0005 < 0.001",
+    "source_value": "0.0"
+   },
+   "note": "observed_mean_diff = 0.923. The checkpoint doc says 'paired sign-flip vs control: p<0.001'. The bound is honest given the 2000-permutation resolution."
+  },
+  "rg.caption.treatment.ci_hi": {
+   "value": "19.2",
+   "quantity": "Upper bound of the 95% CI on the caption treatment-arm pass rate, original shared-host run (Table tab:render-gate)",
+   "status": "derived",
+   "source": {
+    "file": "D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7-caption\\holdout-k1-20260908T-first-attempt\\slice-manifest.json",
+    "format": "text",
+    "locator": "graph_scorer.bootstrap_ci(caption treatment outcomes, n=26).ci_high",
+    "source_value": "0.19230769230769232"
+   },
+   "note": "Rounds to 19.2."
+  },
+  "rg.caption.treatment.ci_lo": {
+   "value": "0",
+   "quantity": "Lower bound of the 95% CI on the caption treatment-arm pass rate, original shared-host run (Table tab:render-gate)",
+   "status": "derived",
+   "source": {
+    "file": "D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7-caption\\holdout-k1-20260908T-first-attempt\\slice-manifest.json",
+    "format": "text",
+    "locator": "graph_scorer.bootstrap_ci(caption treatment outcomes, n=26, blocked=0).ci_low",
+    "source_value": "0.0"
+   },
+   "note": "Printed as 0. The checkpoint doc says 'CI [0,19.2]'."
+  },
+  "rg.caption.treatment.n": {
+   "value": "26",
+   "quantity": "Render-gate (original shared host) caption-family treatment-arm n (Table tab:render-gate)",
+   "status": "verified",
+   "source": {
+    "file": "D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7-caption\\holdout-k1-20260908T-first-attempt\\slice-manifest.json",
+    "format": "text",
+    "locator": "treatment chains: holdout 14 + validation-k1-20260908T-first-attempt 12",
+    "source_value": "14 + 12 = 26"
+   },
+   "note": "L982C28 and L982C36 are the denominators of '1/26' and '2/26'. OK."
+  },
+  "rg.caption.treatment.passes": {
+   "value": "2",
+   "quantity": "Render-gate (original shared host) caption-family treatment-arm passing trials after certificate-failure retries (2/26 = 7.7%, Table tab:render-gate)",
+   "status": "verified",
+   "source": {
+    "file": "D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7-caption\\holdout-k1-20260908T-first-attempt\\slice-manifest.json",
+    "format": "text",
+    "locator": "count caption treatment chains completed pass/pass: holdout 1 + validation-k1-20260908T-first-attempt 1",
+    "source_value": "1 + 1 = 2"
+   },
+   "note": "Matches the checkpoint doc: '2/26 (7.7%)'."
+  },
+  "rg.caption.treatment.rate": {
+   "value": "7.7",
+   "quantity": "Caption-insertion pass rate, treatment arm, original contended host (Table tab:render-gate)",
+   "status": "derived",
+   "source": {
+    "file": "D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7-caption\\holdout-k1-20260908T-first-attempt\\slice-manifest.json",
+    "format": "text",
+    "locator": "2/26 = 0.0769 -> 7.7%. chains[family=caption, arm=treatment]: holdout 1 completed pass/pass + 13 blocked; validation-k1-20260908T-first-attempt\\slice-manifest.json 1 completed + 11 blocked. Blocked counted as 0",
+    "source_value": "bootstrap_ci mean = 0.07692307692307693"
+   },
+   "note": "Recomputed with graph_scorer.bootstrap_ci. The same value is stated in the checkpoint doc (Caption row: '2/26 (7.7%) resolved') and in paper-s8-final-evidence-v1.md. The occurrences at L49, L702, L780 and L861 are all the original-host caption treatment rate. make_paper_figures.py hard-codes 7.7 in ROWS_2."
+  },
+  "rg.equation.control.ci_hi": {
+   "value": "100",
+   "quantity": "Upper bound of the 95% CI on the equation control-arm pass rate, original shared-host run (Table tab:render-gate)",
+   "status": "derived",
+   "source": {
+    "file": "D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7-equation\\development-k1-20260906T-confirmatory-attempt2-sonnet\\slice-manifest.json",
+    "format": "text",
+    "locator": "graph_scorer.bootstrap_ci(control outcomes, n=11).ci_high",
+    "source_value": "1.0"
+   },
+   "note": "Printed as 100. Recomputed read-only."
+  },
+  "rg.equation.control.ci_lo": {
+   "value": "72.7",
+   "quantity": "Lower bound of the 95% CI on the equation control-arm pass rate, original shared-host run (Table tab:render-gate)",
+   "status": "derived",
+   "source": {
+    "file": "D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7-equation\\development-k1-20260906T-confirmatory-attempt2-sonnet\\slice-manifest.json",
+    "format": "text",
+    "locator": "graph_scorer.bootstrap_ci(per-document control outcomes, n=11, seed 20260828, 2000 resamples).ci_low",
+    "source_value": "0.7272727272727273"
+   },
+   "note": "Rounds to 72.7. No stored stats JSON; recomputed read-only."
+  },
+  "rg.equation.control.n": {
+   "value": "11",
+   "quantity": "Number of control-arm equation chains in the original shared-host run (Table tab:render-gate; unpaired corpus)",
+   "status": "verified",
+   "source": {
+    "file": "D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7-equation\\development-k1-20260906T-confirmatory-attempt2-sonnet\\slice-manifest.json",
+    "format": "text",
+    "locator": "count of chains[family=equation, arm=control] with status != not_applicable (12 control chains, 1 not_applicable)",
+    "source_value": "11"
+   },
+   "note": "The manifest has document_count=12 and one not_applicable chain (cross_doc_docops__wordxr_002_dec). See the author flag under rg.equation.control.rate: a paired 26-document control run also exists."
+  },
+  "rg.equation.control.passes": {
+   "value": "10",
+   "quantity": "Number of passing chains for the equation family control arm in the original contended-host render-gate table (10 of 11)",
+   "status": "verified",
+   "source": {
+    "file": "D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7-equation\\development-k1-20260906T-confirmatory-attempt2-sonnet\\slice-manifest.json",
+    "format": "text",
+    "locator": "count chains[family=equation, arm=control, status=completed, all verdicts pass]",
+    "source_value": "10"
+   },
+   "note": "Matches paper-s8-final-evidence-v1.md ('Control: 10/11 completed + 1 completed with a genuine task failure')."
+  },
+  "rg.equation.control.rate": {
+   "value": "90.9",
+   "quantity": "Equation-insertion pass rate, control arm, original shared-host run (Table tab:render-gate; unpaired control corpus, Note c)",
+   "status": "derived",
+   "source": {
+    "file": "D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7-equation\\development-k1-20260906T-confirmatory-attempt2-sonnet\\slice-manifest.json",
+    "format": "text",
+    "locator": "10/11 = 0.9091 -> 90.9%. chains[family=equation, arm=control]: 10 completed pass/pass, 1 completed_with_failure (docops_v2_l3_001_docx_controlled, forward pass / inverse fail), 1 not_applicable (excluded)",
+    "source_value": "bootstrap_ci mean = 0.9090909090909091"
+   },
+   "note": "Matches the development-slice control, as Note c says. AUTHOR FLAG: the primary-corpus equation runs that supply the treatment arm (holdout-k1-20260907T-with-fix and validation-k1-20260907T-with-fix, same host, sonnet, run 2026-09-07) also contain 26 control chains, and all 26 pass. That is 26/26 = 100%, Clopper-Pearson [86.8, 100], paired sign-flip p=0.0 versus the 12/26 treatment. It contradicts the claim at L707-709 and in Note c that equation's original control exists only as an unpaired 11-document corpus. The superseded haiku attempt (development-k1-20260906T-confirmatory-attempt1, model=haiku) gives control 7/9 when blocked chains are excluded."
+  },
+  "rg.equation.control.resolved": {
+   "value": "11",
+   "quantity": "Number of equation-family control-arm chains in the original render-gate table that resolved (did not block on the verification step)",
+   "status": "verified",
+   "source": {
+    "file": "D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7-equation\\development-k1-20260906T-confirmatory-attempt2-sonnet\\slice-manifest.json",
+    "format": "text",
+    "locator": "count equation control chains with status in {completed, completed_with_failure} (i.e. not blocked, not not_applicable): 10 + 1",
+    "source_value": "11"
+   },
+   "note": "The one completed_with_failure chain (docops_v2_l3_001_docx_controlled) failed inverse-leg grading. That matches Note c's 'failed grading on a genuine task mistake'."
+  },
+  "rg.equation.treatment.ci_hi": {
+   "value": "65.4",
+   "quantity": "Upper bound of the 95% CI on the equation treatment-arm pass rate, original shared-host run (Table tab:render-gate)",
+   "status": "derived",
+   "source": {
+    "file": "D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7-equation\\holdout-k1-20260907T-with-fix\\slice-manifest.json",
+    "format": "text",
+    "locator": "graph_scorer.bootstrap_ci(treatment outcomes, n=26, blocked=0).ci_high",
+    "source_value": "0.6538461538461539"
+   },
+   "note": "Rounds to 65.4. The checkpoint doc states the same value."
+  },
+  "rg.equation.treatment.ci_lo": {
+   "value": "26.9",
+   "quantity": "Lower bound of the 95% CI on the equation treatment-arm pass rate, original shared-host run (Table tab:render-gate)",
+   "status": "derived",
+   "source": {
+    "file": "D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7-equation\\holdout-k1-20260907T-with-fix\\slice-manifest.json",
+    "format": "text",
+    "locator": "graph_scorer.bootstrap_ci(treatment outcomes over holdout + validation-k1-20260907T-with-fix, blocked=0, n=26).ci_low",
+    "source_value": "0.2692307692307692"
+   },
+   "note": "Rounds to 26.9. The checkpoint doc also states 'bootstrap CI [26.9, 65.4]'. The superseded figure [23.1, 61.5], for 11/26, is in the checkpoint's row table."
+  },
+  "rg.equation.treatment.n": {
+   "value": "26",
+   "quantity": "Render-gate (original shared host) equation-family treatment-arm n (Table tab:render-gate)",
+   "status": "verified",
+   "source": {
+    "file": "D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7-equation\\holdout-k1-20260907T-with-fix\\slice-manifest.json",
+    "format": "text",
+    "locator": "treatment chains: holdout 14 + validation-k1-20260907T-with-fix 12 = 26, none not_applicable",
+    "source_value": "14 + 12 = 26"
+   },
+   "note": "L981C90 (the denominator of '4/26') and L982C6 (the denominator of '12/26') are the same n. OK."
+  },
+  "rg.equation.treatment.passes": {
+   "value": "12",
+   "quantity": "Render-gate (original shared host) equation-family treatment-arm passing trials after certificate-failure retries (12/26 = 46.2%, Table tab:render-gate)",
+   "status": "verified",
+   "source": {
+    "file": "D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7-equation\\holdout-k1-20260907T-with-fix\\slice-manifest.json",
+    "format": "text",
+    "locator": "count chains[family=equation, arm=treatment, status=completed, forward & inverse verdict=pass]: holdout 9 + validation-k1-20260907T-with-fix 3",
+    "source_value": "9 + 3 = 12"
+   },
+   "note": "The checkpoint doc says '12/26 (46.2%)'. The same sentence's '4/26' starting value was not checked (it is not a key in this group)."
+  },
+  "rg.equation.treatment.rate": {
+   "value": "46.2",
+   "quantity": "Equation-insertion pass rate, treatment arm, original contended host (Table tab:render-gate)",
+   "status": "derived",
+   "source": {
+    "file": "D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7-equation\\holdout-k1-20260907T-with-fix\\slice-manifest.json",
+    "format": "text",
+    "locator": "12/26 = 0.4615 -> 46.2%. chains[family=equation, arm=treatment]: holdout 9 completed pass/pass + 5 blocked; plus D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7-equation\\validation-k1-20260907T-with-fix\\slice-manifest.json 3 completed + 9 blocked. Blocked counted as 0, as the Methods rule requires for render-verification failures. Doc: paper-s7-experiment-status-checkpoint-v1.md, 'Update ... fully-clean number is 12/26 (46.2%)' and the RunPod-section table row 'equation'",
+    "source_value": "graph_scorer.bootstrap_ci mean = 0.46153846153846156 (12 passes of 26 chains)"
+   },
+   "note": "No statistics JSON is stored for Table tab:render-gate. I recomputed from the slice manifests (read-only) with tools/graph_scorer.py bootstrap_ci (seed 20260828, 2000 resamples). Running tools/compute_s7_statistics.py unmodified does NOT reproduce this value: its _chain_outcome excludes 'blocked' chains, which gives 12/12. The occurrences at L49, L696 and L780 all refer to the original contended-host equation treatment rate. The superseded figure 11/26 (42.3%) still appears in the checkpoint row table and in paper-s8-final-evidence-v1.md."
+  },
+  "rg.table.control.ci_hi": {
+   "value": "100",
+   "quantity": "Upper bound of the 95% CI on the table-structural control-arm pass rate, original shared-host run (Table tab:render-gate)",
+   "status": "derived",
+   "source": {
+    "file": "D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7-table-structural\\holdout-k1-20260906T014934Z\\slice-manifest.json",
+    "format": "text",
+    "locator": "graph_scorer.bootstrap_ci(control outcomes, n=26).ci_high",
+    "source_value": "1.0"
+   },
+   "note": "Printed as 100."
+  },
+  "rg.table.control.ci_lo": {
+   "value": "80.8",
+   "quantity": "Lower bound of the 95% CI on the table-structural control-arm pass rate, original shared-host run (Table tab:render-gate)",
+   "status": "derived",
+   "source": {
+    "file": "D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7-table-structural\\holdout-k1-20260906T014934Z\\slice-manifest.json",
+    "format": "text",
+    "locator": "graph_scorer.bootstrap_ci(control outcomes holdout+validation, n=26).ci_low",
+    "source_value": "0.8076923076923077"
+   },
+   "note": "Rounds to 80.8. The checkpoint doc says 'CI [80.8, 100]'."
+  },
+  "rg.table.control.n": {
+   "value": "26",
+   "quantity": "Number of control-arm table-structural chains in the original shared-host run (Table tab:render-gate)",
+   "status": "verified",
+   "source": {
+    "file": "D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7-table-structural\\holdout-k1-20260906T014934Z\\slice-manifest.json",
+    "format": "text",
+    "locator": "control chains: holdout 14 + validation-k1-20260906T014934Z 12",
+    "source_value": "14 + 12 = 26"
+   }
+  },
+  "rg.table.control.rate": {
+   "value": "92.3",
+   "quantity": "Table-structural insertion pass rate, control arm, original shared-host run (Table tab:render-gate)",
+   "status": "derived",
+   "source": {
+    "file": "D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7-table-structural\\holdout-k1-20260906T014934Z\\slice-manifest.json",
+    "format": "text",
+    "locator": "24/26 = 0.9231. holdout: 12 completed + 2 completed_with_failure (inverse fail); validation-k1-20260906T014934Z: 12 completed",
+    "source_value": "bootstrap_ci mean = 0.9230769230769231"
+   },
+   "note": "The checkpoint doc states '24/26 (92.3%)'. Both occurrences (L698, L726) are the same quantity."
+  },
+  "rg.table.p": {
+   "value": "1.0",
+   "quantity": "Paired p-value for table-structural control vs treatment, original shared-host run (Table tab:render-gate)",
+   "status": "derived",
+   "source": {
+    "file": "D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7-table-structural\\validation-k1-20260906T014934Z\\slice-manifest.json",
+    "format": "text",
+    "locator": "graph_scorer.paired_permutation_test(control, treatment per document; 26 paired docs, blocked=0, 2000 sign-flips, seed 20260828).p_value",
+    "source_value": "1.0"
+   },
+   "note": "observed_mean_diff = -0.0385. The checkpoint doc says 'paired sign-flip p=1.0'. If the one blocked outer-timeout chain were excluded under the Methods infrastructure rule, the result would be n=25 with p=0.488."
+  },
+  "rg.table.treatment.ci_hi": {
+   "value": "100",
+   "quantity": "Upper bound of the 95% CI on the table-structural treatment-arm pass rate, original shared-host run (Table tab:render-gate)",
+   "status": "derived",
+   "source": {
+    "file": "D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7-table-structural\\validation-k1-20260906T014934Z\\slice-manifest.json",
+    "format": "text",
+    "locator": "graph_scorer.bootstrap_ci(treatment outcomes, n=26).ci_high",
+    "source_value": "1.0"
+   },
+   "note": "Printed as 100."
+  },
+  "rg.table.treatment.ci_lo": {
+   "value": "88.5",
+   "quantity": "Lower bound of the 95% CI on the table-structural treatment-arm pass rate, original shared-host run (Table tab:render-gate)",
+   "status": "derived",
+   "source": {
+    "file": "D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7-table-structural\\validation-k1-20260906T014934Z\\slice-manifest.json",
+    "format": "text",
+    "locator": "graph_scorer.bootstrap_ci(treatment outcomes holdout+validation corrected manifests, n=26, blocked=0).ci_low",
+    "source_value": "0.8846153846153846"
+   },
+   "note": "Rounds to 88.5, matching L699 and the Note d claim at L1282. The checkpoint doc (2026-09-19 update) says the same."
+  },
+  "rg.table.treatment.n": {
+   "value": "26",
+   "quantity": "Number of chains (n) for the table-structural family treatment arm in the original contended-host render-gate table",
+   "status": "verified",
+   "source": {
+    "file": "D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7-table-structural\\validation-k1-20260906T014934Z\\slice-manifest.json",
+    "format": "text",
+    "locator": "treatment chains: holdout-k1-20260906T014934Z 14 + validation 12 = 26 (includes 1 blocked chain counted as failure)",
+    "source_value": "26"
+   },
+   "note": "The value is 25 if the blocked outer-timeout chain is excluded under the Methods 'process-level subprocess timeout' rule. See rg.table.treatment.rate."
+  },
+  "rg.table.treatment.passes": {
+   "value": "25",
+   "quantity": "Number of passing chains for the table-structural family treatment arm in the original contended-host render-gate table",
+   "status": "verified",
+   "source": {
+    "file": "D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7-table-structural\\validation-k1-20260906T014934Z\\slice-manifest.json",
+    "format": "text",
+    "locator": "count table_structural treatment chains completed pass/pass: holdout-k1-20260906T014934Z 14 + validation 11",
+    "source_value": "14 + 11 = 25"
+   },
+   "note": "This count needs the 2026-09-19 corrected manifests: atomic__word_006_section_reorder and composite_same_type__wordc_009_i both carry manually_recovered_forward_grading=true. The .pre-forward-regrade-backup files (superseded) give 23. This matches Note d."
+  },
+  "rg.table.treatment.rate": {
+   "value": "96.2",
+   "quantity": "Table-structural insertion pass rate, treatment arm, original contended host (Table tab:render-gate)",
+   "status": "derived",
+   "source": {
+    "file": "D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7-table-structural\\validation-k1-20260906T014934Z\\slice-manifest.json",
+    "format": "text",
+    "locator": "25/26 = 0.9615 -> 96.2%. chains[family=table_structural, arm=treatment]: holdout-k1-20260906T014934Z 14 completed pass/pass; validation 11 completed + 1 blocked (docops_v2_l3_009_docx_incident_m, forward not_run, timed_out=true at 601.5s). Blocked counted as 0",
+    "source_value": "bootstrap_ci mean = 0.9615384615384616"
+   },
+   "note": "Reproduces only from the corrected manifests. Two chains carry manually_recovered_forward_grading=true; the .pre-forward-regrade-backup files give the older 23/26. The 26th chain is an outer process timeout. The Methods rule says a 'process-level subprocess timeout' is excluded from the denominator, which would give 25/25 = 100%. Counting it as a failure to reach 26 is defensible only as a render-gate failure. Flag this for the author. The checkpoint doc says '25/26 (96.2%)'. All six occurrences are the same quantity."
+  },
+  "rgclean.all.p": {
+   "value": "1.0",
+   "quantity": "Paired p-value in the confirmatory dedicated-host re-run, stated once as 'p=1.0 throughout' for all three families (equation, table-structural, caption, each 1.0); keyed to the equation family's paired p, the first-named family",
+   "status": "verified",
+   "source": {
+    "file": "D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7-clean-rerun-runpod\\runs\\paper-s7-clean-rerun\\s7-final-statistics-runpod.json",
+    "format": "text",
+    "locator": "groups[1] (family=equation).paired_control_vs_treatment_significance.p_value; groups[0] (caption) and groups[2] (table_structural) have the same field = 1.0",
+    "source_value": "1.0"
+   },
+   "note": "L782C42, '($p=1.0$ throughout)', is an aggregate over the three families. All three stored p_values are 1.0, so the claim holds whichever family is used as the key."
+  },
+  "rgclean.all.rate": {
+   "value": "100",
+   "quantity": "Common pass rate reached by every family-arm cell (equation, table, caption x control, treatment) in the confirmatory dedicated-host re-run (Table tab:render-gate-clean); an aggregate claim, not a single cell",
+   "status": "derived",
+   "source": {
+    "file": "D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7-clean-rerun-runpod\\runs\\paper-s7-clean-rerun\\s7-final-statistics-runpod.json",
+    "format": "text",
+    "locator": "min over groups[0..2].{control_pass_rate_ci,treatment_pass_rate_ci}.mean (caption, equation, table_structural) = 1.0 for all six cells",
+    "source_value": "1.0 (all six cells)"
+   },
+   "note": "L54C10 (abstract) and L1191C66 (conclusion) both say all three families reach 100% for both arms, which is the aggregate. Cross-checked against the raw 156 chain-result.json files under the same run dir: every family x arm cell is 26/26 with cumulative_fidelity_after_k_cycles=True. The ledger doc paper-s7-experiment-status-checkpoint-v1.md (2026-09-13 RunPod section, result table) agrees."
+  },
+  "rgclean.caption.control.ci_hi": {
+   "value": "100",
+   "quantity": "Upper bound of the exact Clopper-Pearson 95% CI, confirmatory re-run, caption family, control arm",
+   "status": "verified",
+   "source": {
+    "file": "sources/rerun-runpod-statistics.json",
+    "format": "json",
+    "locator": "groups[family=caption].control_pass_rate_ci.ci_high",
+    "source_value": "1.0"
+   },
+   "note": "The stale bootstrap ci_high=1.0 in the JSON has the same value."
+  },
+  "rgclean.caption.control.ci_lo": {
+   "value": "86.8",
+   "quantity": "Lower bound of the exact Clopper-Pearson 95% CI, confirmatory re-run, caption family, control arm",
+   "status": "derived",
+   "source": {
+    "file": "../tools/graph_scorer.py",
+    "format": "text",
+    "locator": "_clopper_pearson_boundary_ci(26, 26): lower = (0.05/2)**(1/26), with n=26 from s7-final-statistics-runpod.json groups[0].control_n",
+    "source_value": "0.8677253955022458 (computed; rounds to 86.8)"
+   },
+   "note": "The stored JSON has the superseded bootstrap ci_low=1.0."
+  },
+  "rgclean.caption.control.n": {
+   "value": "26",
+   "quantity": "Number of chains/documents (n), confirmatory re-run, caption family, control arm",
+   "status": "verified",
+   "source": {
+    "file": "sources/rerun-runpod-statistics.json",
+    "format": "json",
+    "locator": "groups[family=caption].control_n",
+    "source_value": "26"
+   },
+   "note": "At L862C82 ('at n=26') the n refers to the caption comparison as a whole, which is 26 on both arms."
+  },
+  "rgclean.caption.control.rate": {
+   "value": "100",
+   "quantity": "Confirmatory dedicated-host re-run pass rate, caption family, control arm",
+   "status": "verified",
+   "source": {
+    "file": "sources/rerun-runpod-statistics.json",
+    "format": "json",
+    "locator": "groups[family=caption].control_pass_rate_ci.mean",
+    "source_value": "1.0"
+   },
+   "note": "L862C36 is the first number in 'closing to 100% vs 100% on the dedicated host at n=26'. The sentence orders control first ('previously 100% vs 7.7%'), so this is caption control. Raw chain results give 26/26."
+  },
+  "rgclean.caption.forward.max_s": {
+   "value": "237.8",
+   "quantity": "Maximum per-trial wall time (seconds) of caption-family forward-edit trials in the confirmatory dedicated-host re-run",
+   "status": "verified",
+   "source": {
+    "file": "D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7-clean-rerun-runpod\\runs\\paper-s7-clean-rerun\\validation\\composite_same_type__wordc_006_r-caption-control-k1\\chain-result.json",
+    "format": "text",
+    "locator": "pairs[0].forward.wall_time_seconds; this is the maximum over all 52 caption forward trials in the clean re-run",
+    "source_value": "237.7722086906433"
+   },
+   "note": "Rounds to 237.8. The maximum over caption-treatment forward trials alone is 31.198, so the overall maximum comes from the control arm. It matches the ledger doc paper-s7-experiment-status-checkpoint-v1.md, line 1467."
+  },
+  "rgclean.caption.forward.min_s": {
+   "value": "14.7",
+   "quantity": "Minimum per-trial wall time (seconds) of caption-family forward-edit trials in the confirmatory dedicated-host re-run",
+   "status": "verified",
+   "source": {
+    "file": "D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7-clean-rerun-runpod\\runs\\paper-s7-clean-rerun\\primary_holdout\\atomic__word_012_table_structure-caption-control-k1\\chain-result.json",
+    "format": "text",
+    "locator": "pairs[0].forward.wall_time_seconds; this is the minimum over all 52 caption forward trials (26 control + 26 treatment) in the clean re-run chain-result.json files",
+    "source_value": "14.684911489486694"
+   },
+   "note": "Rounds to 14.7. The minimum over caption-treatment forward trials alone is 15.936, so the overall minimum comes from the control arm. The ledger doc paper-s7-experiment-status-checkpoint-v1.md, line 1467, also states '14.7--237.8s'."
+  },
+  "rgclean.caption.p": {
+   "value": "1.0",
+   "quantity": "Paired control-vs-treatment p-value, confirmatory dedicated-host re-run, caption family",
+   "status": "verified",
+   "source": {
+    "file": "sources/rerun-runpod-statistics.json",
+    "format": "json",
+    "locator": "groups[family=caption].paired_control_vs_treatment_significance.p_value",
+    "source_value": "1.0"
+   },
+   "note": "L809C68 and L864C63 are both explicitly the caption dedicated-host p. Paired sign-flip permutation test with n_paired_documents=26 and observed_mean_diff=0.0."
+  },
+  "rgclean.caption.treatment.ci_hi": {
+   "value": "100",
+   "quantity": "Upper bound of the exact Clopper-Pearson 95% CI, confirmatory re-run, caption family, treatment arm",
+   "status": "verified",
+   "source": {
+    "file": "sources/rerun-runpod-statistics.json",
+    "format": "json",
+    "locator": "groups[family=caption].treatment_pass_rate_ci.ci_high",
+    "source_value": "1.0"
+   },
+   "note": "The stale bootstrap ci_high=1.0 in the JSON has the same value."
+  },
+  "rgclean.caption.treatment.ci_lo": {
+   "value": "86.8",
+   "quantity": "Lower bound of the exact Clopper-Pearson 95% CI, confirmatory re-run, caption family, treatment arm",
+   "status": "derived",
+   "source": {
+    "file": "../tools/graph_scorer.py",
+    "format": "text",
+    "locator": "_clopper_pearson_boundary_ci(26, 26): lower = (0.05/2)**(1/26), with n=26 from s7-final-statistics-runpod.json groups[0].treatment_n",
+    "source_value": "0.8677253955022458 (computed; rounds to 86.8)"
+   },
+   "note": "The stored JSON has the superseded bootstrap ci_low=1.0."
+  },
+  "rgclean.caption.treatment.n": {
+   "value": "26",
+   "quantity": "Number of chains/documents (n), confirmatory re-run, caption family, treatment arm",
+   "status": "verified",
+   "source": {
+    "file": "sources/rerun-runpod-statistics.json",
+    "format": "json",
+    "locator": "groups[family=caption].treatment_n",
+    "source_value": "26"
+   }
+  },
+  "rgclean.caption.treatment.rate": {
+   "value": "100",
+   "quantity": "Confirmatory dedicated-host re-run pass rate, caption family, treatment arm",
+   "status": "verified",
+   "source": {
+    "file": "sources/rerun-runpod-statistics.json",
+    "format": "json",
+    "locator": "groups[family=caption].treatment_pass_rate_ci.mean",
+    "source_value": "1.0"
+   },
+   "note": "L780C66 ('caption rises from 7.7% to 100%') is treatment, since 7.7% was the original-host treatment rate. L809C43 is 'caption's treatment reaches the identical 100%'. L862C47 is the second number in '100% vs 100%', which is treatment. Raw chain results give 26/26."
+  },
+  "rgclean.chains.n": {
+   "value": "156",
+   "quantity": "Total chains in the dedicated-host confirmatory re-run (3 families x 2 arms x 26 documents)",
+   "status": "verified",
+   "source": {
+    "file": "sources/rerun-runpod-statistics.json",
+    "format": "json",
+    "locator": "chain_count",
+    "source_value": "156"
+   },
+   "note": "L765C51 is correct. There are 156 raw chain-result.json files under primary_holdout (84 chains) and validation (72 chains), all status=completed with cumulative_fidelity_after_k_cycles=True. The counts 84 and 72 match s7_clean_rerun.log in the parent paper-s7-clean-rerun-runpod dir."
+  },
+  "rgclean.equation.control.ci_hi": {
+   "value": "100",
+   "quantity": "Upper bound of the exact Clopper-Pearson 95% CI on the equation control-arm pass rate, confirmatory dedicated-host re-run (Table tab:render-gate-clean)",
+   "status": "verified",
+   "source": {
+    "file": "sources/rerun-runpod-statistics.json",
+    "format": "json",
+    "locator": "groups[family=equation].control_pass_rate_ci.ci_high",
+    "source_value": "1.0"
+   },
+   "note": "This is the Clopper-Pearson upper bound for an all-pass result. The stale bootstrap ci_high=1.0 in s7-final-statistics-runpod.json groups[1].control_pass_rate_ci happens to have the same value, but it comes from a different method."
+  },
+  "rgclean.equation.control.ci_lo": {
+   "value": "86.8",
+   "quantity": "Lower bound of the exact Clopper-Pearson 95% CI on the equation control-arm pass rate, confirmatory dedicated-host re-run (Table tab:render-gate-clean)",
+   "status": "derived",
+   "source": {
+    "file": "../tools/graph_scorer.py",
+    "format": "text",
+    "locator": "_clopper_pearson_boundary_ci(26, 26): lower = (0.05/2)**(1/26), with n=26 taken from s7-final-statistics-runpod.json groups[1].control_n",
+    "source_value": "0.8677253955022458 (computed; rounds to 86.8)"
+   },
+   "note": "The stored stats JSON still has the old degenerate percentile-bootstrap CI (control_pass_rate_ci.ci_low=1.0, ci_high=1.0). It was never regenerated after commit aa40e84 (2026-09-18) added the exact Clopper-Pearson fallback. That commit's message states 26/26 -> [86.8, 100]. No machine-readable file stores 86.8/0.8677 for this run. The JSON's 1.0 is a different method (bootstrap) and is superseded, so it is not a mismatch."
+  },
+  "rgclean.equation.control.n": {
+   "value": "26",
+   "quantity": "Number of control-arm equation chains in the confirmatory dedicated-host re-run (Table tab:render-gate-clean)",
+   "status": "verified",
+   "source": {
+    "file": "sources/rerun-runpod-statistics.json",
+    "format": "json",
+    "locator": "groups[family=equation].control_n",
+    "source_value": "26"
+   },
+   "note": "At L820C79 ('n=26') one token covers both equation and caption, so it applies to either family. There are 26 raw equation-control chain-result.json files with 26 distinct doc_labels, the same doc set as treatment."
+  },
+  "rgclean.equation.control.rate": {
+   "value": "100",
+   "quantity": "Equation-insertion pass rate, control arm, confirmatory dedicated-host re-run (Table tab:render-gate-clean)",
+   "status": "verified",
+   "source": {
+    "file": "sources/rerun-runpod-statistics.json",
+    "format": "json",
+    "locator": "groups[family=equation].control_pass_rate_ci.mean",
+    "source_value": "1.0"
+   },
+   "note": "L753C35 is the table cell. At L820C63 the text says 'equation and caption, both 100%/100%', so one token covers both families; it is correctly the first (control) of the pair. Raw chain results give 26/26 pass."
+  },
+  "rgclean.equation.p": {
+   "value": "1.0",
+   "quantity": "Paired p-value for equation control vs treatment, confirmatory dedicated-host re-run (Table tab:render-gate-clean)",
+   "status": "verified",
+   "source": {
+    "file": "sources/rerun-runpod-statistics.json",
+    "format": "json",
+    "locator": "groups[family=equation].paired_control_vs_treatment_significance.p_value",
+    "source_value": "1.0"
+   },
+   "note": "Paired sign-flip permutation test with n_paired_documents=26 and observed_mean_diff=0.0. At L820C87 the p=1.0 is shared by equation and caption."
+  },
+  "rgclean.equation.treatment.ci_hi": {
+   "value": "100",
+   "quantity": "Upper bound of the exact Clopper-Pearson 95% CI on the equation treatment-arm pass rate, confirmatory dedicated-host re-run (Table tab:render-gate-clean)",
+   "status": "verified",
+   "source": {
+    "file": "sources/rerun-runpod-statistics.json",
+    "format": "json",
+    "locator": "groups[family=equation].treatment_pass_rate_ci.ci_high",
+    "source_value": "1.0"
+   },
+   "note": "The stale bootstrap ci_high=1.0 in the stats JSON has the same value but comes from a different method."
+  },
+  "rgclean.equation.treatment.ci_lo": {
+   "value": "86.8",
+   "quantity": "Lower bound of the exact Clopper-Pearson 95% CI on the equation treatment-arm pass rate, confirmatory dedicated-host re-run (Table tab:render-gate-clean)",
+   "status": "derived",
+   "source": {
+    "file": "../tools/graph_scorer.py",
+    "format": "text",
+    "locator": "_clopper_pearson_boundary_ci(26, 26): lower = (0.05/2)**(1/26), with n=26 from s7-final-statistics-runpod.json groups[1].treatment_n",
+    "source_value": "0.8677253955022458 (computed; rounds to 86.8)"
+   },
+   "note": "The stored JSON has the superseded bootstrap ci_low=1.0 from before the CP fallback in commit aa40e84. No file stores 86.8 for this run."
+  },
+  "rgclean.equation.treatment.n": {
+   "value": "26",
+   "quantity": "Number of treatment-arm equation chains in the confirmatory dedicated-host re-run (Table tab:render-gate-clean)",
+   "status": "verified",
+   "source": {
+    "file": "sources/rerun-runpod-statistics.json",
+    "format": "json",
+    "locator": "groups[family=equation].treatment_n",
+    "source_value": "26"
+   }
+  },
+  "rgclean.equation.treatment.rate": {
+   "value": "100",
+   "quantity": "Equation-insertion pass rate, treatment arm, confirmatory dedicated-host re-run (Table tab:render-gate-clean)",
+   "status": "verified",
+   "source": {
+    "file": "sources/rerun-runpod-statistics.json",
+    "format": "json",
+    "locator": "groups[family=equation].treatment_pass_rate_ci.mean",
+    "source_value": "1.0"
+   },
+   "note": "L780C31 says 'Equation rises from 46.2% to 100%'; 46.2% was the original-host treatment rate, so this token is the treatment arm, as keyed. L820C69 is the second of 'both 100%/100%', which is treatment. Raw chain results give 26/26."
+  },
+  "rgclean.table.control.ci_hi": {
+   "value": "100",
+   "quantity": "Upper bound of the exact Clopper-Pearson 95% CI, confirmatory re-run, table-structural family, control arm",
+   "status": "verified",
+   "source": {
+    "file": "sources/rerun-runpod-statistics.json",
+    "format": "json",
+    "locator": "groups[family=table_structural].control_pass_rate_ci.ci_high",
+    "source_value": "1.0"
+   },
+   "note": "The stale bootstrap ci_high=1.0 in the JSON has the same value."
+  },
+  "rgclean.table.control.ci_lo": {
+   "value": "86.8",
+   "quantity": "Lower bound of the exact Clopper-Pearson 95% CI, confirmatory re-run, table-structural family, control arm",
+   "status": "derived",
+   "source": {
+    "file": "../tools/graph_scorer.py",
+    "format": "text",
+    "locator": "_clopper_pearson_boundary_ci(26, 26): lower = (0.05/2)**(1/26), with n=26 from s7-final-statistics-runpod.json groups[2].control_n",
+    "source_value": "0.8677253955022458 (computed; rounds to 86.8)"
+   },
+   "note": "The stored JSON has the superseded bootstrap ci_low=1.0."
+  },
+  "rgclean.table.control.n": {
+   "value": "26",
+   "quantity": "Number of chains/documents (n), confirmatory re-run, table-structural family, control arm",
+   "status": "verified",
+   "source": {
+    "file": "sources/rerun-runpod-statistics.json",
+    "format": "json",
+    "locator": "groups[family=table_structural].control_n",
+    "source_value": "26"
+   }
+  },
+  "rgclean.table.control.rate": {
+   "value": "100",
+   "quantity": "Confirmatory dedicated-host re-run (Table tab:render-gate-clean) pass rate, table-structural family, control arm",
+   "status": "verified",
+   "source": {
+    "file": "sources/rerun-runpod-statistics.json",
+    "format": "json",
+    "locator": "groups[family=table_structural].control_pass_rate_ci.mean",
+    "source_value": "1.0"
+   },
+   "note": "Raw chain results give 26/26."
+  },
+  "rgclean.table.p": {
+   "value": "1.0",
+   "quantity": "Paired control-vs-treatment p-value, confirmatory dedicated-host re-run, table-structural family",
+   "status": "verified",
+   "source": {
+    "file": "sources/rerun-runpod-statistics.json",
+    "format": "json",
+    "locator": "groups[family=table_structural].paired_control_vs_treatment_significance.p_value",
+    "source_value": "1.0"
+   },
+   "note": "Paired sign-flip permutation test with n_paired_documents=26."
+  },
+  "rgclean.table.treatment.ci_hi": {
+   "value": "100",
+   "quantity": "Upper bound of the exact Clopper-Pearson 95% CI, confirmatory re-run, table-structural family, treatment arm",
+   "status": "verified",
+   "source": {
+    "file": "sources/rerun-runpod-statistics.json",
+    "format": "json",
+    "locator": "groups[family=table_structural].treatment_pass_rate_ci.ci_high",
+    "source_value": "1.0"
+   },
+   "note": "The stale bootstrap ci_high=1.0 in the JSON has the same value."
+  },
+  "rgclean.table.treatment.ci_lo": {
+   "value": "86.8",
+   "quantity": "Lower bound of the exact Clopper-Pearson 95% CI, confirmatory re-run, table-structural family, treatment arm",
+   "status": "derived",
+   "source": {
+    "file": "../tools/graph_scorer.py",
+    "format": "text",
+    "locator": "_clopper_pearson_boundary_ci(26, 26): lower = (0.05/2)**(1/26), with n=26 from s7-final-statistics-runpod.json groups[2].treatment_n",
+    "source_value": "0.8677253955022458 (computed; rounds to 86.8)"
+   },
+   "note": "The stored JSON has the superseded bootstrap ci_low=1.0."
+  },
+  "rgclean.table.treatment.n": {
+   "value": "26",
+   "quantity": "Number of chains/documents (n), confirmatory re-run, table-structural family, treatment arm",
+   "status": "verified",
+   "source": {
+    "file": "sources/rerun-runpod-statistics.json",
+    "format": "json",
+    "locator": "groups[family=table_structural].treatment_n",
+    "source_value": "26"
+   }
+  },
+  "rgclean.table.treatment.rate": {
+   "value": "100",
+   "quantity": "Confirmatory dedicated-host re-run pass rate, table-structural family, treatment arm",
+   "status": "verified",
+   "source": {
+    "file": "sources/rerun-runpod-statistics.json",
+    "format": "json",
+    "locator": "groups[family=table_structural].treatment_pass_rate_ci.mean",
+    "source_value": "1.0"
+   },
+   "note": "L781C74 says 'table-structural ... at 96.2%, also reaches 100%'; 96.2% was the original-host treatment rate, so this token is the treatment arm, as keyed. Raw chain results give 26/26."
+  },
+  "single.bib.control.ci_hi": {
+   "value": "100",
+   "quantity": "K=1 bibliography-entry pass rate 95% CI upper bound (Clopper-Pearson), control arm",
+   "status": "verified",
+   "source": {
+    "file": "sources/single-edit-k1-fixrerun-statistics.json",
+    "format": "json",
+    "locator": "groups[family=bibliography].control_pass_rate_ci.ci_high",
+    "source_value": "1.0"
+   },
+   "note": "The stored value comes from the old percentile bootstrap. The Clopper-Pearson upper bound at 26/26 is also 1.0, so both methods agree."
+  },
+  "single.bib.control.ci_lo": {
+   "value": "86.8",
+   "quantity": "K=1 bibliography-entry pass rate 95% CI lower bound (Clopper-Pearson), control arm",
+   "status": "derived",
+   "source": {
+    "file": "../tools/graph_scorer.py",
+    "format": "text",
+    "locator": "_clopper_pearson_boundary_ci(26,26): (0.05/2)**(1/26) = 0.8677253955022458 -> 86.8; reproduced by compute_statistics on the corrected v1 K=1 manifests (method=clopper_pearson_exact_fallback)",
+    "source_value": "0.8677253955022458"
+   },
+   "note": "The stored k1-fixrerun-statistics-20260831T145852Z.json has control_pass_rate_ci.ci_low=1.0, a degenerate percentile bootstrap from before the Clopper-Pearson fallback existed. The paper's dagger says this interval is Clopper-Pearson, so the stored value is a superseded method, not a data mismatch."
+  },
+  "single.bib.control.n": {
+   "value": "26",
+   "quantity": "K=1 bibliography-entry sample size n, control arm",
+   "status": "verified",
+   "source": {
+    "file": "sources/single-edit-k1-fixrerun-statistics.json",
+    "format": "json",
+    "locator": "groups[family=bibliography].control_n",
+    "source_value": "26"
+   },
+   "note": "Recomputing from the corrected manifests also gives 26."
+  },
+  "single.bib.control.rate": {
+   "value": "100",
+   "quantity": "K=1 bibliography-entry pass rate, control arm",
+   "status": "verified",
+   "source": {
+    "file": "sources/single-edit-k1-fixrerun-statistics.json",
+    "format": "json",
+    "locator": "groups[family=bibliography,k_pairs=1].control_pass_rate_ci.mean",
+    "source_value": "1.0"
+   },
+   "note": "L507 is the table cell. L533C38 is the prose '100%/100% parity', which covers both bibliography and citation (control/treatment); the value is the same for both families, so the assignment is acceptable. The control arm is not affected by the 2026-09-06 flake correction; recomputing from the corrected manifest also gives 1.0."
+  },
+  "single.bib.p": {
+   "value": "1.0",
+   "quantity": "K=1 bibliography-entry paired p-value between control and treatment arms",
+   "status": "verified",
+   "source": {
+    "file": "sources/single-edit-k1-fixrerun-statistics.json",
+    "format": "json",
+    "locator": "groups[family=bibliography].paired_control_vs_treatment_significance.p_value",
+    "source_value": "1.0"
+   },
+   "note": "The stored JSON predates the defect-11 flake correction (observed_mean_diff 0.0385, 25/26 treatment). The corrected recomputation (validation-k1-fixrerun-...-bib-flake-corrected-20260906.json + holdout) gives p=1.0 with diff 0.0, so the printed 1.0 holds under both."
+  },
+  "single.bib.treatment.ci_hi": {
+   "value": "100",
+   "quantity": "K=1 bibliography-entry pass rate 95% CI upper bound (Clopper-Pearson), treatment arm",
+   "status": "verified",
+   "source": {
+    "file": "sources/single-edit-k1-fixrerun-statistics.json",
+    "format": "json",
+    "locator": "groups[family=bibliography,k_pairs=1].treatment_pass_rate_ci.ci_high",
+    "source_value": "1.0"
+   },
+   "note": "The stale JSON's ci_high is also 1.0, but it comes from a bootstrap over the superseded 25/26 data."
+  },
+  "single.bib.treatment.ci_lo": {
+   "value": "86.8",
+   "quantity": "K=1 bibliography-entry pass rate 95% CI lower bound (Clopper-Pearson), treatment arm",
+   "status": "derived",
+   "source": {
+    "file": "../tools/graph_scorer.py",
+    "format": "text",
+    "locator": "_clopper_pearson_boundary_ci(26,26) = 0.025**(1/26) = 0.8677253955022458 -> 86.8; reproduced from the corrected v1 K=1 manifests",
+    "source_value": "0.8677253955022458"
+   },
+   "note": "The stored stale JSON has ci_low 0.8846153846153846, a bootstrap over the superseded 25/26 data."
+  },
+  "single.bib.treatment.n": {
+   "value": "26",
+   "quantity": "K=1 bibliography-entry sample size n, treatment arm",
+   "status": "verified",
+   "source": {
+    "file": "sources/single-edit-k1-fixrerun-statistics.json",
+    "format": "json",
+    "locator": "groups[family=bibliography].treatment_n",
+    "source_value": "26"
+   },
+   "note": "The flake correction replaced the chain's outcome without changing n. The corrected recomputation also gives 26."
+  },
+  "single.bib.treatment.rate": {
+   "value": "100",
+   "quantity": "K=1 bibliography-entry pass rate, treatment arm",
+   "status": "derived",
+   "source": {
+    "file": "D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7\\validation-k1-fixrerun-20260831T145852Z-bib-flake-corrected-20260906.json",
+    "format": "text",
+    "locator": "compute_s7_statistics.compute_statistics(load_chains([paper-s7/validation-k1-fixrerun-20260831T145852Z-bib-flake-corrected-20260906.json, paper-s7/holdout-k1-fixrerun-20260831T145852Z/slice-manifest.json])) -> groups[bibliography,k=1].treatment_pass_rate_ci.mean (26/26)",
+    "source_value": "1.0"
+   },
+   "note": "No stored statistics JSON holds this corrected value. The stored k1-fixrerun-statistics-20260831T145852Z.json has treatment mean 0.9615384615384616 (25/26) and is superseded. Its one failing chain (composite_same_type__wordc_006_rewrite_letter_and_match_body, status completed, outcome 0.0 in the uncorrected validation slice-manifest.json) was replaced by the 2026-09-06 rerun in runs/paper-s7-bibliography-flake-rerun (defect 11). docs/paper-s8-final-evidence-v1.md section 2.1 states 100%. L533C44 is the shared bib/cite prose '100%/100%'."
+  },
+  "single.cite.control.ci_hi": {
+   "value": "100",
+   "quantity": "K=1 inline-citation pass rate 95% CI upper bound (Clopper-Pearson), control arm",
+   "status": "verified",
+   "source": {
+    "file": "sources/single-edit-k1-fixrerun-statistics.json",
+    "format": "json",
+    "locator": "groups[family=citation].control_pass_rate_ci.ci_high",
+    "source_value": "1.0"
+   },
+   "note": "The Clopper-Pearson upper bound at 26/26 is also 1.0."
+  },
+  "single.cite.control.ci_lo": {
+   "value": "86.8",
+   "quantity": "K=1 inline-citation pass rate 95% CI lower bound (Clopper-Pearson), control arm",
+   "status": "derived",
+   "source": {
+    "file": "../tools/graph_scorer.py",
+    "format": "text",
+    "locator": "_clopper_pearson_boundary_ci(26,26) = 0.025**(1/26) = 0.8677253955022458 -> 86.8",
+    "source_value": "0.8677253955022458"
+   },
+   "note": "The stored k1-fixrerun JSON has ci_low 1.0, a degenerate bootstrap from before the Clopper-Pearson fallback (superseded method)."
+  },
+  "single.cite.control.n": {
+   "value": "26",
+   "quantity": "K=1 inline-citation sample size n, control arm",
+   "status": "verified",
+   "source": {
+    "file": "sources/single-edit-k1-fixrerun-statistics.json",
+    "format": "json",
+    "locator": "groups[family=citation].control_n",
+    "source_value": "26"
+   }
+  },
+  "single.cite.control.rate": {
+   "value": "100",
+   "quantity": "K=1 inline-citation pass rate, control arm",
+   "status": "verified",
+   "source": {
+    "file": "sources/single-edit-k1-fixrerun-statistics.json",
+    "format": "json",
+    "locator": "groups[family=citation].control_pass_rate_ci.mean",
+    "source_value": "1.0"
+   },
+   "note": "Recomputing from the corrected manifests also gives 1.0."
+  },
+  "single.cite.p": {
+   "value": "1.0",
+   "quantity": "K=1 inline-citation paired p-value between control and treatment arms",
+   "status": "verified",
+   "source": {
+    "file": "sources/single-edit-k1-fixrerun-statistics.json",
+    "format": "json",
+    "locator": "groups[family=citation].paired_control_vs_treatment_significance.p_value",
+    "source_value": "1.0"
+   },
+   "note": "The stored JSON is stale: paired_n 26, diff 0.0385, with a blocked chain scored as a failure. Recomputing with the current compute_s7_statistics (b286c1b blocked exclusion) gives paired_n 25, diff 0.0, p 1.0. The printed value holds under both."
+  },
+  "single.cite.treatment.ci_hi": {
+   "value": "100",
+   "quantity": "K=1 inline-citation pass rate 95% CI upper bound (Clopper-Pearson), treatment arm",
+   "status": "verified",
+   "source": {
+    "file": "sources/single-edit-k1-fixrerun-statistics.json",
+    "format": "json",
+    "locator": "groups[family=citation,k_pairs=1].treatment_pass_rate_ci.ci_high",
+    "source_value": "1.0"
+   },
+   "note": "The stale JSON also shows 1.0, but from superseded data."
+  },
+  "single.cite.treatment.ci_lo": {
+   "value": "86.3",
+   "quantity": "K=1 inline-citation pass rate 95% CI lower bound (Clopper-Pearson), treatment arm",
+   "status": "derived",
+   "source": {
+    "file": "../tools/graph_scorer.py",
+    "format": "text",
+    "locator": "_clopper_pearson_boundary_ci(25,25) = 0.025**(1/25) = 0.8628148284692875 -> 86.3; reproduced from the v1 K=1 manifests",
+    "source_value": "0.8628148284692875"
+   },
+   "note": "The stale JSON has ci_low 0.8846153846153846, a bootstrap over the superseded n=26 data."
+  },
+  "single.cite.treatment.n": {
+   "value": "25",
+   "quantity": "K=1 inline-citation sample size n, treatment arm",
+   "status": "derived",
+   "source": {
+    "file": "D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7\\holdout-k1-fixrerun-20260831T145852Z\\slice-manifest.json",
+    "format": "text",
+    "locator": "compute_s7_statistics.compute_statistics over v1 K=1 manifests -> groups[citation,k=1].treatment_n (not_applicable_count=1 from the blocked chain)",
+    "source_value": "25"
+   },
+   "note": "Both occurrences (L511 table, L1250 Note a) are the citation treatment n. The stored k1-fixrerun-statistics-20260831T145852Z.json has treatment_n=26, which is stale and superseded (pre-b286c1b). docs/paper-s8-final-evidence-v1.md section 2.2 explicitly corrects it to N=25."
+  },
+  "single.cite.treatment.rate": {
+   "value": "100",
+   "quantity": "K=1 inline-citation pass rate, treatment arm",
+   "status": "derived",
+   "source": {
+    "file": "D:\\MeridianData\\ooxml-graph-paper\\runs\\paper-s7\\holdout-k1-fixrerun-20260831T145852Z\\slice-manifest.json",
+    "format": "text",
+    "locator": "compute_s7_statistics.compute_statistics over v1 K=1 manifests (validation bib-flake-corrected + holdout fixrerun) -> groups[citation,k=1].treatment_pass_rate_ci.mean (25/25)",
+    "source_value": "1.0"
+   },
+   "note": "The stored k1-fixrerun-statistics JSON has treatment mean 0.9615384615384616 with n=26 and is superseded. It was generated before _chain_outcome excluded 'blocked' chains. The excluded chain is composite_same_type__wordc_007_delete_blank_page_and_generat..., status blocked, in the holdout manifest. docs/paper-s8-final-evidence-v1.md section 2.2 (Corrected 2026-09-06, defect 10) states 100%, N=25."
+  },
+  "single.secreorder_comb.control.ci_hi": {
+   "value": "92.7",
+   "quantity": "K=1 section-reorder (combined corpus) pass rate 95% bootstrap CI upper bound, control arm",
+   "status": "verified",
+   "source": {
+    "file": "sources/secreorder-combined-k1-statistics.json",
+    "format": "json",
+    "locator": "groups[family=section_reorder,k_pairs=1].control_pass_rate_ci.ci_high",
+    "source_value": "0.9272727272727272"
+   },
+   "note": "The superseded JSON has 0.8947368421052632. The docs state 92.7%."
+  },
+  "single.secreorder_comb.control.ci_lo": {
+   "value": "74.5",
+   "quantity": "K=1 section-reorder (combined corpus) pass rate 95% bootstrap CI lower bound, control arm",
+   "status": "verified",
+   "source": {
+    "file": "sources/secreorder-combined-k1-statistics.json",
+    "format": "json",
+    "locator": "groups[family=section_reorder,k_pairs=1].control_pass_rate_ci.ci_low",
+    "source_value": "0.7454545454545455"
+   },
+   "note": "The superseded combined corrected-20260904 JSON has 0.6842105263157895. The docs state 74.5%."
+  },
+  "single.secreorder_comb.control.n": {
+   "value": "55",
+   "quantity": "Analyzed n for combined-corpus section reorder, control arm after one disclosed exclusion (Table tab:single-edit; same n in Table tab:k4)",
+   "status": "verified",
+   "source": {
+    "file": "sources/secreorder-combined-k1-statistics.json",
+    "format": "json",
+    "locator": "groups[family=section_reorder,k_pairs=1].control_n",
+    "source_value": "55"
+   },
+   "note": "Checked all three occurrences (L203, L516, L1254 Note b); all are the combined control n. The 1.7MB document's control chain has status 'blocked' and is excluded by _chain_outcome, so control has 55 and treatment 56. The stored combined-v1-v2-statistics-corrected-20260904.json has control_n=57 and is superseded. The follow-up result doc and paper-s8-final-evidence-v1.md section 2.3 both state 55."
+  },
+  "single.secreorder_comb.control.rate": {
+   "value": "83.6",
+   "quantity": "K=1 section-reorder pass rate on the combined (original + follow-up) corpus, control arm",
+   "status": "verified",
+   "source": {
+    "file": "sources/secreorder-combined-k1-statistics.json",
+    "format": "json",
+    "locator": "groups[family=section_reorder,k_pairs=1].control_pass_rate_ci.mean",
+    "source_value": "0.8363636363636363"
+   },
+   "note": "46/55. No stored statistics JSON holds this value. The superseded combined-v1-v2-statistics-corrected-20260904.json has control mean 0.7894736842105263 with n=57. docs/paper-s7-section-reorder-followup-result-v1.md, 'Result (corrected, second pass)', and paper-s8-final-evidence-v1.md section 2.3 state 83.6%."
+  },
+  "single.secreorder_comb.p": {
+   "value": "0.271",
+   "quantity": "K=1 section-reorder (combined corpus) paired p-value between control and treatment arms",
+   "status": "verified",
+   "source": {
+    "file": "sources/secreorder-combined-k1-statistics.json",
+    "format": "json",
+    "locator": "groups[family=section_reorder,k_pairs=1].paired_control_vs_treatment_significance.p_value",
+    "source_value": "0.2705"
+   },
+   "note": "Both occurrences (L516 table, L538 prose) are this p. 0.2705 rounds to 0.271, and Python float formatting also gives 0.271. The superseded combined-v1-v2-statistics-corrected-20260904.json has p 0.3885, and the 20260831 version has 0.5665. The docs state p = 0.2705."
+  },
+  "single.secreorder_comb.treatment.ci_hi": {
+   "value": "98.2",
+   "quantity": "K=1 section-reorder (combined corpus) pass rate 95% bootstrap CI upper bound, treatment arm",
+   "status": "verified",
+   "source": {
+    "file": "sources/secreorder-combined-k1-statistics.json",
+    "format": "json",
+    "locator": "groups[family=section_reorder,k_pairs=1].treatment_pass_rate_ci.ci_high",
+    "source_value": "0.9821428571428571"
+   },
+   "note": "The superseded JSON has 0.9473684210526315. The docs state 98.2%. I did the recomputation read-only by importing tools/compute_s7_statistics.py functions from a scratch script outside the repo (no files written to the repo or run dirs). No archives were extracted."
+  },
+  "single.secreorder_comb.treatment.ci_lo": {
+   "value": "85.7",
+   "quantity": "K=1 section-reorder (combined corpus) pass rate 95% bootstrap CI lower bound, treatment arm",
+   "status": "verified",
+   "source": {
+    "file": "sources/secreorder-combined-k1-statistics.json",
+    "format": "json",
+    "locator": "groups[family=section_reorder,k_pairs=1].treatment_pass_rate_ci.ci_low",
+    "source_value": "0.8571428571428571"
+   },
+   "note": "The superseded JSON has 0.7543859649122807. The docs state 85.7%."
+  },
+  "single.secreorder_comb.treatment.n": {
+   "value": "56",
+   "quantity": "Analyzed n for combined-corpus section reorder, treatment arm (Table tab:single-edit; same n in Table tab:k4)",
+   "status": "verified",
+   "source": {
+    "file": "sources/secreorder-combined-k1-statistics.json",
+    "format": "json",
+    "locator": "groups[family=section_reorder,k_pairs=1].treatment_n",
+    "source_value": "56"
+   },
+   "note": "Checked all three occurrences (L203 methods text, L517 table n cell, L1255 Note b); all are the combined-corpus treatment n. No stored statistics JSON holds 56. I reproduced it read-only from the corrected manifests with the current compute_s7_statistics code (11 v1 + 45 v2). The stored combined-v1-v2-statistics-corrected-20260904.json (treatment_n=57) and combined-v1-v2-statistics-20260831T172118Z.json (59) are superseded: both predate the blank-heading and blocked-chain fixes. docs/paper-s7-section-reorder-followup-result-v1.md, 'Result (corrected, second pass)', and docs/paper-s8-final-evidence-v1.md section 2.3 both state N=56."
+  },
+  "single.secreorder_comb.treatment.rate": {
+   "value": "92.9",
+   "quantity": "K=1 section-reorder pass rate on the combined (original + follow-up) corpus, treatment arm",
+   "status": "verified",
+   "source": {
+    "file": "sources/secreorder-combined-k1-statistics.json",
+    "format": "json",
+    "locator": "groups[family=section_reorder,k_pairs=1].treatment_pass_rate_ci.mean",
+    "source_value": "0.9285714285714286"
+   },
+   "note": "52/56. The superseded JSON has 0.8596491228070176 with n=57. The docs state 92.9%."
+  },
+  "single.secreorder_orig.control.ci_hi": {
+   "value": "100",
+   "quantity": "K=1 section-reorder (original corpus) pass rate 95% bootstrap CI upper bound, control arm",
+   "status": "verified",
+   "source": {
+    "file": "sources/single-edit-k1-fixrerun-statistics.json",
+    "format": "json",
+    "locator": "groups[family=section_reorder].control_pass_rate_ci.ci_high",
+    "source_value": "1.0"
+   }
+  },
+  "single.secreorder_orig.control.ci_lo": {
+   "value": "45.5",
+   "quantity": "K=1 section-reorder (original corpus) pass rate 95% bootstrap CI lower bound, control arm",
+   "status": "verified",
+   "source": {
+    "file": "sources/single-edit-k1-fixrerun-statistics.json",
+    "format": "json",
+    "locator": "groups[family=section_reorder].control_pass_rate_ci.ci_low",
+    "source_value": "0.45454545454545453"
+   },
+   "note": "Percentile bootstrap; the current code reproduces it."
+  },
+  "single.secreorder_orig.control.n": {
+   "value": "11",
+   "quantity": "K=1 section-reorder (original corpus) sample size n, control arm",
+   "status": "verified",
+   "source": {
+    "file": "sources/single-edit-k1-fixrerun-statistics.json",
+    "format": "json",
+    "locator": "groups[family=section_reorder].control_n",
+    "source_value": "11"
+   }
+  },
+  "single.secreorder_orig.control.rate": {
+   "value": "72.7",
+   "quantity": "K=1 section-reorder pass rate on the original corpus, control arm",
+   "status": "verified",
+   "source": {
+    "file": "sources/single-edit-k1-fixrerun-statistics.json",
+    "format": "json",
+    "locator": "groups[family=section_reorder,k_pairs=1].control_pass_rate_ci.mean",
+    "source_value": "0.7272727272727273"
+   },
+   "note": "8/11. Recomputing from the manifests gives the same value."
+  },
+  "single.secreorder_orig.p": {
+   "value": "0.240",
+   "quantity": "K=1 section-reorder (original corpus) paired p-value between control and treatment arms",
+   "status": "verified",
+   "source": {
+    "file": "sources/single-edit-k1-fixrerun-statistics.json",
+    "format": "json",
+    "locator": "groups[family=section_reorder].paired_control_vs_treatment_significance.p_value",
+    "source_value": "0.2395"
+   },
+   "note": "Both occurrences (L513 table, L537 prose) are this p. As a decimal, 0.2395 rounds to 0.240 whether rounding half-up or half-even (479/2000 permutations). Caution for automated checks: Python's '%.3f' % 0.2395 and round(0.2395,3) give '0.239' because of binary float representation. A --verify-sources check using float formatting would falsely flag this value."
+  },
+  "single.secreorder_orig.treatment.ci_hi": {
+   "value": "100",
+   "quantity": "K=1 section-reorder (original corpus) pass rate 95% CI upper bound (Clopper-Pearson), treatment arm",
+   "status": "verified",
+   "source": {
+    "file": "sources/single-edit-k1-fixrerun-statistics.json",
+    "format": "json",
+    "locator": "groups[family=section_reorder].treatment_pass_rate_ci.ci_high",
+    "source_value": "1.0"
+   },
+   "note": "The Clopper-Pearson upper bound at 11/11 is also 1.0."
+  },
+  "single.secreorder_orig.treatment.ci_lo": {
+   "value": "71.5",
+   "quantity": "K=1 section-reorder (original corpus) pass rate 95% CI lower bound (Clopper-Pearson), treatment arm",
+   "status": "derived",
+   "source": {
+    "file": "../tools/graph_scorer.py",
+    "format": "text",
+    "locator": "_clopper_pearson_boundary_ci(11,11) = 0.025**(1/11) = 0.7150858470818455 -> 71.5; reproduced by compute_statistics on the v1 K=1 manifests",
+    "source_value": "0.7150858470818455"
+   },
+   "note": "The stored k1-fixrerun JSON has treatment ci_low 1.0 (degenerate bootstrap, superseded method). docs/paper-s8-final-evidence-v1.md section 2.3 still shows the old [100%, 100%]."
+  },
+  "single.secreorder_orig.treatment.n": {
+   "value": "11",
+   "quantity": "K=1 section-reorder (original corpus) sample size n, treatment arm",
+   "status": "verified",
+   "source": {
+    "file": "sources/single-edit-k1-fixrerun-statistics.json",
+    "format": "json",
+    "locator": "groups[family=section_reorder].treatment_n",
+    "source_value": "11"
+   }
+  },
+  "single.secreorder_orig.treatment.rate": {
+   "value": "100",
+   "quantity": "K=1 section-reorder pass rate on the original corpus, treatment arm",
+   "status": "verified",
+   "source": {
+    "file": "sources/single-edit-k1-fixrerun-statistics.json",
+    "format": "json",
+    "locator": "groups[family=section_reorder].treatment_pass_rate_ci.mean",
+    "source_value": "1.0"
+   },
+   "note": "11/11."
+  },
+  "timing.caption.mean_s": {
+   "value": "8.9",
+   "quantity": "Mean render-verification time in seconds for completed caption outputs in the controlled sequential timing test",
+   "status": "doc_only",
+   "source": {
+    "file": "../docs/paper-s7-experiment-status-checkpoint-v1.md",
+    "format": "text",
+    "locator": "Session transcript line 32218: stdout of time_renders.py (task bjv9tsxvl), summary row 'caption'. Per-call rows: 7.41s (composite_same_type__wordc_005), 10.47s (word_011_theme_transfer). Also stated in docs\\paper-s7-experiment-status-checkpoint-v1.md line 1143 ('caption 8.94s (min 7.4s, max 10.5s across all 8 calls)').",
+    "source_value": "caption              n=2  mean=  8.94s  min=  7.41s  max= 10.47s"
+   },
+   "note": "The assignment at L737C70 is correct (caption mean in the controlled sequential timing test). The mean is (7.41+10.47)/2 = 8.94, which rounds to 8.9, matching the paper. The caption sample is only n=2 (the 'all that existed at the time' caveat in the checkpoint doc); the paper does not state n. As with the other keys, the original render_timing_results.json and task output file no longer exist; the raw stdout survives only in the session transcript."
+  },
+  "timing.equation.mean_s": {
+   "value": "8.0",
+   "quantity": "Mean render-verification time in seconds for completed equation outputs in the controlled sequential timing test",
+   "status": "doc_only",
+   "source": {
+    "file": "../docs/paper-s7-experiment-status-checkpoint-v1.md",
+    "format": "text",
+    "locator": "Session transcript line 32218 (2026-09-11T08:30:43Z): tool_result that cats background task bjv9tsxvl.output, the stdout of scratchpad/time_renders.py, in the '=== summary (mean seconds per family) ===' block, row 'equation'. Per-call values: 8.41s, 7.47s, 8.20s. Also stated in C:\\Users\\13144\\Documents\\Meridian\\ooxml-graph-paper\\docs\\paper-s7-experiment-status-checkpoint-v1.md line 1143 ('equation mean 8.03s').",
+    "source_value": "equation             n=3  mean=  8.03s  min=  7.47s  max=  8.41s"
+   },
+   "note": "L737C33 is in the sentence about the 'controlled, sequential timing test' ('equation 8.0s ... mean'), so the assignment is correct. The mean of the printed per-call values is 24.08/3 = 8.0267, which rounds to 8.0, matching the paper. What was measured: time_renders.py timed render_gate._soffice_render() on completed treatment-arm output files, run sequentially and interleaved round-robin across families. So this is soffice conversion time, not the full check_render_capability path. The on-disk outputs are gone: the scratchpad render_timing_results.json (full-precision elapsed_s) and tasks/bjv9tsxvl.output were deleted when the scratchpad was cleaned. The raw script stdout survives only in the session transcript cited here. No stats JSON under D:\\MeridianData or tools/ holds these numbers."
+  },
+  "tools.anchoredit.count": {
+   "value": "11",
+   "quantity": "Number of MCP tools in the AnchorEdit subset exercised by the benchmark (new prefix 'tools': no existing prefix covers tool-inventory counts; restated in Limitations line 1136)",
+   "status": "derived",
+   "source": {
+    "file": "../tools/docx_trial_broker.py",
+    "format": "text",
+    "locator": "Count of distinct treatment_tool= values across the six reported families' generator functions (generate_bibliography_pair, generate_citation_forward/inverse, generate_section_reorder_pair, generate_equation_forward/inverse, generate_table_structural_forward/inverse, generate_caption_forward/inverse). Formula: 5 families x 2 (insert/remove pair) + 1 (move_section, used for both directions of section reorder) = 11.",
+    "source_value": "insert_bibliography_entry, remove_bibliography_entry, insert_citation, remove_citation, move_section, insert_equation, remove_equation, insert_table, remove_table, insert_caption, remove_caption"
+   },
+   "note": "Assignment check: all four tokens are the AnchorEdit subset size. L34C29 is in '(11 of that package's 86 registered MCP tools' and L1136C87 is in 'exercises AnchorEdit, 11 of Meridian Docs' 86 registered tools'. Provenance: no JSON or ledger stores the number 11, so I counted it from code. The broker's module docstring and the paper's Task-families list (main.tex L207-226) both describe it: one forward/inverse pair per family, with section reorder calling move_section twice. The broker has one more treatment tool, insert_highlighted_note, used only by the comment_targeting family. The paper does not report that family (main.tex never mentions it), so leaving it out is correct. The respec_cascade harness (tools/run_respec_cascade_family.py) uses the same generators and the same five non-table tool pairs. A comment at L292 of that file says an earlier buggy treatment chain had the agent fall back to update_bibliography_entry. That was a pre-fix run, but it means a 12th tool could have been touched in unreported trials. All 11 tools are registered in meridian_docs/server.py, both at commit 78ff5388 and at the current HEAD."
+  },
+  "tools.meridian_docs.count": {
+   "value": "86",
+   "quantity": "Total number of registered MCP tools in the Meridian Docs package",
+   "status": "verified",
+   "source": {
+    "file": "C:/Users/13144/Documents/Meridian/repository/extensions/meridian-docs/meridian_docs/server.py",
+    "format": "text",
+    "locator": "count of @mcp.tool() decorators at repository commit 78ff5388",
+    "source_value": "86"
+   },
+   "note": "Version-dependent. 86 @mcp.tool() registrations in meridian_docs/server.py at repository commit 78ff5388 (2026-09-16); 91 on the docs-intel-journal-preset-externalization-20260918 branch; 78 on main. The paper does not say which version it counts."
+  }
+ }
+}

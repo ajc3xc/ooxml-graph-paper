@@ -6,6 +6,7 @@ platforms = ["win-64"]
 [dependencies]
 python = ">=3.11,<3.13"
 pytest = ">=8,<9"
+matplotlib = ">=3.8,<4"
 
 [pypi-dependencies]
 meridian-docparse = { path = "../repository/packages/docparse", editable = true }

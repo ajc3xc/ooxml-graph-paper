@@ -1,0 +1,635 @@
+{
+  "_meta": {
+    "about": "Recurring claims in main.tex. Each \\claim{id}{...} in main.tex is one site; consistency.py flags the other sites when one changes."
+  },
+  "claims": {
+    "anchor-id-stability": {
+      "statement": "Anchor ids, which the discovery tools return and the editing tools accept, are the native w14:paraId (an OOXML attribute stored on each paragraph that persists through ordinary saves) or, for paragraphs without one, a content-derived fallback id. The fallback id is documented as shifting when an earlier paragraph with the same text is edited, inserted or removed. The drift-mechanism figure caption says treatment re-resolves its target by a stable id.",
+      "depends_on": []
+    },
+    "anchoredit-subset-scope": {
+      "statement": "AnchorEdit, the treatment tool set, is a bounded subset of Meridian Docs (11 of its 86 registered tools). The package's other tools, including the audit tools (audit_document, audit_equation_style) and the indexing and discovery tools (index_document, locate_anchor), are outside this benchmark's scope, and the results are not claimed for the full tool surface.",
+      "depends_on": [
+        "tools.anchoredit.count",
+        "tools.meridian_docs.count"
+      ]
+    },
+    "anchors-pre-resolved-no-discovery": {
+      "statement": "Each trial's target anchor is resolved in advance, at corpus-build time, and given in the trial's prompt. Neither arm has a structure-discovery tool such as locate_anchor or document_outline, so the benchmark does not measure discovery or live anchor resolution. It measures only editing correctness when the target is already known.",
+      "depends_on": []
+    },
+    "arm-tool-surfaces": {
+      "statement": "The control arm gets only the generic Read/Write/Edit/Bash tools and raw XML access, with no purpose-built document-editing tool. The treatment arm gets exactly one bounded forward/inverse tool pair for its family plus Read, and no generic editing or write tools.",
+      "depends_on": []
+    },
+    "audit-tools-out-of-scope": {
+      "statement": "Meridian Docs' format/style-compliance audit tools (audit_document, audit_equation_style) are outside this benchmark's scope. Whether they help an agent bring a document into compliance with a venue's formatting guidelines is left as future work that the current methodology cannot answer as-is.",
+      "depends_on": []
+    },
+    "backend-choice-no-effect-on-outcome": {
+      "statement": "Which verification backend runs does not affect the measured pass/fail outcome. The LibreOffice-only confirmatory re-run measures the same thing as the original run, because in the audit Word COM never succeeded on its own. The Results add that the pass/fail decision does not depend on which backend succeeds. Methods qualifies this: the audit is observational, so a backend effect on pass rates cannot be fully ruled out without a forced-backend ablation.",
+      "depends_on": []
+    },
+    "bib-citation-mechanical-simplicity": {
+      "statement": "Bibliography and citation insertion write only into an already-valid paragraph (plain runs, or a complex-field idiom already known to work, carrying metadata that is already resolved) and synthesize no new schema-fragile XML structure. The paper uses this mechanism to explain both why these families are not render-gated (Sec. 4.3) and why the two arms tie on them (Conclusion).",
+      "depends_on": []
+    },
+    "bib-citation-parity": {
+      "statement": "At single edit (K=1), the bibliography-entry and inline-citation families show no measurable difference between arms: both arms reach a literal 100%/100% pass rate (parity, with overlapping intervals).",
+      "depends_on": [
+        "single.bib.control.rate",
+        "single.bib.treatment.rate"
+      ]
+    },
+    "checkpoint-b-central-test": {
+      "statement": "Checkpoint B keep-survival is the respec_cascade design's central, novel test. It asks whether the three already-inserted, untouched targets (bibliography, equation, caption), which the abstract, Results and Conclusion call unrelated, already-correct content, survive RESPEC's two mid-chain edits (a reversal of a different requirement) completely unchanged.",
+      "depends_on": []
+    },
+    "checkpoint-b-leak-p0305": {
+      "statement": "On respec_cascade's Checkpoint B, which tests whether already-inserted, untouched content survives the mid-chain RESPEC reversal, the generic tool's raw XML edits leak into content it was never asked to touch, and the bounded tool's never do. The significant result (p=0.0305) comes from the anchor-set-level comparison over 11 paired chains. The table's Tier 1/2 document-level paired test for this measure (p=0.2305) is underpowered and not significant.",
+      "depends_on": [
+        "corpus.personal.n",
+        "respec.keepsurvival.anchorset.n",
+        "respec.keepsurvival.anchorset.p"
+      ]
+    },
+    "clopper-pearson-at-degenerate-rates": {
+      "statement": "Per-family pass-rate CIs use the percentile bootstrap with 2,000 resamples. The exception is a literal 100% or 0% observed rate: there the percentile interval collapses to a zero-width [100,100] or [0,0], so the exact Clopper-Pearson interval is reported instead, marked with a dagger.",
+      "depends_on": [
+        "harness.bootstrap_resamples",
+        "ma.caption.treatment.t1.ci_hi",
+        "ma.caption.treatment.t1.ci_lo",
+        "ma.caption.treatment.t1.rate",
+        "ma.caption.treatment.t2.ci_hi",
+        "ma.caption.treatment.t2.ci_lo",
+        "ma.caption.treatment.t3.ci_hi",
+        "ma.caption.treatment.t3.ci_lo",
+        "ma.equation.control.t1.ci_hi",
+        "ma.equation.control.t1.ci_lo",
+        "ma.equation.control.t1.rate",
+        "ma.equation.control.t2.ci_hi",
+        "ma.equation.control.t2.ci_lo",
+        "ma.equation.control.t3.ci_hi",
+        "ma.equation.control.t3.ci_lo",
+        "respec.keepsurvival.treatment.t1.ci_hi",
+        "respec.keepsurvival.treatment.t1.ci_lo",
+        "respec.keepsurvival.treatment.t1.rate",
+        "respec.keepsurvival.treatment.t2.ci_hi",
+        "respec.keepsurvival.treatment.t2.ci_lo",
+        "respec.keepsurvival.treatment.t2.rate",
+        "respec.keepsurvival.treatment.t3.ci_hi",
+        "respec.keepsurvival.treatment.t3.ci_lo",
+        "respec.keepsurvival.treatment.t3.rate",
+        "respec.perfamily.treatment.t1.ci_hi",
+        "respec.perfamily.treatment.t1.ci_lo",
+        "respec.perfamily.treatment.t1.rate"
+      ]
+    },
+    "com-type-library-cache-defect": {
+      "statement": "One of the fixed defects was a missing Word COM type-library cache. It is a deterministic code defect, not a change to the model, its prompts or the grading.",
+      "depends_on": []
+    },
+    "concurrent-fallback-fix-never-shipped": {
+      "statement": "The concurrent-race fix for the render-verification backends (defect 6) was committed but never merged. Every reported chain, on the original host and in the confirmatory re-run, used the original sequential fallback, where the second backend is tried only after the first fails.",
+      "depends_on": []
+    },
+    "control-never-invokes-verification": {
+      "statement": "In the three write-time-verified families (equation, table-structural, caption), the control arm edits raw XML directly and never goes through the write-time render-verification step, so host contention acting on that step does not affect it.",
+      "depends_on": []
+    },
+    "corpus-preregistration": {
+      "statement": "The 26-document primary corpus and the 48-document section-reordering follow-up corpus are each independently preregistered before any reported trial, with a date and commit hash for each given in Methods. The Note c 11-document development-slice corpus has no preregistration details yet (open TODO).",
+      "depends_on": [
+        "corpus.followup.n"
+      ]
+    },
+    "defect-3-table-recovery": {
+      "statement": "Defect 3's fix makes the harness attempt grading on trials that the outer timeout killed but whose output file changed. That fix recovered two genuinely correct table-structural (table-insertion) chains by re-grading their forward-leg output against their own pre-write backups, not by re-running them. Appendix Note d names this recovery as defect 3.",
+      "depends_on": []
+    },
+    "defect-6-numbered-refs": {
+      "statement": "Defect 6 (the 6th item in Section sec:defects) is the sequential backend-fallback defect. The two write-time verification backends are tried one after the other, each with a retry-bounded 90s timeout, for a worst case of about 360s. The fix that races them concurrently was committed but never merged, so every reported chain ran the sequential code. Methods cites defect 6 as the host-contention episode behind raising the per-trial timeout to 600s, and the render-gate text cites defect 6 as documenting the fallback as sequential rather than concurrent.",
+      "depends_on": [
+        "harness.timeout_raised_s"
+      ]
+    },
+    "defect-8-collateral-check-citation": {
+      "statement": "Item 8 in Section sec:defects, where the respec_cascade grader's collateral-diff check counted the auto-created References heading as drift, is the defect that the Methods cite for the respec_cascade collateral-damage (keep-survival) comparison. Together with item 9 (the doc_label collision), it is one of the two harness defects found in the respec_cascade extension.",
+      "depends_on": []
+    },
+    "defect-fixes-code-only-grading-unchanged": {
+      "statement": "Every defect fix changed only deterministic code in the tooling or harness, never the language model's prompts, its weights or the grading criteria. Defect 8's fix is one such change: it altered the respec_cascade grader's collateral-diff check so that an auto-created References/Bibliography heading counts as an expected addition, not as drift, when the document had no such heading before the edit.",
+      "depends_on": []
+    },
+    "defect-fixes-reverified": {
+      "statement": "Each defect fix was independently re-verified against real data rather than assumed fixed. The paper describes two methods: re-running the affected chains/trials, or re-grading output that was already collected.",
+      "depends_on": []
+    },
+    "defects-all-fixed-status": {
+      "statement": "Fix status of the documented defects. The paper says all ten infrastructure and evaluation-harness defects were found and fixed, and that each was re-verified. Separately, it says defect 6's concurrent-race fix never shipped, so the tooling still runs the sequential backend fallback, and that the unreliable external test drive remains a real defect.",
+      "depends_on": []
+    },
+    "defects-disclosed-in-full": {
+      "statement": "The paper says every defect found and fixed during the project is disclosed in full, each with its root cause, fix and re-verification, and none is corrected silently. It also says the two defects behind bibliography/citation parity are described in the defects section. Item 5 of that section, however, gives two defects (the citation inverse-trial paragraph-id bug and the statistics-regeneration gap) only a one-line mention and omits their details \"for space\", pointing to the repository's working notes.",
+      "depends_on": []
+    },
+    "defects-materially-changed-numbers": {
+      "statement": "Several of the ten reported defects materially (and silently) changed a number that had already been reported, until re-verification caught and corrected them. One example is defect 4: before it, the original render-gate table (Table render-gate) counted 29 network-failure trials in its equation and caption rows as ordinary capability failures, and that item corrected them. This is part of why those render-gate numbers moved substantially over the project.",
+      "depends_on": [
+        "defects.cert_failure.count"
+      ]
+    },
+    "equation-original-control-unpaired": {
+      "statement": "In the original shared-host results (Table tab:render-gate), Equation's control arm (n=11) came from a separate 11-document development-slice corpus that is not paired with the 26-document corpus the treatment arm used, so no paired significance test is reported for that row. The confirmatory re-run (Table tab:render-gate-clean) runs both arms on the same 26-document corpus, so a paired test is reported for all three families.",
+      "depends_on": [
+        "corpus.primary.n",
+        "rg.equation.control.n",
+        "rg.equation.treatment.n"
+      ]
+    },
+    "external-drive-unreliable": {
+      "statement": "An external drive on the test host, holding all run data, was physically unreliable. It disconnected twice during the project, which Windows disk-layer I/O retry/error events confirm directly rather than by inference. The paper names it alongside shared-host contention as a cause of the original write-time-verification gap. It is Limitations factor Four, which calls it a remaining defect of the original test environment, but it is not one of the ten numbered 'found and fixed' defects in Section sec:defects.",
+      "depends_on": []
+    },
+    "follow-up-corpus-48-preregistered": {
+      "statement": "A separate, independently preregistered 48-document follow-up corpus was built for the section-reordering family, because the original corpus has only 11 applicable documents. It was combined with the original corpus to produce the section-reordering results that are reported.",
+      "depends_on": [
+        "corpus.followup.n",
+        "corpus.secreorder_comb.n",
+        "corpus.secreorder_followup.n",
+        "corpus.secreorder_orig.n"
+      ]
+    },
+    "forest-figure-ci-overlap": {
+      "statement": "In the forest figure, the bibliography and citation comparisons show overlapping arm CIs. Section reorder's CIs still overlap at K=1 (combined corpus) and separate cleanly only at K=4.",
+      "depends_on": []
+    },
+    "forward-inverse-chain-pass": {
+      "statement": "Each single-edit task is a forward edit followed by its own inverse on the same starting document, graded against the document's original state, and a chain (one forward/inverse pair) passes only if both directions pass.",
+      "depends_on": []
+    },
+    "four-rows-two-corpus-stages": {
+      "statement": "Section reorder appears twice among the three families not gated by write-time structural verification, so the single-edit table and the single-edit forest figure each have four rows (four comparisons). The table's two section-reorder rows are the original corpus and the combined corpus at K=1. The figure's two section-reorder rows are K=1 and K=4 on the combined corpus.",
+      "depends_on": []
+    },
+    "fresh-anchor-resolution-mechanism": {
+      "statement": "The proposed cause of the K=4 section-reorder advantage is this: on every call the bounded tool finds its target again by a stable structural id. The generic-tool agent instead has to reconstruct or carry forward the original document state from one call to the next, so its errors compound with repetition.",
+      "depends_on": []
+    },
+    "gap-causes-contention-and-drive": {
+      "statement": "The original render-gated gap in Table tab:render-gate (equation and caption treatment pass rates much lower on the shared host) is attributed to the original host environment, not to the editing operations. The stated causes are shared-host scheduling contention plus a physically unreliable external drive, and contention is described as not sufficient on its own. The dedicated-host confirmatory re-run is presented as the direct test of this attribution.",
+      "depends_on": []
+    },
+    "gap-was-deployment-artifact": {
+      "statement": "The original render-gated gap on the shared host was caused by the deployment environment (shared-host scheduling contention plus a physically unreliable external drive), not by a limitation of the bounded editing operations. The confirmatory dedicated-host re-run is what confirms this.",
+      "depends_on": []
+    },
+    "grading-exact-order-vs-order-blind": {
+      "statement": "How paragraph comparisons are graded. The inverse leg passes only when the paragraph list exactly matches, in order, its pre-forward state. Collateral-damage checks on content the edit should not touch use an order-blind multiset comparison, so a section move does not by itself count as drift. These checks are the forward leg's \"every pre-existing paragraph unchanged\" and respec_cascade's Checkpoint B keep-survival.",
+      "depends_on": [
+        "k4.secreorder_followup.control.order_c2plus.fails"
+      ]
+    },
+    "grading-external-from-docx": {
+      "statement": "Grading is done outside the agent, by parsing the persisted output .docx XML after each trial, and never from the agent's (or either arm's) own report of success.",
+      "depends_on": []
+    },
+    "indexing-tools-out-of-scope": {
+      "statement": "Structure-discovery and indexing tools (locate_anchor, document_outline, index_document) are not exercised by this benchmark and are outside its scope. Targets are pre-resolved and supplied to both arms, so the benchmark does not measure how reliable the discovery/indexing tools are.",
+      "depends_on": []
+    },
+    "infra-failure-excluded-from-denominator": {
+      "statement": "If a harness- or infrastructure-level failure unrelated to the task (such as a network error or a process-level subprocess timeout) stops a chain from running or finishing, the chain is dropped from the affected arm's denominator instead of being scored as a failure. Note a's inline-citation timeout is excluded under this rule. Note b's control-arm timeout is excluded as a stated exception to it. The 29 certificate-error trials in defect 4 were re-run instead of being counted as capability failures.",
+      "depends_on": [
+        "defects.cert_failure.count",
+        "harness.timeout_initial_s"
+      ]
+    },
+    "k4-design-definition": {
+      "statement": "The K=4 design runs four consecutive forward/inverse (edit-undo) cycles on the same document, rather than a single cycle, to test whether either arm's correctness compounds or decays with repetition.",
+      "depends_on": []
+    },
+    "k4-significant-advantage": {
+      "statement": "When section reorder is run through K=4 repeated edit-undo cycles, the bounded (treatment) tool has a statistically significant advantage over the generic tool: 92.9% vs 67.3% steady-state pass rate, p=0.0015. Several sites also call this the benchmark's one or only significant finding.",
+      "depends_on": [
+        "k4.secreorder.control.n",
+        "k4.secreorder.control.rate",
+        "k4.secreorder.p",
+        "k4.secreorder.treatment.n",
+        "k4.secreorder.treatment.rate"
+      ]
+    },
+    "k4-the-one-significant-finding": {
+      "statement": "The K=4 section-reorder result (Table tab:k4, p=0.0015) is described as the benchmark's one/single significant finding/result; the figure caption narrows it to the one significant single-family comparison.",
+      "depends_on": []
+    },
+    "k4-uses-same-combined-corpus": {
+      "statement": "The K=4 section-reorder result (Table tab:k4) is run on the same combined original + follow-up section-reorder corpus (11+45=56 paired documents, control n=55 / treatment n=56) as the K=1 combined row of Table tab:single-edit.",
+      "depends_on": [
+        "corpus.followup.n",
+        "corpus.secreorder_comb.n",
+        "corpus.secreorder_followup.n",
+        "corpus.secreorder_orig.n",
+        "k4.secreorder.control.n",
+        "k4.secreorder.treatment.n"
+      ]
+    },
+    "licensed-docops-corpus": {
+      "statement": "The paper's primary (26-document) corpus is a licensed slice of the DocOps benchmark corpus.",
+      "depends_on": [
+        "corpus.primary.n"
+      ]
+    },
+    "model-scope-sonnet-except-respec-haiku": {
+      "statement": "Every result in the paper uses the claude-sonnet-5 model except the respec_cascade extension. That extension ran on the claude CLI's haiku model alias, chosen for throughput and cost on its larger, metered job count.",
+      "depends_on": [
+        "respec.baseline.n",
+        "respec.chains.n"
+      ]
+    },
+    "multianchor-equation-caption-merged": {
+      "statement": "For equation and caption, the multi-anchor extension's data have been merged into the reported numbers (Section results-multianchor, Table render-gate-multianchor). The merge was done only after the canonical original-corpus source, the confirmatory dedicated-host re-run, was verified to recompute to the published numbers.",
+      "depends_on": [
+        "rgclean.equation.control.n",
+        "rgclean.equation.control.rate",
+        "rgclean.equation.p",
+        "rgclean.equation.treatment.rate"
+      ]
+    },
+    "multianchor-sr-table-not-merged": {
+      "statement": "The multi-anchor extension's section-reordering data has not been merged into the paper's reported results and is still open. The reason is that section reordering's published combined-corpus number already has an unresolved two-corpus provenance. Two of the three sites (lines 419 and 822) also say that table-structural has no multi-anchor extension run at all, which is likewise named as still open.",
+      "depends_on": []
+    },
+    "multianchor-three-tiers": {
+      "statement": "The multi-anchor extension's outcomes are never reported as one pooled N under the confirmatory corpus's denominator. They are reported as three separately labeled aggregation tiers: Tier 1 is the unweighted per-document mean (N = document count), Tier 2 is the anchor-count-weighted per-document mean, and Tier 3 is a pooled anchor-level estimate. Tier 3's naive pooled N always appears beside its design-effect/ICC-corrected effective N.",
+      "depends_on": [
+        "ma.naive_pooled.n"
+      ]
+    },
+    "multianchor-tier3-neff": {
+      "statement": "Tier 3 reports the pooled anchor-level estimate with the naive pooled N and, beside it, a design-effect (ICC)-corrected effective N. The ICC is a one-way random-effects intraclass correlation estimated directly from the extension's own outcome data, not assumed.",
+      "depends_on": [
+        "maext.secreorder.treatment.icc",
+        "maext.secreorder.treatment.neff.n",
+        "maext.secreorder.treatment.pooled.n"
+      ]
+    },
+    "multianchor-up-to-three-anchors": {
+      "statement": "The multi-anchor extension exists to grow N by resolving up to three additional anchors per document from the corpus's own eligible positions. The Limitations section presents it as aimed at the small section-reordering corpus.",
+      "depends_on": []
+    },
+    "native-ooxml-structures": {
+      "statement": "The equation, table-structural and caption families each insert or build a real native OOXML structure: an m:oMath math object, a w:tbl table with real rows and columns, and a SEQ-field caption. None of them is text formatted to look like that structure.",
+      "depends_on": []
+    },
+    "never-persist-corrupt-document": {
+      "statement": "AnchorEdit's write-time render-verification step, used by the equation, table and caption insertion tools, is atomic. It saves a change only after an independent renderer confirms the document opens, and it restores the original file on any failure, so a saved change from these tools is never a corrupt or unopenable document.",
+      "depends_on": []
+    },
+    "novelty-word-ooxml": {
+      "statement": "Novelty: the tradeoff between bounded and generic tool surfaces is under-characterized for document editing. The closest prior work (SheetCopilot, PPTArena) targets sibling OOXML formats rather than Word directly, and there is no known prior work posing this bounded-versus-generic comparison for Word/OOXML editing.",
+      "depends_on": []
+    },
+    "original-host-two-of-three-depressed": {
+      "statement": "On the original shared, variably-contended host, two of the three write-time-verification-gated (render-gated) families, equation and caption, had markedly lower treatment pass rates. Table-structural treatment reached 96.2%, statistically indistinguishable from its control.",
+      "depends_on": [
+        "rg.caption.treatment.rate",
+        "rg.equation.treatment.rate",
+        "rg.table.control.rate",
+        "rg.table.p",
+        "rg.table.treatment.rate",
+        "rgclean.caption.treatment.rate",
+        "rgclean.equation.treatment.rate",
+        "rgclean.table.treatment.rate"
+      ]
+    },
+    "paired-permutation-test-2000": {
+      "statement": "Paired arms are compared with a paired sign-flip permutation test using 2,000 resamples.",
+      "depends_on": [
+        "harness.permutations",
+        "respec.anchorset.p_bound"
+      ]
+    },
+    "per-trial-timeout-history": {
+      "statement": "The harness uses one global per-trial subprocess timeout for every family. It started at 300s, was raised to 600s on 2026-09-07 (Methods says this was because of the host-contention episode it ties to defect 6), and is currently 900s, a 1.5x raise informed by the evidence. Defect 6 gives 600s as the harness's outer per-trial timeout, and Notes a and b give 300s for the trials that timed out.",
+      "depends_on": [
+        "harness.timeout_final_s",
+        "harness.timeout_hits.rendergated.count",
+        "harness.timeout_initial_s",
+        "harness.timeout_raise_factor",
+        "harness.timeout_raised_s"
+      ]
+    },
+    "preregistration-status": {
+      "statement": "Preregistration status of the paper's research questions and comparisons. The paper places each analysis in one of three groups: fixed or preregistered before any trial (RQ1's six-family K=1 comparisons and RQ2's K=4 section-reorder depth study); post hoc and not preregistered (RQ3, the diagnosis of the render-gate environment); or a separately preregistered protocol (the respec_cascade extension, preregistered 2026-09-20).",
+      "depends_on": []
+    },
+    "primary-corpus-holdout-status": {
+      "statement": "Holdout status of the primary 26-document DocOps corpus: it was not used to design the tooling's original feature set, but it is not a blind holdout. Several defects were found by watching this corpus's own trial outcomes during the benchmark, fixed directly in the tooling, and the affected chains were re-run. The paper therefore does not claim its numbers estimate performance on documents the tooling has never encountered. The Abstract and Contributions describe the same corpus as held-out, previously unseen, and never used during the tooling's development.",
+      "depends_on": [
+        "corpus.primary.n"
+      ]
+    },
+    "prior-benchmarks-fixed-tool-surface": {
+      "statement": "Prior agent benchmarks (SWE-bench, WebArena, GAIA) each measure whether an agent completes a task under one fixed tool surface. None of them holds the task and model fixed while varying the shape of the tool surface (bounded versus generic) as the manipulated variable. This paper does that for document editing.",
+      "depends_on": []
+    },
+    "render-cost-hypothesis-rejected": {
+      "statement": "The alternative explanation for the render-gated families' gap, that render-verification cost depends on the task (e.g. caption fields forcing a document-wide recalculation), was tested directly and rejected. The evidence is a controlled timing test of rendering real outputs from all three families, which found no meaningful difference, plus (per Results) a code-level review of the tools' OOXML output.",
+      "depends_on": []
+    },
+    "render-gate-retry-history": {
+      "statement": "Table render-gate's original-host treatment numbers for equation and caption changed during the project. Defect 4 (certificate-verification errors) re-ran 29 trials: equation went from 4/26 to 12/26 and caption from 1/26 to 2/26, and those trials had previously been counted as capability failures. The render-gate Results section and defect 4 each refer to the other for this history.",
+      "depends_on": [
+        "defects.cert_caption.treatment.passes_before",
+        "defects.cert_equation.treatment.passes_before",
+        "defects.cert_failure.count",
+        "rg.caption.treatment.n",
+        "rg.caption.treatment.passes",
+        "rg.equation.treatment.n",
+        "rg.equation.treatment.passes"
+      ]
+    },
+    "render-gated-families-slower-vs-no-cost-difference": {
+      "statement": "The explanation that render or verification cost depends on the task type is rejected by a direct timing test. Rendering completed output files from the equation, table-structural and caption families showed no meaningful difference in render time, so higher render-verify cost does not explain the equation/caption deficit.",
+      "depends_on": []
+    },
+    "render-gated-three-families": {
+      "statement": "Exactly three of the six families (equation, table-structural, caption) have the treatment tool's write-time render-verification gate (render with an independent renderer before persisting, atomic rollback on failure). Bibliography, citation and section reorder are not render-gated; they get structural verification alone, or none.",
+      "depends_on": []
+    },
+    "report-both-render-gate-tables": {
+      "statement": "The paper reports both render-gate tables: the original shared-host Table render-gate and the confirmatory dedicated-host Table render-gate-clean. It does not replace one with the other silently. The dedicated-host re-run is the load-bearing, final result for the equation, table-structural and caption families. The original table is kept only as evidence for the host-contention causal claim (the contrast between the two tables), not as a competing final number.",
+      "depends_on": []
+    },
+    "report-every-comparison": {
+      "statement": "The paper reports every comparison its design specifies (all six families at K=1, plus the K=4 depth study), with per-family sample sizes and paired significance tests. It does not pick a favourable subset: the null families, where the arms show no difference, are reported too.",
+      "depends_on": []
+    },
+    "rerun-closed-gap-completely": {
+      "statement": "The dedicated-host confirmatory re-run closed the render-gate gap completely: all three write-time-verified families (equation, table-structural, caption) reached 100% pass on both arms, matching their own controls (p=1.0), so the environment fully explains the original gap. Some sites give a narrower version: the Discussion names only equation and caption, one Results paragraph and the multi-anchor text name caption, and the figure caption says table-structural 'closes the remainder'. These are narrower in scope but do not contradict, because table-structural had no real gap to begin with.",
+      "depends_on": [
+        "corpus.primary.n",
+        "rg.caption.treatment.rate",
+        "rg.equation.treatment.rate",
+        "rg.table.treatment.rate",
+        "rgclean.all.p",
+        "rgclean.all.rate",
+        "rgclean.caption.control.n",
+        "rgclean.caption.control.rate",
+        "rgclean.caption.p",
+        "rgclean.caption.treatment.rate",
+        "rgclean.chains.n",
+        "rgclean.equation.control.n",
+        "rgclean.equation.control.rate",
+        "rgclean.equation.p",
+        "rgclean.equation.treatment.rate",
+        "rgclean.table.treatment.rate"
+      ]
+    },
+    "rerun-identical-benchmark-dedicated-host": {
+      "statement": "The confirmatory re-run was the identical benchmark as the original run (same model, corpus, harness and grading code) on a dedicated, single-tenant, uncontended host. Methods presents two environment differences (Linux without Word COM, and a non-root account) as the only departures from the original run.",
+      "depends_on": [
+        "corpus.primary.n",
+        "rgclean.caption.treatment.rate"
+      ]
+    },
+    "rerun-is-direct-test": {
+      "statement": "The dedicated-host re-run is presented as a direct, controlled test of whether the write-time-verification gap came from the host environment rather than the editing operations: a falsifiable prediction that removing host contention closes the gap, confirmed rather than argued or inferred from indirect evidence.",
+      "depends_on": []
+    },
+    "rerun-nonroot-account": {
+      "statement": "On the Linux re-run host, whose default account is root, the CLI refused to bypass its permission checks when run as root, so every trial failed (156 of 156 chains). All of them were re-run under a dedicated non-root account, and only the re-run results are reported.",
+      "depends_on": [
+        "defects.root_cli.attempted",
+        "defects.root_cli.fails"
+      ]
+    },
+    "rerun-verified-live-wall-times": {
+      "statement": "The dedicated-host confirmatory re-run was checked to be a live execution, not cached, uniform or short-circuited. The evidence is that its individual trials showed realistic, varied per-trial wall times and grading output, checked beyond exit status alone.",
+      "depends_on": [
+        "rgclean.caption.forward.max_s",
+        "rgclean.caption.forward.min_s"
+      ]
+    },
+    "respec-17-steps-three-phases": {
+      "statement": "A respec_cascade chain has 17 steps in three phases: BUILD (5), RESPEC (2) and SECOND EXPOSURE (10). The whole-chain composite pass (completing the full protocol) requires all three phases to pass.",
+      "depends_on": [
+        "respec.build_phase.steps",
+        "respec.chain.families",
+        "respec.chain.steps",
+        "respec.chains.control.n",
+        "respec.chains.treatment.n",
+        "respec.composite.control.passes",
+        "respec.composite.control.t1.rate",
+        "respec.composite.treatment.passes",
+        "respec.composite.treatment.t1.rate",
+        "respec.respec_phase.steps",
+        "respec.second_exposure_phase.steps"
+      ]
+    },
+    "respec-anchor-set-gap-p0005": {
+      "statement": "In the respec_cascade extension, the anchor-set-level test pools each family's Phase-3 forward/inverse round trip as a separate paired (family, anchor-set) observation, 30 in all. On it, control and treatment differ by 46.7 percentage points (p<0.0005, permutation test). This p-value belongs to the anchor-set-level measure only. It does not apply to chain-level whole-chain completion (83.3% vs 8.3%, Tier-1/2 paired p=0.2305) or to the Checkpoint B keep-survival test (p=0.0305).",
+      "depends_on": [
+        "harness.permutations",
+        "respec.anchorset.diff_pp",
+        "respec.anchorset.n",
+        "respec.anchorset.p_bound"
+      ]
+    },
+    "respec-anchor-sets-none-excluded": {
+      "statement": "respec_cascade covers 24 chains (3 documents x 4 anchor-sets x 2 arms). All twelve anchor-sets are usable and none is excluded. Chains are not dropped from analysis: a chain that breaks mid-protocol is scored as a whole-chain composite failure, not excluded. The one disclosed exception is the Checkpoint B keep-survival test, which runs on 11 paired chains because one control chain broke before Checkpoint B.",
+      "depends_on": [
+        "corpus.personal.n",
+        "respec.anchorsets_per_doc.n",
+        "respec.chains.n",
+        "respec.keepsurvival.anchorset.n"
+      ]
+    },
+    "respec-chain-completion": {
+      "statement": "On whole-chain completion (Tier 1), the bounded tool finishes the full three-phase, five-family respec_cascade protocol on 83.3% (10/12) of chains and the generic tool on 8.3% (1/12). The chain-level paired test is underpowered and not significant (p=0.2305, shown only in the table). No prose statement of this measure attaches a p-value to it; p<0.0005 belongs to the separate 46.7-point anchor-set-level gap.",
+      "depends_on": [
+        "respec.chains.control.n",
+        "respec.chains.treatment.n",
+        "respec.composite.control.passes",
+        "respec.composite.control.t1.rate",
+        "respec.composite.treatment.passes",
+        "respec.composite.treatment.t1.rate"
+      ]
+    },
+    "respec-control-chains-broke": {
+      "statement": "In respec_cascade, 5 of the 12 control (generic-tool) chains broke mid-protocol and 0 of the 12 treatment chains did. In each broken chain, a raw XML edit corrupted the document badly enough that a later step's package-validity gate refused to continue, so more control chains never reached some families' Phase-3 step. The whole-chain composite scores these frozen chains as failures rather than excluding them. The Phase-3 anchor-set-level comparisons do not include them.",
+      "depends_on": [
+        "respec.broken.control.count",
+        "respec.broken.control.rate",
+        "respec.broken.treatment.count",
+        "respec.chains.control.n",
+        "respec.chains.treatment.n"
+      ]
+    },
+    "respec-corpus-author-owned-docs": {
+      "statement": "The respec_cascade extension runs on three real, author-owned (personal) documents. These are the same three documents already added to the corpus under the multi-anchor extension, which gives n = 26 original + 3 = 29 for the merged equation/caption results. The Abstract describes this three-document corpus as real and previously unseen.",
+      "depends_on": [
+        "corpus.merged.n",
+        "corpus.personal.n",
+        "corpus.primary.n"
+      ]
+    },
+    "respec-five-families-table-dropped": {
+      "statement": "The respec_cascade extension and its K=1 baseline sweep cover five of the paper's six task families: bibliography, citation, section reorder, equation and caption. Table-structural is dropped because insert_table/remove_table were absent from the live Meridian Docs tool manifest at corpus-build time.",
+      "depends_on": [
+        "corpus.personal.n",
+        "respec.anchorsets_per_doc.n",
+        "respec.baseline.n",
+        "respec.chain.families",
+        "respec.chain.steps"
+      ]
+    },
+    "respec-generalization-strength": {
+      "statement": "How strongly the preregistered respec_cascade extension shows that the K=4 section-reordering finding and its mechanism generalize. The axes are all five task families, a mid-chain reversal rather than uniform repetition, and, per Limitations only, one model change. Abstract and Methods say the extension \"generalizes\" the finding, and the Results section title calls it \"a generalization\". Limitations calls its result \"evidence\" that the mechanism generalizes. The Discussion says the question \"remains open\" and that the two designs are \"not a closed generalization\". The Conclusion says the extension \"confirms\" the result is not an artifact of testing one family alone.",
+      "depends_on": [
+        "respec.chain.steps"
+      ]
+    },
+    "respec-harness-defects-8-9": {
+      "statement": "Defects 8 and 9 in the defects section are the two respec_cascade harness defects found during that extension's run. Defect 8: the grader's collateral-diff check miscounted the intended, auto-created References/Bibliography heading as collateral damage. Defect 9: a doc_label 32-character truncation collision merged four anchor-sets' baseline checkpoint directories into one. The respec_cascade Methods (collateral-damage checks, defect 8) and Results (defects 8--9) cite them by number.",
+      "depends_on": []
+    },
+    "respec-k1-baseline": {
+      "statement": "In the respec_cascade extension, each arm's cascade Phase-3 outcome is compared against that same arm's own fresh, isolated K=1 baseline. The baseline is one forward/inverse trial at the identical anchor, run separately for every (document, anchor-set, family, arm) combination.",
+      "depends_on": []
+    },
+    "respec-model-change-interpretation": {
+      "statement": "What the respec_cascade extension's use of the claude CLI's haiku model alias, instead of claude-sonnet-5, means for how its result should be read. Methods calls it a disclosed scope limitation and not a claim that the models are interchangeable. Limitations says it makes the result evidence that the section-reordering mechanism generalizes across at least one model change, though not a same-model replication.",
+      "depends_on": []
+    },
+    "respec-preregistered-two-way-generalization": {
+      "statement": "respec_cascade is a separate, preregistered extension that generalizes the K=4 section-reordering finding in two ways. First, it runs all five task families in one chain instead of repeating a single family. Second, it adds a mid-chain reversal of a structural requirement instead of uniform repetition, a condition the original K-sweep design never included.",
+      "depends_on": [
+        "respec.chain.steps"
+      ]
+    },
+    "respec-same-direction-magnitude": {
+      "statement": "The respec_cascade extension shows the same direction and qualitative pattern as the K=4 section-reorder result, extended across five task families and a mid-chain reversal (and, per Limitations, across a model change): generic raw-XML editing degrades as edits accumulate, including into untouched content, and the bounded tool does not. Only the Conclusion goes further, saying the extension \"confirms\" the advantage and that it \"reappears at a larger magnitude\".",
+      "depends_on": []
+    },
+    "respec-tier12-underpowered": {
+      "statement": "Tier 1 (the unweighted per-document mean, N = document count) is the most conservative, lowest-powered aggregation tier. As a result, the respec_cascade Tier 1/2 paired tests (whole-chain composite, Checkpoint B keep-survival, and the per-family Tier-1 tests) are underpowered at N=3 documents. The anchor-set-level paired tests are the higher-powered versions of the same comparisons.",
+      "depends_on": [
+        "corpus.personal.n",
+        "respec.perfamily.p_t1_max",
+        "respec.perfamily.p_t1_min"
+      ]
+    },
+    "run-chain-reused-unmodified": {
+      "statement": "The respec_cascade K=1 baseline sweep reuses run_paper_s7_benchmark.py's existing run_chain function rather than new trial code. Defect 9's fix changed how run_chain derives its checkpoint directory (an 8-character hash suffix for labels over 32 characters), and the whole 120-trial baseline was re-run under that fix.",
+      "depends_on": [
+        "defects.doclabel.prefix_chars"
+      ]
+    },
+    "section-reorder-combined-corpus-n55-n56": {
+      "statement": "In the combined section-reorder corpus, treatment reports n=56 and control reports n=55. One document's control-arm chain was excluded from the control denominator only (Appendix Note b). Methods and Note b also each say how that single-arm exclusion relates to the paper's harness/infrastructure-failure exclusion rule.",
+      "depends_on": [
+        "harness.timeout_initial_s",
+        "single.secreorder_comb.control.n",
+        "single.secreorder_comb.treatment.n"
+      ]
+    },
+    "section-reorder-destination-validation": {
+      "statement": "A section-reorder destination must be a heading at the same or a shallower level. The corpus-build picker (resolve_section_reorder_plan) enforces this, and move_section separately rejects destinations inside the moved section at runtime.",
+      "depends_on": []
+    },
+    "section-reorder-icc-open-finding": {
+      "statement": "In section reordering's multi-anchor extension data, the treatment arm's intraclass correlation is 1.0: every anchor in a document passes or fails together, so the extra anchors add no independent evidence and the naive pooled N of 22 falls to an effective N of 10. The control arm's ICC is 0. The paper explains this by section reordering's extra anchors being tied to the same document, unlike the body-anchor families, and reports it as a preliminary, open finding.",
+      "depends_on": [
+        "maext.secreorder.control.icc",
+        "maext.secreorder.treatment.icc",
+        "maext.secreorder.treatment.neff.n",
+        "maext.secreorder.treatment.pooled.n"
+      ]
+    },
+    "section-reorder-k1-directional-not-significant": {
+      "statement": "For a single edit (K=1), section reorder leans toward the bounded tool but the difference is not statistically significant: combined corpus 92.9% vs 83.6%, p=0.271, with overlapping 95% CIs. Only at K=4 does it become significant.",
+      "depends_on": [
+        "corpus.followup.n",
+        "corpus.secreorder_orig.n",
+        "single.secreorder_comb.p",
+        "single.secreorder_orig.p"
+      ]
+    },
+    "section-reorder-original-underpowered": {
+      "statement": "For section reordering, the original (primary) corpus has only 11 applicable documents. That sample is small and underpowered on its own, which is why a follow-up corpus was built for this family and combined in.",
+      "depends_on": [
+        "corpus.secreorder_orig.n"
+      ]
+    },
+    "sequential-backend-fallback-order": {
+      "statement": "Write-time render verification tries its two renderer backends sequentially, in a fixed fallback order: LibreOffice/soffice first, then Word COM only if the first fails. The concurrent-race fix was never merged, so every reported chain ran with the sequential fallback.",
+      "depends_on": []
+    },
+    "single-edit-no-advantage": {
+      "statement": "At a single edit (K=1), the bounded tool shows no statistically significant advantage over the generic tools. Bibliography and citation are at literal parity. Section reorder shows a directional but non-significant advantage (combined corpus p=0.271). The advantage becomes significant only under repeated edit-undo cycling.",
+      "depends_on": [
+        "corpus.followup.n",
+        "corpus.secreorder_orig.n",
+        "single.secreorder_comb.p",
+        "single.secreorder_orig.p"
+      ]
+    },
+    "six-task-families": {
+      "statement": "The benchmark reports six task families: bibliography-entry insertion, inline citation insertion, section reordering, equation insertion, table-structural insertion, and caption insertion.",
+      "depends_on": []
+    },
+    "state-drift-generic-degrades": {
+      "statement": "State drift: under repeated edit-undo cycling, and as edits accumulate on one document, the generic-tool (control) arm's correctness degrades because it loses or has to rebuild the original document state across cycles. The bounded tool shows no such drift. The paper calls this its central capability finding.",
+      "depends_on": [
+        "k4.secreorder_followup.control.order_c2plus.fails"
+      ]
+    },
+    "supplementary-docs-location": {
+      "statement": "Material left out of the paper (the details of two further evaluation-harness defects and the exploratory audit_equation_style formatting-compliance pilot) is published under docs/ in the public repository named in the Artifact availability subsection. The text points to that subsection as 'below' from the defects list and 'above' from the Conclusion's future-work paragraph.",
+      "depends_on": []
+    },
+    "table-structural-close-originally": {
+      "statement": "On the original shared host, table-structural was the one write-time-verified family whose treatment arm was not depressed: 96.2% against its control's 92.3% (paired p=1.0), statistically indistinguishable. Only equation and caption showed a real gap there.",
+      "depends_on": [
+        "rg.table.control.rate",
+        "rg.table.p",
+        "rg.table.treatment.rate",
+        "rgclean.table.treatment.rate"
+      ]
+    },
+    "table-tool-pair-vs-manifest": {
+      "statement": "The table-structural family's bounded treatment tool pair is insert_table/remove_table. The respec_cascade methods add that this pair was absent from the live Meridian Docs tool manifest when that protocol's corpus was built, which is why table-structural was dropped from its rotation.",
+      "depends_on": []
+    },
+    "task-failure-scored-not-excluded": {
+      "statement": "A chain that fails at the task level is scored as a failure at a fixed denominator and is not excluded. This covers a write-time verification failure under host contention and a respec_cascade chain that stopped mid-protocol at a package-validity gate. Only harness or infrastructure failures are excluded. The one stated exception is respec_cascade's Checkpoint B keep-survival test, which drops one control chain because it broke before Checkpoint B, leaving 11 paired chains.",
+      "depends_on": [
+        "respec.keepsurvival.anchorset.n"
+      ]
+    },
+    "ten-defects-count": {
+      "statement": "Section sec:defects documents ten infrastructure and evaluation-harness defects. Eight are general and two are respec_cascade harness defects (enumerated items 8--9). The enumerated list has nine items because item 5 bundles two defects. At least one other defect mentioned elsewhere, the cascade orchestrator's chain-id collision, is explicitly outside this list.",
+      "depends_on": []
+    },
+    "timeout-900-censored-evidence": {
+      "statement": "The current 900s per-trial timeout rests on evidence from the corpus's recorded wall-clock times. That evidence is right-censored at whichever ceiling was in effect when each trial ran, so the value is not a closed or uncensored derivation. It clears the observed maximum, but nobody has confirmed that it clears the true tail: no validation run with headroom above 900s is reported.",
+      "depends_on": [
+        "harness.timeout_final_s",
+        "harness.timeout_raise_factor"
+      ]
+    },
+    "tool-surface-only-manipulated-variable": {
+      "statement": "Within each comparison, the two arms run the same model on the same documents, and both produce a real .docx. The only manipulated variable is the tool surface: the bounded AnchorEdit tools versus generic tools with raw XML access.",
+      "depends_on": [
+        "tools.anchoredit.count",
+        "tools.meridian_docs.count"
+      ]
+    },
+    "verification-confound-reliability-cost": {
+      "statement": "The write-time render-verification step shared by the equation, table-structural and caption treatment tools confounded the original results. Its reliability depends on host conditions: on the shared, contended host it often could not verify a change and so did not save it, which pushed down treatment pass rates. So the original gap came from the environment, not from what the editing operations can do.",
+      "depends_on": []
+    }
+  }
+}

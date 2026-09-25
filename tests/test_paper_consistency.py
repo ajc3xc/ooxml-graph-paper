@@ -97,6 +97,14 @@ def test_literal_copies_ignores_val_and_comments():
         ("83.3", ["respec.composite.treatment.t1.rate"])]
 
 
+def test_literal_copies_ignores_tikz_and_version_numbers():
+    vals = {"x.y": {"value": "1.5", "status": "verified"}, "a.b": {"value": "1.0", "status": "verified"}}
+    tex = ("\\begin{document}\n\\begin{tikzpicture}\\node at (-3.4, 1.5) {};\\end{tikzpicture}\n"
+           "under the Meridian Source License 1.0 (MSL-1.0).\n")
+    assert consistency.literal_copies(tex, vals) == []
+    assert consistency.literal_copies(tex + "a factor of 1.5\n", vals) == [("1.5", ["x.y"])]
+
+
 def test_tripwire_lists_unchanged_sites_of_an_edited_claim():
     head = TEX.replace("The tool completes", "The bounded tool completes")
     items = consistency.tripwire(TEX, head, VALUES, VALUES, CLAIMS, CLAIMS)

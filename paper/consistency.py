@@ -236,8 +236,17 @@ def figure_staleness() -> list[str]:
 
 
 def strip_vals_and_comments(text: str) -> str:
+    """Remove what can't be a hand-typed reported value: comments, \\val calls,
+    TikZ drawing code (coordinates), and version numbers (e.g. MSL-1.0)."""
     text = re.sub(r"(?<!\\)%[^\n]*", "", text)
+    text = re.sub(r"\\begin\{tikzpicture\}.*?\\end\{tikzpicture\}", " ", text, flags=re.S)
+    text = re.sub(r"(License|MSL-|[Vv]ersion|v)\s*\d+(\.\d+)+", " ", text)
     return re.sub(r"\\val\{[^}]*\}", " ", text)
+
+
+def inside_tikz(text: str, pos: int) -> bool:
+    start = text.rfind("\\begin{tikzpicture}", 0, pos)
+    return start >= 0 and text.rfind("\\end{tikzpicture}", 0, pos) < start
 
 
 LITERAL_RE = re.compile(r"(?<![A-Za-z0-9_.{])\d+\.\d+(?![0-9])")
@@ -420,6 +429,9 @@ def hook_pre() -> int:
         if not values:
             return 0
         current = TEX.read_text(encoding="utf-8")
+        old_s = ti.get("old_string") or ""
+        if tool == "Edit" and old_s and old_s in current and inside_tikz(current, current.index(old_s)):
+            return 0
         removed, introduced, _ = edit_texts(tool, ti, current)
         idx = decimal_index(values)
         had = Counter(m.group(0) for m in LITERAL_RE.finditer(strip_vals_and_comments(removed)))
@@ -449,7 +461,7 @@ def snapshot_write_all() -> None:
     STATE_DIR.mkdir(parents=True, exist_ok=True)
     for path, rel in TRACKED.items():
         if path.exists():
-            (STATE_DIR / rel.replace("/", "__")).write_text(path.read_text(encoding="utf-8"), encoding="utf-8")
+            (STATE_DIR / rel.replace("/", "__")).write_bytes(path.read_bytes())
 
 
 def parse_vals_text(text: str) -> dict:
