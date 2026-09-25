@@ -384,8 +384,8 @@ arm's correctness compounds or decays under repetition.
 \begin{sloppypar}
 A supplementary extension generalizes the single fixed-percentile anchor above to up to three
 additional anchors per document, using the identical eligibility filter at three further fixed
-percentile positions. \texttt{resolve\_multiple\_body\_anchors} implements
-this for the body-anchor families.
+percentile positions. This applies
+to the body-anchor families directly.
 The analogous
 extension for section reordering additionally excludes already-used heading triples across
 plans. Both reuse the original single-anchor resolver's own output unchanged as anchor zero. The
@@ -1263,8 +1263,7 @@ throughout the paper.
   block on the verification step) but failed grading on a genuine task mistake -- 11/11
   \emph{resolved} is not the same as 11/11 \emph{passed}.
 \item[Note d (Table~\ref{tab:render-gate}, Table structural)] This row's published number
-  (96.2\%, 25/26) was independently re-verified during a later revision pass and found to be
-  correct, but not, at the time, reproducible from the stored trial data. The two chains involved
+  (96.2\%, 25/26) is correct; the stored trial data did not initially reproduce it. The two chains involved
   are the same two defect 3 (Section~\ref{sec:defects}) describes recovering by re-grading their
   output against their own pre-write backups after the harness's outer timeout killed their
   forward leg -- that description was accurate, and defect 3's own fix (attempting grading on a
