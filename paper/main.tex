@@ -357,7 +357,7 @@ the two harness-flake cases we report (Appendix~\ref{app:notes}, Notes a--b), ra
 a failure. This is a single global per-trial subprocess timeout applied to
 every family, not a per-family budget; it started at 300 seconds (an uninstrumented initial
 choice) and was raised to 600 seconds on 2026-09-07 as a reactive doubling to survive a specific
-host-contention episode (Section~\ref{sec:defects} defect 7) -- so families whose trials ran before
+host-contention episode (Section~\ref{sec:defects} defect 6) -- so families whose trials ran before
 that date saw the 300s ceiling and families run afterward, predominantly the render-gated ones,
 saw 600s, but this was an artifact of when each family's trials happened to run, not a deliberate
 per-family design. We have since derived an evidence-informed value from the corpus's own recorded
@@ -684,7 +684,7 @@ entirely -- they write raw XML directly, with no independent render-verification
 
 Figure~\ref{fig:rendergate-arch} shows this flow. The verification step tries two independent
 renderer backends in a fixed fallback order, advancing to the second only if the first fails
-(Section~\ref{sec:defects}, defect 7, which also corrects an earlier draft's claim that this
+(Section~\ref{sec:defects}, defect 6, which also corrects an earlier draft's claim that this
 runs as a concurrent race) -- the pass/fail decision is unaffected by which backend succeeds.
 
 \begin{table}[h]
