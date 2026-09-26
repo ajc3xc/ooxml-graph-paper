@@ -1,0 +1,131 @@
+{
+"roots": [
+"C:\\Users\\13144\\Documents\\Meridian\\ooxml-graph-paper"
+],
+"text_files_scanned": 189,
+"per_file": {
+"C:\\Users\\13144\\Documents\\Meridian\\ooxml-graph-paper\\.claude\\state\\consistency\\paper__numbers.json": [
+125,
+230,
+349,
+1461,
+1672,
+2562,
+2668,
+2930,
+3758,
+3812,
+4364,
+4596,
+4602,
+4933,
+5414,
+5494,
+6108,
+6339
+],
+"C:\\Users\\13144\\Documents\\Meridian\\ooxml-graph-paper\\docs\\paper-s11-d1-natural-freeze-v1.md": [
+6444,
+6489
+],
+"C:\\Users\\13144\\Documents\\Meridian\\ooxml-graph-paper\\docs\\paper-s12-holdout-exposure-audit-v0.md": [
+6440,
+6450,
+6452,
+6467,
+6471,
+6508,
+6510,
+6518
+],
+"C:\\Users\\13144\\Documents\\Meridian\\ooxml-graph-paper\\docs\\paper-s17-pilot-v1.md": [
+6469
+],
+"C:\\Users\\13144\\Documents\\Meridian\\ooxml-graph-paper\\docs\\paper-s19-profile-inference-v1.md": [
+6433,
+6436
+],
+"C:\\Users\\13144\\Documents\\Meridian\\ooxml-graph-paper\\docs\\paper-s5-graph-edge-adapters-v1.md": [
+6469
+],
+"C:\\Users\\13144\\Documents\\Meridian\\ooxml-graph-paper\\docs\\paper-s6-organic-omml-batch-500-result-v1.md": [
+33,
+46,
+116,
+439
+],
+"C:\\Users\\13144\\Documents\\Meridian\\ooxml-graph-paper\\docs\\paper-s6-organic-omml-round2-3-result-v1.md": [
+33,
+4890,
+6114
+],
+"C:\\Users\\13144\\Documents\\Meridian\\ooxml-graph-paper\\docs\\paper-s7-section-reorder-followup-result-v1.md": [
+349,
+3812,
+4770
+],
+"C:\\Users\\13144\\Documents\\Meridian\\ooxml-graph-paper\\docs\\paper-s9-formatting-compliance-pilot-v1.md": [
+2140
+],
+"C:\\Users\\13144\\Documents\\Meridian\\ooxml-graph-paper\\docs\\paper31-local-baselines-v0.md": [
+6469
+],
+"C:\\Users\\13144\\Documents\\Meridian\\ooxml-graph-paper\\docs\\paper36-docling-full-run-v0.md": [
+6456,
+6495,
+6511,
+6521
+],
+"C:\\Users\\13144\\Documents\\Meridian\\ooxml-graph-paper\\docs\\paper39-final-metrics-v0.md": [
+6448,
+6462,
+6502
+],
+"C:\\Users\\13144\\Documents\\Meridian\\ooxml-graph-paper\\paper\\numbers.json": [
+125,
+230,
+349,
+1461,
+1672,
+2562,
+2668,
+2930,
+3758,
+3812,
+4364,
+4596,
+4602,
+4933,
+5414,
+5494,
+6108,
+6339
+],
+"C:\\Users\\13144\\Documents\\Meridian\\ooxml-graph-paper\\paper\\sources\\SOURCES.json": [
+125
+],
+"C:\\Users\\13144\\Documents\\Meridian\\ooxml-graph-paper\\paper\\sources\\secreorder-combined-k1-statistics.json": [
+125
+],
+"C:\\Users\\13144\\Documents\\Meridian\\ooxml-graph-paper\\paper\\sources\\secreorder-combined-k4-statistics.json": [
+125
+],
+"C:\\Users\\13144\\Documents\\Meridian\\ooxml-graph-paper\\tools\\formatting_compliance_pilot.py": [
+2140
+],
+"C:\\Users\\13144\\Documents\\Meridian\\ooxml-graph-paper\\tools\\merge_docling_retry_addendum.py": [
+6456,
+6495,
+6511,
+6521
+],
+"C:\\Users\\13144\\Documents\\Meridian\\ooxml-graph-paper\\tools\\merge_paper39_retry_addendum.py": [
+6448,
+6462,
+6502
+],
+"C:\\Users\\13144\\Documents\\Meridian\\ooxml-graph-paper\\tools\\regenerate_paper_sources.py": [
+125
+]
+}
+}

@@ -1,0 +1,1826 @@
+{
+ "schema": "respec-public-candidates-v0",
+ "note": "Disjoint from k4sr_candidates.json by construction (organic docs are touched/excluded from K4SR; fresh docs here have >25 headings, outside the K4SR band).",
+ "documents": [
+  {
+   "sha256": "b40b9c9d10ed9331602be85d4db9a2047a74fa6be4c7bb607a222c5df7de670c",
+   "source": "docx-corpus batch-2-v1 (S6 organic-OMML cleared candidate b40b9c9d10ed9331)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-2-v1\\2ea656f1a1318982fea66583fd34d351557b3d3fdd804d75ff2bead87c8daec3.docx",
+   "headings": 14,
+   "omath": 1,
+   "tbl": 10,
+   "five_family_usable": 4,
+   "six_family_usable": 4,
+   "pii_status": "cleared_institutional_contact (flagged_email)",
+   "license_status": "unknown_pending_review (per-file); dataset-level claim ODC-BY (s6-organic-candidates-adjudication-v1.json summary.note)",
+   "prior_use": "S6/S18 organic-OMML screening, s6-independent-gold, s6-word-receipts; never in any respec_cascade or section_reorder run"
+  },
+  {
+   "sha256": "f885adf9d806a32fa7791239112619ab5cb55745130b2082613d65e4706f6c7b",
+   "source": "docx-corpus batch-2-v1 (S6 organic-OMML cleared candidate f885adf9d806a32f)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-2-v1\\472f354c73d8c6ba68b6a89d06ac9205c4845e03906e28068181459bda463c2a.docx",
+   "headings": 71,
+   "omath": 1,
+   "tbl": 3,
+   "five_family_usable": 4,
+   "six_family_usable": 4,
+   "pii_status": "cleared_institutional_contact (flagged_phone)",
+   "license_status": "unknown_pending_review (per-file); dataset-level claim ODC-BY (s6-organic-candidates-adjudication-v1.json summary.note)",
+   "prior_use": "S6/S18 organic-OMML screening, s6-independent-gold, s6-word-receipts; never in any respec_cascade or section_reorder run"
+  },
+  {
+   "sha256": "70c3b0d7c6971586d2447faee9fd1dfa6ed35a857de9914785823a6ba77f666a",
+   "source": "docx-corpus batch-2-v1 (S6 organic-OMML cleared candidate 70c3b0d7c6971586)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-2-v1\\f0afd0b8d6a07f9f0054cf7c4d99ca02a8e4c426b4117662a5b2f53fd88b935d.docx",
+   "headings": 15,
+   "omath": 12,
+   "tbl": 4,
+   "five_family_usable": 4,
+   "six_family_usable": 4,
+   "pii_status": "cleared_false_positive (flagged_phone)",
+   "license_status": "unknown_pending_review (per-file); dataset-level claim ODC-BY (s6-organic-candidates-adjudication-v1.json summary.note)",
+   "prior_use": "S6/S18 organic-OMML screening, s6-independent-gold, s6-word-receipts; never in any respec_cascade or section_reorder run"
+  },
+  {
+   "sha256": "15eda5d133e5be381ea8e19d9b2d4ee6e889618e89eec934d254c4db8949a101",
+   "source": "docx-corpus batch-3-v1 (S6 organic-OMML cleared candidate 15eda5d133e5be38)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-3-v1\\13430c5226b72647bb89eb2160cce5dd3c251d23706ff92b031945b64f1ce066.docx",
+   "headings": 8,
+   "omath": 2,
+   "tbl": 3,
+   "five_family_usable": 2,
+   "six_family_usable": 2,
+   "pii_status": "cleared_clean_scan (clean)",
+   "license_status": "unknown_pending_review (per-file); dataset-level claim ODC-BY (s6-organic-candidates-adjudication-v1.json summary.note)",
+   "prior_use": "S6/S18 organic-OMML screening, s6-independent-gold, s6-word-receipts; never in any respec_cascade or section_reorder run"
+  },
+  {
+   "sha256": "3876b1fb917a43cd00ed41351c8b4a3ef775fae6e2adf097898001f288a3a008",
+   "source": "docx-corpus batch-3-v1 (S6 organic-OMML cleared candidate 3876b1fb917a43cd)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-3-v1\\35a06205c09cceee69e58e431f5a553f101d886fc189d0711e1cd72870e25fa1.docx",
+   "headings": 24,
+   "omath": 28,
+   "tbl": 0,
+   "five_family_usable": 4,
+   "six_family_usable": 4,
+   "pii_status": "cleared_clean_scan (clean)",
+   "license_status": "unknown_pending_review (per-file); dataset-level claim ODC-BY (s6-organic-candidates-adjudication-v1.json summary.note)",
+   "prior_use": "S6/S18 organic-OMML screening, s6-independent-gold, s6-word-receipts; never in any respec_cascade or section_reorder run"
+  },
+  {
+   "sha256": "ad179d61905c4ff10052d9e8506ae7794052905a5004f8474d0a5f10f5a560b0",
+   "source": "docx-corpus batch-3-v1 (S6 organic-OMML cleared candidate ad179d61905c4ff1)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-3-v1\\3d785aab27db4f969c331ee2061421b6e5d768f9f2ec31992227d91e8f4f708b.docx",
+   "headings": 18,
+   "omath": 3,
+   "tbl": 1,
+   "five_family_usable": 3,
+   "six_family_usable": 3,
+   "pii_status": "cleared_clean_scan (clean)",
+   "license_status": "unknown_pending_review (per-file); dataset-level claim ODC-BY (s6-organic-candidates-adjudication-v1.json summary.note)",
+   "prior_use": "S6/S18 organic-OMML screening, s6-independent-gold, s6-word-receipts; never in any respec_cascade or section_reorder run"
+  },
+  {
+   "sha256": "9dddba26d673e1dac0f04bd085b48dd7a467aa8b35bf7d027cc978503acdb2d6",
+   "source": "docx-corpus batch-3-v1 (S6 organic-OMML cleared candidate 9dddba26d673e1da)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-3-v1\\843a22e83d54865681f8b36d61f14a147c1bf103829b54d37f433b58514bfb4c.docx",
+   "headings": 10,
+   "omath": 3,
+   "tbl": 2,
+   "five_family_usable": 3,
+   "six_family_usable": 3,
+   "pii_status": "cleared_false_positive (flagged_long_digit_run)",
+   "license_status": "unknown_pending_review (per-file); dataset-level claim ODC-BY (s6-organic-candidates-adjudication-v1.json summary.note)",
+   "prior_use": "S6/S18 organic-OMML screening, s6-independent-gold, s6-word-receipts; never in any respec_cascade or section_reorder run"
+  },
+  {
+   "sha256": "84371808eb479fe45190b4bf08d99313848d26f9d95ba43b5cdbde7e66186dac",
+   "source": "docx-corpus batch-3-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-3-v1\\00501ca3918249ad593eb64e2ec744d65d6083611df3fb3b0291de63be4d9d2d.docx",
+   "source_url": "https://docxcorp.us/documents/00501ca3918249ad593eb64e2ec744d65d6083611df3fb3b0291de63be4d9d2d.docx",
+   "corpus_metadata": {
+    "type": "technical",
+    "topic": "technology",
+    "word_count": 4307
+   },
+   "headings": 36,
+   "omath": 0,
+   "tbl": 5,
+   "five_family_usable": 4,
+   "six_family_usable": 4,
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+   "license_status": "unknown_pending_review per file; dataset-level ODC-BY claim (same as S6 adjudication note)",
+   "prior_use": "none found"
+  },
+  {
+   "sha256": "5b1a0ddde34644b86adb2124fd6f87b9536f46ebbf9ccd12c01bf40c6ea1970c",
+   "source": "docx-corpus batch-2-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-2-v1\\00692cca347f18c13d47c4f50bfa76d1e19b6b2dfb1ee0da64d2a9200e6395f9.docx",
+   "source_url": "https://docxcorp.us/documents/00692cca347f18c13d47c4f50bfa76d1e19b6b2dfb1ee0da64d2a9200e6395f9.docx",
+   "corpus_metadata": {
+    "type": "policies",
+    "topic": "nonprofit",
+    "word_count": 3318
+   },
+   "headings": 33,
+   "omath": 0,
+   "tbl": 4,
+   "five_family_usable": 4,
+   "six_family_usable": 4,
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+   "license_status": "unknown_pending_review per file; dataset-level ODC-BY claim (same as S6 adjudication note)",
+   "prior_use": "none found"
+  },
+  {
+   "sha256": "3abadf01285ada2fa24343b841ac11a46b0e2e9ff2f884173628bc00db2b6e20",
+   "source": "docx-corpus batch-2-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-2-v1\\074ef547c28f85c334d3a23a6093e8f717423689aac7c532c84f6f9cff2698d2.docx",
+   "source_url": "https://docxcorp.us/documents/074ef547c28f85c334d3a23a6093e8f717423689aac7c532c84f6f9cff2698d2.docx",
+   "corpus_metadata": {
+    "type": "policies",
+    "topic": "finance",
+    "word_count": 1228
+   },
+   "headings": 58,
+   "omath": 0,
+   "tbl": 2,
+   "five_family_usable": 4,
+   "six_family_usable": 4,
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+   "license_status": "unknown_pending_review per file; dataset-level ODC-BY claim (same as S6 adjudication note)",
+   "prior_use": "none found"
+  },
+  {
+   "sha256": "ad3f52351c5e20f2c2f943230f8c8d75e3abab51f881c6729115289c3d94eee9",
+   "source": "docx-corpus batch-2-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-2-v1\\08ed75dba551235c8cb88fc7cf20b52cd563408bdb572dbac8564ac77863c04f.docx",
+   "source_url": "https://docxcorp.us/documents/08ed75dba551235c8cb88fc7cf20b52cd563408bdb572dbac8564ac77863c04f.docx",
+   "corpus_metadata": {
+    "type": "reference",
+    "topic": "nonprofit",
+    "word_count": 2587
+   },
+   "headings": 49,
+   "omath": 0,
+   "tbl": 0,
+   "five_family_usable": 4,
+   "six_family_usable": 4,
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+   "license_status": "unknown_pending_review per file; dataset-level ODC-BY claim (same as S6 adjudication note)",
+   "prior_use": "none found"
+  },
+  {
+   "sha256": "5b43c948a991e60e4e5a1a6e709222b5b0c805f87b875b087a1448e902eefee5",
+   "source": "docx-corpus batch-500-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-500-v1\\0998db0e27ce2095b892a4b340bfeda6e315f57d2db8df58ed6fce2c2c6a0972.docx",
+   "source_url": "https://docxcorp.us/documents/0998db0e27ce2095b892a4b340bfeda6e315f57d2db8df58ed6fce2c2c6a0972.docx",
+   "corpus_metadata": {
+    "type": "technical",
+    "topic": "technology",
+    "word_count": 2050
+   },
+   "headings": 28,
+   "omath": 0,
+   "tbl": 0,
+   "five_family_usable": 4,
+   "six_family_usable": 4,
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+   "license_status": "unknown_pending_review per file; dataset-level ODC-BY claim (same as S6 adjudication note)",
+   "prior_use": "none found"
+  },
+  {
+   "sha256": "ede3e0981b844b40238ef074e5c00b69de453a3292825d2a2a1a9598d179079f",
+   "source": "docx-corpus batch-3-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-3-v1\\0c37d96304efea14bdb673c00e4de89474ab8e798a208ee5c7f7de5423ba0393.docx",
+   "source_url": "https://docxcorp.us/documents/0c37d96304efea14bdb673c00e4de89474ab8e798a208ee5c7f7de5423ba0393.docx",
+   "corpus_metadata": {
+    "type": "technical",
+    "topic": "finance",
+    "word_count": 1533
+   },
+   "headings": 73,
+   "omath": 0,
+   "tbl": 4,
+   "five_family_usable": 4,
+   "six_family_usable": 4,
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+   "license_status": "unknown_pending_review per file; dataset-level ODC-BY claim (same as S6 adjudication note)",
+   "prior_use": "none found"
+  },
+  {
+   "sha256": "5deff8606ca6db464b0d36e503335fac64951f41fa725d3a735590b163e2dbe1",
+   "source": "docx-corpus batch-2-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-2-v1\\0cbf717cebee72a910fbf188ceff6eb1ed078d56497aabd07724321542545326.docx",
+   "source_url": "https://docxcorp.us/documents/0cbf717cebee72a910fbf188ceff6eb1ed078d56497aabd07724321542545326.docx",
+   "corpus_metadata": {
+    "type": "policies",
+    "topic": "government",
+    "word_count": 1897
+   },
+   "headings": 32,
+   "omath": 0,
+   "tbl": 3,
+   "five_family_usable": 3,
+   "six_family_usable": 3,
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+   "license_status": "unknown_pending_review per file; dataset-level ODC-BY claim (same as S6 adjudication note)",
+   "prior_use": "none found"
+  },
+  {
+   "sha256": "aaa0eab1b8263d34df7cdad59bb2d7b70a60376bad0daef2f56f572432766fe9",
+   "source": "docx-corpus batch-2-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-2-v1\\0d53e2e89693738e9b09a3c9df86405c2859d09c63cd601d5343f4c5c110e2d0.docx",
+   "source_url": "https://docxcorp.us/documents/0d53e2e89693738e9b09a3c9df86405c2859d09c63cd601d5343f4c5c110e2d0.docx",
+   "corpus_metadata": {
+    "type": "technical",
+    "topic": "technology",
+    "word_count": 4654
+   },
+   "headings": 31,
+   "omath": 0,
+   "tbl": 3,
+   "five_family_usable": 4,
+   "six_family_usable": 4,
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+   "license_status": "unknown_pending_review per file; dataset-level ODC-BY claim (same as S6 adjudication note)",
+   "prior_use": "none found"
+  },
+  {
+   "sha256": "a981f5d282d9c9949ea00c58627a930e30fdcb0a901120054a8142a3144f560e",
+   "source": "docx-corpus batch-500-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-500-v1\\10dc6069bf585fa5b4821ba76231ab8e00277df16bdbde0cd562f7b856425c89.docx",
+   "source_url": "https://docxcorp.us/documents/10dc6069bf585fa5b4821ba76231ab8e00277df16bdbde0cd562f7b856425c89.docx",
+   "corpus_metadata": {
+    "type": "policies",
+    "topic": "government",
+    "word_count": 2444
+   },
+   "headings": 34,
+   "omath": 0,
+   "tbl": 0,
+   "five_family_usable": 4,
+   "six_family_usable": 4,
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+   "license_status": "unknown_pending_review per file; dataset-level ODC-BY claim (same as S6 adjudication note)",
+   "prior_use": "none found"
+  },
+  {
+   "sha256": "8825d1fbd427c9353ef59a999b3efb7eb641d85a494fc842d40bb2c7627959fb",
+   "source": "docx-corpus batch-3-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-3-v1\\12c81f89e281ce848e59649c60d9c5f70cf5312e88d6b8b9953fc154f178a865.docx",
+   "source_url": "https://docxcorp.us/documents/12c81f89e281ce848e59649c60d9c5f70cf5312e88d6b8b9953fc154f178a865.docx",
+   "corpus_metadata": {
+    "type": "policies",
+    "topic": "finance",
+    "word_count": 3371
+   },
+   "headings": 31,
+   "omath": 0,
+   "tbl": 0,
+   "five_family_usable": 4,
+   "six_family_usable": 4,
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+   "license_status": "unknown_pending_review per file; dataset-level ODC-BY claim (same as S6 adjudication note)",
+   "prior_use": "none found"
+  },
+  {
+   "sha256": "a0c759b712b579fec49ff32e06fd915bd1be0e24cddfaa3078d5211955aa6002",
+   "source": "docx-corpus batch-3-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-3-v1\\1312221bc0410be9c7a20938ad018b8ad12da57690b7a0cbcbef7c7408c5b836.docx",
+   "source_url": "https://docxcorp.us/documents/1312221bc0410be9c7a20938ad018b8ad12da57690b7a0cbcbef7c7408c5b836.docx",
+   "corpus_metadata": {
+    "type": "technical",
+    "topic": "technology",
+    "word_count": 2199
+   },
+   "headings": 33,
+   "omath": 0,
+   "tbl": 10,
+   "five_family_usable": 4,
+   "six_family_usable": 4,
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+   "license_status": "unknown_pending_review per file; dataset-level ODC-BY claim (same as S6 adjudication note)",
+   "prior_use": "none found"
+  },
+  {
+   "sha256": "acd134313c175f4e5d9ceb10f33454115c977153a91e83cdccad73303ed4a428",
+   "source": "docx-corpus batch-2-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-2-v1\\1335a446a140e80b20bc039c24f151cf3e2653d11c17a73891853bf91fb52a14.docx",
+   "source_url": "https://docxcorp.us/documents/1335a446a140e80b20bc039c24f151cf3e2653d11c17a73891853bf91fb52a14.docx",
+   "corpus_metadata": {
+    "type": "technical",
+    "topic": "technology",
+    "word_count": 2199
+   },
+   "headings": 33,
+   "omath": 0,
+   "tbl": 10,
+   "five_family_usable": 4,
+   "six_family_usable": 4,
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+   "license_status": "unknown_pending_review per file; dataset-level ODC-BY claim (same as S6 adjudication note)",
+   "prior_use": "none found"
+  },
+  {
+   "sha256": "b3db096444a8305cdf41e5fd9a96cd62f210b9fe598f290a49ba376199172a03",
+   "source": "docx-corpus batch-2-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-2-v1\\157b60be310d4f0b18d63631b9dd889f9774084b68332e2bf315cecbe7b89aa6.docx",
+   "source_url": "https://docxcorp.us/documents/157b60be310d4f0b18d63631b9dd889f9774084b68332e2bf315cecbe7b89aa6.docx",
+   "corpus_metadata": {
+    "type": "technical",
+    "topic": "environment",
+    "word_count": 2032
+   },
+   "headings": 120,
+   "omath": 0,
+   "tbl": 0,
+   "five_family_usable": 3,
+   "six_family_usable": 3,
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+   "license_status": "unknown_pending_review per file; dataset-level ODC-BY claim (same as S6 adjudication note)",
+   "prior_use": "none found"
+  },
+  {
+   "sha256": "16533ed385b8d759e2569735b15f55b4ec16f28032c8e34159a02433a3d721b0",
+   "source": "docx-corpus batch-3-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-3-v1\\15ef23126ede47fe3ddce5e9b918113309aac3ecb5989481304530a27c825969.docx",
+   "source_url": "https://docxcorp.us/documents/15ef23126ede47fe3ddce5e9b918113309aac3ecb5989481304530a27c825969.docx",
+   "corpus_metadata": {
+    "type": "policies",
+    "topic": "general",
+    "word_count": 1812
+   },
+   "headings": 33,
+   "omath": 0,
+   "tbl": 0,
+   "five_family_usable": 4,
+   "six_family_usable": 4,
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+   "license_status": "unknown_pending_review per file; dataset-level ODC-BY claim (same as S6 adjudication note)",
+   "prior_use": "none found"
+  },
+  {
+   "sha256": "b45ee68bb148cffb61c9f0f6dc4681014c73f26c238c876737c27b6f34ad430d",
+   "source": "docx-corpus batch-2-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-2-v1\\16aa6afa5326d02868b4afd2a242a2b641cd38ea0530f51b9c0c973c5d227384.docx",
+   "source_url": "https://docxcorp.us/documents/16aa6afa5326d02868b4afd2a242a2b641cd38ea0530f51b9c0c973c5d227384.docx",
+   "corpus_metadata": {
+    "type": "technical",
+    "topic": "technology",
+    "word_count": 1490
+   },
+   "headings": 49,
+   "omath": 0,
+   "tbl": 0,
+   "five_family_usable": 4,
+   "six_family_usable": 4,
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+   "license_status": "unknown_pending_review per file; dataset-level ODC-BY claim (same as S6 adjudication note)",
+   "prior_use": "none found"
+  },
+  {
+   "sha256": "c0685d8dd3bf648a4c803f62727e0411e29db8918541d12529a3194f2d8061f4",
+   "source": "docx-corpus batch-2-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-2-v1\\17752592d249980199b742a72970e59b577885fe203649b5dcd657817a27af25.docx",
+   "source_url": "https://docxcorp.us/documents/17752592d249980199b742a72970e59b577885fe203649b5dcd657817a27af25.docx",
+   "corpus_metadata": {
+    "type": "technical",
+    "topic": "technology",
+    "word_count": 2217
+   },
+   "headings": 33,
+   "omath": 0,
+   "tbl": 10,
+   "five_family_usable": 4,
+   "six_family_usable": 4,
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+   "license_status": "unknown_pending_review per file; dataset-level ODC-BY claim (same as S6 adjudication note)",
+   "prior_use": "none found"
+  },
+  {
+   "sha256": "fd0ee3ef1f0e6d7dcc320464d7ebfaba6a25a1dfe4171bfe48b906eb6203d729",
+   "source": "docx-corpus batch-2-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-2-v1\\193f2e4fd85af80fd59b4777138edc673b872cec8bc7b4d81e98a8d644be924d.docx",
+   "source_url": "https://docxcorp.us/documents/193f2e4fd85af80fd59b4777138edc673b872cec8bc7b4d81e98a8d644be924d.docx",
+   "corpus_metadata": {
+    "type": "policies",
+    "topic": "finance",
+    "word_count": 675
+   },
+   "headings": 32,
+   "omath": 0,
+   "tbl": 17,
+   "five_family_usable": 4,
+   "six_family_usable": 4,
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+   "license_status": "unknown_pending_review per file; dataset-level ODC-BY claim (same as S6 adjudication note)",
+   "prior_use": "none found"
+  },
+  {
+   "sha256": "5edbc0970004022ed4f2ef7c77477ea37aa80a78519b822586df0cdfb2ed766f",
+   "source": "docx-corpus batch-2-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-2-v1\\1e362dfe73278f19fe14b92e69d19de1200b8b281d04ff097a1e069d5c85a2c2.docx",
+   "source_url": "https://docxcorp.us/documents/1e362dfe73278f19fe14b92e69d19de1200b8b281d04ff097a1e069d5c85a2c2.docx",
+   "corpus_metadata": {
+    "type": "policies",
+    "topic": "nonprofit",
+    "word_count": 4019
+   },
+   "headings": 40,
+   "omath": 0,
+   "tbl": 5,
+   "five_family_usable": 4,
+   "six_family_usable": 4,
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+   "license_status": "unknown_pending_review per file; dataset-level ODC-BY claim (same as S6 adjudication note)",
+   "prior_use": "none found"
+  },
+  {
+   "sha256": "e4fc97de1102b700b98e26ef8852a80cff42ec202b0c4116230cb80ff463596f",
+   "source": "docx-corpus batch-2-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-2-v1\\219175d744ae28866fc0c0c4760618679e1a2d457b85bf7f2fa7b2f740381fc5.docx",
+   "source_url": "https://docxcorp.us/documents/219175d744ae28866fc0c0c4760618679e1a2d457b85bf7f2fa7b2f740381fc5.docx",
+   "corpus_metadata": {
+    "type": "policies",
+    "topic": "government",
+    "word_count": 4749
+   },
+   "headings": 65,
+   "omath": 0,
+   "tbl": 0,
+   "five_family_usable": 4,
+   "six_family_usable": 4,
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+   "license_status": "unknown_pending_review per file; dataset-level ODC-BY claim (same as S6 adjudication note)",
+   "prior_use": "none found"
+  },
+  {
+   "sha256": "d24b02ec84e6854546c8d18fa3c0ee5d27b94330091f1ed3c6111be9c18fdd6b",
+   "source": "docx-corpus batch-500-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-500-v1\\24235432abe2b598e9ffd845da6fd73c805bece9885b0b9ba087b92dd530cabc.docx",
+   "source_url": "https://docxcorp.us/documents/24235432abe2b598e9ffd845da6fd73c805bece9885b0b9ba087b92dd530cabc.docx",
+   "corpus_metadata": {
+    "type": "reports",
+    "topic": "education",
+    "word_count": 4298
+   },
+   "headings": 29,
+   "omath": 0,
+   "tbl": 4,
+   "five_family_usable": 4,
+   "six_family_usable": 4,
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+   "license_status": "unknown_pending_review per file; dataset-level ODC-BY claim (same as S6 adjudication note)",
+   "prior_use": "none found"
+  },
+  {
+   "sha256": "bed1ecb15f6e426e8e2170a63109b62a8e94f5468d8181bcf458bc654a37859e",
+   "source": "docx-corpus batch-3-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-3-v1\\2576fc20b1a6403815bddf42f8ba7a02937af96172a03a8258dbe324cd1e2e07.docx",
+   "source_url": "https://docxcorp.us/documents/2576fc20b1a6403815bddf42f8ba7a02937af96172a03a8258dbe324cd1e2e07.docx",
+   "corpus_metadata": {
+    "type": "reports",
+    "topic": "technology",
+    "word_count": 4678
+   },
+   "headings": 28,
+   "omath": 0,
+   "tbl": 4,
+   "five_family_usable": 3,
+   "six_family_usable": 3,
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+   "license_status": "unknown_pending_review per file; dataset-level ODC-BY claim (same as S6 adjudication note)",
+   "prior_use": "none found"
+  },
+  {
+   "sha256": "a44fafc47d639595e6277876190c0bf9f7b6c4d59a66c266bb5d36a76e0f13c1",
+   "source": "docx-corpus batch-500-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-500-v1\\2973a7aecd6036a0a882c21a2152c9f69f5eee3c76e023349606ddef1899eda6.docx",
+   "source_url": "https://docxcorp.us/documents/2973a7aecd6036a0a882c21a2152c9f69f5eee3c76e023349606ddef1899eda6.docx",
+   "corpus_metadata": {
+    "type": "reports",
+    "topic": "government",
+    "word_count": 1964
+   },
+   "headings": 40,
+   "omath": 0,
+   "tbl": 0,
+   "five_family_usable": 4,
+   "six_family_usable": 4,
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+   "license_status": "unknown_pending_review per file; dataset-level ODC-BY claim (same as S6 adjudication note)",
+   "prior_use": "none found"
+  },
+  {
+   "sha256": "c3b976ee674843a9aa0a7a9eaa287f5cbd1c0072c28eecec52de48e9abea7917",
+   "source": "docx-corpus batch-2-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-2-v1\\2a2c9f939628dc29e64bc401c1a29e0147997977d43253d776a37492c8975768.docx",
+   "source_url": "https://docxcorp.us/documents/2a2c9f939628dc29e64bc401c1a29e0147997977d43253d776a37492c8975768.docx",
+   "corpus_metadata": {
+    "type": "policies",
+    "topic": "environment",
+    "word_count": 744
+   },
+   "headings": 65,
+   "omath": 0,
+   "tbl": 0,
+   "five_family_usable": 3,
+   "six_family_usable": 0,
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+   "license_status": "unknown_pending_review per file; dataset-level ODC-BY claim (same as S6 adjudication note)",
+   "prior_use": "none found"
+  },
+  {
+   "sha256": "8363fc53d931fdb9399364912ba6692820c1b8c5be975c274663051231d53407",
+   "source": "docx-corpus batch-2-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-2-v1\\2e87b58cc5e01200a16512e689514a128f7880d7d625d46ee171cd58c14962be.docx",
+   "source_url": "https://docxcorp.us/documents/2e87b58cc5e01200a16512e689514a128f7880d7d625d46ee171cd58c14962be.docx",
+   "corpus_metadata": {
+    "type": "policies",
+    "topic": "nonprofit",
+    "word_count": 3851
+   },
+   "headings": 35,
+   "omath": 0,
+   "tbl": 1,
+   "five_family_usable": 4,
+   "six_family_usable": 4,
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+   "license_status": "unknown_pending_review per file; dataset-level ODC-BY claim (same as S6 adjudication note)",
+   "prior_use": "none found"
+  },
+  {
+   "sha256": "77c6786b8f366d57a8c57f984cead3ed38990f5021c4eb4d17842d91875cd92b",
+   "source": "docx-corpus batch-3-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-3-v1\\2efed6909a702a3721489547f21467882c1e1af782bf988fba1c5cc977f4cabb.docx",
+   "source_url": "https://docxcorp.us/documents/2efed6909a702a3721489547f21467882c1e1af782bf988fba1c5cc977f4cabb.docx",
+   "corpus_metadata": {
+    "type": "reports",
+    "topic": "education",
+    "word_count": 831
+   },
+   "headings": 35,
+   "omath": 0,
+   "tbl": 0,
+   "five_family_usable": 4,
+   "six_family_usable": 4,
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+   "license_status": "unknown_pending_review per file; dataset-level ODC-BY claim (same as S6 adjudication note)",
+   "prior_use": "none found"
+  },
+  {
+   "sha256": "0aa4a53eeae2ba11ecca6d3135f4a3ec8994690b3bee5dd6301d2ce07f4ac712",
+   "source": "docx-corpus batch-2-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-2-v1\\2f97d7c5aae770fbddd295a09d7f45e808195251b948b7ac033f0dc8dd095c21.docx",
+   "source_url": "https://docxcorp.us/documents/2f97d7c5aae770fbddd295a09d7f45e808195251b948b7ac033f0dc8dd095c21.docx",
+   "corpus_metadata": {
+    "type": "policies",
+    "topic": "finance",
+    "word_count": 4633
+   },
+   "headings": 31,
+   "omath": 0,
+   "tbl": 1,
+   "five_family_usable": 4,
+   "six_family_usable": 4,
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+   "license_status": "unknown_pending_review per file; dataset-level ODC-BY claim (same as S6 adjudication note)",
+   "prior_use": "none found"
+  },
+  {
+   "sha256": "e94f9314162debdd1a85d2accc2402d46140c874902bfad9b3686ba34c21ebc0",
+   "source": "docx-corpus batch-2-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-2-v1\\30e3ba73d5fdcbd2e9b0ab3e98d726eee986e67fd1ccc56cac8533485cf6d5ec.docx",
+   "source_url": "https://docxcorp.us/documents/30e3ba73d5fdcbd2e9b0ab3e98d726eee986e67fd1ccc56cac8533485cf6d5ec.docx",
+   "corpus_metadata": {
+    "type": "policies",
+    "topic": "environment",
+    "word_count": 4678
+   },
+   "headings": 52,
+   "omath": 0,
+   "tbl": 0,
+   "five_family_usable": 4,
+   "six_family_usable": 4,
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+   "license_status": "unknown_pending_review per file; dataset-level ODC-BY claim (same as S6 adjudication note)",
+   "prior_use": "none found"
+  },
+  {
+   "sha256": "c04412c3eeda841d22fd345d3ca5ed3757ec528500d4cd542a82e29d1e5b18b5",
+   "source": "docx-corpus batch-3-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-3-v1\\32071ef2d95b709e1574cf0f47e622bf6bf952ba4f12dadb6f73741cd9e6f05c.docx",
+   "source_url": "https://docxcorp.us/documents/32071ef2d95b709e1574cf0f47e622bf6bf952ba4f12dadb6f73741cd9e6f05c.docx",
+   "corpus_metadata": {
+    "type": "policies",
+    "topic": "government",
+    "word_count": 4388
+   },
+   "headings": 36,
+   "omath": 0,
+   "tbl": 1,
+   "five_family_usable": 4,
+   "six_family_usable": 4,
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+   "license_status": "unknown_pending_review per file; dataset-level ODC-BY claim (same as S6 adjudication note)",
+   "prior_use": "none found"
+  },
+  {
+   "sha256": "59fac918af442e72a94642e2e5eee78279dc2ef425a94660ae82ee21ef0f854b",
+   "source": "docx-corpus batch-3-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-3-v1\\32503982a9827a6b8475df2893ce3f7870fe65a405d1e1179e3677201434655d.docx",
+   "source_url": "https://docxcorp.us/documents/32503982a9827a6b8475df2893ce3f7870fe65a405d1e1179e3677201434655d.docx",
+   "corpus_metadata": {
+    "type": "technical",
+    "topic": "technology",
+    "word_count": 4972
+   },
+   "headings": 57,
+   "omath": 0,
+   "tbl": 3,
+   "five_family_usable": 3,
+   "six_family_usable": 3,
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+   "license_status": "unknown_pending_review per file; dataset-level ODC-BY claim (same as S6 adjudication note)",
+   "prior_use": "none found"
+  },
+  {
+   "sha256": "1768af4f85ef5bd3665246647f633bc0adc76fdb904ebeae6b91b36f0fefeae0",
+   "source": "docx-corpus batch-3-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-3-v1\\3591bfcec969b5c953e310f82aa3f10e33aa4c8636faa187f63ef45fd1061a9a.docx",
+   "source_url": "https://docxcorp.us/documents/3591bfcec969b5c953e310f82aa3f10e33aa4c8636faa187f63ef45fd1061a9a.docx",
+   "corpus_metadata": {
+    "type": "policies",
+    "topic": "government",
+    "word_count": 4842
+   },
+   "headings": 68,
+   "omath": 0,
+   "tbl": 0,
+   "five_family_usable": 4,
+   "six_family_usable": 4,
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+   "license_status": "unknown_pending_review per file; dataset-level ODC-BY claim (same as S6 adjudication note)",
+   "prior_use": "none found"
+  },
+  {
+   "sha256": "64dc5febe115b62c2c9c952647e559c26f778fc600a0475d594448039481b1d5",
+   "source": "docx-corpus batch-3-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-3-v1\\372914701bfd9289abf3eb4296145ec311aab904d549cece12e964c8d44600f2.docx",
+   "source_url": "https://docxcorp.us/documents/372914701bfd9289abf3eb4296145ec311aab904d549cece12e964c8d44600f2.docx",
+   "corpus_metadata": {
+    "type": "technical",
+    "topic": "technology",
+    "word_count": 2519
+   },
+   "headings": 35,
+   "omath": 0,
+   "tbl": 3,
+   "five_family_usable": 3,
+   "six_family_usable": 3,
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+   "license_status": "unknown_pending_review per file; dataset-level ODC-BY claim (same as S6 adjudication note)",
+   "prior_use": "none found"
+  },
+  {
+   "sha256": "9489d1e2355a6889234d56c1d885df3bd241679d73231f5b4a01f8ba689e2776",
+   "source": "docx-corpus batch-2-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-2-v1\\387ed56e23f7601354d1accdc903a43641d62be5650158c1dd2e9451038197a8.docx",
+   "source_url": "https://docxcorp.us/documents/387ed56e23f7601354d1accdc903a43641d62be5650158c1dd2e9451038197a8.docx",
+   "corpus_metadata": {
+    "type": "technical",
+    "topic": "technology",
+    "word_count": 2200
+   },
+   "headings": 33,
+   "omath": 0,
+   "tbl": 10,
+   "five_family_usable": 4,
+   "six_family_usable": 4,
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+   "license_status": "unknown_pending_review per file; dataset-level ODC-BY claim (same as S6 adjudication note)",
+   "prior_use": "none found"
+  },
+  {
+   "sha256": "b6d50c0dd0824241236189b4a12e7aacac4c94a11a88f64c953062a5197e1929",
+   "source": "docx-corpus batch-2-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-2-v1\\38f17a9d46989928cb4e1ad4da2a2ba1bb109181776011bf32edad1fc3070813.docx",
+   "source_url": "https://docxcorp.us/documents/38f17a9d46989928cb4e1ad4da2a2ba1bb109181776011bf32edad1fc3070813.docx",
+   "corpus_metadata": {
+    "type": "policies",
+    "topic": "environment",
+    "word_count": 3171
+   },
+   "headings": 32,
+   "omath": 0,
+   "tbl": 2,
+   "five_family_usable": 3,
+   "six_family_usable": 3,
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+   "license_status": "unknown_pending_review per file; dataset-level ODC-BY claim (same as S6 adjudication note)",
+   "prior_use": "none found"
+  },
+  {
+   "sha256": "acec7bb004df3b30e8982b066cdbff9352e0a5b742f577b3d07c32513596c55f",
+   "source": "docx-corpus batch-500-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-500-v1\\4149bdb4a12581b0a18a0b599cb552bdf3f08b37fa1c98ddac7dd060692ade20.docx",
+   "source_url": "https://docxcorp.us/documents/4149bdb4a12581b0a18a0b599cb552bdf3f08b37fa1c98ddac7dd060692ade20.docx",
+   "corpus_metadata": {
+    "type": "technical",
+    "topic": "technology",
+    "word_count": 1629
+   },
+   "headings": 26,
+   "omath": 0,
+   "tbl": 1,
+   "five_family_usable": 4,
+   "six_family_usable": 4,
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+   "license_status": "unknown_pending_review per file; dataset-level ODC-BY claim (same as S6 adjudication note)",
+   "prior_use": "none found"
+  },
+  {
+   "sha256": "e8437d05d1efc2fa7cc67a888e0093dcf79c86da0842d9b1cd3bf2b6f6581305",
+   "source": "docx-corpus batch-3-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-3-v1\\43dea82c294afea4195e7c6ecea2692297e236be24704eeb0dc4a41e8096988b.docx",
+   "source_url": "https://docxcorp.us/documents/43dea82c294afea4195e7c6ecea2692297e236be24704eeb0dc4a41e8096988b.docx",
+   "corpus_metadata": {
+    "type": "policies",
+    "topic": "government",
+    "word_count": 4298
+   },
+   "headings": 43,
+   "omath": 0,
+   "tbl": 27,
+   "five_family_usable": 4,
+   "six_family_usable": 4,
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+   "license_status": "unknown_pending_review per file; dataset-level ODC-BY claim (same as S6 adjudication note)",
+   "prior_use": "none found"
+  },
+  {
+   "sha256": "7bbdd815faf8179980ad48421470a041d62c5e8c19688956e8566bef73cdd45a",
+   "source": "docx-corpus batch-2-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-2-v1\\474709e6f891c9b2a77d9144f1a30ce77166ee10a289e507def2f667e402fda3.docx",
+   "source_url": "https://docxcorp.us/documents/474709e6f891c9b2a77d9144f1a30ce77166ee10a289e507def2f667e402fda3.docx",
+   "corpus_metadata": {
+    "type": "technical",
+    "topic": "technology",
+    "word_count": 4411
+   },
+   "headings": 28,
+   "omath": 0,
+   "tbl": 0,
+   "five_family_usable": 4,
+   "six_family_usable": 4,
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+   "license_status": "unknown_pending_review per file; dataset-level ODC-BY claim (same as S6 adjudication note)",
+   "prior_use": "none found"
+  },
+  {
+   "sha256": "a5f57b4626963dcf2bf850db3b3057b4cc69a72bc19fb328b72e5b3ce2ec6d7c",
+   "source": "docx-corpus batch-500-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-500-v1\\47f3a66b51a508c1a8f510ad31e3aff226fd5052f93ef82c51fd0530efaad057.docx",
+   "source_url": "https://docxcorp.us/documents/47f3a66b51a508c1a8f510ad31e3aff226fd5052f93ef82c51fd0530efaad057.docx",
+   "corpus_metadata": {
+    "type": "technical",
+    "topic": "technology",
+    "word_count": 4549
+   },
+   "headings": 35,
+   "omath": 0,
+   "tbl": 1,
+   "five_family_usable": 4,
+   "six_family_usable": 4,
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+   "license_status": "unknown_pending_review per file; dataset-level ODC-BY claim (same as S6 adjudication note)",
+   "prior_use": "none found"
+  },
+  {
+   "sha256": "728512c20b1cf7d896336c176b227a509cf0a75cbf19c9d9d8409da722be6cd9",
+   "source": "docx-corpus batch-2-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-2-v1\\4ac158a5d50c7118933834d5d8a33ede30f62e62c71e6f4c77f206ad67a4c4a7.docx",
+   "source_url": "https://docxcorp.us/documents/4ac158a5d50c7118933834d5d8a33ede30f62e62c71e6f4c77f206ad67a4c4a7.docx",
+   "corpus_metadata": {
+    "type": "policies",
+    "topic": "government",
+    "word_count": 1257
+   },
+   "headings": 34,
+   "omath": 0,
+   "tbl": 2,
+   "five_family_usable": 4,
+   "six_family_usable": 0,
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+   "license_status": "unknown_pending_review per file; dataset-level ODC-BY claim (same as S6 adjudication note)",
+   "prior_use": "none found"
+  },
+  {
+   "sha256": "d7fc3159669c77f4fb01587157e44af138ef5ff5093c0636b3e645dd33d9ee5a",
+   "source": "docx-corpus batch-500-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-500-v1\\4bd50a414ad28a2d3f2b8b1926d41f2023f650673f582184b5415ea1a538530f.docx",
+   "source_url": "https://docxcorp.us/documents/4bd50a414ad28a2d3f2b8b1926d41f2023f650673f582184b5415ea1a538530f.docx",
+   "corpus_metadata": {
+    "type": "technical",
+    "topic": "education",
+    "word_count": 2403
+   },
+   "headings": 26,
+   "omath": 0,
+   "tbl": 0,
+   "five_family_usable": 4,
+   "six_family_usable": 4,
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+   "license_status": "unknown_pending_review per file; dataset-level ODC-BY claim (same as S6 adjudication note)",
+   "prior_use": "none found"
+  },
+  {
+   "sha256": "c64cf48fb746b507b2f1b9bdb9d9b62be8705aa88dab0cb94ab51b3aa4fd9795",
+   "source": "docx-corpus batch-3-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-3-v1\\4f970c5149bb4a7bc3f7fe7b1f09cc725ba5987c2ee65cd98e49906a450b9ae0.docx",
+   "source_url": "https://docxcorp.us/documents/4f970c5149bb4a7bc3f7fe7b1f09cc725ba5987c2ee65cd98e49906a450b9ae0.docx",
+   "corpus_metadata": {
+    "type": "technical",
+    "topic": "finance",
+    "word_count": 1214
+   },
+   "headings": 66,
+   "omath": 0,
+   "tbl": 4,
+   "five_family_usable": 2,
+   "six_family_usable": 0,
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+   "license_status": "unknown_pending_review per file; dataset-level ODC-BY claim (same as S6 adjudication note)",
+   "prior_use": "none found"
+  },
+  {
+   "sha256": "0db1a93eb2dd7d09f58978b145bbb148feb7116013387107788b162f094698cc",
+   "source": "docx-corpus batch-2-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-2-v1\\4fc9c0d5ec7953eed211bfa2ed6c519c1b9d570b93958ab2cea73a3975d181d2.docx",
+   "source_url": "https://docxcorp.us/documents/4fc9c0d5ec7953eed211bfa2ed6c519c1b9d570b93958ab2cea73a3975d181d2.docx",
+   "corpus_metadata": {
+    "type": "technical",
+    "topic": "technology",
+    "word_count": 2222
+   },
+   "headings": 33,
+   "omath": 0,
+   "tbl": 10,
+   "five_family_usable": 4,
+   "six_family_usable": 4,
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+   "license_status": "unknown_pending_review per file; dataset-level ODC-BY claim (same as S6 adjudication note)",
+   "prior_use": "none found"
+  },
+  {
+   "sha256": "97dd2a132b783b04fcdefb8b63827eddfdda8975668c20296edd2809195bac74",
+   "source": "docx-corpus batch-3-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-3-v1\\5bfc9ad7b048c811cf53efe4d992170ed3cb6eb2ddfa58e0dea5ed638fed8531.docx",
+   "source_url": "https://docxcorp.us/documents/5bfc9ad7b048c811cf53efe4d992170ed3cb6eb2ddfa58e0dea5ed638fed8531.docx",
+   "corpus_metadata": {
+    "type": "policies",
+    "topic": "education",
+    "word_count": 4844
+   },
+   "headings": 44,
+   "omath": 0,
+   "tbl": 0,
+   "five_family_usable": 4,
+   "six_family_usable": 4,
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+   "license_status": "unknown_pending_review per file; dataset-level ODC-BY claim (same as S6 adjudication note)",
+   "prior_use": "none found"
+  },
+  {
+   "sha256": "2644b7ec60ed3eab204343cef2cc1bc46413bab69ebd7741ea520b65b4dabcb4",
+   "source": "docx-corpus batch-2-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-2-v1\\5d0135d1caa381de6a5c5366c1a92cd7bd98c2fd25ef75206f9766fc8d54e8fc.docx",
+   "source_url": "https://docxcorp.us/documents/5d0135d1caa381de6a5c5366c1a92cd7bd98c2fd25ef75206f9766fc8d54e8fc.docx",
+   "corpus_metadata": {
+    "type": "technical",
+    "topic": "technology",
+    "word_count": 2199
+   },
+   "headings": 33,
+   "omath": 0,
+   "tbl": 10,
+   "five_family_usable": 4,
+   "six_family_usable": 4,
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+   "license_status": "unknown_pending_review per file; dataset-level ODC-BY claim (same as S6 adjudication note)",
+   "prior_use": "none found"
+  },
+  {
+   "sha256": "763bbf73fd5db07e4021cf20febe829ed4873f9cc8e6b042c5a6318b803257d1",
+   "source": "docx-corpus batch-3-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-3-v1\\5fd0e65bcc78389f10207b0c2af06e5f19d5ccf412a1b28be7eb3bfeae3bd647.docx",
+   "source_url": "https://docxcorp.us/documents/5fd0e65bcc78389f10207b0c2af06e5f19d5ccf412a1b28be7eb3bfeae3bd647.docx",
+   "corpus_metadata": {
+    "type": "technical",
+    "topic": "technology",
+    "word_count": 2199
+   },
+   "headings": 33,
+   "omath": 0,
+   "tbl": 10,
+   "five_family_usable": 4,
+   "six_family_usable": 4,
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+   "license_status": "unknown_pending_review per file; dataset-level ODC-BY claim (same as S6 adjudication note)",
+   "prior_use": "none found"
+  },
+  {
+   "sha256": "c3bd066d02e19cdad1bae39c4c96de8e61c01442a3d81864f383f6de0eadad29",
+   "source": "docx-corpus batch-3-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-3-v1\\5fdb0f3d3b27a201e4bc9225c734e8e20395f31af224baefd55cd4db5c7842cb.docx",
+   "source_url": "https://docxcorp.us/documents/5fdb0f3d3b27a201e4bc9225c734e8e20395f31af224baefd55cd4db5c7842cb.docx",
+   "corpus_metadata": {
+    "type": "policies",
+    "topic": "education",
+    "word_count": 3114
+   },
+   "headings": 26,
+   "omath": 0,
+   "tbl": 2,
+   "five_family_usable": 4,
+   "six_family_usable": 4,
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+   "license_status": "unknown_pending_review per file; dataset-level ODC-BY claim (same as S6 adjudication note)",
+   "prior_use": "none found"
+  },
+  {
+   "sha256": "2d8285d2a36a0efc4da6f53fea26cd9ecb2400dea017519252de376d41bba130",
+   "source": "docx-corpus batch-2-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-2-v1\\64ff7b9e575dba88fdc1d5ac048f08945b24dce3f326e5a88f86f38713ea305d.docx",
+   "source_url": "https://docxcorp.us/documents/64ff7b9e575dba88fdc1d5ac048f08945b24dce3f326e5a88f86f38713ea305d.docx",
+   "corpus_metadata": {
+    "type": "technical",
+    "topic": "technology",
+    "word_count": 2982
+   },
+   "headings": 37,
+   "omath": 0,
+   "tbl": 5,
+   "five_family_usable": 2,
+   "six_family_usable": 2,
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+   "license_status": "unknown_pending_review per file; dataset-level ODC-BY claim (same as S6 adjudication note)",
+   "prior_use": "none found"
+  },
+  {
+   "sha256": "66157a47a2b464f153124998c373a6336d75560439381c4e2df80c1b997732bd",
+   "source": "docx-corpus batch-3-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-3-v1\\6714566bf06fea0245475f091e7a9d4a6f97a00a9c1fe8842771f2f312b3319c.docx",
+   "source_url": "https://docxcorp.us/documents/6714566bf06fea0245475f091e7a9d4a6f97a00a9c1fe8842771f2f312b3319c.docx",
+   "corpus_metadata": {
+    "type": "policies",
+    "topic": "nonprofit",
+    "word_count": 4307
+   },
+   "headings": 38,
+   "omath": 0,
+   "tbl": 2,
+   "five_family_usable": 4,
+   "six_family_usable": 4,
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+   "license_status": "unknown_pending_review per file; dataset-level ODC-BY claim (same as S6 adjudication note)",
+   "prior_use": "none found"
+  },
+  {
+   "sha256": "c1fea3a23eb983e97aadc127aeeff15a2fead5012d61b5735ab00a8de184da40",
+   "source": "docx-corpus batch-3-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-3-v1\\69925e0a500fb9c900e0e2f8e8027c7108c73a5b5288ff71d4429047c0122301.docx",
+   "source_url": "https://docxcorp.us/documents/69925e0a500fb9c900e0e2f8e8027c7108c73a5b5288ff71d4429047c0122301.docx",
+   "corpus_metadata": {
+    "type": "technical",
+    "topic": "technology",
+    "word_count": 4777
+   },
+   "headings": 57,
+   "omath": 0,
+   "tbl": 0,
+   "five_family_usable": 4,
+   "six_family_usable": 4,
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+   "license_status": "unknown_pending_review per file; dataset-level ODC-BY claim (same as S6 adjudication note)",
+   "prior_use": "none found"
+  },
+  {
+   "sha256": "e8aaa006f24662c29e6a8bf17fb11c92092315fd01eb0296e5d4c78a54f2d1f5",
+   "source": "docx-corpus batch-2-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-2-v1\\6e278092658bda6773a1739651b2301cdd0922b274339b7945b847a131d440e6.docx",
+   "source_url": "https://docxcorp.us/documents/6e278092658bda6773a1739651b2301cdd0922b274339b7945b847a131d440e6.docx",
+   "corpus_metadata": {
+    "type": "technical",
+    "topic": "technology",
+    "word_count": 2221
+   },
+   "headings": 33,
+   "omath": 0,
+   "tbl": 10,
+   "five_family_usable": 4,
+   "six_family_usable": 4,
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+   "license_status": "unknown_pending_review per file; dataset-level ODC-BY claim (same as S6 adjudication note)",
+   "prior_use": "none found"
+  },
+  {
+   "sha256": "068b1ba98cdfc3a1ff14fd0ae85b8bbc604f46a368826459d4814542225d8d95",
+   "source": "docx-corpus batch-2-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-2-v1\\71e771d43968d0713b38887b0eb01daff2250a8d00eda34176dc331468e9cc13.docx",
+   "source_url": "https://docxcorp.us/documents/71e771d43968d0713b38887b0eb01daff2250a8d00eda34176dc331468e9cc13.docx",
+   "corpus_metadata": {
+    "type": "technical",
+    "topic": "technology",
+    "word_count": 2215
+   },
+   "headings": 33,
+   "omath": 0,
+   "tbl": 10,
+   "five_family_usable": 4,
+   "six_family_usable": 4,
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+   "license_status": "unknown_pending_review per file; dataset-level ODC-BY claim (same as S6 adjudication note)",
+   "prior_use": "none found"
+  },
+  {
+   "sha256": "59d66c473f750765a57e6373deb4918a9a02f6c8584ec5a7d53d7c65a39a98d7",
+   "source": "docx-corpus batch-2-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-2-v1\\740ac9026d9e036d05bbb8ae9ed5109ee8f101d7d767f4fff240bd6d072bd3cc.docx",
+   "source_url": "https://docxcorp.us/documents/740ac9026d9e036d05bbb8ae9ed5109ee8f101d7d767f4fff240bd6d072bd3cc.docx",
+   "corpus_metadata": {
+    "type": "technical",
+    "topic": "environment",
+    "word_count": 3265
+   },
+   "headings": 31,
+   "omath": 0,
+   "tbl": 6,
+   "five_family_usable": 4,
+   "six_family_usable": 4,
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+   "license_status": "unknown_pending_review per file; dataset-level ODC-BY claim (same as S6 adjudication note)",
+   "prior_use": "none found"
+  },
+  {
+   "sha256": "6e9e964ede81efdbbee71d12500c8263cc968ac0eb0529f304b5086eff8aa279",
+   "source": "docx-corpus batch-500-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-500-v1\\75bfe3e69316a3d2f6ae2af90a773e8b1676e315332318a2ad102f331b619417.docx",
+   "source_url": "https://docxcorp.us/documents/75bfe3e69316a3d2f6ae2af90a773e8b1676e315332318a2ad102f331b619417.docx",
+   "corpus_metadata": {
+    "type": "policies",
+    "topic": "education",
+    "word_count": 3270
+   },
+   "headings": 29,
+   "omath": 0,
+   "tbl": 11,
+   "five_family_usable": 4,
+   "six_family_usable": 4,
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+   "license_status": "unknown_pending_review per file; dataset-level ODC-BY claim (same as S6 adjudication note)",
+   "prior_use": "none found"
+  },
+  {
+   "sha256": "747351a94486953268e6ea92cd0926ca7c2f73418f8d318f2e85bdf70fa79a2c",
+   "source": "docx-corpus batch-2-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-2-v1\\7694b41ac9c9e671259f6ec787bc79d638140555ff39e885f55fc9bc721a2475.docx",
+   "source_url": "https://docxcorp.us/documents/7694b41ac9c9e671259f6ec787bc79d638140555ff39e885f55fc9bc721a2475.docx",
+   "corpus_metadata": {
+    "type": "reports",
+    "topic": "technology",
+    "word_count": 356
+   },
+   "headings": 32,
+   "omath": 0,
+   "tbl": 1,
+   "five_family_usable": 2,
+   "six_family_usable": 0,
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+   "license_status": "unknown_pending_review per file; dataset-level ODC-BY claim (same as S6 adjudication note)",
+   "prior_use": "none found"
+  },
+  {
+   "sha256": "cf5e9847bb8b1710ca7553404c29748ee1e8724e62e96709ef09ae7ecb707e74",
+   "source": "docx-corpus batch-3-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-3-v1\\77a1a84605a46232fbfb21d142f168af1239ba92c8ac70f1e007fbb2952670f2.docx",
+   "source_url": "https://docxcorp.us/documents/77a1a84605a46232fbfb21d142f168af1239ba92c8ac70f1e007fbb2952670f2.docx",
+   "corpus_metadata": {
+    "type": "technical",
+    "topic": "technology",
+    "word_count": 2215
+   },
+   "headings": 33,
+   "omath": 0,
+   "tbl": 10,
+   "five_family_usable": 4,
+   "six_family_usable": 4,
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+   "license_status": "unknown_pending_review per file; dataset-level ODC-BY claim (same as S6 adjudication note)",
+   "prior_use": "none found"
+  },
+  {
+   "sha256": "8e7472fafb9b897319e7f12a864c8dbe3def535dee5c14dd72d0cc9cb48ac448",
+   "source": "docx-corpus batch-500-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-500-v1\\77ae74e5448ef029df65339323ba0e4345dda66db35540b06780cac7efd8cf8b.docx",
+   "source_url": "https://docxcorp.us/documents/77ae74e5448ef029df65339323ba0e4345dda66db35540b06780cac7efd8cf8b.docx",
+   "corpus_metadata": {
+    "type": "reports",
+    "topic": "education",
+    "word_count": 4850
+   },
+   "headings": 26,
+   "omath": 0,
+   "tbl": 0,
+   "five_family_usable": 4,
+   "six_family_usable": 4,
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+   "license_status": "unknown_pending_review per file; dataset-level ODC-BY claim (same as S6 adjudication note)",
+   "prior_use": "none found"
+  },
+  {
+   "sha256": "2f675a963a2cc6f17c0982ccd2093681373aea53ccc8014bb35acb061bd22a4d",
+   "source": "docx-corpus batch-3-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-3-v1\\7ec55842246cb5e939d10d96d2fadc9d80317ad801ca82215822b211c50301d9.docx",
+   "source_url": "https://docxcorp.us/documents/7ec55842246cb5e939d10d96d2fadc9d80317ad801ca82215822b211c50301d9.docx",
+   "corpus_metadata": {
+    "type": "policies",
+    "topic": "nonprofit",
+    "word_count": 3719
+   },
+   "headings": 29,
+   "omath": 0,
+   "tbl": 0,
+   "five_family_usable": 4,
+   "six_family_usable": 4,
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+   "license_status": "unknown_pending_review per file; dataset-level ODC-BY claim (same as S6 adjudication note)",
+   "prior_use": "none found"
+  },
+  {
+   "sha256": "74aeb1a7c2194885ee65f47f6f5e1c0dd0eec29f18dcf973b680b1656a446db5",
+   "source": "docx-corpus batch-2-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-2-v1\\81c2c6d69f82e48152ffd2c7bbf7d824cd09d645487ee6f1acd911b9c4c02c0e.docx",
+   "source_url": "https://docxcorp.us/documents/81c2c6d69f82e48152ffd2c7bbf7d824cd09d645487ee6f1acd911b9c4c02c0e.docx",
+   "corpus_metadata": {
+    "type": "technical",
+    "topic": "environment",
+    "word_count": 3168
+   },
+   "headings": 53,
+   "omath": 0,
+   "tbl": 0,
+   "five_family_usable": 4,
+   "six_family_usable": 4,
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+   "license_status": "unknown_pending_review per file; dataset-level ODC-BY claim (same as S6 adjudication note)",
+   "prior_use": "none found"
+  },
+  {
+   "sha256": "283926675293f145dca5a73e686de806cc9f6faf7013f49c4e226c920d97921a",
+   "source": "docx-corpus batch-2-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-2-v1\\82aadc5e26e825595fd600334aa289bc6d7aa5e59b7471443fc708faf507fd59.docx",
+   "source_url": "https://docxcorp.us/documents/82aadc5e26e825595fd600334aa289bc6d7aa5e59b7471443fc708faf507fd59.docx",
+   "corpus_metadata": {
+    "type": "policies",
+    "topic": "education",
+    "word_count": 3354
+   },
+   "headings": 30,
+   "omath": 0,
+   "tbl": 0,
+   "five_family_usable": 4,
+   "six_family_usable": 4,
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+   "license_status": "unknown_pending_review per file; dataset-level ODC-BY claim (same as S6 adjudication note)",
+   "prior_use": "none found"
+  },
+  {
+   "sha256": "09a30ee8e801e36375e58be9e34ed7b39aa91f410fad94386ae619d923e96c54",
+   "source": "docx-corpus batch-3-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-3-v1\\8321c316e029c28b823bc91f5dcecb21aa9e5530590e9fb964dc2d83fc112cdd.docx",
+   "source_url": "https://docxcorp.us/documents/8321c316e029c28b823bc91f5dcecb21aa9e5530590e9fb964dc2d83fc112cdd.docx",
+   "corpus_metadata": {
+    "type": "policies",
+    "topic": "nonprofit",
+    "word_count": 431
+   },
+   "headings": 26,
+   "omath": 0,
+   "tbl": 0,
+   "five_family_usable": 3,
+   "six_family_usable": 3,
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+   "license_status": "unknown_pending_review per file; dataset-level ODC-BY claim (same as S6 adjudication note)",
+   "prior_use": "none found"
+  },
+  {
+   "sha256": "0f43823a61a2997c22e5cab7cc8d957faaa00a29c0a50a8de6e967c4a0296caf",
+   "source": "docx-corpus batch-500-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-500-v1\\8916b0bad7b1e8b08c35d19af3995fa5abf1f9b62f115c83d28fcb016b5a5ad9.docx",
+   "source_url": "https://docxcorp.us/documents/8916b0bad7b1e8b08c35d19af3995fa5abf1f9b62f115c83d28fcb016b5a5ad9.docx",
+   "corpus_metadata": {
+    "type": "policies",
+    "topic": "education",
+    "word_count": 3979
+   },
+   "headings": 33,
+   "omath": 0,
+   "tbl": 0,
+   "five_family_usable": 4,
+   "six_family_usable": 4,
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+   "license_status": "unknown_pending_review per file; dataset-level ODC-BY claim (same as S6 adjudication note)",
+   "prior_use": "none found"
+  },
+  {
+   "sha256": "9ab8aecce2780844deba01342c67a140e3b8194374868d77eab531b57a3e67d0",
+   "source": "docx-corpus batch-3-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-3-v1\\8f83d7a427851e2b3fc18069a6c70c8242b4f3038962f92352419ddeadc966b4.docx",
+   "source_url": "https://docxcorp.us/documents/8f83d7a427851e2b3fc18069a6c70c8242b4f3038962f92352419ddeadc966b4.docx",
+   "corpus_metadata": {
+    "type": "reports",
+    "topic": "technology",
+    "word_count": 1194
+   },
+   "headings": 44,
+   "omath": 0,
+   "tbl": 1,
+   "five_family_usable": 4,
+   "six_family_usable": 4,
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+   "license_status": "unknown_pending_review per file; dataset-level ODC-BY claim (same as S6 adjudication note)",
+   "prior_use": "none found"
+  },
+  {
+   "sha256": "08180b4b29ff39c50df45e0e1934930f7a36aeaf96e1f79cef0c6415b2f3b59f",
+   "source": "docx-corpus batch-3-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-3-v1\\970c9b9cb89e530313f3ec2c9732c95b4cab396ed7144024dc6eab9e614d4236.docx",
+   "source_url": "https://docxcorp.us/documents/970c9b9cb89e530313f3ec2c9732c95b4cab396ed7144024dc6eab9e614d4236.docx",
+   "corpus_metadata": {
+    "type": "policies",
+    "topic": "education",
+    "word_count": 4245
+   },
+   "headings": 31,
+   "omath": 0,
+   "tbl": 1,
+   "five_family_usable": 4,
+   "six_family_usable": 4,
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+   "license_status": "unknown_pending_review per file; dataset-level ODC-BY claim (same as S6 adjudication note)",
+   "prior_use": "none found"
+  },
+  {
+   "sha256": "315ea4b7e4349f22c141b006ce3aaef8f89e1a1b6235dd1f94b46cd30e38182b",
+   "source": "docx-corpus batch-500-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-500-v1\\98fb5157d4e5b718f9bb6b51e3cac177c45ad719a1db7389f9d6fcccf526d6c4.docx",
+   "source_url": "https://docxcorp.us/documents/98fb5157d4e5b718f9bb6b51e3cac177c45ad719a1db7389f9d6fcccf526d6c4.docx",
+   "corpus_metadata": {
+    "type": "technical",
+    "topic": "technology",
+    "word_count": 3201
+   },
+   "headings": 61,
+   "omath": 0,
+   "tbl": 2,
+   "five_family_usable": 4,
+   "six_family_usable": 4,
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+   "license_status": "unknown_pending_review per file; dataset-level ODC-BY claim (same as S6 adjudication note)",
+   "prior_use": "none found"
+  },
+  {
+   "sha256": "99a5c1da24712f71af8c33091520e55129dbc3e38ec9c7b1af4d695702da8217",
+   "source": "docx-corpus batch-3-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-3-v1\\9b433375f9abd434907183071f8067e2a3d9b046cae39134072ce36ddc13ca86.docx",
+   "source_url": "https://docxcorp.us/documents/9b433375f9abd434907183071f8067e2a3d9b046cae39134072ce36ddc13ca86.docx",
+   "corpus_metadata": {
+    "type": "technical",
+    "topic": "environment",
+    "word_count": 2281
+   },
+   "headings": 33,
+   "omath": 0,
+   "tbl": 1,
+   "five_family_usable": 4,
+   "six_family_usable": 4,
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+   "license_status": "unknown_pending_review per file; dataset-level ODC-BY claim (same as S6 adjudication note)",
+   "prior_use": "none found"
+  },
+  {
+   "sha256": "a7f275af3d8d55ba079a6126801c1eb07a0d34891fc16352fb7a544dcd46f6bc",
+   "source": "docx-corpus batch-2-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-2-v1\\9cd4606ef4c0c24af57a2a7818df54590efeebbaf5913e7bbf452b55bba4ac81.docx",
+   "source_url": "https://docxcorp.us/documents/9cd4606ef4c0c24af57a2a7818df54590efeebbaf5913e7bbf452b55bba4ac81.docx",
+   "corpus_metadata": {
+    "type": "policies",
+    "topic": "environment",
+    "word_count": 4083
+   },
+   "headings": 32,
+   "omath": 0,
+   "tbl": 0,
+   "five_family_usable": 4,
+   "six_family_usable": 4,
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+   "license_status": "unknown_pending_review per file; dataset-level ODC-BY claim (same as S6 adjudication note)",
+   "prior_use": "none found"
+  },
+  {
+   "sha256": "e24944991422b8bcdd13b95c5f62c0ee1b818dddd896cfc36615d8708f6652a7",
+   "source": "docx-corpus batch-3-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-3-v1\\9f0e0f5ef4273c9f4ee06f126ac6dbc76190b1dfe42078a4211196b865a1dbb2.docx",
+   "source_url": "https://docxcorp.us/documents/9f0e0f5ef4273c9f4ee06f126ac6dbc76190b1dfe42078a4211196b865a1dbb2.docx",
+   "corpus_metadata": {
+    "type": "technical",
+    "topic": "technology",
+    "word_count": 3023
+   },
+   "headings": 37,
+   "omath": 0,
+   "tbl": 5,
+   "five_family_usable": 2,
+   "six_family_usable": 2,
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+   "license_status": "unknown_pending_review per file; dataset-level ODC-BY claim (same as S6 adjudication note)",
+   "prior_use": "none found"
+  },
+  {
+   "sha256": "b9270b5813d394786d1cf1d1aab0966968a9008e36abccbef5f527b2d816c93c",
+   "source": "docx-corpus batch-3-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-3-v1\\9f84a5227185d1405988c64dcd929957de6bc27ea8ff71f1945e0bed9c4f6991.docx",
+   "source_url": "https://docxcorp.us/documents/9f84a5227185d1405988c64dcd929957de6bc27ea8ff71f1945e0bed9c4f6991.docx",
+   "corpus_metadata": {
+    "type": "policies",
+    "topic": "nonprofit",
+    "word_count": 2621
+   },
+   "headings": 45,
+   "omath": 0,
+   "tbl": 1,
+   "five_family_usable": 4,
+   "six_family_usable": 4,
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+   "license_status": "unknown_pending_review per file; dataset-level ODC-BY claim (same as S6 adjudication note)",
+   "prior_use": "none found"
+  },
+  {
+   "sha256": "39f9f57b66bb4973a1e3546c18808d1909812ebb92a4dec64b9a163f86ae6e98",
+   "source": "docx-corpus batch-3-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-3-v1\\a109fa28aff155847e66411b196f38b331d6416f1092fe093b656c08cf128294.docx",
+   "source_url": "https://docxcorp.us/documents/a109fa28aff155847e66411b196f38b331d6416f1092fe093b656c08cf128294.docx",
+   "corpus_metadata": {
+    "type": "technical",
+    "topic": "technology",
+    "word_count": 2984
+   },
+   "headings": 37,
+   "omath": 0,
+   "tbl": 5,
+   "five_family_usable": 2,
+   "six_family_usable": 2,
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+   "license_status": "unknown_pending_review per file; dataset-level ODC-BY claim (same as S6 adjudication note)",
+   "prior_use": "none found"
+  },
+  {
+   "sha256": "b2c2716a1fc4581576b65275fe57ef4eb906de024f469b70526b358559af84dd",
+   "source": "docx-corpus batch-3-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-3-v1\\a252e5a29d61feb4cd1a8fece2c3d9f8b6f9b4bddd11b64da41435224b7cd172.docx",
+   "source_url": "https://docxcorp.us/documents/a252e5a29d61feb4cd1a8fece2c3d9f8b6f9b4bddd11b64da41435224b7cd172.docx",
+   "corpus_metadata": {
+    "type": "policies",
+    "topic": "environment",
+    "word_count": 1231
+   },
+   "headings": 31,
+   "omath": 0,
+   "tbl": 2,
+   "five_family_usable": 4,
+   "six_family_usable": 4,
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+   "license_status": "unknown_pending_review per file; dataset-level ODC-BY claim (same as S6 adjudication note)",
+   "prior_use": "none found"
+  },
+  {
+   "sha256": "453ec7cf9b768077ed3991e34eed31710c9a0eb49daaaa79e81d84aeede2bc68",
+   "source": "docx-corpus batch-2-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-2-v1\\a55cca062cb521c9cf37f390c4e65f3598f40af9a349438b1c5b43f1b0708a81.docx",
+   "source_url": "https://docxcorp.us/documents/a55cca062cb521c9cf37f390c4e65f3598f40af9a349438b1c5b43f1b0708a81.docx",
+   "corpus_metadata": {
+    "type": "technical",
+    "topic": "environment",
+    "word_count": 1908
+   },
+   "headings": 75,
+   "omath": 0,
+   "tbl": 1,
+   "five_family_usable": 1,
+   "six_family_usable": 0,
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+   "license_status": "unknown_pending_review per file; dataset-level ODC-BY claim (same as S6 adjudication note)",
+   "prior_use": "none found"
+  },
+  {
+   "sha256": "9276620888d70caaf52d9c6b41269159a27d6ac34c25f375676fb0e790d5d44e",
+   "source": "docx-corpus batch-2-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-2-v1\\a5bd4ee50bd42a62dbd07b2e49eecc0f3d7b7e3d3cb4c8fd581f9a4a0e37b913.docx",
+   "source_url": "https://docxcorp.us/documents/a5bd4ee50bd42a62dbd07b2e49eecc0f3d7b7e3d3cb4c8fd581f9a4a0e37b913.docx",
+   "corpus_metadata": {
+    "type": "policies",
+    "topic": "government",
+    "word_count": 3941
+   },
+   "headings": 50,
+   "omath": 0,
+   "tbl": 0,
+   "five_family_usable": 4,
+   "six_family_usable": 4,
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+   "license_status": "unknown_pending_review per file; dataset-level ODC-BY claim (same as S6 adjudication note)",
+   "prior_use": "none found"
+  },
+  {
+   "sha256": "11914c0e5697bc9f9034ac971a3e43f38815fdaf7e073dc169438edb48b6efaf",
+   "source": "docx-corpus batch-2-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-2-v1\\b03750ed723e372b647eecaa7f8f44be02cc7ba331cc44c7a504a61e65bd0980.docx",
+   "source_url": "https://docxcorp.us/documents/b03750ed723e372b647eecaa7f8f44be02cc7ba331cc44c7a504a61e65bd0980.docx",
+   "corpus_metadata": {
+    "type": "reports",
+    "topic": "technology",
+    "word_count": 370
+   },
+   "headings": 32,
+   "omath": 0,
+   "tbl": 1,
+   "five_family_usable": 4,
+   "six_family_usable": 3,
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+   "license_status": "unknown_pending_review per file; dataset-level ODC-BY claim (same as S6 adjudication note)",
+   "prior_use": "none found"
+  },
+  {
+   "sha256": "290d0af39b86791e0b041bd5f1a3d9167b4b082f7bcda32ea84fcd2cb12e5ea0",
+   "source": "docx-corpus batch-2-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-2-v1\\b26c1f79d656e58ddfa7e324e194687d9932552e468a14479ae7bd72072672e9.docx",
+   "source_url": "https://docxcorp.us/documents/b26c1f79d656e58ddfa7e324e194687d9932552e468a14479ae7bd72072672e9.docx",
+   "corpus_metadata": {
+    "type": "reports",
+    "topic": "government",
+    "word_count": 2664
+   },
+   "headings": 48,
+   "omath": 0,
+   "tbl": 0,
+   "five_family_usable": 4,
+   "six_family_usable": 4,
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+   "license_status": "unknown_pending_review per file; dataset-level ODC-BY claim (same as S6 adjudication note)",
+   "prior_use": "none found"
+  },
+  {
+   "sha256": "c61d1c9487cca762f5591d29c4ae95ae280a56fbed7b54eb91fb3a5c27dee4b9",
+   "source": "docx-corpus batch-2-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-2-v1\\b7e526e4491702c3e53b81c81d46f0135c55d7c49a95887aa41d086d6cf923e8.docx",
+   "source_url": "https://docxcorp.us/documents/b7e526e4491702c3e53b81c81d46f0135c55d7c49a95887aa41d086d6cf923e8.docx",
+   "corpus_metadata": {
+    "type": "technical",
+    "topic": "technology",
+    "word_count": 1616
+   },
+   "headings": 33,
+   "omath": 0,
+   "tbl": 1,
+   "five_family_usable": 4,
+   "six_family_usable": 4,
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+   "license_status": "unknown_pending_review per file; dataset-level ODC-BY claim (same as S6 adjudication note)",
+   "prior_use": "none found"
+  },
+  {
+   "sha256": "d3ff0b3c3f2d72d3e1aa59de7ab04446b2e470ba21987ea66b0702d4b14fa968",
+   "source": "docx-corpus batch-2-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-2-v1\\c078ed0ad6fc096da8a028b3ce49eea170634db3d21fe48e30a5d5c722268c7d.docx",
+   "source_url": "https://docxcorp.us/documents/c078ed0ad6fc096da8a028b3ce49eea170634db3d21fe48e30a5d5c722268c7d.docx",
+   "corpus_metadata": {
+    "type": "technical",
+    "topic": "technology",
+    "word_count": 2817
+   },
+   "headings": 35,
+   "omath": 0,
+   "tbl": 3,
+   "five_family_usable": 4,
+   "six_family_usable": 4,
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+   "license_status": "unknown_pending_review per file; dataset-level ODC-BY claim (same as S6 adjudication note)",
+   "prior_use": "none found"
+  },
+  {
+   "sha256": "4d1af43c7f7384ebf92365e5d64112fafa6287618803ab0c1099e6bbdf979353",
+   "source": "docx-corpus batch-2-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-2-v1\\c13737fcc963a7ab874df8664a700c7d439864bb9461f5fa36c1ef4e07451fab.docx",
+   "source_url": "https://docxcorp.us/documents/c13737fcc963a7ab874df8664a700c7d439864bb9461f5fa36c1ef4e07451fab.docx",
+   "corpus_metadata": {
+    "type": "policies",
+    "topic": "government",
+    "word_count": 2625
+   },
+   "headings": 27,
+   "omath": 0,
+   "tbl": 3,
+   "five_family_usable": 4,
+   "six_family_usable": 4,
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+   "license_status": "unknown_pending_review per file; dataset-level ODC-BY claim (same as S6 adjudication note)",
+   "prior_use": "none found"
+  },
+  {
+   "sha256": "e9f511b831df0dfab37b6bf4b82a006a3ee57da54d351e8f628885abbeb73927",
+   "source": "docx-corpus batch-2-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-2-v1\\c637f2cee0f99c4b95c08c899d47f81f2311bcd355ed790c8108e33dcfc7807d.docx",
+   "source_url": "https://docxcorp.us/documents/c637f2cee0f99c4b95c08c899d47f81f2311bcd355ed790c8108e33dcfc7807d.docx",
+   "corpus_metadata": {
+    "type": "policies",
+    "topic": "government",
+    "word_count": 4910
+   },
+   "headings": 47,
+   "omath": 0,
+   "tbl": 9,
+   "five_family_usable": 4,
+   "six_family_usable": 4,
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+   "license_status": "unknown_pending_review per file; dataset-level ODC-BY claim (same as S6 adjudication note)",
+   "prior_use": "none found"
+  },
+  {
+   "sha256": "6f373490dcf8281096e2427f15dffbc210bfb423cd5f783e90e89757353f09b5",
+   "source": "docx-corpus batch-3-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-3-v1\\d191df6fdb502f78db6949b46c9c0e7553afdbe594ebc9d31173a08caa90d39f.docx",
+   "source_url": "https://docxcorp.us/documents/d191df6fdb502f78db6949b46c9c0e7553afdbe594ebc9d31173a08caa90d39f.docx",
+   "corpus_metadata": {
+    "type": "policies",
+    "topic": "nonprofit",
+    "word_count": 2646
+   },
+   "headings": 30,
+   "omath": 0,
+   "tbl": 0,
+   "five_family_usable": 4,
+   "six_family_usable": 4,
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+   "license_status": "unknown_pending_review per file; dataset-level ODC-BY claim (same as S6 adjudication note)",
+   "prior_use": "none found"
+  },
+  {
+   "sha256": "214fc81de0a849c6609dad925199dfc4283c50a7d10b6a917c7e278dc37dba72",
+   "source": "docx-corpus batch-2-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-2-v1\\d2eaadc0d17caf4f0184da376318e631b2fb6f4b16e4f9ca35282b69faf2cad3.docx",
+   "source_url": "https://docxcorp.us/documents/d2eaadc0d17caf4f0184da376318e631b2fb6f4b16e4f9ca35282b69faf2cad3.docx",
+   "corpus_metadata": {
+    "type": "technical",
+    "topic": "technology",
+    "word_count": 1991
+   },
+   "headings": 35,
+   "omath": 0,
+   "tbl": 15,
+   "five_family_usable": 4,
+   "six_family_usable": 4,
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+   "license_status": "unknown_pending_review per file; dataset-level ODC-BY claim (same as S6 adjudication note)",
+   "prior_use": "none found"
+  },
+  {
+   "sha256": "c228e2a144ebaf6ecd9a93dcb5468bea350a5af144e29a4d6515044e76cfafc7",
+   "source": "docx-corpus batch-3-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-3-v1\\d51f3e919956283df1725e86872f6e4282bd023326b4637c633349488d4e896d.docx",
+   "source_url": "https://docxcorp.us/documents/d51f3e919956283df1725e86872f6e4282bd023326b4637c633349488d4e896d.docx",
+   "corpus_metadata": {
+    "type": "reports",
+    "topic": "government",
+    "word_count": 2661
+   },
+   "headings": 45,
+   "omath": 0,
+   "tbl": 0,
+   "five_family_usable": 4,
+   "six_family_usable": 4,
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+   "license_status": "unknown_pending_review per file; dataset-level ODC-BY claim (same as S6 adjudication note)",
+   "prior_use": "none found"
+  },
+  {
+   "sha256": "bc30c7b71fba4b8d16d676fce7f99bdc80ea0830cfff2bf34ce5fabc4dc2b676",
+   "source": "docx-corpus batch-500-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-500-v1\\da17a2188669c20e0ff3048101b418dbea666a7e5d4ca7df36655ed4d59d532b.docx",
+   "source_url": "https://docxcorp.us/documents/da17a2188669c20e0ff3048101b418dbea666a7e5d4ca7df36655ed4d59d532b.docx",
+   "corpus_metadata": {
+    "type": "technical",
+    "topic": "technology",
+    "word_count": 4865
+   },
+   "headings": 100,
+   "omath": 0,
+   "tbl": 37,
+   "five_family_usable": 4,
+   "six_family_usable": 4,
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+   "license_status": "unknown_pending_review per file; dataset-level ODC-BY claim (same as S6 adjudication note)",
+   "prior_use": "none found"
+  },
+  {
+   "sha256": "34b44c1bb077c795104a7aa3c7471cc8284ca04446f6da986dd6a9dbb1914597",
+   "source": "docx-corpus batch-3-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-3-v1\\ddd4096830b5c3468de6614133bfdb69c75b777154470024e3c9a17666e0a10a.docx",
+   "source_url": "https://docxcorp.us/documents/ddd4096830b5c3468de6614133bfdb69c75b777154470024e3c9a17666e0a10a.docx",
+   "corpus_metadata": {
+    "type": "policies",
+    "topic": "government",
+    "word_count": 4159
+   },
+   "headings": 31,
+   "omath": 0,
+   "tbl": 1,
+   "five_family_usable": 4,
+   "six_family_usable": 4,
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+   "license_status": "unknown_pending_review per file; dataset-level ODC-BY claim (same as S6 adjudication note)",
+   "prior_use": "none found"
+  },
+  {
+   "sha256": "062bbc95126494a578875d107f1607fc84bc018a80e511db842a6ce29b087d12",
+   "source": "docx-corpus batch-2-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-2-v1\\de664a8a9ee5e029975bb878c2de89691c83c95e768b31a30eb1b65fadbcec19.docx",
+   "source_url": "https://docxcorp.us/documents/de664a8a9ee5e029975bb878c2de89691c83c95e768b31a30eb1b65fadbcec19.docx",
+   "corpus_metadata": {
+    "type": "technical",
+    "topic": "technology",
+    "word_count": 2214
+   },
+   "headings": 33,
+   "omath": 0,
+   "tbl": 10,
+   "five_family_usable": 4,
+   "six_family_usable": 4,
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+   "license_status": "unknown_pending_review per file; dataset-level ODC-BY claim (same as S6 adjudication note)",
+   "prior_use": "none found"
+  },
+  {
+   "sha256": "39b8481413513ba01fc4ba11199800da3a82ea646791f9a3c84f7173174d3d91",
+   "source": "docx-corpus batch-3-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-3-v1\\e2ebe3f54e5ac9e84c2e802913fea1e648319da8bc416ad0460732b785bbb231.docx",
+   "source_url": "https://docxcorp.us/documents/e2ebe3f54e5ac9e84c2e802913fea1e648319da8bc416ad0460732b785bbb231.docx",
+   "corpus_metadata": {
+    "type": "technical",
+    "topic": "technology",
+    "word_count": 2983
+   },
+   "headings": 37,
+   "omath": 0,
+   "tbl": 5,
+   "five_family_usable": 2,
+   "six_family_usable": 2,
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+   "license_status": "unknown_pending_review per file; dataset-level ODC-BY claim (same as S6 adjudication note)",
+   "prior_use": "none found"
+  },
+  {
+   "sha256": "5733e29dabb855d66a2e11249359c745c1f09f294bc63b3f5936286288af19cb",
+   "source": "docx-corpus batch-3-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-3-v1\\e4039200e2ca8f9c925a90582c807f0cfdd3ff7928001d3244ce32d0f87801e8.docx",
+   "source_url": "https://docxcorp.us/documents/e4039200e2ca8f9c925a90582c807f0cfdd3ff7928001d3244ce32d0f87801e8.docx",
+   "corpus_metadata": {
+    "type": "policies",
+    "topic": "general",
+    "word_count": 1038
+   },
+   "headings": 48,
+   "omath": 0,
+   "tbl": 0,
+   "five_family_usable": 4,
+   "six_family_usable": 4,
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+   "license_status": "unknown_pending_review per file; dataset-level ODC-BY claim (same as S6 adjudication note)",
+   "prior_use": "none found"
+  },
+  {
+   "sha256": "0439dc7b29aafdeb9149c7d5eeb626a09bdc4962619b3bf8894578d38ff83b62",
+   "source": "docx-corpus batch-2-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-2-v1\\e6874cdd73ba291aaa56a235c4630f0e57e9756ff11cbd5d5be52603108538eb.docx",
+   "source_url": "https://docxcorp.us/documents/e6874cdd73ba291aaa56a235c4630f0e57e9756ff11cbd5d5be52603108538eb.docx",
+   "corpus_metadata": {
+    "type": "policies",
+    "topic": "finance",
+    "word_count": 2098
+   },
+   "headings": 32,
+   "omath": 0,
+   "tbl": 1,
+   "five_family_usable": 4,
+   "six_family_usable": 4,
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+   "license_status": "unknown_pending_review per file; dataset-level ODC-BY claim (same as S6 adjudication note)",
+   "prior_use": "none found"
+  },
+  {
+   "sha256": "3e5a1ae6417319e342eb056992690d5f95f338710e7b7033fb239115f84ed082",
+   "source": "docx-corpus batch-2-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-2-v1\\e9811f69ac00799df25792a0532c0266683fccaad02476c0e9097836adc309f0.docx",
+   "source_url": "https://docxcorp.us/documents/e9811f69ac00799df25792a0532c0266683fccaad02476c0e9097836adc309f0.docx",
+   "corpus_metadata": {
+    "type": "reports",
+    "topic": "technology",
+    "word_count": 3934
+   },
+   "headings": 35,
+   "omath": 0,
+   "tbl": 1,
+   "five_family_usable": 4,
+   "six_family_usable": 4,
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+   "license_status": "unknown_pending_review per file; dataset-level ODC-BY claim (same as S6 adjudication note)",
+   "prior_use": "none found"
+  },
+  {
+   "sha256": "688db32231158b5e37ffb961139ab2cd32a995fcee5f8442012735cf0c9d950c",
+   "source": "docx-corpus batch-3-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-3-v1\\edc9a9bd78b075d1c690984228a218813c6e5247f694f3f94cf502bca78ece76.docx",
+   "source_url": "https://docxcorp.us/documents/edc9a9bd78b075d1c690984228a218813c6e5247f694f3f94cf502bca78ece76.docx",
+   "corpus_metadata": {
+    "type": "technical",
+    "topic": "general",
+    "word_count": 4404
+   },
+   "headings": 38,
+   "omath": 0,
+   "tbl": 0,
+   "five_family_usable": 4,
+   "six_family_usable": 4,
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+   "license_status": "unknown_pending_review per file; dataset-level ODC-BY claim (same as S6 adjudication note)",
+   "prior_use": "none found"
+  },
+  {
+   "sha256": "b62ffeaf0c2d800620b835bcb7b782f4c72af53676368c8677d199b09086b01f",
+   "source": "docx-corpus batch-2-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-2-v1\\ef1115925393a86d7bd1401a1600e07a977a15a259749fa1700063a1c8761a1e.docx",
+   "source_url": "https://docxcorp.us/documents/ef1115925393a86d7bd1401a1600e07a977a15a259749fa1700063a1c8761a1e.docx",
+   "corpus_metadata": {
+    "type": "policies",
+    "topic": "government",
+    "word_count": 2522
+   },
+   "headings": 27,
+   "omath": 0,
+   "tbl": 12,
+   "five_family_usable": 4,
+   "six_family_usable": 4,
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+   "license_status": "unknown_pending_review per file; dataset-level ODC-BY claim (same as S6 adjudication note)",
+   "prior_use": "none found"
+  },
+  {
+   "sha256": "5a619fa9ac0886a9249ed9a1ad4b64e5be30d29a960dbf0be76ed7e87add2e6f",
+   "source": "docx-corpus batch-2-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-2-v1\\f1385b7246a0ee3603a020f153f16e15bb9c856a96c4de8411971453a4ad157d.docx",
+   "source_url": "https://docxcorp.us/documents/f1385b7246a0ee3603a020f153f16e15bb9c856a96c4de8411971453a4ad157d.docx",
+   "corpus_metadata": {
+    "type": "policies",
+    "topic": "nonprofit",
+    "word_count": 2223
+   },
+   "headings": 41,
+   "omath": 0,
+   "tbl": 0,
+   "five_family_usable": 4,
+   "six_family_usable": 4,
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+   "license_status": "unknown_pending_review per file; dataset-level ODC-BY claim (same as S6 adjudication note)",
+   "prior_use": "none found"
+  },
+  {
+   "sha256": "9837a8a0cc2df1014a6f6eee1ec172481e91cad035d0c393df1f3c24d2fb0961",
+   "source": "docx-corpus batch-2-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-2-v1\\f8b8eb3a2b630f3cfa1a80a09b2d3d60e1e66fe9d0eadc69aff041b0609fc66d.docx",
+   "source_url": "https://docxcorp.us/documents/f8b8eb3a2b630f3cfa1a80a09b2d3d60e1e66fe9d0eadc69aff041b0609fc66d.docx",
+   "corpus_metadata": {
+    "type": "technical",
+    "topic": "technology",
+    "word_count": 4375
+   },
+   "headings": 52,
+   "omath": 0,
+   "tbl": 1,
+   "five_family_usable": 4,
+   "six_family_usable": 4,
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+   "license_status": "unknown_pending_review per file; dataset-level ODC-BY claim (same as S6 adjudication note)",
+   "prior_use": "none found"
+  }
+ ]
+}

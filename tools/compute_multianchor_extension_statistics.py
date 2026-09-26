@@ -165,6 +165,15 @@ def weighted_paired_permutation_test(
     way, just weighted. control_items/treatment_items are already aligned by
     caller (same document order, same weights on both sides -- weight is a
     property of the document, not the arm)."""
+    # Known issue, left as is because reported statistics depend on it: the
+    # weight used for both arms is CONTROL's (`w`); treatment's own weight
+    # (`_w2`) is discarded. The docstring's "same weights on both sides" holds
+    # only when both arms kept the same number of observations per document.
+    # When they differ (e.g. chains excluded on one arm only), both the
+    # observed weighted mean diff and, in general, the p-value are weighted
+    # by control's counts. Checked 2026-09-25 against the stored
+    # respec_cascade statistics: only observed_weighted_mean_diff moves, no
+    # p-value does, and no number the paper reports changes.
     diffs_weights = [
         (c - t, w) for (c, w), (t, _w2) in zip(control_items, treatment_items)
         if c is not None and t is not None
@@ -200,9 +209,14 @@ def estimate_icc_and_effective_n(values_by_doc: dict[str, list[float]]) -> dict[
     """One-way random-effects intraclass correlation from real cluster data
     (Shrout & Fleiss ICC(1) via one-way ANOVA), with Fleiss's (1986) k0
     correction for unequal cluster sizes (documents don't all have the same
-    number of extension anchors). design_effect = 1 + (k0-1)*ICC (the
-    standard Kish design effect for a clustered mean); effective_n =
-    naive_pooled_n / design_effect. A negative ICC estimate (can happen with
+    number of extension anchors) used in the ICC estimate itself. The design
+    effect does NOT use k0: design_effect = 1 + (m-1)*ICC with m the simple
+    mean cluster size, naive_pooled_n / k_clusters (the Kish design effect
+    for a clustered mean, as coded below); effective_n = naive_pooled_n /
+    design_effect. k0 is also returned (`k0_unbalanced_avg_cluster_size`),
+    and equals m when every cluster has the same size; with unequal sizes
+    k0 < m, so using m gives a slightly larger design effect (smaller
+    effective_n) than k0 would. A negative ICC estimate (can happen with
     small/noisy samples) is clamped to 0 -- a negative "within-cluster
     similarity" isn't interpretable as inflating variance and would produce a
     design effect below 1, understating uncertainty; 0 means "no detectable

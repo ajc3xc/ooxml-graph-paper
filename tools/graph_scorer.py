@@ -1018,6 +1018,127 @@ def paired_permutation_test(values_a: list[float | None], values_b: list[float |
     }
 
 
+# Exact sign-flip enumeration is always used while 2**units <= 2**_EXACT_SIGN_FLIP_MAX_UNITS,
+# and beyond that while the null distribution has at most that many distinct values
+# (always true for 0/1 outcomes); otherwise the tests below use a seeded Monte Carlo draw.
+_EXACT_SIGN_FLIP_MAX_UNITS = 20
+
+
+def _sign_flip_p_value(unit_sums: list[float], n_permutations: int, seed: int,
+                       max_exact_units: int) -> dict[str, Any]:
+    """Two-sided sign-flip p-value for the statistic |sum_u s_u * D_u|, where
+    D_u is one exchangeable unit's summed paired difference and every s_u is
+    flipped independently. The observed statistic is the all-(+1) pattern.
+
+    Exact: the null distribution of the flipped sum over all 2**units sign
+    patterns is built one unit at a time as {sum: number of patterns} (a unit
+    whose sum is 0 leaves the statistic unchanged under both signs, so it is
+    skipped), and p is the exact share of patterns at least as extreme as
+    observed. This is always done when units <= max_exact_units (the table
+    then has at most 2**max_exact_units entries) and is kept for more units as
+    long as the table stays that small -- as it does for 0/1 outcomes, whose
+    sums are small integers. Otherwise a Monte Carlo estimate over
+    n_permutations seeded draws, with the usual (extreme + 1) /
+    (n_permutations + 1) correction so it is never 0."""
+    observed = abs(sum(unit_sums))
+    tol = 1e-8 * max(1.0, observed)
+    n_units = len(unit_sums)
+    max_table = 2 ** max_exact_units
+    dist: dict[float, int] | None = {0.0: 1}
+    nonzero = [d for d in unit_sums if d != 0]
+    for d in nonzero:
+        nxt: dict[float, int] = {}
+        for s, count in dist.items():
+            for v in (round(s + d, 10), round(s - d, 10)):
+                nxt[v] = nxt.get(v, 0) + count
+        dist = nxt
+        if len(dist) > max_table:
+            dist = None
+            break
+    if dist is not None:
+        extreme = sum(count for s, count in dist.items() if abs(s) >= observed - tol)
+        return {"p_value": extreme / 2 ** len(nonzero), "exact": True, "n_sign_patterns": 2 ** n_units}
+    rng = random.Random(seed)
+    extreme = 0
+    for _ in range(n_permutations):
+        if abs(sum(d if rng.random() < 0.5 else -d for d in unit_sums)) >= observed - tol:
+            extreme += 1
+    return {"p_value": (extreme + 1) / (n_permutations + 1), "exact": False, "n_permutations": n_permutations}
+
+
+def paired_permutation_test_exact(values_a: list[float | None], values_b: list[float | None],
+                                  n_permutations: int = _PERMUTATION_RESAMPLES,
+                                  seed: int = _BOOTSTRAP_SEED,
+                                  max_exact_n: int = _EXACT_SIGN_FLIP_MAX_UNITS) -> dict[str, Any]:
+    """Same paired sign-flip test and statistic as `paired_permutation_test`
+    (every pair is its own exchangeable unit), but with the p-value computed
+    exactly over all 2**n sign patterns (always while n <= max_exact_n; for
+    larger n while the null distribution stays small -- see
+    `_sign_flip_p_value`), and a corrected Monte Carlo estimate otherwise;
+    `exact` in the result says which. `paired_permutation_test`
+    itself is left unchanged because reported statistics depend on it; its
+    uncorrected Monte Carlo p can fall below the exact floor 2/2**n or be 0.
+
+    `p_value_floor` is the smallest two-sided p any data with this many pairs
+    could produce (2/2**n) -- e.g. 0.25 with 3 pairs."""
+    diffs = [a - b for a, b in zip(values_a, values_b) if a is not None and b is not None]
+    if len(diffs) < 2:
+        return {"observed_mean_diff": None, "p_value": None, "n_paired_documents": len(diffs),
+                "reason": "fewer than 2 paired documents with values on both sides"}
+    result = {
+        "observed_mean_diff": sum(diffs) / len(diffs),
+        **_sign_flip_p_value(diffs, n_permutations, seed, max_exact_n),
+        "p_value_floor": 2 / 2 ** len(diffs),
+        "n_paired_documents": len(diffs),
+    }
+    result["method"] = ("paired sign-flip permutation test, exact enumeration" if result["exact"]
+                        else "paired sign-flip permutation test, Monte Carlo (null distribution too large to enumerate)")
+    return result
+
+
+def cluster_paired_sign_flip_test(cluster_ids: list[str], values_a: list[float | None],
+                                  values_b: list[float | None],
+                                  n_permutations: int = _PERMUTATION_RESAMPLES,
+                                  seed: int = _BOOTSTRAP_SEED,
+                                  max_exact_clusters: int = _EXACT_SIGN_FLIP_MAX_UNITS) -> dict[str, Any]:
+    """Cluster-level paired sign-flip test. Observation i is the pair
+    (values_a[i], values_b[i]) and belongs to cluster cluster_ids[i]; under the
+    null, the A/B labels are exchangeable per CLUSTER, not per observation, so
+    every observation of one cluster flips sign together. Use it when several
+    paired observations come from one unit that is not independent inside --
+    e.g. the five family outcomes of one respec_cascade chain.
+
+    The statistic is the same mean paired difference (A - B) over all
+    observations that `paired_permutation_test` reports, so `observed_mean_diff`
+    is comparable between the two; only the null distribution differs. Exact
+    over the 2**clusters sign patterns (always while clusters <=
+    max_exact_clusters; for more clusters while the null distribution stays
+    small), a corrected Monte Carlo estimate otherwise (see
+    `_sign_flip_p_value`); `exact` in the result says which.
+    `p_value_floor` = 2/2**clusters."""
+    cluster_diffs: dict[str, list[float]] = {}
+    for cluster, a, b in zip(cluster_ids, values_a, values_b):
+        if a is None or b is None:
+            continue
+        cluster_diffs.setdefault(cluster, []).append(a - b)
+    n_obs = sum(len(ds) for ds in cluster_diffs.values())
+    if len(cluster_diffs) < 2:
+        return {"observed_mean_diff": None, "p_value": None, "n_clusters": len(cluster_diffs),
+                "n_paired_observations": n_obs,
+                "reason": "fewer than 2 clusters with paired values on both sides"}
+    unit_sums = [sum(ds) for ds in cluster_diffs.values()]
+    result = {
+        "observed_mean_diff": sum(unit_sums) / n_obs,
+        **_sign_flip_p_value(unit_sums, n_permutations, seed, max_exact_clusters),
+        "p_value_floor": 2 / 2 ** len(unit_sums),
+        "n_clusters": len(unit_sums),
+        "n_paired_observations": n_obs,
+    }
+    result["method"] = ("cluster-level paired sign-flip test, exact enumeration" if result["exact"]
+                        else "cluster-level paired sign-flip test, Monte Carlo (null distribution too large to enumerate)")
+    return result
+
+
 # ---------------------------------------------------------------------------
 # Per-document scoring entry point
 # ---------------------------------------------------------------------------

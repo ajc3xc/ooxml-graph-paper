@@ -1,0 +1,368 @@
+{
+ "schema": "s26-k4-documents-locked-v1",
+ "decided": "2026-09-26 (FINAL DECISIONS, docs/paper-s26-k4-section-reorder-confirmatory-protocol-v1.md D-K1/D-K2)",
+ "n": 60,
+ "selection_method": "top 60 documents by existing hash rank (rank_under_proposed_seed) from manifests/k4sr_candidates.json (seed already recorded there as proposed_seed, not re-seeded); selection is by hash rank alone, not a fresh two-reviewer content review, because of the Sunday 19:00 deadline -- disclosed as a lock-time deviation from S26 section 1.2's originally drafted two-reviewer process.",
+ "documents": [
+  {
+   "doc_label": "s26k4_792390797c191d68",
+   "source": "manifests/k4sr_candidates.json rank 1 (seed 20260925001); docx-corpus (docxcorp.us), batch-500-v1",
+   "sha256": "792390797c191d68571323d7366803781a964fceec8523b1a633462579922548",
+   "selection": "hash rank 1 of 676 eligible, seed 20260925001"
+  },
+  {
+   "doc_label": "s26k4_dbecbb89511f921f",
+   "source": "manifests/k4sr_candidates.json rank 2 (seed 20260925001); docx-corpus (docxcorp.us), batch-2-v1",
+   "sha256": "dbecbb89511f921f59bb647a8c3a534c601ffd6ec76a68f6234caee461b5b5db",
+   "selection": "hash rank 2 of 676 eligible, seed 20260925001"
+  },
+  {
+   "doc_label": "s26k4_b608883eb8aedbb5",
+   "source": "manifests/k4sr_candidates.json rank 3 (seed 20260925001); docx-corpus (docxcorp.us), batch-3-v1",
+   "sha256": "b608883eb8aedbb53ac31f8e632be7a6410d9edd83a84faa3c0e62e175dcf53f",
+   "selection": "hash rank 3 of 676 eligible, seed 20260925001"
+  },
+  {
+   "doc_label": "s26k4_b9feac7246087871",
+   "source": "manifests/k4sr_candidates.json rank 4 (seed 20260925001); docx-corpus (docxcorp.us), batch-2-v1",
+   "sha256": "b9feac724608787115407e7c7a967e0f2916f1bf967082783a759400480330d8",
+   "selection": "hash rank 4 of 676 eligible, seed 20260925001"
+  },
+  {
+   "doc_label": "s26k4_46e973802b5c6463",
+   "source": "manifests/k4sr_candidates.json rank 5 (seed 20260925001); docx-corpus (docxcorp.us), batch-3-v1",
+   "sha256": "46e973802b5c6463d59e9681e2e55bfc69c710610c962a27d39f4335a7908fe0",
+   "selection": "hash rank 5 of 676 eligible, seed 20260925001"
+  },
+  {
+   "doc_label": "s26k4_11105b6ef71bbcd1",
+   "source": "manifests/k4sr_candidates.json rank 6 (seed 20260925001); docx-corpus (docxcorp.us), batch-3-v1",
+   "sha256": "11105b6ef71bbcd19e69e9cc67a5fcacc5092ccc43fee3f96cbb434de05eec18",
+   "selection": "hash rank 6 of 676 eligible, seed 20260925001"
+  },
+  {
+   "doc_label": "s26k4_96bcf35c0417433a",
+   "source": "manifests/k4sr_candidates.json rank 7 (seed 20260925001); docx-corpus (docxcorp.us), batch-500-v1",
+   "sha256": "96bcf35c0417433afa40dba836505914f9b5d8915a80194cb38dc994c8839e1c",
+   "selection": "hash rank 7 of 676 eligible, seed 20260925001"
+  },
+  {
+   "doc_label": "s26k4_20696bfbaa645d60",
+   "source": "manifests/k4sr_candidates.json rank 8 (seed 20260925001); docx-corpus (docxcorp.us), batch-3-v1",
+   "sha256": "20696bfbaa645d606275e3076fc0c64ae8817e450f99aacd7eabb50dee0d955b",
+   "selection": "hash rank 8 of 676 eligible, seed 20260925001"
+  },
+  {
+   "doc_label": "s26k4_47cc13c9e1bf0733",
+   "source": "manifests/k4sr_candidates.json rank 9 (seed 20260925001); docx-corpus (docxcorp.us), batch-2-v1",
+   "sha256": "47cc13c9e1bf073308675d4d234cf835c3a57df0f88158ea44eb026886723270",
+   "selection": "hash rank 9 of 676 eligible, seed 20260925001"
+  },
+  {
+   "doc_label": "s26k4_ef19c16d35bb7289",
+   "source": "manifests/k4sr_candidates.json rank 10 (seed 20260925001); docx-corpus (docxcorp.us), batch-2-v1",
+   "sha256": "ef19c16d35bb7289f6877ab105ced29d484ab0e1001513479b7a7d76f50cd201",
+   "selection": "hash rank 10 of 676 eligible, seed 20260925001"
+  },
+  {
+   "doc_label": "s26k4_20aa529426b36353",
+   "source": "manifests/k4sr_candidates.json rank 11 (seed 20260925001); docx-corpus (docxcorp.us), batch-3-v1",
+   "sha256": "20aa529426b363539c33920b7daddd4ca0590dc5e41a8ba7e9447314c4c5497a",
+   "selection": "hash rank 11 of 676 eligible, seed 20260925001"
+  },
+  {
+   "doc_label": "s26k4_5635d4c34559284e",
+   "source": "manifests/k4sr_candidates.json rank 12 (seed 20260925001); docx-corpus (docxcorp.us), batch-3-v1",
+   "sha256": "5635d4c34559284ec630c039216f1b3970451db1ba9af2a30475f9aa22f4d5ae",
+   "selection": "hash rank 12 of 676 eligible, seed 20260925001"
+  },
+  {
+   "doc_label": "s26k4_69a77e9d454c92cc",
+   "source": "manifests/k4sr_candidates.json rank 13 (seed 20260925001); docx-corpus (docxcorp.us), batch-3-v1",
+   "sha256": "69a77e9d454c92ccf68b136f0f4743e2bf85993e5ce535830db4aa6b103e288c",
+   "selection": "hash rank 13 of 676 eligible, seed 20260925001"
+  },
+  {
+   "doc_label": "s26k4_de4d18d39c6d680b",
+   "source": "manifests/k4sr_candidates.json rank 14 (seed 20260925001); docx-corpus (docxcorp.us), batch-3-v1",
+   "sha256": "de4d18d39c6d680bb0b79cd725a14b3ae64df37351ec56df4a83ef0844531ed9",
+   "selection": "hash rank 14 of 676 eligible, seed 20260925001"
+  },
+  {
+   "doc_label": "s26k4_88db066456718048",
+   "source": "manifests/k4sr_candidates.json rank 15 (seed 20260925001); docx-corpus (docxcorp.us), batch-2-v1",
+   "sha256": "88db0664567180488c23ba290ed0182e856c46aeebcf069cea6b03f9b85bdadf",
+   "selection": "hash rank 15 of 676 eligible, seed 20260925001"
+  },
+  {
+   "doc_label": "s26k4_3fa6058324808789",
+   "source": "manifests/k4sr_candidates.json rank 16 (seed 20260925001); docx-corpus (docxcorp.us), batch-3-v1",
+   "sha256": "3fa60583248087898cf13d969ef50e5d8ff1eb351049e4ec06a1ca6bff764a42",
+   "selection": "hash rank 16 of 676 eligible, seed 20260925001"
+  },
+  {
+   "doc_label": "s26k4_fa75239938fd8943",
+   "source": "manifests/k4sr_candidates.json rank 17 (seed 20260925001); docx-corpus (docxcorp.us), batch-3-v1",
+   "sha256": "fa75239938fd8943123910b73725fba61da41ac3b27b8279224faebb86d9ae3a",
+   "selection": "hash rank 17 of 676 eligible, seed 20260925001"
+  },
+  {
+   "doc_label": "s26k4_a2e265cd65168991",
+   "source": "manifests/k4sr_candidates.json rank 18 (seed 20260925001); docx-corpus (docxcorp.us), batch-2-v1",
+   "sha256": "a2e265cd6516899192fcc8c289d7acb18462c560952cf03743da901efe65cb88",
+   "selection": "hash rank 18 of 676 eligible, seed 20260925001"
+  },
+  {
+   "doc_label": "s26k4_ea56f333011352b1",
+   "source": "manifests/k4sr_candidates.json rank 19 (seed 20260925001); docx-corpus (docxcorp.us), batch-3-v1",
+   "sha256": "ea56f333011352b167a47ffc46c31492eea2c4e38213391ed290cb45f238619a",
+   "selection": "hash rank 19 of 676 eligible, seed 20260925001"
+  },
+  {
+   "doc_label": "s26k4_5649b13ada337a14",
+   "source": "manifests/k4sr_candidates.json rank 20 (seed 20260925001); docx-corpus (docxcorp.us), batch-2-v1",
+   "sha256": "5649b13ada337a14f11d81791dd9119fa443674da364771c2e340db6df0f8f2c",
+   "selection": "hash rank 20 of 676 eligible, seed 20260925001"
+  },
+  {
+   "doc_label": "s26k4_993cdb330cbef3c8",
+   "source": "manifests/k4sr_candidates.json rank 21 (seed 20260925001); docx-corpus (docxcorp.us), batch-2-v1",
+   "sha256": "993cdb330cbef3c805f355abac12747af2411968b48b6d07e89cc3d9a1a4a165",
+   "selection": "hash rank 21 of 676 eligible, seed 20260925001"
+  },
+  {
+   "doc_label": "s26k4_a128da741d39dd25",
+   "source": "manifests/k4sr_candidates.json rank 22 (seed 20260925001); docx-corpus (docxcorp.us), batch-2-v1",
+   "sha256": "a128da741d39dd259f3d305216a22363e7b8935319b5adc48831b5ba81370a5d",
+   "selection": "hash rank 22 of 676 eligible, seed 20260925001"
+  },
+  {
+   "doc_label": "s26k4_97deb633f1de728e",
+   "source": "manifests/k4sr_candidates.json rank 23 (seed 20260925001); docx-corpus (docxcorp.us), batch-500-v1",
+   "sha256": "97deb633f1de728e9384c4797418e579ae6f35fbc22cef2825bf630708ed37ec",
+   "selection": "hash rank 23 of 676 eligible, seed 20260925001"
+  },
+  {
+   "doc_label": "s26k4_a90f00ce7681e03d",
+   "source": "manifests/k4sr_candidates.json rank 24 (seed 20260925001); docx-corpus (docxcorp.us), batch-500-v1",
+   "sha256": "a90f00ce7681e03dce2cc5351eeb513d2509fd10bc55355db9b5e13651a15c34",
+   "selection": "hash rank 24 of 676 eligible, seed 20260925001"
+  },
+  {
+   "doc_label": "s26k4_4fd0da90108c0e2d",
+   "source": "manifests/k4sr_candidates.json rank 25 (seed 20260925001); docx-corpus (docxcorp.us), batch-2-v1",
+   "sha256": "4fd0da90108c0e2d563fdf318d6a62955588bdf2bf13e7fed5c47a5e4e4e0ba2",
+   "selection": "hash rank 25 of 676 eligible, seed 20260925001"
+  },
+  {
+   "doc_label": "s26k4_2918c6e5693eda7d",
+   "source": "manifests/k4sr_candidates.json rank 26 (seed 20260925001); docx-corpus (docxcorp.us), batch-3-v1",
+   "sha256": "2918c6e5693eda7d86c311c9f0e2de01aa34da9b9a861a51a3ab57cddd73cf60",
+   "selection": "hash rank 26 of 676 eligible, seed 20260925001"
+  },
+  {
+   "doc_label": "s26k4_40c23e5cdbfc6387",
+   "source": "manifests/k4sr_candidates.json rank 27 (seed 20260925001); docx-corpus (docxcorp.us), batch-2-v1",
+   "sha256": "40c23e5cdbfc638753a737a16602942740bb8e3763b6e6f7526ac4b4a57505a4",
+   "selection": "hash rank 27 of 676 eligible, seed 20260925001"
+  },
+  {
+   "doc_label": "s26k4_9abc93cd3e2ec7a2",
+   "source": "manifests/k4sr_candidates.json rank 28 (seed 20260925001); docx-corpus (docxcorp.us), batch-3-v1",
+   "sha256": "9abc93cd3e2ec7a2b7fa4dd37c4cf3eb5401c993591ba1d33d41c77f44750e7b",
+   "selection": "hash rank 28 of 676 eligible, seed 20260925001"
+  },
+  {
+   "doc_label": "s26k4_f63205d0c11297fc",
+   "source": "manifests/k4sr_candidates.json rank 29 (seed 20260925001); docx-corpus (docxcorp.us), batch-500-v1",
+   "sha256": "f63205d0c11297fc11d9e98f8b7e2db4030d8c4706b015209bd87fa3d8bb5c10",
+   "selection": "hash rank 29 of 676 eligible, seed 20260925001"
+  },
+  {
+   "doc_label": "s26k4_05d95d9aecfadd28",
+   "source": "manifests/k4sr_candidates.json rank 30 (seed 20260925001); docx-corpus (docxcorp.us), batch-2-v1",
+   "sha256": "05d95d9aecfadd28150bda3f948a365d655aa4eb4c7176b0785f2facfea34c3a",
+   "selection": "hash rank 30 of 676 eligible, seed 20260925001"
+  },
+  {
+   "doc_label": "s26k4_23259fb226006d4e",
+   "source": "manifests/k4sr_candidates.json rank 31 (seed 20260925001); docx-corpus (docxcorp.us), batch-3-v1",
+   "sha256": "23259fb226006d4e47d5ec303c6682ecfb32f630e107ccd7517ca9b602585fc0",
+   "selection": "hash rank 31 of 676 eligible, seed 20260925001"
+  },
+  {
+   "doc_label": "s26k4_b307631a241e6d13",
+   "source": "manifests/k4sr_candidates.json rank 32 (seed 20260925001); docx-corpus (docxcorp.us), batch-3-v1",
+   "sha256": "b307631a241e6d133a839331a1b53983aad02f35f5f311b7277cb5ccbab76a99",
+   "selection": "hash rank 32 of 676 eligible, seed 20260925001"
+  },
+  {
+   "doc_label": "s26k4_c435dc82e1604671",
+   "source": "manifests/k4sr_candidates.json rank 33 (seed 20260925001); docx-corpus (docxcorp.us), batch-3-v1",
+   "sha256": "c435dc82e16046710f69946ca3edddc2104b34e2711abe3fca15ed995a61f75f",
+   "selection": "hash rank 33 of 676 eligible, seed 20260925001"
+  },
+  {
+   "doc_label": "s26k4_6fddaae14d914eda",
+   "source": "manifests/k4sr_candidates.json rank 34 (seed 20260925001); docx-corpus (docxcorp.us), batch-3-v1",
+   "sha256": "6fddaae14d914edac055298d05a79038e457d186e3f501056048af47fc037159",
+   "selection": "hash rank 34 of 676 eligible, seed 20260925001"
+  },
+  {
+   "doc_label": "s26k4_d73df51c2fa9e4ba",
+   "source": "manifests/k4sr_candidates.json rank 35 (seed 20260925001); docx-corpus (docxcorp.us), batch-2-v1",
+   "sha256": "d73df51c2fa9e4ba7a62f135eac346a3a68c24ba066b0f06c9c01c1ea677b91a",
+   "selection": "hash rank 35 of 676 eligible, seed 20260925001"
+  },
+  {
+   "doc_label": "s26k4_1e4f44e222f8a31c",
+   "source": "manifests/k4sr_candidates.json rank 36 (seed 20260925001); docx-corpus (docxcorp.us), batch-2-v1",
+   "sha256": "1e4f44e222f8a31c968aa73019a3f5e4f60e63950fbfdddfb7b641c8b664f607",
+   "selection": "hash rank 36 of 676 eligible, seed 20260925001"
+  },
+  {
+   "doc_label": "s26k4_d70a901fe660180e",
+   "source": "manifests/k4sr_candidates.json rank 37 (seed 20260925001); docx-corpus (docxcorp.us), batch-2-v1",
+   "sha256": "d70a901fe660180e29b5d026289d71f5a6adcec132f83b444c7804a5a8a0c148",
+   "selection": "hash rank 37 of 676 eligible, seed 20260925001"
+  },
+  {
+   "doc_label": "s26k4_650fae6bf056d139",
+   "source": "manifests/k4sr_candidates.json rank 38 (seed 20260925001); docx-corpus (docxcorp.us), batch-500-v1",
+   "sha256": "650fae6bf056d139ead974cb6029cb84bf8ecf66b83a91f4a995d563a51d6643",
+   "selection": "hash rank 38 of 676 eligible, seed 20260925001"
+  },
+  {
+   "doc_label": "s26k4_8ff9e7fd4c492285",
+   "source": "manifests/k4sr_candidates.json rank 39 (seed 20260925001); docx-corpus (docxcorp.us), batch-3-v1",
+   "sha256": "8ff9e7fd4c492285684372dd78e512824b8de44597e922c511be8a5ef5dd8536",
+   "selection": "hash rank 39 of 676 eligible, seed 20260925001"
+  },
+  {
+   "doc_label": "s26k4_8f0baed017da2822",
+   "source": "manifests/k4sr_candidates.json rank 40 (seed 20260925001); docx-corpus (docxcorp.us), batch-2-v1",
+   "sha256": "8f0baed017da2822a125aac7d39191609a2d5807c965e50d4698630fe451409b",
+   "selection": "hash rank 40 of 676 eligible, seed 20260925001"
+  },
+  {
+   "doc_label": "s26k4_e5b5460a20fd4a81",
+   "source": "manifests/k4sr_candidates.json rank 41 (seed 20260925001); docx-corpus (docxcorp.us), batch-3-v1",
+   "sha256": "e5b5460a20fd4a8184a9c5b6ca43b00577ad8e25c9cad57942c9f252ffe5bb05",
+   "selection": "hash rank 41 of 676 eligible, seed 20260925001"
+  },
+  {
+   "doc_label": "s26k4_98c2f85eb6fc4f51",
+   "source": "manifests/k4sr_candidates.json rank 42 (seed 20260925001); docx-corpus (docxcorp.us), batch-500-v1",
+   "sha256": "98c2f85eb6fc4f51da31905699809de3deb7d946d1a254503455998f365365de",
+   "selection": "hash rank 42 of 676 eligible, seed 20260925001"
+  },
+  {
+   "doc_label": "s26k4_abc05fb8b1277fe2",
+   "source": "manifests/k4sr_candidates.json rank 43 (seed 20260925001); docx-corpus (docxcorp.us), batch-2-v1",
+   "sha256": "abc05fb8b1277fe2ee999e0391101ff89e0564fc4369ea7538bdb12f399ed8e9",
+   "selection": "hash rank 43 of 676 eligible, seed 20260925001"
+  },
+  {
+   "doc_label": "s26k4_69220aef705adca4",
+   "source": "manifests/k4sr_candidates.json rank 44 (seed 20260925001); docx-corpus (docxcorp.us), batch-3-v1",
+   "sha256": "69220aef705adca4db5591c8cbe262084ff978b4eebf6c0e6bfa81c563fb6320",
+   "selection": "hash rank 44 of 676 eligible, seed 20260925001"
+  },
+  {
+   "doc_label": "s26k4_c242e5f02511a03b",
+   "source": "manifests/k4sr_candidates.json rank 45 (seed 20260925001); docx-corpus (docxcorp.us), batch-2-v1",
+   "sha256": "c242e5f02511a03beec2683654317cfdb07f996f6b27b3c09800a817a284ed2d",
+   "selection": "hash rank 45 of 676 eligible, seed 20260925001"
+  },
+  {
+   "doc_label": "s26k4_6dcacd8c58734b1a",
+   "source": "manifests/k4sr_candidates.json rank 46 (seed 20260925001); docx-corpus (docxcorp.us), batch-3-v1",
+   "sha256": "6dcacd8c58734b1a68c9a4c7272597ba9523126977f7f3125779f79a2c2df1c8",
+   "selection": "hash rank 46 of 676 eligible, seed 20260925001"
+  },
+  {
+   "doc_label": "s26k4_e5c0c4eaa94a0cfe",
+   "source": "manifests/k4sr_candidates.json rank 47 (seed 20260925001); docx-corpus (docxcorp.us), batch-500-v1",
+   "sha256": "e5c0c4eaa94a0cfe35de6c742e593dda5ed6fca1ccd87a7975b3b2226b388a37",
+   "selection": "hash rank 47 of 676 eligible, seed 20260925001"
+  },
+  {
+   "doc_label": "s26k4_6bf7c71fc582a659",
+   "source": "manifests/k4sr_candidates.json rank 48 (seed 20260925001); docx-corpus (docxcorp.us), batch-3-v1",
+   "sha256": "6bf7c71fc582a6593e0240315539a8707c35b24276b69206a27de63026f5f0da",
+   "selection": "hash rank 48 of 676 eligible, seed 20260925001"
+  },
+  {
+   "doc_label": "s26k4_007b25bc325160ba",
+   "source": "manifests/k4sr_candidates.json rank 49 (seed 20260925001); docx-corpus (docxcorp.us), batch-2-v1",
+   "sha256": "007b25bc325160bab722dc1fcc362dac87906b0a9bbc3fe802ad80eb8196f046",
+   "selection": "hash rank 49 of 676 eligible, seed 20260925001"
+  },
+  {
+   "doc_label": "s26k4_57ecb4a65a495e7f",
+   "source": "manifests/k4sr_candidates.json rank 50 (seed 20260925001); docx-corpus (docxcorp.us), batch-2-v1",
+   "sha256": "57ecb4a65a495e7f69e48480304385782c4518bb22714f0b876645623957834d",
+   "selection": "hash rank 50 of 676 eligible, seed 20260925001"
+  },
+  {
+   "doc_label": "s26k4_c0709f93525eded9",
+   "source": "manifests/k4sr_candidates.json rank 51 (seed 20260925001); docx-corpus (docxcorp.us), batch-2-v1",
+   "sha256": "c0709f93525eded9e963b682c469a903fcde5b19e55e34833db34dc88ab45ca9",
+   "selection": "hash rank 51 of 676 eligible, seed 20260925001"
+  },
+  {
+   "doc_label": "s26k4_4be986994c7662d7",
+   "source": "manifests/k4sr_candidates.json rank 52 (seed 20260925001); docx-corpus (docxcorp.us), batch-3-v1",
+   "sha256": "4be986994c7662d7c8b73d97118aea838d72439d4cfbe33c5e2942c60ee60349",
+   "selection": "hash rank 52 of 676 eligible, seed 20260925001"
+  },
+  {
+   "doc_label": "s26k4_7bbf7c9fcf101467",
+   "source": "manifests/k4sr_candidates.json rank 53 (seed 20260925001); docx-corpus (docxcorp.us), batch-2-v1",
+   "sha256": "7bbf7c9fcf1014671974d1540d62af5ec0f482858602b9cb3ea92c7bea6f5969",
+   "selection": "hash rank 53 of 676 eligible, seed 20260925001"
+  },
+  {
+   "doc_label": "s26k4_d1b3f2ee724029f9",
+   "source": "manifests/k4sr_candidates.json rank 54 (seed 20260925001); docx-corpus (docxcorp.us), batch-2-v1",
+   "sha256": "d1b3f2ee724029f920f85c199a55b93fd0422f664d92a425ceb422140092480e",
+   "selection": "hash rank 54 of 676 eligible, seed 20260925001"
+  },
+  {
+   "doc_label": "s26k4_7f28703739ad55fe",
+   "source": "manifests/k4sr_candidates.json rank 55 (seed 20260925001); docx-corpus (docxcorp.us), batch-3-v1",
+   "sha256": "7f28703739ad55fe0b609dc1b7c722c067d19dbe476922bc797330091f7bf394",
+   "selection": "hash rank 55 of 676 eligible, seed 20260925001"
+  },
+  {
+   "doc_label": "s26k4_eae321dd53ef75b2",
+   "source": "manifests/k4sr_candidates.json rank 56 (seed 20260925001); docx-corpus (docxcorp.us), batch-2-v1",
+   "sha256": "eae321dd53ef75b2ebe74b1ac804027d072f6470eb2bbc99629af9c878cd3a36",
+   "selection": "hash rank 56 of 676 eligible, seed 20260925001"
+  },
+  {
+   "doc_label": "s26k4_6de0899503b8457f",
+   "source": "manifests/k4sr_candidates.json rank 57 (seed 20260925001); docx-corpus (docxcorp.us), batch-3-v1",
+   "sha256": "6de0899503b8457f34a7c8431194e81f47f6bf5e66ea7e52b0981ac23e20eb44",
+   "selection": "hash rank 57 of 676 eligible, seed 20260925001"
+  },
+  {
+   "doc_label": "s26k4_027d099e5f100b42",
+   "source": "manifests/k4sr_candidates.json rank 58 (seed 20260925001); docx-corpus (docxcorp.us), batch-2-v1",
+   "sha256": "027d099e5f100b42c79be562e19f02b75451d050dca308bed0cc02648069333d",
+   "selection": "hash rank 58 of 676 eligible, seed 20260925001"
+  },
+  {
+   "doc_label": "s26k4_2fe2d3b69f2dabb1",
+   "source": "manifests/k4sr_candidates.json rank 59 (seed 20260925001); docx-corpus (docxcorp.us), batch-2-v1",
+   "sha256": "2fe2d3b69f2dabb1313f15a3932460f72602dbfcb80d7b3f45bd9447f0870e29",
+   "selection": "hash rank 59 of 676 eligible, seed 20260925001"
+  },
+  {
+   "doc_label": "s26k4_0c05f927cfefc8a9",
+   "source": "manifests/k4sr_candidates.json rank 60 (seed 20260925001); docx-corpus (docxcorp.us), batch-3-v1",
+   "sha256": "0c05f927cfefc8a9b4f9903bb297fabd7d55c72961082d63fcdc74d32523b69a",
+   "selection": "hash rank 60 of 676 eligible, seed 20260925001"
+  }
+ ]
+}

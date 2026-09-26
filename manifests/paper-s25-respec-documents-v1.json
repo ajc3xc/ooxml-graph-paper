@@ -1,0 +1,49 @@
+{
+ "schema": "paper-s25-respec-documents-v1",
+ "derived_from": "manifests/s25-respec-documents-locked.json",
+ "derived_from_sha256": "b700bf2e7d942082e0596578c61924859f2e523bf1576614f33f3fcfe8e5137f",
+ "meridian_docs_pin_commit": "89c93fac6a9ee7a03d98baab34ba7043de983018",
+ "note": "Pod-path form: docx_path is where the runbook's provisioning step (section 3.3) copies the real file on the pod, not this machine's local path. Eligibility at the pin: manifests/s25-respec-eligibility-at-pin-v1.json (all 8 eligible).",
+ "documents": [
+  {
+   "doc_label": "jcshm-manuscript",
+   "docx_path": "/workspace/ooxml-graph-paper/corpus/jcshm-manuscript.docx",
+   "sha256": "ada276d4de9dd346b2f2b6be3cfac9e7637f6eca849e0aa2b516d7b70c294747"
+  },
+  {
+   "doc_label": "jcshm-si",
+   "docx_path": "/workspace/ooxml-graph-paper/corpus/jcshm-si.docx",
+   "sha256": "8ccdf9dd53a1cb16def8fc6f22044c5902d553c47cd0781fec29677486495cb8"
+  },
+  {
+   "doc_label": "masters-dissertation-defense",
+   "docx_path": "/workspace/ooxml-graph-paper/corpus/masters-dissertation-defense.docx",
+   "sha256": "b3336b9809dfb0bcac5d73e0f2e94ed4d899a98a93217f01fd6fca648ae0f332"
+  },
+  {
+   "doc_label": "s25pub_d3ff0b3c3f2d72d3",
+   "docx_path": "/workspace/ooxml-graph-paper/corpus/s25pub_d3ff0b3c3f2d72d3.docx",
+   "sha256": "d3ff0b3c3f2d72d3e1aa59de7ab04446b2e470ba21987ea66b0702d4b14fa968"
+  },
+  {
+   "doc_label": "s25pub_acd134313c175f4e",
+   "docx_path": "/workspace/ooxml-graph-paper/corpus/s25pub_acd134313c175f4e.docx",
+   "sha256": "acd134313c175f4e5d9ceb10f33454115c977153a91e83cdccad73303ed4a428"
+  },
+  {
+   "doc_label": "s25pub_c04412c3eeda841d",
+   "docx_path": "/workspace/ooxml-graph-paper/corpus/s25pub_c04412c3eeda841d.docx",
+   "sha256": "c04412c3eeda841d22fd345d3ca5ed3757ec528500d4cd542a82e29d1e5b18b5"
+  },
+  {
+   "doc_label": "s25pub_66157a47a2b464f1",
+   "docx_path": "/workspace/ooxml-graph-paper/corpus/s25pub_66157a47a2b464f1.docx",
+   "sha256": "66157a47a2b464f153124998c373a6336d75560439381c4e2df80c1b997732bd"
+  },
+  {
+   "doc_label": "s25pub_ede3e0981b844b40",
+   "docx_path": "/workspace/ooxml-graph-paper/corpus/s25pub_ede3e0981b844b40.docx",
+   "sha256": "ede3e0981b844b40238ef074e5c00b69de453a3292825d2a2a1a9598d179079f"
+  }
+ ]
+}

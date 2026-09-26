@@ -19,6 +19,16 @@ cumulative drift even when each cycle nominally undoes itself.
 Word-COM milestones (two-tier verification, protocol section 5): once at
 chain start (the pristine input), then once after every pair -- never after
 every raw tool call.
+
+2026-09-25 (re-run preparation): a chain that stops early records its cause
+as its status (blocked_timeout, blocked_forward_failed,
+blocked_unreadable_input, blocked_inverse_unresolvable -- all trusted on
+resume, so a relaunch never re-runs a timeout -- or infra_blocked, the only
+one re-run); every attempt is counted in <run-root>/_chain_attempts/ and an
+earlier attempt's files move to <run-root>/attic/; a sweep-wide circuit
+breaker stops dispatch at the first global infrastructure signature (exit 3);
+--check-only verifies hashes and plans without running a trial; both arms of
+a pair are submitted back to back (--arm-order-seed).
 """
 from __future__ import annotations
 
@@ -68,7 +78,18 @@ from docx_trial_evaluator import (  # noqa: E402
     grade_inverse_trial_reorder,
     grade_inverse_trial_table_structural,
 )
-from claude_pair_runner import audit_isolation, run_trial  # noqa: E402
+from claude_pair_runner import (  # noqa: E402
+    CircuitBreaker,
+    CircuitOpenError,
+    audit_isolation,
+    begin_chain_attempt,
+    exhausted_chain_result,
+    finish_chain_attempt,
+    infra_signature_of,
+    run_trial,
+)
+from provenance import build_provenance, write_provenance_end, write_provenance_start  # noqa: E402
+from usage_cap import UsagePauseController, run_with_usage_cap_retry  # noqa: E402
 from word_receipt_watchdog import word_receipt_with_orphan_diagnostics  # noqa: E402
 
 _WORD_RECEIPT_TIMEOUT_SECONDS = 90.0
@@ -252,14 +273,42 @@ def _safe_grade(grade_fn, *args, **kwargs) -> dict[str, Any]:
 
 
 _CHECKPOINT_NAME = "chain-result.json"
-# Statuses that represent a chain that genuinely finished (its outcome may
-# itself be a failure, but the ATTEMPT completed) -- safe to trust and skip
-# on resume. "blocked" is deliberately excluded: found live (2026-09-02)
-# that a Windows STATUS_DLL_INIT_FAILED process-launch failure under shared-
-# host resource contention also produces a "blocked" chain, indistinguishable
-# from a genuine forward-timeout without deeper inspection -- always retry
-# blocked chains on resume rather than risk trusting an infra hiccup as data.
-_CHECKPOINT_TRUSTED_STATUSES = frozenset({"not_applicable", "completed", "completed_with_failure"})
+
+# Why a chain stopped early (2026-09-25, review blocker 1). Before this date
+# every such chain was plain "blocked", which could not be trusted on resume
+# because a Windows STATUS_DLL_INIT_FAILED process-launch failure (found live
+# 2026-09-02) also produced it -- so every relaunch re-ran every timed-out
+# chain, contradicting "timeouts are never re-run". Each cause now has its own
+# status; the infrastructure case is identified from evidence
+# (claude_pair_runner.classify_infra_signature) and is the only one re-run:
+#   blocked_timeout             a forward trial hit the harness timeout
+#                               (no infrastructure signature, output not
+#                               recovered) -- the arm's own outcome
+#   blocked_forward_failed      a forward CLI process exited non-zero with a
+#                               JSON result and no infrastructure signature
+#   blocked_unreadable_input    the prior pair's inverse output is unreadable
+#   blocked_inverse_unresolvable the forward output has no resolvable marker
+#   infra_blocked               some trial has an infrastructure signature,
+#                               whatever else happened (review item 23)
+# compute_s7_statistics treats every blocked_* status exactly as it treats
+# the legacy "blocked" (see its BLOCKED_STATUSES and --blocked-policy).
+STATUS_BLOCKED_TIMEOUT = "blocked_timeout"
+STATUS_BLOCKED_FORWARD_FAILED = "blocked_forward_failed"
+STATUS_BLOCKED_UNREADABLE_INPUT = "blocked_unreadable_input"
+STATUS_BLOCKED_INVERSE_UNRESOLVABLE = "blocked_inverse_unresolvable"
+STATUS_INFRA_BLOCKED = "infra_blocked"
+STATUS_INFRA_EXCLUDED = "infra_excluded"
+STATUS_ABORTED_CIRCUIT_OPEN = "aborted_circuit_open"
+
+# Statuses of a chain whose attempt genuinely finished (its outcome may itself
+# be a failure) -- trusted and skipped on resume. Untrusted, so re-run: the
+# legacy "blocked" (cause unknown), infra_blocked, and harness_exception /
+# aborted_circuit_open (never written as a checkpoint).
+_CHECKPOINT_TRUSTED_STATUSES = frozenset({
+    "not_applicable", "completed", "completed_with_failure",
+    STATUS_BLOCKED_TIMEOUT, STATUS_BLOCKED_FORWARD_FAILED,
+    STATUS_BLOCKED_UNREADABLE_INPUT, STATUS_BLOCKED_INVERSE_UNRESOLVABLE,
+})
 
 
 def _load_checkpoint(chain_root: Path) -> dict[str, Any] | None:
@@ -287,7 +336,17 @@ def run_chain(
     family: str, doc_label: str, docx_path: Path, arm: str, k_pairs: int, model: str,
     run_root: Path, *, word_receipts_enabled: bool = True,
     anchor_or_plan_override: dict[str, Any] | None = None,
+    circuit_breaker: CircuitBreaker | None = None,
+    max_chain_attempts: int | None = None,
+    pause_controller: UsagePauseController | None = None,
 ) -> dict[str, Any]:
+    # circuit_breaker (review item 17): checked before every trial; a trial
+    # with a global infrastructure signature opens it. max_chain_attempts:
+    # the rerun limit counted in the per-chain attempt ledger kept outside
+    # the chain root (claude_pair_runner.begin_chain_attempt); None = no limit.
+    # pause_controller (rate-limit handling): forwarded to infra_signature_of
+    # so a usage-cap/rate-limit trial pauses the sweep (see usage_cap.py);
+    # purely additive, None reproduces the exact prior behavior.
     # anchor_or_plan_override: multi-anchor-per-document extension. The
     # CALLER is responsible for passing a doc_label that is already unique
     # per anchor (e.g. f"{base_label}__anchor2") when using this -- doc_label
@@ -330,12 +389,50 @@ def run_chain(
     if checkpoint is not None:
         return checkpoint
 
+    # No trusted checkpoint: a new attempt. Whatever an earlier, untrusted
+    # attempt left in chain_root is moved to <run_root>/attic/ first (review
+    # item 18) and the attempt is counted in the ledger (blocker 1).
+    attempt = begin_chain_attempt(run_root, chain_id, chain_root, max_chain_attempts=max_chain_attempts)
+    if attempt.exhausted:
+        return exhausted_chain_result(attempt, {
+            "chain_id": chain_id, "doc_label": doc_label, "family": family, "arm": arm,
+            "k_pairs": k_pairs, "model": model, "pairs": [],
+        }, max_chain_attempts)
+    try:
+        result = _run_chain_attempt(
+            family, doc_label, docx_path, arm, k_pairs, model, chain_id, chain_root,
+            word_receipts_enabled=word_receipts_enabled, anchor_or_plan_override=anchor_or_plan_override,
+            circuit_breaker=circuit_breaker, attempt_number=attempt.number, pause_controller=pause_controller,
+        )
+    except CircuitOpenError:
+        finish_chain_attempt(attempt, STATUS_ABORTED_CIRCUIT_OPEN)
+        raise
+    except Exception:
+        finish_chain_attempt(attempt, "harness_exception")
+        raise
+    finish_chain_attempt(attempt, result["status"], infra_scope=(result.get("infra_signature") or {}).get("scope"))
+    return result
+
+
+def _check_circuit(circuit_breaker: CircuitBreaker | None, source: str) -> None:
+    if circuit_breaker is not None:
+        circuit_breaker.check(source)
+
+
+def _run_chain_attempt(
+    family: str, doc_label: str, docx_path: Path, arm: str, k_pairs: int, model: str,
+    chain_id: str, chain_root: Path, *, word_receipts_enabled: bool,
+    anchor_or_plan_override: dict[str, Any] | None, circuit_breaker: CircuitBreaker | None,
+    attempt_number: int, pause_controller: UsagePauseController | None = None,
+) -> dict[str, Any]:
+    """One attempt of run_chain (everything after the checkpoint and attempt
+    bookkeeping); writes the chain's checkpoint."""
     applicability = probe_family_applicability(family, docx_path, anchor_or_plan_override=anchor_or_plan_override)
     if not applicability["applicable"]:
         result = {
             "chain_id": chain_id, "doc_label": doc_label, "family": family, "arm": arm,
             "k_pairs": k_pairs, "model": model, "status": "not_applicable",
-            "reason": applicability["reason"], "pairs": [],
+            "reason": applicability["reason"], "pairs": [], "attempt": attempt_number,
         }
         _write_checkpoint(chain_root, result)
         return result
@@ -348,6 +445,7 @@ def run_chain(
     current_input = docx_path
     pairs: list[dict[str, Any]] = []
     chain_status = "completed"
+    infra_signature: dict[str, Any] | None = None
 
     for pair_index in range(k_pairs):
         paragraphs_before_this_pair = _safe_paragraph_texts(current_input)
@@ -356,7 +454,7 @@ def run_chain(
             # that even a raw paragraph read fails -- a real, on-thesis
             # finding in its own right (found live during development-slice
             # testing, 2026-08-30), not a reason to crash the whole slice.
-            chain_status = "blocked"
+            chain_status = STATUS_BLOCKED_UNREADABLE_INPUT
             pairs.append({
                 "pair_index": pair_index,
                 "forward": None,
@@ -367,8 +465,20 @@ def run_chain(
         forward_spec, inverse_spec = _build_pair_specs(family, doc_label, current_input, marker, applicability)
         forward_spec = dataclasses.replace(forward_spec, arm=arm, pair_index=pair_index, trial_id=f"p{pair_index}-forward")
 
+        _check_circuit(circuit_breaker, f"{chain_id}/{forward_spec.trial_id}")
         fwd_result = run_trial(forward_spec, chain_root, model=model)
         fwd_result["isolation_audit"] = audit_isolation(fwd_result)
+        infra_signature = infra_signature_of(
+            fwd_result, circuit_breaker, f"{chain_id}/{forward_spec.trial_id}", pause_controller=pause_controller,
+        )
+        if infra_signature is not None:
+            # Review item 23: an infrastructure signature makes the chain
+            # infra_blocked whatever the trial's outcome; the chain stops here
+            # (it will be re-run) rather than spending more trials.
+            chain_status = STATUS_INFRA_BLOCKED
+            infra_signature = {**infra_signature, "trial_id": forward_spec.trial_id}
+            pairs.append({"pair_index": pair_index, "forward": fwd_result})
+            break
         fwd_execution_ok = fwd_result.get("returncode") == 0 and not fwd_result.get("timed_out")
         fwd_docx_changed = bool(fwd_result.get("docx_changed"))
         if fwd_execution_ok:
@@ -412,7 +522,7 @@ def run_chain(
         pair_record: dict[str, Any] = {"pair_index": pair_index, "forward": fwd_result}
 
         if not fwd_task_completed:
-            chain_status = "blocked"
+            chain_status = STATUS_BLOCKED_TIMEOUT if fwd_result.get("timed_out") else STATUS_BLOCKED_FORWARD_FAILED
             pairs.append(pair_record)
             break
 
@@ -443,7 +553,7 @@ def run_chain(
             if not resolved["found"]:
                 pair_record["inverse"] = None
                 pair_record["inverse_resolution_error"] = resolved["reason"]
-                chain_status = "blocked"
+                chain_status = STATUS_BLOCKED_INVERSE_UNRESOLVABLE
                 pairs.append(pair_record)
                 break
             if family == "caption":
@@ -469,8 +579,18 @@ def run_chain(
             inverse_spec, arm=arm, pair_index=pair_index, trial_id=f"p{pair_index}-inverse",
             input_docx=Path(fwd_result["output_docx_path"]),
         )
+        _check_circuit(circuit_breaker, f"{chain_id}/{inverse_spec.trial_id}")
         inv_result = run_trial(inverse_spec, chain_root, model=model)
         inv_result["isolation_audit"] = audit_isolation(inv_result)
+        infra_signature = infra_signature_of(
+            inv_result, circuit_breaker, f"{chain_id}/{inverse_spec.trial_id}", pause_controller=pause_controller,
+        )
+        if infra_signature is not None:
+            chain_status = STATUS_INFRA_BLOCKED
+            infra_signature = {**infra_signature, "trial_id": inverse_spec.trial_id}
+            pair_record["inverse"] = inv_result
+            pairs.append(pair_record)
+            break
         inv_execution_ok = inv_result.get("returncode") == 0 and not inv_result.get("timed_out")
         inv_docx_changed = bool(inv_result.get("docx_changed"))
         if inv_execution_ok:
@@ -508,58 +628,185 @@ def run_chain(
         "chain_id": chain_id, "doc_label": doc_label, "family": family, "arm": arm,
         "k_pairs": k_pairs, "model": model, "status": chain_status,
         "pairs_completed": len(pairs), "cumulative_fidelity_after_k_cycles": cumulative_fidelity,
-        "pairs": pairs, "word_com_receipts": receipts,
+        "pairs": pairs, "word_com_receipts": receipts, "attempt": attempt_number,
     }
-    # Written even for "blocked" so the attempt is on record for debugging,
-    # but _load_checkpoint will not trust or reuse a "blocked" result on
-    # resume -- see its own docstring for why.
+    if infra_signature is not None:
+        result["infra_signature"] = infra_signature
+    # Written for every status so the attempt is on record, but
+    # _load_checkpoint trusts only _CHECKPOINT_TRUSTED_STATUSES: an
+    # infra_blocked chain is re-run (after its root moves to the attic).
     _write_checkpoint(chain_root, result)
     return result
+
+
+_ARMS = ("control", "treatment")
+
+
+def arm_order(seed: int | None, key: str) -> tuple[str, str]:
+    """The order a matched (control, treatment) pair of chains is submitted
+    in. Both arms of one pair are always submitted together, back to back
+    (review minor: arms interleaved per document in run order, so host load
+    and time of day are not confounded with arm). With `seed` None: control
+    first, the historical order. With a seed: a fixed pseudo-random order per
+    pair, from sha256(f"{seed}:{key}") -- no PRNG state, reproducible."""
+    if seed is None:
+        return _ARMS
+    flip = hashlib.sha256(f"{seed}:{key}".encode("utf-8")).digest()[0] & 1
+    return (_ARMS[1], _ARMS[0]) if flip else _ARMS
+
+
+def _sha256_path(path: Path) -> str:
+    h = hashlib.sha256()
+    with path.open("rb") as f:
+        for chunk in iter(lambda: f.read(1 << 20), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def check_corpus_slice(
+    corpus_manifest_path: Path, split: str, families: tuple[str, ...], run_root: Path,
+) -> dict[str, Any]:
+    """--check-only (review item 19, S26 section 1.2 item 5): verifies every
+    document's SHA-256 against the manifest (when it records one) and resolves
+    each family's anchor/plan exactly as run_chain would, without starting any
+    trial. Writes <run_root>/check-report.json (and its sha256 beside it);
+    `ok` is True only when every hash matches and every (document, family)
+    is applicable."""
+    manifest = json.loads(corpus_manifest_path.read_text(encoding="utf-8"))
+    documents = [d for d in manifest["documents"] if d["s7_split"] == split]
+    rows: list[dict[str, Any]] = []
+    ok = True
+    for doc in documents:
+        docx_path = Path(doc["docx_path"])
+        row: dict[str, Any] = {"doc_label": doc["doc_label"], "docx_path": str(docx_path)}
+        if not docx_path.is_file():
+            row.update({"sha256": None, "sha256_ok": False, "error": "docx_path does not exist"})
+            ok = False
+            rows.append(row)
+            continue
+        actual = _sha256_path(docx_path)
+        expected = doc.get("sha256")
+        row["sha256"] = actual
+        row["sha256_ok"] = expected is None or actual.lower() == str(expected).lower()
+        if expected is None:
+            row["sha256_note"] = "manifest records no sha256"
+        ok = ok and row["sha256_ok"]
+        row["families"] = {}
+        if not row["sha256_ok"]:
+            rows.append(row)
+            continue
+        for family in families:
+            try:
+                probe = probe_family_applicability(family, docx_path)
+            except Exception as exc:  # noqa: BLE001 -- a check must report, not crash
+                probe = {"applicable": False, "reason": f"resolver raised {type(exc).__name__}: {exc}"}
+            row["families"][family] = probe
+            ok = ok and bool(probe.get("applicable"))
+        rows.append(row)
+    report = {
+        "schema": "paper-s7-check-only-v1",
+        "generated_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+        "corpus_manifest": str(corpus_manifest_path), "split": split, "families": list(families),
+        "document_count": len(documents), "ok": ok, "documents": rows,
+    }
+    run_root.mkdir(parents=True, exist_ok=True)
+    out = run_root / "check-report.json"
+    out.write_text(json.dumps(report, indent=2, ensure_ascii=False), encoding="utf-8")
+    (run_root / "check-report.json.sha256").write_text(f"{_sha256_path(out)}  check-report.json\n", encoding="utf-8")
+    return report
+
+
+def _corpus_chain_key(job: dict[str, Any]) -> tuple[str, str, str, int]:
+    return (job["doc"]["doc_label"], job["family"], job["arm"], job["k"])
 
 
 def run_corpus_slice(
     corpus_manifest_path: Path, split: str, families: tuple[str, ...], k_values: tuple[int, ...],
     model: str, run_root: Path, *, max_workers: int = 4, word_receipts_enabled: bool = True,
+    arm_order_seed: int | None = None, max_chain_attempts: int | None = None,
+    pause_controller: UsagePauseController | None = None, max_usage_cap_rounds: int | None = None,
 ) -> dict[str, Any]:
+    """Rate-limit handling (2026-09-25): dispatches in rounds via
+    usage_cap.run_with_usage_cap_retry. A round whose fresh CircuitBreaker
+    trips on usage_limit/api_rate_limit is automatically retried after
+    `pause_controller` waits (a parsed reset time, or exponential backoff) --
+    no relaunch of this function/command is needed. A round that trips on
+    any OTHER global kind (a hard infrastructure failure) is left exactly as
+    before: those chains end aborted_circuit_open/infra_blocked, the final
+    circuit_breaker in the manifest is open, and the caller (main()) exits 3.
+    `pause_controller` defaults to a fresh UsagePauseController that writes
+    its heartbeat to `<run_root>/usage-cap-status.json`.
+    """
     manifest = json.loads(corpus_manifest_path.read_text(encoding="utf-8"))
     documents = [d for d in manifest["documents"] if d["s7_split"] == split]
 
-    jobs = [
-        (doc, family, k)
+    run_root.mkdir(parents=True, exist_ok=True)
+    if pause_controller is None:
+        pause_controller = UsagePauseController(heartbeat_path=run_root / "usage-cap-status.json")
+
+    # Both arms of each (document, family, k) are one job each so a usage-cap
+    # retry round can re-dispatch exactly the chains it needs to, not
+    # necessarily both arms of a pair.
+    all_jobs: list[dict[str, Any]] = [
+        {"doc": doc, "family": family, "k": k, "arm": arm}
         for doc in documents
         for family in families
         for k in k_values
+        for arm in arm_order(arm_order_seed, f"{doc['doc_label']}:{family}:{k}")
     ]
 
-    run_root.mkdir(parents=True, exist_ok=True)
-    results: list[dict[str, Any]] = []
-    with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as pool:
-        futures = {
-            pool.submit(
-                run_chain, family, doc["doc_label"], Path(doc["docx_path"]), arm, k, model, run_root,
-                word_receipts_enabled=word_receipts_enabled,
-            ): (doc["doc_label"], family, arm, k)
-            for doc, family, k in jobs
-            for arm in ("control", "treatment")
-        }
-        for future in concurrent.futures.as_completed(futures):
-            key = futures[future]
-            try:
-                results.append(future.result())
-            except Exception as exc:  # noqa: BLE001
-                doc_label, family, arm, k = key
-                results.append({
-                    "chain_id": f"{doc_label}-{family}-{arm}-k{k}-EXCEPTION",
-                    "doc_label": doc_label, "family": family, "arm": arm, "k_pairs": k,
-                    "status": "harness_exception", "reason": f"{type(exc).__name__}: {exc}",
-                    "pairs": [],
-                })
+    def dispatch_round(jobs: list[dict[str, Any]], circuit_breaker: CircuitBreaker) -> tuple[dict[Any, dict[str, Any]], list[Any]]:
+        round_results: dict[Any, dict[str, Any]] = {}
+        round_submission: list[Any] = []
+        with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as pool:
+            futures = {}
+            for job in jobs:
+                doc, family, k, arm = job["doc"], job["family"], job["k"], job["arm"]
+                future = pool.submit(
+                    run_chain, family, doc["doc_label"], Path(doc["docx_path"]), arm, k, model, run_root,
+                    word_receipts_enabled=word_receipts_enabled,
+                    circuit_breaker=circuit_breaker, max_chain_attempts=max_chain_attempts,
+                    pause_controller=pause_controller,
+                )
+                key = _corpus_chain_key(job)
+                futures[future] = key
+                round_submission.append([doc["doc_label"], family, k, arm])
+            for future in concurrent.futures.as_completed(futures):
+                doc_label, family, arm, k = key = futures[future]
+                try:
+                    round_results[key] = future.result()
+                except CircuitOpenError as exc:
+                    round_results[key] = {
+                        "chain_id": f"{doc_label}-{family}-{arm}-k{k}-ABORTED",
+                        "doc_label": doc_label, "family": family, "arm": arm, "k_pairs": k,
+                        "status": STATUS_ABORTED_CIRCUIT_OPEN, "reason": str(exc), "pairs": [],
+                    }
+                except Exception as exc:  # noqa: BLE001
+                    round_results[key] = {
+                        "chain_id": f"{doc_label}-{family}-{arm}-k{k}-EXCEPTION",
+                        "doc_label": doc_label, "family": family, "arm": arm, "k_pairs": k,
+                        "status": "harness_exception", "reason": f"{type(exc).__name__}: {exc}",
+                        "pairs": [],
+                    }
+        return round_results, round_submission
+
+    final_results, submission_order, usage_cap_rounds = run_with_usage_cap_retry(
+        dispatch_round, all_jobs, pause_controller, job_key=_corpus_chain_key,
+        make_circuit_breaker=CircuitBreaker, max_rounds=max_usage_cap_rounds,
+    )
+    results = list(final_results.values())
+    final_circuit_breaker = usage_cap_rounds[-1]["circuit_breaker"] if usage_cap_rounds else CircuitBreaker().state()
 
     manifest_out = {
         "schema": "paper-s7-benchmark-slice-v1",
         "generated_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
         "split": split, "families": list(families), "k_values": list(k_values), "model": model,
         "document_count": len(documents), "chain_count": len(results),
+        "arm_order_seed": arm_order_seed, "max_chain_attempts": max_chain_attempts,
+        "submission_order": submission_order,
+        "circuit_breaker": final_circuit_breaker,
+        "usage_cap_rounds": usage_cap_rounds,
+        "usage_cap_status": pause_controller.state(),
         "chains": results,
     }
     out_path = run_root / "slice-manifest.json"
@@ -579,12 +826,69 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--max-workers", type=int, default=4)
     parser.add_argument("--no-word-receipts", action="store_true")
     parser.add_argument("--run-root", type=Path, required=True)
+    parser.add_argument(
+        "--check-only", action="store_true",
+        help="Verify every document's SHA-256 and resolve every family's plan/anchor, write "
+             "<run-root>/check-report.json, and exit (non-zero unless all pass). No trial is started.",
+    )
+    parser.add_argument(
+        "--arm-order-seed", type=int, default=None,
+        help="Seed for the order in which each matched pair's two arms are submitted (both are always "
+             "submitted together). Omitted: control first.",
+    )
+    parser.add_argument(
+        "--max-chain-attempts", type=int, default=None,
+        help="Rerun limit per chain, counted in <run-root>/_chain_attempts/ (attempts ended by a global "
+             "infrastructure event or the circuit breaker do not count). Omitted: no limit.",
+    )
+    parser.add_argument(
+        "--max-usage-cap-rounds", type=int, default=None,
+        help="Safety valve: stop auto-retrying after this many usage-cap/rate-limit pause-and-resume rounds "
+             "(circuit_breaker stays open, exit 3). Omitted: unlimited -- the sweep resumes on its own for as "
+             "long as the account keeps hitting its usage cap or a transient rate limit, with no relaunch needed.",
+    )
+    parser.add_argument(
+        "--usage-cap-base-backoff-seconds", type=float, default=30.0,
+        help="Backoff before the first retry after a usage-cap/rate-limit pause when the CLI gave no reset time.",
+    )
+    parser.add_argument(
+        "--usage-cap-max-backoff-seconds", type=float, default=1800.0,
+        help="Cap on the exponential backoff between usage-cap/rate-limit retry rounds (default 30 minutes).",
+    )
+    parser.add_argument(
+        "--provenance-json", type=Path, default=None,
+        help="Write a provenance record here (argv, this repo's git commit, the installed Meridian Docs "
+             "package's commit/version, model, corpus manifest path+sha256, hostname, start/end time, exit "
+             "status) at the start of a real run (not --check-only), then update it with the end time and "
+             "exit status when the run finishes.",
+    )
     args = parser.parse_args(argv)
 
+    if args.check_only:
+        report = check_corpus_slice(args.corpus_manifest, args.split, tuple(args.families), args.run_root)
+        print(json.dumps({"ok": report["ok"], "document_count": report["document_count"]}, indent=2))
+        print(f"Check report: {args.run_root / 'check-report.json'}")
+        return 0 if report["ok"] else 2
+
+    args.run_root.mkdir(parents=True, exist_ok=True)
+    if args.provenance_json is not None:
+        # No schedule concept in this script (that's the two respec_cascade
+        # scripts only): schedule_path/_sha256 stay None.
+        record = build_provenance(
+            sys.argv, model=args.model, documents_manifest=args.corpus_manifest,
+        )
+        write_provenance_start(args.provenance_json, record)
+    pause_controller = UsagePauseController(
+        heartbeat_path=args.run_root / "usage-cap-status.json",
+        base_backoff_seconds=args.usage_cap_base_backoff_seconds,
+        max_backoff_seconds=args.usage_cap_max_backoff_seconds,
+    )
     manifest = run_corpus_slice(
         args.corpus_manifest, args.split, tuple(args.families), tuple(args.k_values),
         args.model, args.run_root, max_workers=args.max_workers,
         word_receipts_enabled=not args.no_word_receipts,
+        arm_order_seed=args.arm_order_seed, max_chain_attempts=args.max_chain_attempts,
+        pause_controller=pause_controller, max_usage_cap_rounds=args.max_usage_cap_rounds,
     )
 
     counts: dict[str, int] = {}
@@ -593,7 +897,15 @@ def main(argv: list[str] | None = None) -> int:
         counts[status] = counts.get(status, 0) + 1
     print(json.dumps(counts, indent=2))
     print(f"Slice manifest: {args.run_root / 'slice-manifest.json'}")
-    return 0
+    if manifest["usage_cap_rounds"]:
+        print(f"Usage-cap pause/resume rounds: {len(manifest['usage_cap_rounds'])} "
+              f"(heartbeat: {args.run_root / 'usage-cap-status.json'})")
+    exit_status = 3 if manifest["circuit_breaker"]["open"] else 0
+    if manifest["circuit_breaker"]["open"]:
+        print(f"CIRCUIT BREAKER OPEN: {json.dumps(manifest['circuit_breaker'])}", file=sys.stderr)
+    if args.provenance_json is not None:
+        write_provenance_end(args.provenance_json, exit_status=exit_status)
+    return exit_status
 
 
 if __name__ == "__main__":

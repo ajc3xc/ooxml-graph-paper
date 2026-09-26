@@ -1,0 +1,69 @@
+{
+ "schema": "s25-respec-eligibility-at-pin-v1",
+ "meridian_docs_pin_commit": "89c93fac6a9ee7a03d98baab34ba7043de983018",
+ "previously_used_unpinned_commit": "b0d28a6134bb7f4bb62b7d4fd2c29cda22b28615",
+ "note": "Recomputed 2026-09-26 against an isolated venv built from `git archive 89c93fac6a9ee7a03d98baab34ba7043de983018 -- extensions/meridian-docs` (extracted, `pip install --no-deps` -- the resolvers used here, parse_docx/document_outline via tools/docx_anchor_prober.py, are stdlib-only, so no other meridian_docs runtime dependency is exercised or needed), run read-only against the shared C:\\Users\\13144\\Documents\\Meridian\\repository checkout (never modified). `git merge-base --is-ancestor 89c93fac6a9ee7a03d98baab34ba7043de983018 b0d28a6134bb7f4bb62b7d4fd2c29cda22b28615` is true: the previously-used unpinned build (b0d28a6134bb7f4bb62b7d4fd2c29cda22b28615) already contains the pin, and `git diff {unpinned}:extensions/meridian-docs/meridian_docs/docs_intel.py {pin}:extensions/meridian-docs/meridian_docs/docs_intel.py` is empty (byte-identical) -- the one file these resolvers read. The recompute below was still executed for real against the pinned build's own installed copy, not inferred from that diff.",
+ "resolver": "tools/respec_eligibility.analyze (resolve_respec_schedule + table-anchor pool, max_anchor_sets=4)",
+ "eligibility_rule": "docs/paper-s25-respec-cascade-rerun-protocol-v1.md section 1.5: eligible only if six_family_usable == 4 (all 4 anchor-sets usable)",
+ "source_locked_file": "manifests/s25-respec-documents-locked.json",
+ "document_count": 8,
+ "all_eligible": true,
+ "documents": [
+  {
+   "doc_label": "jcshm-manuscript",
+   "sha256": "ada276d4de9dd346b2f2b6be3cfac9e7637f6eca849e0aa2b516d7b70c294747",
+   "six_family_usable_at_pin": 4,
+   "five_family_usable_at_pin": 4,
+   "eligible_six_family": true
+  },
+  {
+   "doc_label": "jcshm-si",
+   "sha256": "8ccdf9dd53a1cb16def8fc6f22044c5902d553c47cd0781fec29677486495cb8",
+   "six_family_usable_at_pin": 4,
+   "five_family_usable_at_pin": 4,
+   "eligible_six_family": true
+  },
+  {
+   "doc_label": "masters-dissertation-defense",
+   "sha256": "b3336b9809dfb0bcac5d73e0f2e94ed4d899a98a93217f01fd6fca648ae0f332",
+   "six_family_usable_at_pin": 4,
+   "five_family_usable_at_pin": 4,
+   "eligible_six_family": true
+  },
+  {
+   "doc_label": "s25pub_d3ff0b3c3f2d72d3",
+   "sha256": "d3ff0b3c3f2d72d3e1aa59de7ab04446b2e470ba21987ea66b0702d4b14fa968",
+   "six_family_usable_at_pin": 4,
+   "five_family_usable_at_pin": 4,
+   "eligible_six_family": true
+  },
+  {
+   "doc_label": "s25pub_acd134313c175f4e",
+   "sha256": "acd134313c175f4e5d9ceb10f33454115c977153a91e83cdccad73303ed4a428",
+   "six_family_usable_at_pin": 4,
+   "five_family_usable_at_pin": 4,
+   "eligible_six_family": true
+  },
+  {
+   "doc_label": "s25pub_c04412c3eeda841d",
+   "sha256": "c04412c3eeda841d22fd345d3ca5ed3757ec528500d4cd542a82e29d1e5b18b5",
+   "six_family_usable_at_pin": 4,
+   "five_family_usable_at_pin": 4,
+   "eligible_six_family": true
+  },
+  {
+   "doc_label": "s25pub_66157a47a2b464f1",
+   "sha256": "66157a47a2b464f153124998c373a6336d75560439381c4e2df80c1b997732bd",
+   "six_family_usable_at_pin": 4,
+   "five_family_usable_at_pin": 4,
+   "eligible_six_family": true
+  },
+  {
+   "doc_label": "s25pub_ede3e0981b844b40",
+   "sha256": "ede3e0981b844b40238ef074e5c00b69de453a3292825d2a2a1a9598d179079f",
+   "six_family_usable_at_pin": 4,
+   "five_family_usable_at_pin": 4,
+   "eligible_six_family": true
+  }
+ ]
+}

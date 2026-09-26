@@ -223,3 +223,112 @@ def test_compute_statistics_reports_steady_state_for_k4_but_not_k1() -> None:
     # Strict, whole-chain outcome still correctly shows 0.0 for both arms.
     assert by_k[4]["control_pass_rate_ci"]["mean"] == 0.0
     assert by_k[4]["treatment_pass_rate_ci"]["mean"] == 0.0
+
+
+# ---------------------------------------------------------------------------
+# 2026-09-25: per-cause blocked statuses and --blocked-policy (review blocker 1,
+# items 22 and 23). The default must treat every new status exactly as the
+# legacy "blocked", so no stored number moves.
+# ---------------------------------------------------------------------------
+
+import json  # noqa: E402
+
+import compute_s7_statistics as cs7  # noqa: E402
+
+_NEW_BLOCKED = ("blocked_timeout", "blocked_forward_failed", "blocked_unreadable_input", "blocked_inverse_unresolvable")
+
+
+def _blocked_by_cause(status: str, chain_id: str = "c1", *, arm: str = "control", doc: str = "d1", trial: dict | None = None,
+                   k: int = 4) -> dict:
+    forward = trial if trial is not None else {"timed_out": True, "returncode": None, "claude_json_result": None,
+                                               "grading": {"verdict": "not_run"}}
+    return {"chain_id": chain_id, "doc_label": doc, "family": "section_reorder", "arm": arm, "k_pairs": k,
+            "status": status, "pairs": [{"forward": forward}]}
+
+
+@pytest.mark.parametrize("status", ("blocked", *_NEW_BLOCKED))
+def test_every_blocked_status_is_excluded_by_default(status) -> None:
+    chain = _blocked_by_cause(status)
+    assert _chain_outcome(chain) is None
+    assert _chain_steady_state_outcome(chain) is None
+
+
+@pytest.mark.parametrize("status", ("infra_blocked", "infra_excluded", "aborted_circuit_open", "harness_exception"))
+def test_infrastructure_and_aborted_chains_are_never_scored(status) -> None:
+    chain = _blocked_by_cause(status, trial={"grading": {"verdict": "pass"}})
+    for policy in cs7.BLOCKED_POLICIES:
+        assert _chain_outcome(chain, blocked_policy=policy) is None
+        assert _chain_steady_state_outcome(chain, blocked_policy=policy) is None
+
+
+@pytest.mark.parametrize("status", _NEW_BLOCKED)
+def test_fail_policy_scores_every_non_infrastructure_blocked_cause_zero(status) -> None:
+    chain = _blocked_by_cause(status)
+    assert _chain_outcome(chain, blocked_policy="fail") == 0.0
+    assert _chain_steady_state_outcome(chain, blocked_policy="fail") == 0.0
+
+
+def test_fail_policy_classifies_a_legacy_blocked_chain_from_its_trials() -> None:
+    timed_out = _blocked_by_cause("blocked")
+    assert _chain_outcome(timed_out, blocked_policy="fail") == 0.0
+    dll_init_failed = _blocked_by_cause("blocked", trial={"timed_out": False, "returncode": 0xC0000142,
+                                                       "claude_json_result": None, "stderr_tail": ""})
+    assert _chain_outcome(dll_init_failed, blocked_policy="fail") is None
+    rate_limited = _blocked_by_cause("blocked", trial={
+        "timed_out": False, "returncode": 1, "stderr_tail": "",
+        "claude_json_result": {"subtype": "success", "is_error": True, "api_error_status": 429, "result": "API Error: 429"},
+    })
+    assert _chain_outcome(rate_limited, blocked_policy="fail") is None
+    recorded = {**_blocked_by_cause("blocked_timeout"), "infra_signature": {"kinds": ["foreign_signal"], "scope": "chain"}}
+    assert _chain_outcome(recorded, blocked_policy="fail") is None
+
+
+def test_score_as_failure_accepts_the_new_timeout_status() -> None:
+    chain = _blocked_by_cause("blocked_timeout", chain_id="d1-sr-control-k4")
+    assert _chain_outcome(chain, frozenset({"d1-sr-control-k4"})) == 0.0
+
+
+def test_unknown_blocked_policy_is_rejected() -> None:
+    with pytest.raises(ValueError):
+        _chain_outcome(_passing_chain("d1", "bibliography", "control"), blocked_policy="sometimes")
+
+
+def test_default_policy_output_is_unchanged_and_fail_policy_is_recorded() -> None:
+    chains = [
+        {**_passing_chain("d1", "section_reorder", "control", 4), "chain_id": "d1-c"},
+        {**_passing_chain("d1", "section_reorder", "treatment", 4), "chain_id": "d1-t"},
+        {**_passing_chain("d2", "section_reorder", "treatment", 4), "chain_id": "d2-t"},
+        _blocked_by_cause("blocked_timeout", "d2-c", doc="d2"),
+        _blocked_by_cause("blocked", "d3-c", doc="d3", trial={"timed_out": False, "returncode": -9,
+                                                          "claude_json_result": None, "stderr_tail": ""}),
+        {**_passing_chain("d3", "section_reorder", "treatment", 4), "chain_id": "d3-t"},
+    ]
+    default = compute_statistics(chains)
+    assert "blocked_policy" not in default
+    assert default == compute_statistics(chains, blocked_policy="exclude")
+    [group] = default["groups"]
+    assert group["control_n"] == 1 and group["paired_n"] == 1
+
+    failed = compute_statistics(chains, blocked_policy="fail")
+    [group] = failed["groups"]
+    assert group["control_n"] == 2 and group["paired_n"] == 2
+    assert failed["blocked_policy"]["policy"] == "fail"
+    assert failed["blocked_policy"]["blocked_scored_as_failure"] == ["d2-c"]
+    assert failed["blocked_policy"]["blocked_excluded_infrastructure"] == ["d3-c"]
+
+
+def test_cli_accepts_blocked_policy_and_its_timeout_policy_alias(tmp_path: Path) -> None:
+    manifest = tmp_path / "slice.json"
+    manifest.write_text(json.dumps({"chains": [
+        {**_passing_chain("d1", "bibliography", "control"), "chain_id": "a"},
+        {**_passing_chain("d1", "bibliography", "treatment"), "chain_id": "b"},
+        {**_blocked_by_cause("blocked_timeout", "c", doc="d2", k=1), "family": "bibliography"},
+        {**_passing_chain("d2", "bibliography", "treatment"), "chain_id": "d"},
+    ]}))
+    for flag in ("--blocked-policy", "--timeout-policy"):
+        out = tmp_path / f"{flag}.json"
+        assert cs7.main([str(manifest), "--out", str(out), flag, "fail"]) == 0
+        assert json.loads(out.read_text())["blocked_policy"]["blocked_scored_as_failure"] == ["c"]
+    out = tmp_path / "default.json"
+    assert cs7.main([str(manifest), "--out", str(out)]) == 0
+    assert "blocked_policy" not in json.loads(out.read_text())

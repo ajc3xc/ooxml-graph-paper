@@ -45,6 +45,29 @@ matching section 7's own "matched by doc_label + anchor-set" wording) and are
 written out explicitly, under their own labeled keys, both per family and
 pooled -- never left implicit inside a larger tiered dict.
 
+2026-09-25 corrections (independent audit of the 2026-09-23 run):
+  - Frozen chains. The as-run code EXCLUDED a chain that froze from the
+    per-family Phase-3 and keep-survival measures. `--frozen-chain-mode fail`
+    (default) scores it 0 at every checkpoint it did not reach;
+    `--frozen-chain-mode exclude` reproduces the stored statistics. The mode
+    used is written to the output. `fail` is one interpretation, not the
+    protocol's literal rule: protocol section 4 defines a freeze only for a
+    package-validity failure, so `fail` is exact only for a package-invalid
+    freeze. The orchestrator also freezes when it cannot re-resolve its own
+    anchor marker, and a family the chain never ran has no outcome at all; for
+    both, the 0 is an imputation (see FROZEN_CHAIN_MODES).
+  - Additional tests. Each section-7 entry now also carries `chain_level` (an
+    exact cluster sign-flip test in which all observations of one
+    (document, anchor-set) chain flip together, since the five family
+    outcomes of one chain are not independent) and `observation_level_exact`
+    (the as-run test with an exact p). The flat as-run fields are unchanged in
+    meaning. Tier 1 gains `paired_significance_exact`. These tests, and the
+    whole-chain composite direct comparison, were chosen after the
+    2026-09-23 results were known: for that run they are post hoc (output
+    `analysis_status`), not the test protocol section 7 names. They can be
+    primary only for a run whose protocol names them before any data exists
+    (the S25 re-run protocol).
+
 -------------------------------------------------------------------------
 SCHEMA THIS FILE READS (reconciled against the REAL orchestrator, 2026-09-20)
 -------------------------------------------------------------------------
@@ -84,6 +107,11 @@ extractors below.
                              "harness_exception"/"blocked" reserved for
                              future harness-level failure modes, not
                              currently emitted by the orchestrator itself.
+                             Since 2026-09-25 a frozen chain also carries
+                             freeze_cause ("package_invalid" |
+                             "anchor_reresolution_failed" | "other"),
+                             freeze_detail and frozen_at_step; the same
+                             status string is written for every cause.
     phase1_result         -- None (chain froze before Phase 1 finished) or
                              {"phase1_pass": bool, "families": {family:
                              {"verdict": "pass"|..., ...}, ...}, ...}
@@ -92,10 +120,17 @@ extractors below.
                               "section_at_d2": bool, "keep_survival":
                               {"overall_status": "clean_keep_survival"|...,
                                ...}, ...}
-    phase3_result          -- None (froze before/during Phase 3) or
+    phase3_result          -- None (froze before Phase 3; before 2026-09-25
+                             also on a Phase-3 freeze) or
                              {"phase3_pass": bool, "families": {family:
                               {"verdict": "pass"|..., ...}, ...},
-                              "final_structure_match": bool, ...}
+                              "final_structure_match": bool, ...}. On a
+                             Phase-3 freeze since 2026-09-25:
+                             {"status": "frozen_before_checkpoint_c",
+                              "phase3_pass": False, "families": {finished
+                              round trips' own verdicts, the rest
+                              "not_completed"/"not_run"}} -- diagnostics,
+                             never read as Checkpoint-C outcomes.
 
   `--baseline-run-root/<family>/<chain_id>/chain-result.json` -- this IS the
   existing, unmodified `run_paper_s7_benchmark.py::run_chain(k_pairs=1)`
@@ -113,7 +148,8 @@ Usage:
     python compute_respec_cascade_statistics.py \
         --run-root D:/MeridianData/ooxml-graph-paper/runs/paper-s23-respec-cascade/runs \
         --baseline-run-root D:/MeridianData/ooxml-graph-paper/runs/paper-s23-respec-cascade/baseline-runs \
-        --out D:/MeridianData/ooxml-graph-paper/runs/paper-s23-respec-cascade/statistics.json
+        --out D:/MeridianData/ooxml-graph-paper/runs/paper-s23-respec-cascade/statistics.json \
+        [--frozen-chain-mode fail|exclude] [--six-family]
 """
 from __future__ import annotations
 
@@ -132,19 +168,133 @@ from compute_multianchor_extension_statistics import (  # noqa: E402 -- reused U
     weighted_mean,  # noqa: F401 -- re-exported for callers pattern-matching the multi-anchor module's own surface
     weighted_paired_permutation_test,
 )
-from compute_s7_statistics import _chain_outcome  # noqa: E402 -- reused UNMODIFIED for baseline pass/fail
-from graph_scorer import bootstrap_ci, paired_permutation_test  # noqa: E402 -- reused UNMODIFIED
+from compute_s7_statistics import (  # noqa: E402 -- reused UNMODIFIED for baseline pass/fail
+    BLOCKED_POLICIES,
+    DEFAULT_BLOCKED_POLICY,
+    _chain_outcome,
+    _check_blocked_policy,
+)
+from graph_scorer import (  # noqa: E402 -- reused UNMODIFIED
+    bootstrap_ci,
+    cluster_paired_sign_flip_test,
+    paired_permutation_test,
+    paired_permutation_test_exact,
+)
 
 # Five-family contingency rotation R' (protocol section 2.3 / 1.2a item 2).
-# `table_structural` is NOT in this list -- see module docstring.
+# `table_structural` is NOT in this list -- see module docstring. The
+# six-family rotation R (protocol section 2.2) is SIX_FAMILIES, selected
+# explicitly with --families; five-family results are never merged with it.
 FAMILIES: list[str] = ["bibliography", "citation", "section_reorder", "equation", "caption"]
+SIX_FAMILIES: list[str] = ["bibliography", "citation", "section_reorder", "equation", "table_structural", "caption"]
 
 # Statuses excluded from every outcome measure's denominator (None, not a
 # fabricated 0) -- mirrors compute_s7_statistics._chain_outcome's own
 # exclusion set, PLUS "render_gate_timeout", which protocol section 7's
 # render-gate/host-contention control requires be reported separately and
 # never folded into control_drop/treatment_drop.
-_EXCLUDED_STATUSES = frozenset({"not_applicable", "harness_exception", "blocked", "render_gate_timeout"})
+#
+# 2026-09-26 fix (M1): "infra_blocked", "infra_excluded" and
+# "aborted_circuit_open" were missing here. Without them, a chain still
+# infra_blocked (or exhausted to infra_excluded, or stopped by the sweep-wide
+# circuit breaker) had phase1_result/phase2_result/phase3_result == None but
+# was NOT in this set, so _phase3_composite_outcome fell through to its
+# "froze or missing phase result" branch and scored it a hard 0.0 -- an
+# infrastructure non-outcome counted as an observed task failure. Probed
+# directly against all three outcome functions before this fix (see
+# tests/test_compute_respec_cascade_statistics.py); each of these three
+# statuses must be None (excluded), never 0.0, from every measure.
+_EXCLUDED_STATUSES = frozenset({
+    "not_applicable", "harness_exception", "blocked", "render_gate_timeout",
+    "infra_blocked", "infra_excluded", "aborted_circuit_open",
+})
+
+# How a chain that froze at a package-validity gate or a marker re-resolution
+# (status "chain_broken_at_step_*") enters the per-family Phase-3 measure and
+# the Phase-2 keep-survival measure:
+#   "fail"    -- a chain that froze passes no checkpoint it did not reach; it
+#                scores 0.0 there. Default for every new run. Exact only for
+#                a package-invalid freeze, the one freeze protocol section 4
+#                defines (composite PASS needs every package-validity gate).
+#                For a freeze on a failed anchor/marker re-resolution (the
+#                harness not finding its own marker in the arm's output;
+#                protocol section 4 does not define it as a freeze) and for
+#                every family the chain never ran, the 0 is an imputation,
+#                not an observed outcome. The orchestrator records
+#                `freeze_cause` since 2026-09-25; chains from the 2026-09-23
+#                run carry none (all 5 of its control freezes were at steps
+#                with a re-resolution check, cause unknown).
+#   "exclude" -- the as-run behavior of the 2026-09-23 primary sweep: a
+#                frozen chain has no outcome for a checkpoint it did not reach
+#                and drops out of that measure's denominator. Kept so
+#                paper/sources/respec-cascade-statistics.json stays
+#                reproducible.
+# The whole-chain composite (measure a) scores a frozen chain 0.0 in both
+# modes, as it always has. A checkpoint the chain DID reach before freezing
+# (e.g. Checkpoint B for a chain that froze in Phase 3) keeps its real
+# graded outcome in both modes.
+#   "fail_graded_prefreeze" -- S25 protocol section 5.2's PRIMARY scoring
+#                (prerequisite P-R1). Per family: a round trip that finished
+#                grading before the freeze keeps that real verdict (pass/fail);
+#                a family not reached (in progress when it froze, or later in
+#                the rotation) scores 0, same as "fail". Keep-survival and the
+#                whole-chain composite score exactly as "fail" (keep-survival
+#                has no partial-credit notion below Checkpoint B; the
+#                composite fails on any freeze regardless of mode).
+#   "package_invalid_only" -- a sensitivity split of "fail_graded_prefreeze"
+#                by freeze_cause (S25 section 6.8 item 4): a freeze whose
+#                freeze_cause is "package_invalid" (protocol section 4's one
+#                defined freeze) is scored exactly as "fail_graded_prefreeze";
+#                any other cause (anchor/marker re-resolution, "other", or
+#                "not_recorded" on a pre-2026-09-25 chain) is EXCLUDED
+#                (None) from every checkpoint that chain did not reach,
+#                instead of imputed.
+FROZEN_CHAIN_MODES: tuple[str, ...] = ("fail", "exclude", "fail_graded_prefreeze", "package_invalid_only")
+DEFAULT_FROZEN_CHAIN_MODE = "fail"
+FROZEN_CHAIN_MODE_NOTES: dict[str, str] = {
+    "fail": (
+        "A frozen chain scores 0 at every checkpoint it did not reach. Exact only for a package-invalid "
+        "freeze (protocol section 4); for an anchor/marker re-resolution freeze and for families the chain "
+        "never ran, the 0 is an imputation. See frozen_chains[*].freeze_cause."
+    ),
+    "exclude": (
+        "A frozen chain drops out of every measure whose checkpoint it did not reach (the as-run scoring "
+        "of the 2026-09-23 sweep)."
+    ),
+    "fail_graded_prefreeze": (
+        "S25 protocol section 5.2's primary scoring. Per family, a Phase-3 round trip already graded "
+        "before the freeze keeps its real verdict; a family not reached scores 0, like 'fail'. "
+        "Keep-survival and the whole-chain composite score exactly as 'fail'."
+    ),
+    "package_invalid_only": (
+        "'fail_graded_prefreeze' scoring restricted to freezes with freeze_cause == 'package_invalid' "
+        "(protocol section 4's one defined freeze); every other freeze cause is excluded (None) from the "
+        "checkpoints it did not reach, rather than imputed (S25 section 6.8 item 4)."
+    ),
+}
+
+# Tests added on 2026-09-25, after the 2026-09-23 results were known. For that
+# run they are post hoc; a later run may call them primary only if its own
+# protocol names them before any data exists (S25 does).
+POST_HOC_LABEL = "post_hoc_for_2026-09-23_run"
+ANALYSIS_STATUS: dict[str, str] = {
+    "confirm_disconfirm.*.chain_level": POST_HOC_LABEL,
+    "confirm_disconfirm.*.observation_level_exact": POST_HOC_LABEL,
+    "confirm_disconfirm.whole_chain_composite_direct": POST_HOC_LABEL,
+    "confirm_disconfirm.keep_survival_significance_chain_level": POST_HOC_LABEL,
+    "confirm_disconfirm.keep_survival_significance_observation_level_exact": POST_HOC_LABEL,
+    "outcome_measures.*.tier1_per_document_unweighted.paired_significance_exact": POST_HOC_LABEL,
+    "frozen_chain_mode=fail": POST_HOC_LABEL,
+}
+
+
+def _is_frozen(chain: dict[str, Any]) -> bool:
+    return str(chain.get("status") or "").startswith("chain_broken_at_step_")
+
+
+def _check_frozen_chain_mode(frozen_chain_mode: str) -> None:
+    if frozen_chain_mode not in FROZEN_CHAIN_MODES:
+        raise ValueError(f"frozen_chain_mode must be one of {FROZEN_CHAIN_MODES}, got {frozen_chain_mode!r}")
 
 
 # ---------------------------------------------------------------------------
@@ -236,14 +386,16 @@ def _phase3_composite_outcome(chain: dict[str, Any]) -> float | None:
     phase1 = chain.get("phase1_result")
     phase2 = chain.get("phase2_result")
     phase3 = chain.get("phase3_result")
-    if phase1 is None or phase2 is None or phase3 is None:
+    if _is_frozen(chain) or phase1 is None or phase2 is None or phase3 is None:
         # The chain froze at a package-validity gate before all three
         # phases completed (`run_respec_cascade_chain`'s own `_freeze`
         # leaves every not-yet-reached phase's result as `None`) -- scored
         # 0.0, not excluded: the composite requires all three phases to
         # have genuinely passed, and a mid-chain freeze is itself a real
         # structural finding about that arm's output, per protocol section
-        # 4/7, not an absence of information.
+        # 4/7, not an absence of information. `_is_frozen` covers chains from
+        # the current orchestrator, whose `phase3_result` on a Phase-3 freeze
+        # holds the verdicts of the round trips that finished before it.
         return 0.0
     a, b, c = phase1.get("phase1_pass"), phase2.get("phase2_pass"), phase3.get("phase3_pass")
     if a is None or b is None or c is None:
@@ -251,7 +403,23 @@ def _phase3_composite_outcome(chain: dict[str, Any]) -> float | None:
     return 1.0 if (a and b and c) else 0.0
 
 
-def _phase3_family_outcome(chain: dict[str, Any], family: str) -> float | None:
+def _frozen_not_reached_outcome(chain: dict[str, Any], frozen_chain_mode: str) -> float | None:
+    """0.0 or None for a measure this frozen chain never reached at all
+    (never graded before or during the freeze), depending on
+    frozen_chain_mode: "fail"/"fail_graded_prefreeze" impute 0.0; "exclude"
+    always excludes (None); "package_invalid_only" imputes 0.0 only when this
+    chain's freeze_cause is "package_invalid" (the one freeze protocol
+    section 4 defines), else excludes -- see FROZEN_CHAIN_MODES."""
+    if frozen_chain_mode == "exclude":
+        return None
+    if frozen_chain_mode == "package_invalid_only":
+        return 0.0 if chain.get("freeze_cause") == "package_invalid" else None
+    return 0.0  # "fail", "fail_graded_prefreeze"
+
+
+def _phase3_family_outcome(
+    chain: dict[str, Any], family: str, frozen_chain_mode: str = DEFAULT_FROZEN_CHAIN_MODE,
+) -> float | None:
     """Outcome measure (a), per-family: this family's own Phase-3
     forward+inverse pass/fail, section 7's primary per-family comparison
     unit. Reads `phase3_result["families"][family]["verdict"] == "pass"`
@@ -259,18 +427,41 @@ def _phase3_family_outcome(chain: dict[str, Any], family: str) -> float | None:
     carrying a `"verdict"` key -- the same convention
     `grade_phase1_build`/`grade_phase3_second_exposure` themselves check via
     `r.get("verdict") == "pass"`), NOT `checkpoint_c["per_family"][family]
-    ["pass"]`, which never matches anything the real evaluator produces."""
+    ["pass"]`, which never matches anything the real evaluator produces.
+
+    A frozen chain never reached Checkpoint C, so it has no Checkpoint-C
+    verdict for any family: 0.0 under frozen_chain_mode="fail", None under
+    "exclude" (see FROZEN_CHAIN_MODES). Verdicts the orchestrator recorded
+    for round trips that finished before a Phase-3 freeze are diagnostics
+    (reported under `frozen_chains`), not Checkpoint-C outcomes -- EXCEPT
+    under "fail_graded_prefreeze" (S25 section 5.2's primary scoring) and,
+    when this chain's freeze_cause is "package_invalid", under
+    "package_invalid_only": both then use that pre-freeze verdict as this
+    family's real outcome, exactly like a chain that did not freeze at all,
+    falling back to _frozen_not_reached_outcome (0.0/None) only for a family
+    the chain never reached (in progress when it froze, or later in the
+    rotation)."""
+    _check_frozen_chain_mode(frozen_chain_mode)
     status = chain.get("status")
     if status in _EXCLUDED_STATUSES:
         return None
+    if _is_frozen(chain):
+        use_graded_prefreeze = frozen_chain_mode == "fail_graded_prefreeze" or (
+            frozen_chain_mode == "package_invalid_only" and chain.get("freeze_cause") == "package_invalid"
+        )
+        if use_graded_prefreeze:
+            phase3 = chain.get("phase3_result")
+            fam = ((phase3 or {}).get("families") or {}).get(family) or {}
+            verdict = fam.get("verdict")
+            if verdict is not None:
+                return 1.0 if verdict == "pass" else 0.0
+            # Not graded before the freeze (not_completed/not_run, or no
+            # phase3_result at all): never reached.
+            return _frozen_not_reached_outcome(chain, frozen_chain_mode)
+        return _frozen_not_reached_outcome(chain, frozen_chain_mode)
     phase3 = chain.get("phase3_result")
     if phase3 is None:
-        # Phase 3 never ran (the chain froze during Phase 1 or Phase 2) --
-        # this family's own Phase-3 round trip never happened, so there is
-        # no real per-family verdict to report. Excluded (None), not the
-        # whole-chain composite's 0.0 -- a family-specific outcome that
-        # never got a chance to run is a different thing from one that ran
-        # and failed.
+        # No Phase-3 result on a chain that did not freeze: nothing graded.
         return None
     families = phase3.get("families") or {}
     fam = families.get(family)
@@ -282,7 +473,9 @@ def _phase3_family_outcome(chain: dict[str, Any], family: str) -> float | None:
     return 1.0 if verdict == "pass" else 0.0
 
 
-def _phase2_keep_survival_outcome(chain: dict[str, Any]) -> float | None:
+def _phase2_keep_survival_outcome(
+    chain: dict[str, Any], frozen_chain_mode: str = DEFAULT_FROZEN_CHAIN_MODE,
+) -> float | None:
     """Outcome measure (b): `score_keep_survival`'s own pass/fail at
     Checkpoint B (protocol section 4, Checkpoint B item 3) -- distinct from
     Checkpoint B's FULL pass (which also folds in citation-absence,
@@ -290,14 +483,22 @@ def _phase2_keep_survival_outcome(chain: dict[str, Any]) -> float | None:
     `phase2_result["keep_survival"]["overall_status"] == "clean_keep_survival"`
     (a status STRING, per `graph_scorer.score_keep_survival`'s real return
     shape), NOT `checkpoint_b["keep_survival"]["pass"]` (a boolean that
-    field never had)."""
+    field never had).
+
+    A chain that froze before Checkpoint B (no `phase2_result`) scores 0.0
+    under frozen_chain_mode="fail"/"fail_graded_prefreeze" (there is no
+    partial-credit notion below Checkpoint B, so "fail_graded_prefreeze"
+    scores exactly as "fail" here), is excluded under "exclude", and under
+    "package_invalid_only" follows freeze_cause via _frozen_not_reached_outcome;
+    a chain that froze later keeps its real Checkpoint-B outcome in every mode."""
+    _check_frozen_chain_mode(frozen_chain_mode)
     status = chain.get("status")
     if status in _EXCLUDED_STATUSES:
         return None
     phase2 = chain.get("phase2_result")
     if phase2 is None:
-        # Phase 2 never ran (the chain froze during Phase 1) -- excluded,
-        # same reasoning as the per-family Phase-3 case above.
+        if _is_frozen(chain):
+            return _frozen_not_reached_outcome(chain, frozen_chain_mode)
         return None
     keep_survival = phase2.get("keep_survival") or {}
     overall_status = keep_survival.get("overall_status")
@@ -306,11 +507,19 @@ def _phase2_keep_survival_outcome(chain: dict[str, Any]) -> float | None:
     return 1.0 if overall_status == "clean_keep_survival" else 0.0
 
 
-def _baseline_outcome(chain: dict[str, Any]) -> float | None:
+def _baseline_outcome(chain: dict[str, Any], blocked_policy: str = DEFAULT_BLOCKED_POLICY) -> float | None:
     """Outcome measure (c): reuses `compute_s7_statistics._chain_outcome`
     UNMODIFIED -- baseline chains are exactly `run_chain`'s own K=1
-    checkpoint format, so its already-validated pass/fail rule applies as-is."""
-    return _chain_outcome(chain)
+    checkpoint format, so its already-validated pass/fail rule applies as-is.
+
+    2026-09-26 fix (M2/P-R1): `blocked_policy` was previously never threaded
+    through, so `_chain_outcome` always ran with its default ("exclude") no
+    matter what a caller wanted -- a `blocked_*` baseline chain (a K=1 trial
+    that timed out, failed to exit cleanly, or hit an unreadable/unresolvable
+    input) silently dropped out of the baseline denominator instead of
+    scoring 0 under `--blocked-policy fail`, the S25 protocol's locked
+    default for baselines (section 5.6)."""
+    return _chain_outcome(chain, blocked_policy=blocked_policy)
 
 
 # ---------------------------------------------------------------------------
@@ -381,7 +590,13 @@ def _anchor_level_values(
 # SAME function, imported and called unmodified.
 # ---------------------------------------------------------------------------
 
-def _tiered_report(control_by_doc: dict[str, list[float]], treatment_by_doc: dict[str, list[float]]) -> dict[str, Any]:
+def _tiered_report(
+    control_by_doc: dict[str, list[float]], treatment_by_doc: dict[str, list[float]], *, exact_tests: bool = False,
+) -> dict[str, Any]:
+    """`exact_tests=True` adds Tier 1's `paired_significance_exact` (exact
+    sign-flip enumeration over the paired documents; with 3 documents no p
+    below 0.25 is possible, which the Monte Carlo `paired_significance` can
+    undershoot). Off by default so other callers' output is unchanged."""
     def per_doc_means(by_doc: dict[str, list[float]]) -> dict[str, float]:
         return {doc: sum(vs) / len(vs) for doc, vs in by_doc.items() if vs}
 
@@ -407,6 +622,12 @@ def _tiered_report(control_by_doc: dict[str, list[float]], treatment_by_doc: dic
             if len(paired_docs) >= 2 else None
         ),
     }
+    if exact_tests:
+        tier1["paired_significance_exact"] = (
+            paired_permutation_test_exact([control_means[d] for d in paired_docs],
+                                          [treatment_means[d] for d in paired_docs])
+            if len(paired_docs) >= 2 else None
+        )
 
     # --- Tier 2: anchor-set-count-weighted per-document mean.
     control_items = [(control_means[d], len(control_by_doc[d])) for d in control_means]
@@ -515,85 +736,208 @@ def _pool_across_families(per_family: dict[str, dict[str, dict[str, float]]]) ->
 
 
 # ---------------------------------------------------------------------------
+# Section 7, additional tests (post hoc for the 2026-09-23 run, see
+# ANALYSIS_STATUS). The flat `control_drop`/`treatment_drop`/
+# `direct_control_vs_treatment_phase3`/`keep_survival_significance` fields
+# above are the as-run observation-level Monte Carlo paired_permutation_test
+# and keep that meaning. Pooled across families they treat the five family
+# outcomes of ONE chain as five independent pairs, which they are not. The
+# chain-level test below flips all observations of one (document,
+# anchor-set) chain together, and the exact observation-level test is the
+# same test as the flat fields with an exact p-value.
+# ---------------------------------------------------------------------------
+
+def _chain_of(key: str) -> str:
+    """(document, anchor-set) chain a section-7 observation key belongs to:
+    per-family keys are the doc_label itself, pooled keys are
+    "family::doc_label" (see _pool_across_families)."""
+    return key.split("::", 1)[-1]
+
+
+def _section7_tests(a_by_key: dict[str, float], b_by_key: dict[str, float], label: str) -> dict[str, Any]:
+    common = sorted(set(a_by_key) & set(b_by_key))
+    a_values = [a_by_key[k] for k in common]
+    b_values = [b_by_key[k] for k in common]
+    chain_level = cluster_paired_sign_flip_test([_chain_of(k) for k in common], a_values, b_values)
+    chain_level["method"] = f"{chain_level.get('method', 'cluster-level paired sign-flip test')}: {label}, clustered by (document, anchor-set) chain"
+    observation_exact = paired_permutation_test_exact(a_values, b_values)
+    observation_exact["method"] = f"{observation_exact.get('method', 'paired sign-flip permutation test')}: {label}, every observation its own unit"
+    for result in (chain_level, observation_exact):
+        result["n_paired_observations"] = len(common)
+        result["matched_observations"] = common
+    return {"chain_level": chain_level, "observation_level_exact": observation_exact}
+
+
+def _section7_primary_tests(
+    cascade_by_arm_doc: dict[str, dict[str, float]],
+    baseline_by_arm_doc: dict[str, dict[str, float]] | None,
+) -> dict[str, dict[str, Any]]:
+    """{"chain_level": {...}, "observation_level_exact": {...}}, each holding
+    control_drop / treatment_drop / direct_control_vs_treatment_phase3 with
+    the same pairing as `_paired_drop`/`_direct_arm_comparison`. With
+    `baseline_by_arm_doc=None` only the direct comparison is computed (used
+    for keep-survival, which has no baseline)."""
+    out: dict[str, dict[str, Any]] = {"chain_level": {}, "observation_level_exact": {}}
+    tests: dict[str, dict[str, Any]] = {}
+    if baseline_by_arm_doc is not None:
+        for arm in ("control", "treatment"):
+            tests[f"{arm}_drop"] = _section7_tests(
+                cascade_by_arm_doc.get(arm, {}), baseline_by_arm_doc.get(arm, {}),
+                f"{arm} cascade Phase-3 outcome vs {arm} fresh isolated K=1 baseline outcome",
+            )
+    tests["direct_control_vs_treatment_phase3"] = _section7_tests(
+        cascade_by_arm_doc.get("control", {}), cascade_by_arm_doc.get("treatment", {}),
+        "control vs treatment cascade outcome",
+    )
+    for name, result in tests.items():
+        for level in out:
+            out[level][name] = result[level]
+    return out
+
+
+def _frozen_chain_disclosure(cascade_chains: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Every frozen chain with where and why it froze (`freeze_cause`, only
+    recorded by the orchestrator since 2026-09-25 -- "not_recorded" for older
+    chains) and the verdicts of any Phase-3 round trips that finished before
+    the freeze. Diagnostic only: under either frozen_chain_mode these
+    verdicts are not Checkpoint-C outcomes."""
+    out: list[dict[str, Any]] = []
+    for chain in cascade_chains:
+        if not _is_frozen(chain):
+            continue
+        phase3 = chain.get("phase3_result") or {}
+        families = phase3.get("families") or {}
+        out.append({
+            "doc_label": chain.get("doc_label"), "arm": chain.get("arm"), "status": chain.get("status"),
+            "freeze_cause": chain.get("freeze_cause", "not_recorded"),
+            "freeze_detail": chain.get("freeze_detail", chain.get("reason")),
+            "phase3_verdicts_before_freeze": {
+                family: (result or {}).get("verdict", (result or {}).get("status")) for family, result in families.items()
+            },
+        })
+    return out
+
+
+# ---------------------------------------------------------------------------
 # Top-level aggregation
 # ---------------------------------------------------------------------------
 
 def compute_respec_cascade_tiers(
     cascade_chains: list[dict[str, Any]],
     baseline_chains: dict[str, list[dict[str, Any]]],
+    *,
+    frozen_chain_mode: str = DEFAULT_FROZEN_CHAIN_MODE,
+    families: list[str] | None = None,
+    blocked_policy: str = DEFAULT_BLOCKED_POLICY,
 ) -> dict[str, Any]:
+    """`frozen_chain_mode`: see FROZEN_CHAIN_MODES ("exclude" reproduces the
+    stored 2026-09-23 statistics; "fail" scores a frozen chain 0 at every
+    checkpoint it did not reach, exact only for package-invalid freezes;
+    "fail_graded_prefreeze" and "package_invalid_only" are the S25 protocol's
+    primary and per-cause-sensitivity modes, section 5.2).
+    `families`: the rotation to aggregate, FAMILIES (default, five-family
+    contingency) or SIX_FAMILIES.
+    `blocked_policy`: passed through to `_baseline_outcome` /
+    `compute_s7_statistics._chain_outcome` for the fresh isolated K=1
+    baselines (compute_s7_statistics.BLOCKED_POLICIES; "exclude" default
+    reproduces the stored 2026-09-23 statistics, "fail" is the S25 locked
+    command's choice for baselines, section 5.6/6.8 item 8).
+
+    Raises ValueError if a family in `families` has no baseline chain: its
+    per-family drops would be empty and the pooled drops would silently leave
+    out every one of its observations while the direct comparison kept them."""
+    _check_frozen_chain_mode(frozen_chain_mode)
+    _check_blocked_policy(blocked_policy)
+    families = list(families) if families is not None else list(FAMILIES)
+    no_baseline = [family for family in families if not baseline_chains.get(family)]
+    if no_baseline:
+        raise ValueError(
+            f"no fresh isolated K=1 baseline chains for {no_baseline}: control_drop/treatment_drop would silently "
+            "drop these families' observations. Run the baselines for every family in the rotation."
+        )
     excluded_observations: list[dict[str, Any]] = []
     render_gate_timeouts: list[dict[str, Any]] = [
         {"doc_label": c.get("doc_label"), "arm": c.get("arm"), "chain_broken_at_step": c.get("chain_broken_at_step")}
         for c in cascade_chains if c.get("status") == "render_gate_timeout"
     ]
 
+    def _keep_survival(chain: dict[str, Any]) -> float | None:
+        return _phase2_keep_survival_outcome(chain, frozen_chain_mode)
+
     # ---- (a) Phase 3 composite pass rate, per arm -- whole-chain.
     composite_grouped, composite_excluded = _group_by_document(cascade_chains, _phase3_composite_outcome, "phase3_composite")
     excluded_observations.extend(composite_excluded)
-    phase3_composite_tiers = _tiered_report(composite_grouped["control"], composite_grouped["treatment"])
+    phase3_composite_tiers = _tiered_report(composite_grouped["control"], composite_grouped["treatment"], exact_tests=True)
     phase3_composite_anchor_level = _anchor_level_values(cascade_chains, _phase3_composite_outcome)
 
     # ---- (a) Phase 3 pass rate, per family.
     per_family_phase3_tiers: dict[str, Any] = {}
     per_family_phase3_anchor_level: dict[str, dict[str, dict[str, float]]] = {}
-    for family in FAMILIES:
+    for family in families:
         def _fn(chain: dict[str, Any], family: str = family) -> float | None:
-            return _phase3_family_outcome(chain, family)
+            return _phase3_family_outcome(chain, family, frozen_chain_mode)
         grouped, excluded = _group_by_document(cascade_chains, _fn, f"phase3_{family}")
         excluded_observations.extend(excluded)
-        per_family_phase3_tiers[family] = _tiered_report(grouped["control"], grouped["treatment"])
+        per_family_phase3_tiers[family] = _tiered_report(grouped["control"], grouped["treatment"], exact_tests=True)
         per_family_phase3_anchor_level[family] = _anchor_level_values(cascade_chains, _fn)
 
     # ---- (a) pooled across families (family x anchor-set as the observation unit).
     pooled_phase3_grouped: dict[str, dict[str, list[float]]] = {"control": {}, "treatment": {}}
-    for family in FAMILIES:
+    for family in families:
         def _fn2(chain: dict[str, Any], family: str = family) -> float | None:
-            return _phase3_family_outcome(chain, family)
+            return _phase3_family_outcome(chain, family, frozen_chain_mode)
         grouped, _excl = _group_by_document(cascade_chains, _fn2, f"phase3_{family}_pooled")
         for arm in ("control", "treatment"):
             for doc, vs in grouped[arm].items():
                 pooled_phase3_grouped[arm].setdefault(doc, []).extend(vs)
-    pooled_phase3_tiers = _tiered_report(pooled_phase3_grouped["control"], pooled_phase3_grouped["treatment"])
+    pooled_phase3_tiers = _tiered_report(pooled_phase3_grouped["control"], pooled_phase3_grouped["treatment"], exact_tests=True)
     pooled_phase3_anchor_level = _pool_across_families(per_family_phase3_anchor_level)
 
     # ---- (b) Phase 2 keep-survival pass rate (chain-level, one bool per anchor-set).
-    ks_grouped, ks_excluded = _group_by_document(cascade_chains, _phase2_keep_survival_outcome, "phase2_keep_survival")
+    ks_grouped, ks_excluded = _group_by_document(cascade_chains, _keep_survival, "phase2_keep_survival")
     excluded_observations.extend(ks_excluded)
-    phase2_keep_survival_tiers = _tiered_report(ks_grouped["control"], ks_grouped["treatment"])
-    phase2_keep_survival_anchor_level = _anchor_level_values(cascade_chains, _phase2_keep_survival_outcome)
+    phase2_keep_survival_tiers = _tiered_report(ks_grouped["control"], ks_grouped["treatment"], exact_tests=True)
+    phase2_keep_survival_anchor_level = _anchor_level_values(cascade_chains, _keep_survival)
     keep_survival_direct_comparison = _direct_arm_comparison(phase2_keep_survival_anchor_level)
 
     # ---- (c) fresh isolated K=1 baseline pass rate, per arm, per family.
     baseline_tiers: dict[str, Any] = {}
     baseline_anchor_level: dict[str, dict[str, dict[str, float]]] = {}
     pooled_baseline_grouped: dict[str, dict[str, list[float]]] = {"control": {}, "treatment": {}}
-    for family in FAMILIES:
+    def _baseline_fn(chain: dict[str, Any]) -> float | None:
+        return _baseline_outcome(chain, blocked_policy)
+
+    for family in families:
         chains_f = baseline_chains.get(family, [])
-        grouped, excluded = _group_by_document(chains_f, _baseline_outcome, f"baseline_{family}")
+        grouped, excluded = _group_by_document(chains_f, _baseline_fn, f"baseline_{family}")
         excluded_observations.extend(excluded)
-        baseline_tiers[family] = _tiered_report(grouped["control"], grouped["treatment"])
-        baseline_anchor_level[family] = _anchor_level_values(chains_f, _baseline_outcome)
+        baseline_tiers[family] = _tiered_report(grouped["control"], grouped["treatment"], exact_tests=True)
+        baseline_anchor_level[family] = _anchor_level_values(chains_f, _baseline_fn)
         for arm in ("control", "treatment"):
             for doc, vs in grouped[arm].items():
                 pooled_baseline_grouped[arm].setdefault(doc, []).extend(vs)
-    baseline_tiers["pooled"] = _tiered_report(pooled_baseline_grouped["control"], pooled_baseline_grouped["treatment"])
+    baseline_tiers["pooled"] = _tiered_report(pooled_baseline_grouped["control"], pooled_baseline_grouped["treatment"], exact_tests=True)
     pooled_baseline_anchor_level = _pool_across_families(baseline_anchor_level)
 
     # ---- Section 7: control_drop / treatment_drop / direct comparison, per family and pooled.
+    # The flat fields are the as-run observation-level Monte Carlo tests;
+    # `chain_level` and `observation_level_exact` (post hoc for the
+    # 2026-09-23 run) sit beside them -- see _section7_primary_tests.
     confirm_disconfirm: dict[str, Any] = {}
-    for family in FAMILIES:
+    for family in families:
         cascade_al = per_family_phase3_anchor_level[family]
         baseline_al = baseline_anchor_level[family]
         confirm_disconfirm[family] = {
             "control_drop": _paired_drop(cascade_al, baseline_al, "control"),
             "treatment_drop": _paired_drop(cascade_al, baseline_al, "treatment"),
             "direct_control_vs_treatment_phase3": _direct_arm_comparison(cascade_al),
+            **_section7_primary_tests(cascade_al, baseline_al),
         }
     confirm_disconfirm["pooled"] = {
         "control_drop": _paired_drop(pooled_phase3_anchor_level, pooled_baseline_anchor_level, "control"),
         "treatment_drop": _paired_drop(pooled_phase3_anchor_level, pooled_baseline_anchor_level, "treatment"),
         "direct_control_vs_treatment_phase3": _direct_arm_comparison(pooled_phase3_anchor_level),
+        **_section7_primary_tests(pooled_phase3_anchor_level, pooled_baseline_anchor_level),
     }
     # NOTE: no "whole_chain_composite" control_drop/treatment_drop entry is
     # computed here deliberately -- section 3's fresh isolated baseline is
@@ -604,14 +948,37 @@ def compute_respec_cascade_tiers(
     # well-defined baseline to compare against; the whole-chain composite is
     # reported on its own (outcome measure "a_phase3_composite_pass_rate"
     # above) without a drop-vs-baseline number, rather than faking one
-    # against a baseline that does not actually match its scope.
+    # against a baseline that does not actually match its scope. Its direct
+    # control-vs-treatment comparison (section 7 names the composite pass
+    # rate for that test) needs no baseline and is reported below.
+    confirm_disconfirm["whole_chain_composite_direct"] = _section7_primary_tests(phase3_composite_anchor_level, None)
     confirm_disconfirm["keep_survival_significance"] = keep_survival_direct_comparison
+    keep_survival_primary = _section7_primary_tests(phase2_keep_survival_anchor_level, None)
+    confirm_disconfirm["keep_survival_significance_chain_level"] = keep_survival_primary["chain_level"]["direct_control_vs_treatment_phase3"]
+    confirm_disconfirm["keep_survival_significance_observation_level_exact"] = (
+        keep_survival_primary["observation_level_exact"]["direct_control_vs_treatment_phase3"]
+    )
 
     return {
         "schema": "paper-s23-respec-cascade-statistics-v1",
-        "rotation_order": FAMILIES,
+        "rotation_order": families,
         "seed": _SEED,
         "n_resamples": _RESAMPLES,
+        "frozen_chain_mode": frozen_chain_mode,
+        "frozen_chain_mode_note": FROZEN_CHAIN_MODE_NOTES[frozen_chain_mode],
+        "blocked_policy": blocked_policy,
+        "section7_tests_note": (
+            "chain_level: exact cluster-level paired sign-flip test, every observation of one (document, "
+            "anchor-set) chain flips together (each result's `exact` says whether the p-value was enumerated "
+            "exactly or, for a null distribution too large to enumerate, estimated by Monte Carlo). The flat control_drop/"
+            "treatment_drop/direct_control_vs_treatment_phase3/keep_survival_significance fields are the "
+            "as-run observation-level Monte Carlo paired_permutation_test, kept for continuity; "
+            "observation_level_exact is that test with an exact p-value. chain_level, observation_level_exact, "
+            "whole_chain_composite_direct and Tier 1 paired_significance_exact were added after the 2026-09-23 "
+            f"results were known: for that run they are {POST_HOC_LABEL} (see analysis_status), and they are "
+            "primary tests only for a run whose protocol names them in advance (S25)."
+        ),
+        "analysis_status": dict(ANALYSIS_STATUS),
         "outcome_measures": {
             "a_phase3_composite_pass_rate": phase3_composite_tiers,
             "a_phase3_pass_rate_per_family": per_family_phase3_tiers,
@@ -621,6 +988,7 @@ def compute_respec_cascade_tiers(
         },
         "confirm_disconfirm": confirm_disconfirm,
         "render_gate_timeouts": render_gate_timeouts,
+        "frozen_chains": _frozen_chain_disclosure(cascade_chains),
         "excluded_observations": excluded_observations,
         "n_cascade_chains_loaded": len(cascade_chains),
         "n_baseline_chains_loaded": {family: len(chains) for family, chains in baseline_chains.items()},
@@ -632,12 +1000,40 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--run-root", required=True, type=Path)
     parser.add_argument("--baseline-run-root", required=True, type=Path)
     parser.add_argument("--out", required=True, type=Path)
+    parser.add_argument(
+        "--frozen-chain-mode", choices=FROZEN_CHAIN_MODES, default=DEFAULT_FROZEN_CHAIN_MODE,
+        help=(
+            "How a chain that froze (status chain_broken_at_step_*) enters the per-family Phase-3 and "
+            "keep-survival measures: 'fail' (default) scores it 0 at every checkpoint it did not reach -- exact "
+            "for a package-invalid freeze, an imputation for a marker re-resolution freeze and for families "
+            "never run; 'exclude' drops it, the as-run behavior of the 2026-09-23 sweep, needed to reproduce "
+            "paper/sources/respec-cascade-statistics.json. Recorded in the output as frozen_chain_mode."
+        ),
+    )
+    parser.add_argument(
+        "--six-family", action="store_true",
+        help="Aggregate the six-family rotation R (protocol section 2.2, adds table_structural) instead of the five-family contingency R'.",
+    )
+    parser.add_argument(
+        "--blocked-policy", choices=BLOCKED_POLICIES, default=DEFAULT_BLOCKED_POLICY,
+        help=(
+            "How a blocked_* fresh isolated K=1 baseline chain (timed out, non-zero exit, unreadable/"
+            "unresolvable input) enters outcome measure (c): 'exclude' (default) drops it, reproducing "
+            "paper/sources/respec-cascade-statistics.json; 'fail' scores it 0 unless it carries an "
+            "infrastructure signature (compute_s7_statistics.BLOCKED_POLICIES, passed to _baseline_outcome). "
+            "The S25 locked s25-statistics command passes 'fail'. Recorded in the output as blocked_policy."
+        ),
+    )
     args = parser.parse_args(argv)
 
+    families = SIX_FAMILIES if args.six_family else FAMILIES
     cascade_chains = load_respec_cascade_chains(args.run_root)
-    baseline_chains = load_baseline_chains(args.baseline_run_root)
+    baseline_chains = load_baseline_chains(args.baseline_run_root, families)
 
-    report = compute_respec_cascade_tiers(cascade_chains, baseline_chains)
+    report = compute_respec_cascade_tiers(
+        cascade_chains, baseline_chains, frozen_chain_mode=args.frozen_chain_mode, families=families,
+        blocked_policy=args.blocked_policy,
+    )
     report["run_root"] = str(args.run_root)
     report["baseline_run_root"] = str(args.baseline_run_root)
 
@@ -645,14 +1041,21 @@ def main(argv: list[str] | None = None) -> int:
     args.out.write_text(json.dumps(report, indent=2, ensure_ascii=False), encoding="utf-8")
     print(json.dumps(report, indent=2, ensure_ascii=False))
 
-    # Section 7's three primary numbers, explicit and clearly labeled per the
-    # protocol's own requirement -- never left implicit in the larger dict above.
+    # Section 7's three preregistered numbers, explicit and clearly labeled per
+    # the protocol's own requirement -- never left implicit in the larger dict above.
     pooled = report["confirm_disconfirm"]["pooled"]
-    print("\n=== PAPER-S23 section 7 primary numbers (pooled across families) ===")
-    print(f"control_drop   (cascade Phase-3 vs control's own fresh K=1 baseline):   {pooled['control_drop']}")
-    print(f"treatment_drop (cascade Phase-3 vs treatment's own fresh K=1 baseline): {pooled['treatment_drop']}")
-    print(f"direct control-vs-treatment (cascade Phase-3 composite pass rate):      {pooled['direct_control_vs_treatment_phase3']}")
-    print(f"keep_survival_significance (Checkpoint B, control vs treatment):        {report['confirm_disconfirm']['keep_survival_significance']}")
+    chain_level = pooled["chain_level"]
+    print(f"\n=== PAPER-S23 section 7 numbers (pooled across families; frozen_chain_mode={args.frozen_chain_mode}) ===")
+    print(f"--- chain-level exact tests ({POST_HOC_LABEL}; primary only under a protocol naming them in advance) ---")
+    print(f"control_drop   (cascade Phase-3 vs control's own fresh K=1 baseline), chain-level:   {chain_level['control_drop']}")
+    print(f"treatment_drop (cascade Phase-3 vs treatment's own fresh K=1 baseline), chain-level: {chain_level['treatment_drop']}")
+    print(f"direct control-vs-treatment (cascade Phase-3 per-family outcome), chain-level:      {chain_level['direct_control_vs_treatment_phase3']}")
+    print(f"keep_survival_significance (Checkpoint B, control vs treatment), chain-level:       {report['confirm_disconfirm']['keep_survival_significance_chain_level']}")
+    print("--- as-run observation-level Monte Carlo tests (continuity) ---")
+    print(f"control_drop:   {pooled['control_drop']}")
+    print(f"treatment_drop: {pooled['treatment_drop']}")
+    print(f"direct:         {pooled['direct_control_vs_treatment_phase3']}")
+    print(f"keep_survival:  {report['confirm_disconfirm']['keep_survival_significance']}")
 
     return 0
 

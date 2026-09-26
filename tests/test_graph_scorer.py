@@ -229,6 +229,74 @@ def test_paired_permutation_ignores_unpaired_none_values():
     assert result["n_paired_documents"] == 2  # only indices 0 and 3 have values on both sides
 
 
+def _brute_force_sign_flip_p(unit_sums):
+    import itertools
+    observed = abs(sum(unit_sums))
+    patterns = list(itertools.product((1, -1), repeat=len(unit_sums)))
+    extreme = sum(1 for signs in patterns if abs(sum(s * d for s, d in zip(signs, unit_sums))) >= observed - 1e-12)
+    return extreme / len(patterns)
+
+
+def test_exact_paired_test_matches_brute_force_enumeration():
+    a_vals = [0.9, 0.2, 0.75, 0.5, 1.0, 0.3, 0.6]
+    b_vals = [0.1, 0.4, 0.25, 0.5, 0.0, 0.35, 0.2]
+    result = graph_scorer.paired_permutation_test_exact(a_vals, b_vals)
+    assert result["exact"] is True and result["n_sign_patterns"] == 2 ** 7
+    assert result["p_value"] == pytest.approx(_brute_force_sign_flip_p([a - b for a, b in zip(a_vals, b_vals)]))
+    assert result["observed_mean_diff"] == pytest.approx(
+        graph_scorer.paired_permutation_test(a_vals, b_vals)["observed_mean_diff"])
+
+
+def test_exact_paired_test_hits_the_floor_that_monte_carlo_undershoots():
+    # 3 pairs, all in one direction: the smallest possible two-sided p is 2/8.
+    result = graph_scorer.paired_permutation_test_exact([1.0, 1.0, 1.0], [0.0, 0.0, 0.0])
+    assert result["p_value"] == 0.25 and result["p_value_floor"] == 0.25
+
+
+def test_exact_paired_test_stays_exact_for_many_binary_pairs():
+    a_vals = [1.0] * 30 + [0.0] * 30
+    b_vals = [0.0] * 30 + [1.0] * 10 + [0.0] * 20
+    result = graph_scorer.paired_permutation_test_exact(a_vals, b_vals)
+    assert result["exact"] is True
+    # 40 nonzero diffs (30 of +1, 10 of -1): p = P(|Bin(40, 1/2) - 20| >= 10)
+    from math import comb
+    expected = sum(comb(40, k) for k in range(41) if abs(2 * k - 40) >= 20) / 2 ** 40
+    assert result["p_value"] == pytest.approx(expected)
+
+
+def test_exact_paired_test_falls_back_to_corrected_monte_carlo_for_large_continuous_data():
+    a_vals = [0.1 * i + 0.013 * i * i for i in range(24)]
+    b_vals = [0.0] * 24
+    result = graph_scorer.paired_permutation_test_exact(a_vals, b_vals, max_exact_n=8)
+    assert result["exact"] is False and result["n_permutations"] == 2000
+    assert result["p_value"] == pytest.approx(1 / 2001)  # never 0
+
+
+def test_cluster_test_flips_whole_clusters_together():
+    # 3 clusters of 5 identical observations: exactly the 3-unit exact test.
+    clusters = [c for c in ("x", "y", "z") for _ in range(5)]
+    result = graph_scorer.cluster_paired_sign_flip_test(clusters, [1.0] * 15, [0.0] * 15)
+    assert result["n_clusters"] == 3 and result["n_paired_observations"] == 15
+    assert result["observed_mean_diff"] == 1.0
+    assert result["p_value"] == 0.25 and result["exact"] is True
+    # the observation-level test on the same data treats the 15 as independent
+    assert graph_scorer.paired_permutation_test_exact([1.0] * 15, [0.0] * 15)["p_value"] == pytest.approx(2 / 2 ** 15)
+
+
+def test_cluster_test_matches_brute_force_on_unequal_clusters():
+    clusters = ["a", "a", "b", "c", "c", "c", "d"]
+    a_vals = [1.0, 0.0, 1.0, 1.0, 1.0, 0.0, 0.0]
+    b_vals = [0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0]
+    result = graph_scorer.cluster_paired_sign_flip_test(clusters, a_vals, b_vals)
+    assert result["p_value"] == pytest.approx(_brute_force_sign_flip_p([1.0, 1.0, 1.0, -1.0]))
+    assert result["observed_mean_diff"] == pytest.approx(2 / 7)
+
+
+def test_cluster_test_ignores_unpaired_values_and_needs_two_clusters():
+    result = graph_scorer.cluster_paired_sign_flip_test(["a", "a", "b"], [1.0, 1.0, None], [0.0, 0.0, 0.0])
+    assert result["p_value"] is None and result["n_clusters"] == 1 and result["n_paired_observations"] == 2
+
+
 # ---------------------------------------------------------------------------
 # score_document_graph (integration-style, synthetic documents)
 # ---------------------------------------------------------------------------

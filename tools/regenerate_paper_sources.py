@@ -71,6 +71,13 @@ def plan(runs: Path) -> list[dict]:
         {"name": "respec-cascade-statistics.json", "copy": runs / "paper-s23-final" / "statistics.json"},
         {"name": "respec-cascade-primary-sweep-manifest.json", "copy": runs / "paper-s23-final" / "primary-sweep-manifest.json"},
         {"name": "respec-cascade-baseline-sweep-manifest.json", "copy": runs / "paper-s23-final" / "baseline-sweep-manifest.json"},
+        # Re-analysis of the respec_cascade run from the three files above (its raw chain
+        # results were lost); must come after them.
+        {"name": "respec-cascade-reanalysis.json",
+         "cmd": [TOOLS / "reanalyze_respec_cascade.py",
+                 "--statistics", OUT / "respec-cascade-statistics.json",
+                 "--primary-manifest", OUT / "respec-cascade-primary-sweep-manifest.json",
+                 "--baseline-manifest", OUT / "respec-cascade-baseline-sweep-manifest.json"]},
         {"name": "rerun-runpod-statistics.json", "copy": rerun / "s7-final-statistics-runpod.json"},
         {"name": "single-edit-k1-fixrerun-statistics.json", "copy": v1 / "k1-fixrerun-statistics-20260831T145852Z.json"},
     ]

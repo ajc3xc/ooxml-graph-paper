@@ -1,0 +1,708 @@
+{
+ "seed": 20260925002,
+ "eligible": 78,
+ "queue": [
+  {
+   "rank": 1,
+   "sha256": "d3ff0b3c3f2d72d3e1aa59de7ab04446b2e470ba21987ea66b0702d4b14fa968",
+   "headings": 35,
+   "omath": 0,
+   "tbl": 3,
+   "source": "docx-corpus batch-2-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)"
+  },
+  {
+   "rank": 2,
+   "sha256": "acd134313c175f4e5d9ceb10f33454115c977153a91e83cdccad73303ed4a428",
+   "headings": 33,
+   "omath": 0,
+   "tbl": 10,
+   "source": "docx-corpus batch-2-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)"
+  },
+  {
+   "rank": 3,
+   "sha256": "c04412c3eeda841d22fd345d3ca5ed3757ec528500d4cd542a82e29d1e5b18b5",
+   "headings": 36,
+   "omath": 0,
+   "tbl": 1,
+   "source": "docx-corpus batch-3-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)"
+  },
+  {
+   "rank": 4,
+   "sha256": "66157a47a2b464f153124998c373a6336d75560439381c4e2df80c1b997732bd",
+   "headings": 38,
+   "omath": 0,
+   "tbl": 2,
+   "source": "docx-corpus batch-3-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)"
+  },
+  {
+   "rank": 5,
+   "sha256": "ede3e0981b844b40238ef074e5c00b69de453a3292825d2a2a1a9598d179079f",
+   "headings": 73,
+   "omath": 0,
+   "tbl": 4,
+   "source": "docx-corpus batch-3-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)"
+  },
+  {
+   "rank": 6,
+   "sha256": "bc30c7b71fba4b8d16d676fce7f99bdc80ea0830cfff2bf34ce5fabc4dc2b676",
+   "headings": 100,
+   "omath": 0,
+   "tbl": 37,
+   "source": "docx-corpus batch-500-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)"
+  },
+  {
+   "rank": 7,
+   "sha256": "062bbc95126494a578875d107f1607fc84bc018a80e511db842a6ce29b087d12",
+   "headings": 33,
+   "omath": 0,
+   "tbl": 10,
+   "source": "docx-corpus batch-2-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)"
+  },
+  {
+   "rank": 8,
+   "sha256": "1768af4f85ef5bd3665246647f633bc0adc76fdb904ebeae6b91b36f0fefeae0",
+   "headings": 68,
+   "omath": 0,
+   "tbl": 0,
+   "source": "docx-corpus batch-3-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)"
+  },
+  {
+   "rank": 9,
+   "sha256": "e8437d05d1efc2fa7cc67a888e0093dcf79c86da0842d9b1cd3bf2b6f6581305",
+   "headings": 43,
+   "omath": 0,
+   "tbl": 27,
+   "source": "docx-corpus batch-3-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)"
+  },
+  {
+   "rank": 10,
+   "sha256": "fd0ee3ef1f0e6d7dcc320464d7ebfaba6a25a1dfe4171bfe48b906eb6203d729",
+   "headings": 32,
+   "omath": 0,
+   "tbl": 17,
+   "source": "docx-corpus batch-2-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)"
+  },
+  {
+   "rank": 11,
+   "sha256": "97dd2a132b783b04fcdefb8b63827eddfdda8975668c20296edd2809195bac74",
+   "headings": 44,
+   "omath": 0,
+   "tbl": 0,
+   "source": "docx-corpus batch-3-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)"
+  },
+  {
+   "rank": 12,
+   "sha256": "34b44c1bb077c795104a7aa3c7471cc8284ca04446f6da986dd6a9dbb1914597",
+   "headings": 31,
+   "omath": 0,
+   "tbl": 1,
+   "source": "docx-corpus batch-3-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)"
+  },
+  {
+   "rank": 13,
+   "sha256": "2644b7ec60ed3eab204343cef2cc1bc46413bab69ebd7741ea520b65b4dabcb4",
+   "headings": 33,
+   "omath": 0,
+   "tbl": 10,
+   "source": "docx-corpus batch-2-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)"
+  },
+  {
+   "rank": 14,
+   "sha256": "5b43c948a991e60e4e5a1a6e709222b5b0c805f87b875b087a1448e902eefee5",
+   "headings": 28,
+   "omath": 0,
+   "tbl": 0,
+   "source": "docx-corpus batch-500-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)"
+  },
+  {
+   "rank": 15,
+   "sha256": "4d1af43c7f7384ebf92365e5d64112fafa6287618803ab0c1099e6bbdf979353",
+   "headings": 27,
+   "omath": 0,
+   "tbl": 3,
+   "source": "docx-corpus batch-2-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)"
+  },
+  {
+   "rank": 16,
+   "sha256": "e4fc97de1102b700b98e26ef8852a80cff42ec202b0c4116230cb80ff463596f",
+   "headings": 65,
+   "omath": 0,
+   "tbl": 0,
+   "source": "docx-corpus batch-2-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)"
+  },
+  {
+   "rank": 17,
+   "sha256": "214fc81de0a849c6609dad925199dfc4283c50a7d10b6a917c7e278dc37dba72",
+   "headings": 35,
+   "omath": 0,
+   "tbl": 15,
+   "source": "docx-corpus batch-2-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)"
+  },
+  {
+   "rank": 18,
+   "sha256": "068b1ba98cdfc3a1ff14fd0ae85b8bbc604f46a368826459d4814542225d8d95",
+   "headings": 33,
+   "omath": 0,
+   "tbl": 10,
+   "source": "docx-corpus batch-2-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)"
+  },
+  {
+   "rank": 19,
+   "sha256": "315ea4b7e4349f22c141b006ce3aaef8f89e1a1b6235dd1f94b46cd30e38182b",
+   "headings": 61,
+   "omath": 0,
+   "tbl": 2,
+   "source": "docx-corpus batch-500-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)"
+  },
+  {
+   "rank": 20,
+   "sha256": "c228e2a144ebaf6ecd9a93dcb5468bea350a5af144e29a4d6515044e76cfafc7",
+   "headings": 45,
+   "omath": 0,
+   "tbl": 0,
+   "source": "docx-corpus batch-3-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)"
+  },
+  {
+   "rank": 21,
+   "sha256": "acec7bb004df3b30e8982b066cdbff9352e0a5b742f577b3d07c32513596c55f",
+   "headings": 26,
+   "omath": 0,
+   "tbl": 1,
+   "source": "docx-corpus batch-500-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)"
+  },
+  {
+   "rank": 22,
+   "sha256": "b40b9c9d10ed9331602be85d4db9a2047a74fa6be4c7bb607a222c5df7de670c",
+   "headings": 14,
+   "omath": 1,
+   "tbl": 10,
+   "source": "docx-corpus batch-2-v1 (S6 organic-OMML cleared candidate b40b9c9d10ed9331)",
+   "pii_status": "cleared_institutional_contact (flagged_email)"
+  },
+  {
+   "rank": 23,
+   "sha256": "283926675293f145dca5a73e686de806cc9f6faf7013f49c4e226c920d97921a",
+   "headings": 30,
+   "omath": 0,
+   "tbl": 0,
+   "source": "docx-corpus batch-2-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)"
+  },
+  {
+   "rank": 24,
+   "sha256": "a44fafc47d639595e6277876190c0bf9f7b6c4d59a66c266bb5d36a76e0f13c1",
+   "headings": 40,
+   "omath": 0,
+   "tbl": 0,
+   "source": "docx-corpus batch-500-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)"
+  },
+  {
+   "rank": 25,
+   "sha256": "b2c2716a1fc4581576b65275fe57ef4eb906de024f469b70526b358559af84dd",
+   "headings": 31,
+   "omath": 0,
+   "tbl": 2,
+   "source": "docx-corpus batch-3-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)"
+  },
+  {
+   "rank": 26,
+   "sha256": "84371808eb479fe45190b4bf08d99313848d26f9d95ba43b5cdbde7e66186dac",
+   "headings": 36,
+   "omath": 0,
+   "tbl": 5,
+   "source": "docx-corpus batch-3-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)"
+  },
+  {
+   "rank": 27,
+   "sha256": "c0685d8dd3bf648a4c803f62727e0411e29db8918541d12529a3194f2d8061f4",
+   "headings": 33,
+   "omath": 0,
+   "tbl": 10,
+   "source": "docx-corpus batch-2-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)"
+  },
+  {
+   "rank": 28,
+   "sha256": "99a5c1da24712f71af8c33091520e55129dbc3e38ec9c7b1af4d695702da8217",
+   "headings": 33,
+   "omath": 0,
+   "tbl": 1,
+   "source": "docx-corpus batch-3-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)"
+  },
+  {
+   "rank": 29,
+   "sha256": "3abadf01285ada2fa24343b841ac11a46b0e2e9ff2f884173628bc00db2b6e20",
+   "headings": 58,
+   "omath": 0,
+   "tbl": 2,
+   "source": "docx-corpus batch-2-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)"
+  },
+  {
+   "rank": 30,
+   "sha256": "0439dc7b29aafdeb9149c7d5eeb626a09bdc4962619b3bf8894578d38ff83b62",
+   "headings": 32,
+   "omath": 0,
+   "tbl": 1,
+   "source": "docx-corpus batch-2-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)"
+  },
+  {
+   "rank": 31,
+   "sha256": "a7f275af3d8d55ba079a6126801c1eb07a0d34891fc16352fb7a544dcd46f6bc",
+   "headings": 32,
+   "omath": 0,
+   "tbl": 0,
+   "source": "docx-corpus batch-2-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)"
+  },
+  {
+   "rank": 32,
+   "sha256": "688db32231158b5e37ffb961139ab2cd32a995fcee5f8442012735cf0c9d950c",
+   "headings": 38,
+   "omath": 0,
+   "tbl": 0,
+   "source": "docx-corpus batch-3-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)"
+  },
+  {
+   "rank": 33,
+   "sha256": "7bbdd815faf8179980ad48421470a041d62c5e8c19688956e8566bef73cdd45a",
+   "headings": 28,
+   "omath": 0,
+   "tbl": 0,
+   "source": "docx-corpus batch-2-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)"
+  },
+  {
+   "rank": 34,
+   "sha256": "5edbc0970004022ed4f2ef7c77477ea37aa80a78519b822586df0cdfb2ed766f",
+   "headings": 40,
+   "omath": 0,
+   "tbl": 5,
+   "source": "docx-corpus batch-2-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)"
+  },
+  {
+   "rank": 35,
+   "sha256": "2f675a963a2cc6f17c0982ccd2093681373aea53ccc8014bb35acb061bd22a4d",
+   "headings": 29,
+   "omath": 0,
+   "tbl": 0,
+   "source": "docx-corpus batch-3-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)"
+  },
+  {
+   "rank": 36,
+   "sha256": "c1fea3a23eb983e97aadc127aeeff15a2fead5012d61b5735ab00a8de184da40",
+   "headings": 57,
+   "omath": 0,
+   "tbl": 0,
+   "source": "docx-corpus batch-3-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)"
+  },
+  {
+   "rank": 37,
+   "sha256": "290d0af39b86791e0b041bd5f1a3d9167b4b082f7bcda32ea84fcd2cb12e5ea0",
+   "headings": 48,
+   "omath": 0,
+   "tbl": 0,
+   "source": "docx-corpus batch-2-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)"
+  },
+  {
+   "rank": 38,
+   "sha256": "59d66c473f750765a57e6373deb4918a9a02f6c8584ec5a7d53d7c65a39a98d7",
+   "headings": 31,
+   "omath": 0,
+   "tbl": 6,
+   "source": "docx-corpus batch-2-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)"
+  },
+  {
+   "rank": 39,
+   "sha256": "e9f511b831df0dfab37b6bf4b82a006a3ee57da54d351e8f628885abbeb73927",
+   "headings": 47,
+   "omath": 0,
+   "tbl": 9,
+   "source": "docx-corpus batch-2-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)"
+  },
+  {
+   "rank": 40,
+   "sha256": "16533ed385b8d759e2569735b15f55b4ec16f28032c8e34159a02433a3d721b0",
+   "headings": 33,
+   "omath": 0,
+   "tbl": 0,
+   "source": "docx-corpus batch-3-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)"
+  },
+  {
+   "rank": 41,
+   "sha256": "8363fc53d931fdb9399364912ba6692820c1b8c5be975c274663051231d53407",
+   "headings": 35,
+   "omath": 0,
+   "tbl": 1,
+   "source": "docx-corpus batch-2-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)"
+  },
+  {
+   "rank": 42,
+   "sha256": "08180b4b29ff39c50df45e0e1934930f7a36aeaf96e1f79cef0c6415b2f3b59f",
+   "headings": 31,
+   "omath": 0,
+   "tbl": 1,
+   "source": "docx-corpus batch-3-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)"
+  },
+  {
+   "rank": 43,
+   "sha256": "74aeb1a7c2194885ee65f47f6f5e1c0dd0eec29f18dcf973b680b1656a446db5",
+   "headings": 53,
+   "omath": 0,
+   "tbl": 0,
+   "source": "docx-corpus batch-2-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)"
+  },
+  {
+   "rank": 44,
+   "sha256": "77c6786b8f366d57a8c57f984cead3ed38990f5021c4eb4d17842d91875cd92b",
+   "headings": 35,
+   "omath": 0,
+   "tbl": 0,
+   "source": "docx-corpus batch-3-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)"
+  },
+  {
+   "rank": 45,
+   "sha256": "5a619fa9ac0886a9249ed9a1ad4b64e5be30d29a960dbf0be76ed7e87add2e6f",
+   "headings": 41,
+   "omath": 0,
+   "tbl": 0,
+   "source": "docx-corpus batch-2-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)"
+  },
+  {
+   "rank": 46,
+   "sha256": "a0c759b712b579fec49ff32e06fd915bd1be0e24cddfaa3078d5211955aa6002",
+   "headings": 33,
+   "omath": 0,
+   "tbl": 10,
+   "source": "docx-corpus batch-3-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)"
+  },
+  {
+   "rank": 47,
+   "sha256": "6f373490dcf8281096e2427f15dffbc210bfb423cd5f783e90e89757353f09b5",
+   "headings": 30,
+   "omath": 0,
+   "tbl": 0,
+   "source": "docx-corpus batch-3-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)"
+  },
+  {
+   "rank": 48,
+   "sha256": "a5f57b4626963dcf2bf850db3b3057b4cc69a72bc19fb328b72e5b3ce2ec6d7c",
+   "headings": 35,
+   "omath": 0,
+   "tbl": 1,
+   "source": "docx-corpus batch-500-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)"
+  },
+  {
+   "rank": 49,
+   "sha256": "aaa0eab1b8263d34df7cdad59bb2d7b70a60376bad0daef2f56f572432766fe9",
+   "headings": 31,
+   "omath": 0,
+   "tbl": 3,
+   "source": "docx-corpus batch-2-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)"
+  },
+  {
+   "rank": 50,
+   "sha256": "6e9e964ede81efdbbee71d12500c8263cc968ac0eb0529f304b5086eff8aa279",
+   "headings": 29,
+   "omath": 0,
+   "tbl": 11,
+   "source": "docx-corpus batch-500-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)"
+  },
+  {
+   "rank": 51,
+   "sha256": "3e5a1ae6417319e342eb056992690d5f95f338710e7b7033fb239115f84ed082",
+   "headings": 35,
+   "omath": 0,
+   "tbl": 1,
+   "source": "docx-corpus batch-2-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)"
+  },
+  {
+   "rank": 52,
+   "sha256": "0f43823a61a2997c22e5cab7cc8d957faaa00a29c0a50a8de6e967c4a0296caf",
+   "headings": 33,
+   "omath": 0,
+   "tbl": 0,
+   "source": "docx-corpus batch-500-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)"
+  },
+  {
+   "rank": 53,
+   "sha256": "9276620888d70caaf52d9c6b41269159a27d6ac34c25f375676fb0e790d5d44e",
+   "headings": 50,
+   "omath": 0,
+   "tbl": 0,
+   "source": "docx-corpus batch-2-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)"
+  },
+  {
+   "rank": 54,
+   "sha256": "70c3b0d7c6971586d2447faee9fd1dfa6ed35a857de9914785823a6ba77f666a",
+   "headings": 15,
+   "omath": 12,
+   "tbl": 4,
+   "source": "docx-corpus batch-2-v1 (S6 organic-OMML cleared candidate 70c3b0d7c6971586)",
+   "pii_status": "cleared_false_positive (flagged_phone)"
+  },
+  {
+   "rank": 55,
+   "sha256": "c3bd066d02e19cdad1bae39c4c96de8e61c01442a3d81864f383f6de0eadad29",
+   "headings": 26,
+   "omath": 0,
+   "tbl": 2,
+   "source": "docx-corpus batch-3-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)"
+  },
+  {
+   "rank": 56,
+   "sha256": "d24b02ec84e6854546c8d18fa3c0ee5d27b94330091f1ed3c6111be9c18fdd6b",
+   "headings": 29,
+   "omath": 0,
+   "tbl": 4,
+   "source": "docx-corpus batch-500-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)"
+  },
+  {
+   "rank": 57,
+   "sha256": "0db1a93eb2dd7d09f58978b145bbb148feb7116013387107788b162f094698cc",
+   "headings": 33,
+   "omath": 0,
+   "tbl": 10,
+   "source": "docx-corpus batch-2-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)"
+  },
+  {
+   "rank": 58,
+   "sha256": "3876b1fb917a43cd00ed41351c8b4a3ef775fae6e2adf097898001f288a3a008",
+   "headings": 24,
+   "omath": 28,
+   "tbl": 0,
+   "source": "docx-corpus batch-3-v1 (S6 organic-OMML cleared candidate 3876b1fb917a43cd)",
+   "pii_status": "cleared_clean_scan (clean)"
+  },
+  {
+   "rank": 59,
+   "sha256": "0aa4a53eeae2ba11ecca6d3135f4a3ec8994690b3bee5dd6301d2ce07f4ac712",
+   "headings": 31,
+   "omath": 0,
+   "tbl": 1,
+   "source": "docx-corpus batch-2-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)"
+  },
+  {
+   "rank": 60,
+   "sha256": "9837a8a0cc2df1014a6f6eee1ec172481e91cad035d0c393df1f3c24d2fb0961",
+   "headings": 52,
+   "omath": 0,
+   "tbl": 1,
+   "source": "docx-corpus batch-2-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)"
+  },
+  {
+   "rank": 61,
+   "sha256": "a981f5d282d9c9949ea00c58627a930e30fdcb0a901120054a8142a3144f560e",
+   "headings": 34,
+   "omath": 0,
+   "tbl": 0,
+   "source": "docx-corpus batch-500-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)"
+  },
+  {
+   "rank": 62,
+   "sha256": "f885adf9d806a32fa7791239112619ab5cb55745130b2082613d65e4706f6c7b",
+   "headings": 71,
+   "omath": 1,
+   "tbl": 3,
+   "source": "docx-corpus batch-2-v1 (S6 organic-OMML cleared candidate f885adf9d806a32f)",
+   "pii_status": "cleared_institutional_contact (flagged_phone)"
+  },
+  {
+   "rank": 63,
+   "sha256": "e8aaa006f24662c29e6a8bf17fb11c92092315fd01eb0296e5d4c78a54f2d1f5",
+   "headings": 33,
+   "omath": 0,
+   "tbl": 10,
+   "source": "docx-corpus batch-2-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)"
+  },
+  {
+   "rank": 64,
+   "sha256": "9ab8aecce2780844deba01342c67a140e3b8194374868d77eab531b57a3e67d0",
+   "headings": 44,
+   "omath": 0,
+   "tbl": 1,
+   "source": "docx-corpus batch-3-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)"
+  },
+  {
+   "rank": 65,
+   "sha256": "8e7472fafb9b897319e7f12a864c8dbe3def535dee5c14dd72d0cc9cb48ac448",
+   "headings": 26,
+   "omath": 0,
+   "tbl": 0,
+   "source": "docx-corpus batch-500-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)"
+  },
+  {
+   "rank": 66,
+   "sha256": "c61d1c9487cca762f5591d29c4ae95ae280a56fbed7b54eb91fb3a5c27dee4b9",
+   "headings": 33,
+   "omath": 0,
+   "tbl": 1,
+   "source": "docx-corpus batch-2-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)"
+  },
+  {
+   "rank": 67,
+   "sha256": "9489d1e2355a6889234d56c1d885df3bd241679d73231f5b4a01f8ba689e2776",
+   "headings": 33,
+   "omath": 0,
+   "tbl": 10,
+   "source": "docx-corpus batch-2-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)"
+  },
+  {
+   "rank": 68,
+   "sha256": "763bbf73fd5db07e4021cf20febe829ed4873f9cc8e6b042c5a6318b803257d1",
+   "headings": 33,
+   "omath": 0,
+   "tbl": 10,
+   "source": "docx-corpus batch-3-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)"
+  },
+  {
+   "rank": 69,
+   "sha256": "5b1a0ddde34644b86adb2124fd6f87b9536f46ebbf9ccd12c01bf40c6ea1970c",
+   "headings": 33,
+   "omath": 0,
+   "tbl": 4,
+   "source": "docx-corpus batch-2-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)"
+  },
+  {
+   "rank": 70,
+   "sha256": "ad3f52351c5e20f2c2f943230f8c8d75e3abab51f881c6729115289c3d94eee9",
+   "headings": 49,
+   "omath": 0,
+   "tbl": 0,
+   "source": "docx-corpus batch-2-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)"
+  },
+  {
+   "rank": 71,
+   "sha256": "b62ffeaf0c2d800620b835bcb7b782f4c72af53676368c8677d199b09086b01f",
+   "headings": 27,
+   "omath": 0,
+   "tbl": 12,
+   "source": "docx-corpus batch-2-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)"
+  },
+  {
+   "rank": 72,
+   "sha256": "8825d1fbd427c9353ef59a999b3efb7eb641d85a494fc842d40bb2c7627959fb",
+   "headings": 31,
+   "omath": 0,
+   "tbl": 0,
+   "source": "docx-corpus batch-3-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)"
+  },
+  {
+   "rank": 73,
+   "sha256": "b45ee68bb148cffb61c9f0f6dc4681014c73f26c238c876737c27b6f34ad430d",
+   "headings": 49,
+   "omath": 0,
+   "tbl": 0,
+   "source": "docx-corpus batch-2-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)"
+  },
+  {
+   "rank": 74,
+   "sha256": "cf5e9847bb8b1710ca7553404c29748ee1e8724e62e96709ef09ae7ecb707e74",
+   "headings": 33,
+   "omath": 0,
+   "tbl": 10,
+   "source": "docx-corpus batch-3-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)"
+  },
+  {
+   "rank": 75,
+   "sha256": "5733e29dabb855d66a2e11249359c745c1f09f294bc63b3f5936286288af19cb",
+   "headings": 48,
+   "omath": 0,
+   "tbl": 0,
+   "source": "docx-corpus batch-3-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)"
+  },
+  {
+   "rank": 76,
+   "sha256": "d7fc3159669c77f4fb01587157e44af138ef5ff5093c0636b3e645dd33d9ee5a",
+   "headings": 26,
+   "omath": 0,
+   "tbl": 0,
+   "source": "docx-corpus batch-500-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)"
+  },
+  {
+   "rank": 77,
+   "sha256": "b9270b5813d394786d1cf1d1aab0966968a9008e36abccbef5f527b2d816c93c",
+   "headings": 45,
+   "omath": 0,
+   "tbl": 1,
+   "source": "docx-corpus batch-3-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)"
+  },
+  {
+   "rank": 78,
+   "sha256": "e94f9314162debdd1a85d2accc2402d46140c874902bfad9b3686ba34c21ebc0",
+   "headings": 52,
+   "omath": 0,
+   "tbl": 0,
+   "source": "docx-corpus batch-2-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)"
+  }
+ ]
+}

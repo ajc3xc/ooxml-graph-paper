@@ -359,7 +359,8 @@ def test_run_chain_does_not_recover_forward_trial_when_docx_changed_but_grading_
 
     result = run_chain("bibliography", "doc-a", docx_path, "treatment", 1, "sonnet", tmp_path / "run-root", word_receipts_enabled=False)
 
-    assert result["status"] == "blocked"
+    # 2026-09-25: the timeout cause has its own status (trusted on resume).
+    assert result["status"] == "blocked_timeout"
     fwd_result = result["pairs"][0]["forward"]
     assert "recovered_from_outer_timeout" not in fwd_result
 
