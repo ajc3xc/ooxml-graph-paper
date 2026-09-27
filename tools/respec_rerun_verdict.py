@@ -139,27 +139,29 @@ def load_statistics_files(stats_dir: Path) -> dict[str, dict[str, Any]]:
 # Extracting the numbers section 7 needs, each from an explicitly named field
 # ---------------------------------------------------------------------------
 
-def _pooled_measure_node(stats: dict[str, Any], measure_key: str, ctx: str) -> dict[str, Any]:
-    return _dig(stats, ("confirm_disconfirm", "pooled", measure_key), ctx)
-
-
-def _level(node: dict[str, Any], level: str, measure_key: str, ctx: str) -> dict[str, Any]:
-    if level not in node:
+def _level(stats: dict[str, Any], level: str, measure_key: str, ctx: str) -> dict[str, Any]:
+    """confirm_disconfirm.pooled.<level> holds every measure's test at that
+    level as a sibling dict (compute_respec_cascade_statistics.py's actual,
+    long-established output shape: chain_level/document_level/
+    observation_level_exact sit beside the flat per-measure Monte Carlo
+    fields under `pooled`, not nested inside each measure -- see
+    _section7_primary_tests / _flatten_section7_tests)."""
+    pooled = _dig(stats, ("confirm_disconfirm", "pooled"), ctx)
+    if level not in pooled or measure_key not in pooled[level]:
         extra = (
             " (prerequisite P-R4 -- document-level tests beside every chain_level entry, "
             "protocol section 6.3 -- is not yet implemented in compute_respec_cascade_statistics.py)"
             if level == "document_level" else ""
         )
         raise VerdictInputError(
-            f"{ctx}: confirm_disconfirm.pooled.{measure_key} has no '{level}' entry{extra}"
+            f"{ctx}: confirm_disconfirm.pooled.{level}.{measure_key} missing{extra}"
         )
-    return _require_p(node[level], ctx, f"confirm_disconfirm.pooled.{measure_key}.{level}")
+    return _require_p(pooled[level][measure_key], ctx, f"confirm_disconfirm.pooled.{level}.{measure_key}")
 
 
 def _extract_pooled_measure(stats: dict[str, Any], measure_key: str, ctx: str, pp_sign: float) -> dict[str, Any]:
-    node = _pooled_measure_node(stats, measure_key, ctx)
-    chain = _level(node, "chain_level", measure_key, ctx)
-    document = _level(node, "document_level", measure_key, ctx)
+    chain = _level(stats, "chain_level", measure_key, ctx)
+    document = _level(stats, "document_level", measure_key, ctx)
     return {
         "pp": pp_sign * 100.0 * chain["observed_mean_diff"],
         "chain_level_p": chain["p_value"],
@@ -201,17 +203,19 @@ def _extract_keep_survival(stats: dict[str, Any], ctx: str) -> dict[str, Any]:
 def _extract_drop_difference(stats: dict[str, Any], ctx: str) -> dict[str, Any]:
     """Protocol section 6.6: `d = (control_baseline - control_phase3) -
     (treatment_baseline - treatment_phase3)`, `drop_difference_pp = 100 x
-    mean(d)`, output key `drop_difference` (section 6.6, prerequisite P-R4,
-    not yet implemented). Assumed built the same way as every other section-7
-    test in this codebase (`cluster_paired_sign_flip_test(clusters, a, b)`
-    with `a` = each observation's control-arm drop and `b` = its treatment-arm
-    drop, so `observed_mean_diff` IS `mean(d)` already -- no sign flip, unlike
+    mean(d)`, tested against a null of zero via cluster_paired_sign_flip_test
+    (d, 0*d) at chain and document level, output under
+    `confirm_disconfirm.difference_in_drops` (P-R4, protocol section 6.6 --
+    pooled across families by construction, so it is not nested under
+    `confirm_disconfirm.pooled` the way the other measures are).
+    `observed_mean_diff` IS `mean(d)` already -- no sign flip, unlike
     control_drop/treatment_drop/direct, which reverse the cascade-vs-baseline
-    or control-vs-treatment order). If a future implementation of P-R4 uses a
-    different sign, update this function and its docstring together."""
-    node = _dig(stats, ("confirm_disconfirm", "pooled", "drop_difference"), ctx)
-    chain = _level(node, "chain_level", "drop_difference", ctx)
-    document = _level(node, "document_level", "drop_difference", ctx)
+    or control-vs-treatment order."""
+    node = _dig(stats, ("confirm_disconfirm", "difference_in_drops"), ctx)
+    if "chain_level" not in node or "document_level" not in node:
+        raise VerdictInputError(f"{ctx}: confirm_disconfirm.difference_in_drops missing chain_level/document_level")
+    chain = _require_p(node["chain_level"], ctx, "confirm_disconfirm.difference_in_drops.chain_level")
+    document = _require_p(node["document_level"], ctx, "confirm_disconfirm.difference_in_drops.document_level")
     return {
         "pp": 100.0 * chain["observed_mean_diff"],
         "chain_level_p": chain["p_value"],

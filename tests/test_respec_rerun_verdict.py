@@ -27,6 +27,14 @@ def _node(diff, p, exact=True, n_clusters=8):
 
 
 def _measure(chain_diff, chain_p, doc_diff, doc_p, exact=True):
+    """One measure's {chain_level, document_level} pair. _full_stats fans
+    these into the REAL sibling-grouped shape compute_respec_cascade_
+    statistics.py actually produces: confirm_disconfirm.pooled.chain_level/
+    document_level each hold every measure's test as a sibling dict (see
+    _section7_primary_tests / _flatten_section7_tests), not nested inside
+    each measure the way this helper's own return value is shaped -- that
+    shape only exists transiently here, as a convenience for building the
+    three measures' tests together before _full_stats regroups them."""
     return {
         "chain_level": _node(chain_diff, chain_p, exact=exact),
         "document_level": _node(doc_diff, doc_p, exact=exact),
@@ -63,10 +71,20 @@ def _full_stats(
         "render_gate_timeouts": render_gate_timeouts if render_gate_timeouts is not None else [],
         "confirm_disconfirm": {
             "pooled": {
-                "control_drop": control_drop,
-                "treatment_drop": treatment_drop,
-                "direct_control_vs_treatment_phase3": direct,
-                "drop_difference": drop_difference,
+                "chain_level": {
+                    "control_drop": control_drop["chain_level"],
+                    "treatment_drop": treatment_drop["chain_level"],
+                    "direct_control_vs_treatment_phase3": direct["chain_level"],
+                },
+                "document_level": {
+                    "control_drop": control_drop["document_level"],
+                    "treatment_drop": treatment_drop["document_level"],
+                    "direct_control_vs_treatment_phase3": direct["document_level"],
+                },
+            },
+            "difference_in_drops": {
+                "chain_level": drop_difference["chain_level"],
+                "document_level": drop_difference["document_level"],
             },
             "keep_survival_significance_chain_level": keep_survival_chain,
             "keep_survival_significance_document_level": keep_survival_document,
@@ -203,7 +221,7 @@ def test_missing_document_level_fails_loudly(tmp_path, capsys):
     stats_dir = tmp_path / "statistics"
     stats_dir.mkdir()
     primary = _full_stats("fail_graded_prefreeze")
-    del primary["confirm_disconfirm"]["pooled"]["control_drop"]["document_level"]
+    del primary["confirm_disconfirm"]["pooled"]["document_level"]["control_drop"]
     _write_all_modes(stats_dir, primary)
     out = tmp_path / "verdict.json"
 
@@ -285,9 +303,9 @@ def test_missing_optional_fields_do_not_crash(tmp_path):
     stats_dir.mkdir()
     primary = _full_stats("fail_graded_prefreeze")
     # "exact" and "n_clusters" are descriptive, not required by the rule.
-    del primary["confirm_disconfirm"]["pooled"]["control_drop"]["chain_level"]["exact"]
-    del primary["confirm_disconfirm"]["pooled"]["control_drop"]["chain_level"]["n_clusters"]
-    del primary["confirm_disconfirm"]["pooled"]["direct_control_vs_treatment_phase3"]["document_level"]["n_clusters"]
+    del primary["confirm_disconfirm"]["pooled"]["chain_level"]["control_drop"]["exact"]
+    del primary["confirm_disconfirm"]["pooled"]["chain_level"]["control_drop"]["n_clusters"]
+    del primary["confirm_disconfirm"]["pooled"]["document_level"]["direct_control_vs_treatment_phase3"]["n_clusters"]
     # unregradable_grader_exception_stubs is simply absent (never disclosed).
     assert "unregradable_grader_exception_stubs" not in primary
     _write_all_modes(stats_dir, primary, _full_stats("exclude"))
