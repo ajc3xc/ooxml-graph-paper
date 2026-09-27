@@ -217,6 +217,22 @@ def test_no_public_documents_only_section_when_not_requested():
     assert "public_documents_only" not in report["confirm_disconfirm"]
 
 
+def test_per_document_breakdown_covers_every_document_and_sums_to_the_pooled_total():
+    cascade, baseline = _synthetic_run()
+    report = r.compute_respec_cascade_tiers(cascade, baseline)
+    per_doc = report["confirm_disconfirm"]["per_document"]
+    # _synthetic_run has exactly 3 documents (doc0, doc1, doc2), always requested.
+    assert set(per_doc) == {"doc0", "doc1", "doc2"}
+    for doc, entry in per_doc.items():
+        assert entry["control_drop"]["n_paired_anchor_sets"] <= 10  # 2 anchor-sets x 5 families, at most
+        assert "difference_in_drops" in entry
+    # every per-document observation, summed, accounts for the whole pooled n
+    total_control_drop_obs = sum(
+        entry["control_drop"].get("n_paired_anchor_sets", 0) for entry in per_doc.values()
+    )
+    assert total_control_drop_obs == report["confirm_disconfirm"]["pooled"]["control_drop"]["n_paired_anchor_sets"]
+
+
 def test_documents_manifest_cli_flag_identifies_public_documents_by_source_field(tmp_path):
     manifest = tmp_path / "docs.json"
     manifest.write_text(json.dumps({"documents": [

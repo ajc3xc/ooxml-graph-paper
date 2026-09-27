@@ -887,6 +887,50 @@ def _filter_to_documents(by_arm_doc: dict[str, dict[str, float]], allowed_docume
     }
 
 
+def _per_document_breakdown(
+    pooled_phase3_anchor_level: dict[str, dict[str, float]],
+    pooled_baseline_anchor_level: dict[str, dict[str, float]],
+    phase2_keep_survival_anchor_level: dict[str, dict[str, float]],
+    per_family_phase3_anchor_level: dict[str, dict[str, dict[str, float]]],
+    baseline_anchor_level: dict[str, dict[str, dict[str, float]]],
+    families: list[str],
+) -> dict[str, Any]:
+    """Exploratory (protocol section 8: no verdict weight, not part of the
+    section 7 decision rule): P1 (control_drop), P2 (treatment_drop), P3
+    (direct), P4 (keep_survival) and the difference-in-drops test, ONE
+    DOCUMENT AT A TIME instead of pooled across all D documents -- lets a
+    reader see whether a pooled effect is broad-based or driven by a subset
+    of documents. Chain-level only (cluster = anchor-set): restricted to a
+    single document, there is nothing left to cluster further at the
+    document level (see docs/paper-s25-respec-cascade-rerun-protocol-v1.md
+    section 6.7 for the analogous, protocol-named public-documents-only
+    slice this generalizes; found live, 2026-09-27, when the single public
+    document in the D=4 rerun showed a null effect while the pooled result,
+    driven by the 3 author-owned documents, was strongly significant)."""
+    all_documents = sorted({
+        _document_of(k) for k in (
+            list(pooled_phase3_anchor_level.get("control", {}))
+            + list(pooled_phase3_anchor_level.get("treatment", {}))
+        )
+    })
+    out: dict[str, Any] = {}
+    for doc in all_documents:
+        doc_filter = {doc}
+        doc_phase3 = _filter_to_documents(pooled_phase3_anchor_level, doc_filter)
+        doc_baseline = _filter_to_documents(pooled_baseline_anchor_level, doc_filter)
+        doc_keep_survival = _filter_to_documents(phase2_keep_survival_anchor_level, doc_filter)
+        out[doc] = {
+            "control_drop": _paired_drop(doc_phase3, doc_baseline, "control"),
+            "treatment_drop": _paired_drop(doc_phase3, doc_baseline, "treatment"),
+            "direct_control_vs_treatment_phase3": _direct_arm_comparison(doc_phase3),
+            "keep_survival_significance": _direct_arm_comparison(doc_keep_survival),
+            "difference_in_drops": _difference_in_drops(
+                per_family_phase3_anchor_level, baseline_anchor_level, families, doc_filter=doc_filter,
+            ),
+        }
+    return out
+
+
 def _frozen_chain_disclosure(cascade_chains: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """Every frozen chain with where and why it froze (`freeze_cause`, only
     recorded by the orchestrator since 2026-09-25 -- "not_recorded" for older
@@ -1059,6 +1103,10 @@ def compute_respec_cascade_tiers(
     confirm_disconfirm["difference_in_drops"] = _difference_in_drops(
         per_family_phase3_anchor_level, baseline_anchor_level, families,
     )
+    confirm_disconfirm["per_document"] = _per_document_breakdown(
+        pooled_phase3_anchor_level, pooled_baseline_anchor_level, phase2_keep_survival_anchor_level,
+        per_family_phase3_anchor_level, baseline_anchor_level, families,
+    )
     if public_doc_labels:
         pub_phase3 = _filter_to_documents(pooled_phase3_anchor_level, public_doc_labels)
         pub_baseline = _filter_to_documents(pooled_baseline_anchor_level, public_doc_labels)
@@ -1209,6 +1257,14 @@ def main(argv: list[str] | None = None) -> int:
     print("--- difference-in-drops (P-R4; the cascade-specific claim, C4, protocol section 6.6) ---")
     dd = report["confirm_disconfirm"]["difference_in_drops"]
     print(f"drop_difference_pp={dd['drop_difference_pp']}  chain_level={dd['chain_level']}  document_level={dd['document_level']}")
+    print("--- per-document breakdown (P-R4; exploratory, no verdict weight -- protocol section 8) ---")
+    for doc, per_doc in report["confirm_disconfirm"]["per_document"].items():
+        cd, di = per_doc["control_drop"], per_doc["direct_control_vs_treatment_phase3"]
+        dd_doc = per_doc["difference_in_drops"]
+        cd_pp = -100 * cd["observed_mean_diff"] if cd.get("observed_mean_diff") is not None else None
+        di_pp = -100 * di["observed_mean_diff"] if di.get("observed_mean_diff") is not None else None
+        print(f"{doc}: control_drop_pp={cd_pp} (p={cd.get('p_value')})  direct_pp={di_pp} (p={di.get('p_value')})  "
+              f"drop_difference_pp={dd_doc.get('drop_difference_pp')} (chain p={dd_doc['chain_level'].get('p_value')})")
     if "public_documents_only" in report["confirm_disconfirm"]:
         pub = report["confirm_disconfirm"]["public_documents_only"]
         print(f"--- public-documents-only (P-R4; C6, protocol section 6.7; n={pub['n_public_documents']}) ---")
