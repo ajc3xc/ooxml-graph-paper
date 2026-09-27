@@ -241,7 +241,8 @@ def classify_infra_signature(trial: dict[str, Any]) -> dict[str, Any] | None:
     """The infrastructure signature of one trial record (run_trial's return
     shape, or a stored trial from an older run: only `arm`, `timed_out`,
     `returncode`, `claude_json_result`, `stderr_tail`/`stderr` and, when
-    present, `claude_init_record` and `treatment_tool` are read), or None.
+    present, `claude_init_record`, `treatment_tool` and `docx_changed` are
+    read), or None.
 
     Returns {"kinds": [...], "scope": "global" | "chain", "evidence": [...]}.
     scope is "global" when any kind is global (see INFRA_KIND_SCOPES). See the
@@ -290,13 +291,32 @@ def classify_infra_signature(trial: dict[str, Any]) -> dict[str, Any] | None:
             add("nonzero_exit_no_json", f"exit {returncode} with no JSON result")
 
     # 4. MCP load failure, from the CLI's own init record only.
+    #
+    # 2026-09-27 fix (found live during the S25/S26 rerun: 30 of 30 k4
+    # section_reorder treatment chains excluded, 0 of 30 control -- every one
+    # of the 30 had `docx_changed: True` on the very trial that tripped this
+    # signature, meaning the real move_section MCP call had already
+    # succeeded -- `--disallowedTools` leaves no other way for the docx to
+    # change). The init record's `mcp_servers` snapshot is taken once, early
+    # in the CLI's own startup; under this host's heavy contention the
+    # server's connection handshake can still be resolving at that moment
+    # and finish moments later in the SAME session, in time for the real
+    # tool call to succeed. The within-attempt retry a few lines below
+    # already encodes this exact distinction (`not docx_changed`, i.e. only
+    # a trial that changed nothing gets treated as a load flake); this branch
+    # is the one place that never learned it, so a trial whose edit had
+    # already landed was still discarded as an infrastructure failure. Fixed
+    # by requiring the same `not docx_changed` here. Disclosed as a dated
+    # instrumentation correction, not a scoring-criteria change: it does not
+    # touch how a trial's actual edit is graded, only whether a trial that
+    # provably ran for real is allowed to reach grading at all.
     init = trial.get("claude_init_record")
     if trial.get("arm") == "treatment" and isinstance(init, dict):
         servers = {s.get("name"): s.get("status") for s in init.get("mcp_servers") or [] if isinstance(s, dict)}
         status = servers.get(_MERIDIAN_MCP_SERVER)
         tool = trial.get("treatment_tool")
         tool_listed = bool(tool) and _mcp_tool_name(tool) in (init.get("tools") or [])
-        if status != "connected" and not tool_listed:
+        if status != "connected" and not tool_listed and not trial.get("docx_changed"):
             add("mcp_load_failure", f"init record: {_MERIDIAN_MCP_SERVER} status {status!r}, tool not listed")
 
     if not kinds:
@@ -935,6 +955,7 @@ def run_trial(spec: TrialSpec, runs_root: Path, *, model: str = "haiku") -> dict
     trial_record = {
         "arm": spec.arm, "timed_out": timed_out, "returncode": returncode, "claude_json_result": parsed_json,
         "stderr": stderr, "claude_init_record": init_record, "treatment_tool": spec.treatment_tool,
+        "docx_changed": docx_changed,
     }
     # Plain --output-format json put exactly the result record on stdout;
     # keep stdout_tail meaning that when --verbose printed the whole list.

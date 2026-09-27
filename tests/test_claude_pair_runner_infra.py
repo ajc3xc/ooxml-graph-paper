@@ -126,6 +126,30 @@ def test_mcp_load_failure_comes_only_from_the_init_record():
     assert cpr.classify_infra_signature(_trial(claude_init_record=_init(None, ["Read"]))) is None
 
 
+def test_mcp_load_failure_does_not_fire_when_the_docx_actually_changed():
+    """2026-09-27 fix: found live in the S25/S26 rerun (30/30 k4 treatment
+    chains excluded this way, 0/30 control). The init record's MCP-server
+    snapshot is taken once, early in CLI startup; under host contention the
+    server can finish connecting moments later, in time for the real tool
+    call to land, before the init snapshot ever reflects it. `docx_changed`
+    is unfakeable evidence the tool call actually ran (no other tool can
+    touch the file) and must suppress the signature the same way it already
+    suppresses the within-attempt retry."""
+    tool = "mcp__meridian-docs-pilot__move_section"
+    still_pending_but_edited = _trial(
+        arm="treatment", treatment_tool="move_section", claude_init_record=_init("pending", ["Read"]),
+        docx_changed=True,
+    )
+    assert cpr.classify_infra_signature(still_pending_but_edited) is None
+    # unedited: the signature still fires -- this is not a blanket exemption
+    # for treatment, only for a trial with unfakeable proof it ran for real.
+    still_pending_untouched = _trial(
+        arm="treatment", treatment_tool="move_section", claude_init_record=_init("pending", ["Read"]),
+        docx_changed=False,
+    )
+    assert cpr.classify_infra_signature(still_pending_untouched)["kinds"] == ["mcp_load_failure"]
+
+
 # ---------------------------------------------------------------------------
 # run_trial with a faked CLI
 # ---------------------------------------------------------------------------
@@ -221,6 +245,30 @@ def test_persistent_mcp_load_failure_is_an_infrastructure_signature(tmp_path, mo
     out = cpr.run_trial(spec, tmp_path / "runs")
     assert out["mcp_flake_retry_triggered"] is True
     assert out["infra_signature"]["kinds"] == ["mcp_load_failure"]
+
+
+def test_late_mcp_connect_with_a_real_edit_is_not_an_infrastructure_signature(tmp_path, monkeypatch):
+    """2026-09-27 fix, exact production shape: the CLI's init snapshot still
+    shows the server 'pending' (never reaches 'connected'), so there is
+    nothing here to retry into -- but the trial's own tool call already
+    changed the docx on this same, single attempt. Real, unfakeable
+    evidence of success must not be discarded as an infrastructure failure."""
+    spec = _spec(tmp_path)
+    calls = []
+
+    def fake_run(cmd, **kwargs):
+        calls.append(1)
+        trial_root = Path(kwargs["cwd"])
+        (trial_root / "doc.docx").write_bytes(b"edited")
+        init = _init("pending", ["Read"])  # never reaches "connected" in this trial's snapshot
+        result = {"type": "result", "subtype": "success", "is_error": False, "result": "Done."}
+        return subprocess.CompletedProcess(cmd, 0, stdout=_verbose_stdout(init, result), stderr="")
+
+    monkeypatch.setattr(cpr.subprocess, "run", fake_run)
+    out = cpr.run_trial(spec, tmp_path / "runs")
+    assert len(calls) == 1  # docx_changed means this was never treated as a flake to retry
+    assert out["docx_changed"] is True
+    assert out["infra_signature"] is None
 
 
 def test_a_rerun_never_reuses_a_non_empty_trial_directory(tmp_path, monkeypatch):
