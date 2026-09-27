@@ -146,6 +146,88 @@ def test_tier1_gains_an_exact_test_with_the_three_document_floor():
     assert tier1["paired_significance_exact"]["p_value"] >= 0.25
 
 
+# ---------------------------------------------------------------------------
+# P-R4 (2026-09-27): document-level tests, the difference-in-drops test
+# (section 6.6, C4) and the public-documents-only analysis (section 6.7, C6).
+# ---------------------------------------------------------------------------
+
+def test_document_of_strips_the_anchor_set_suffix():
+    assert r._document_of("doc0__anchor1") == "doc0"
+    assert r._document_of("bibliography::doc0__anchor1") == "doc0"
+    assert r._document_of("doc-with-no-anchor-suffix") == "doc-with-no-anchor-suffix"
+
+
+def test_document_level_test_clusters_the_pooled_family_outcomes_by_document():
+    cascade, baseline = _synthetic_run()
+    pooled = r.compute_respec_cascade_tiers(cascade, baseline)["confirm_disconfirm"]["pooled"]
+    chain_level = pooled["chain_level"]["direct_control_vs_treatment_phase3"]
+    document_level = pooled["document_level"]["direct_control_vs_treatment_phase3"]
+    # _synthetic_run has 3 documents (doc0, doc1, doc2) x 2 anchor-sets each = 6 chains;
+    # document-level pools both anchor-sets of one document into one cluster.
+    assert chain_level["n_clusters"] == 6
+    assert document_level["n_clusters"] == 3
+    assert document_level["n_paired_observations"] == chain_level["n_paired_observations"]
+    assert document_level["exact"] is True
+    # coarser clustering of the same signed observations -> same total mean diff
+    assert document_level["observed_mean_diff"] == chain_level["observed_mean_diff"]
+    # protocol section 6.3: document-level p floor is looser (fewer, bigger clusters)
+    assert document_level["p_value_floor"] >= chain_level["p_value_floor"]
+
+
+def test_keep_survival_significance_document_level_is_reported():
+    cascade, baseline = _synthetic_run()
+    report = r.compute_respec_cascade_tiers(cascade, baseline)
+    assert "keep_survival_significance_document_level" in report["confirm_disconfirm"]
+    ks_doc = report["confirm_disconfirm"]["keep_survival_significance_document_level"]
+    assert ks_doc["n_clusters"] <= 3  # at most the 3 documents
+
+
+def test_difference_in_drops_matches_control_minus_treatment_drop_pp():
+    cascade, baseline = _synthetic_run()
+    report = r.compute_respec_cascade_tiers(cascade, baseline)
+    pooled = report["confirm_disconfirm"]["pooled"]
+    dd = report["confirm_disconfirm"]["difference_in_drops"]
+    # protocol section 6.1: drop_difference_pp = control_drop_pp - treatment_drop_pp;
+    # the script's own observed_mean_diff is A-B (cascade - baseline), opposite sign.
+    control_drop_pp = -100 * pooled["chain_level"]["control_drop"]["observed_mean_diff"]
+    treatment_drop_pp = -100 * pooled["chain_level"]["treatment_drop"]["observed_mean_diff"]
+    assert abs(dd["drop_difference_pp"] - (control_drop_pp - treatment_drop_pp)) < 1e-9
+    assert dd["chain_level"]["n_clusters"] == 6
+    assert dd["document_level"]["n_clusters"] == 3
+    assert dd["n_missing_any_of_four_values"] == 0
+
+
+def test_public_documents_only_restricts_the_analysis_and_degrades_gracefully_at_one_document():
+    cascade, baseline = _synthetic_run()
+    report = r.compute_respec_cascade_tiers(cascade, baseline, public_doc_labels={"doc0"})
+    pub = report["confirm_disconfirm"]["public_documents_only"]
+    assert pub["n_public_documents"] == 1
+    # doc0 has 2 anchor-sets: chain-level has 2 clusters, a real test.
+    assert pub["chain_level"]["control_drop"]["n_clusters"] == 2
+    # only 1 document in scope: document-level cannot run (protocol's own
+    # "fewer than 2 clusters" degradation, not a crash or a fabricated p).
+    assert pub["document_level"]["control_drop"]["n_clusters"] == 1
+    assert "reason" in pub["document_level"]["control_drop"]
+    assert pub["difference_in_drops"]["n_candidates"] == 10  # 2 anchor-sets x 5 families
+
+
+def test_no_public_documents_only_section_when_not_requested():
+    cascade, baseline = _synthetic_run()
+    report = r.compute_respec_cascade_tiers(cascade, baseline)
+    assert "public_documents_only" not in report["confirm_disconfirm"]
+
+
+def test_documents_manifest_cli_flag_identifies_public_documents_by_source_field(tmp_path):
+    manifest = tmp_path / "docs.json"
+    manifest.write_text(json.dumps({"documents": [
+        {"doc_label": "doc0", "source": "author-owned, /path/to/doc0.docx"},
+        {"doc_label": "doc1", "source": "manifests/respec_public_review_queue.json rank 1"},
+    ]}), encoding="utf-8")
+    data = json.loads(manifest.read_text(encoding="utf-8"))
+    public = {d["doc_label"] for d in data["documents"] if "public" in str(d.get("source", "")).lower()}
+    assert public == {"doc1"}
+
+
 def test_a_family_without_baseline_chains_fails_loudly():
     import pytest
     cascade, baseline = _synthetic_run()

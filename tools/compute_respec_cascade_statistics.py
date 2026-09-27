@@ -754,18 +754,35 @@ def _chain_of(key: str) -> str:
     return key.split("::", 1)[-1]
 
 
+def _strip_anchor_suffix(doc_or_chain_label: str) -> str:
+    """"<original_doc_label>__anchor<N>" -> "<original_doc_label>", the same
+    convention _original_doc_label reads directly off a chain dict (see its
+    docstring); unchanged if there is no "__anchor" suffix to strip."""
+    return doc_or_chain_label.rsplit("__anchor", 1)[0] if "__anchor" in doc_or_chain_label else doc_or_chain_label
+
+
+def _document_of(key: str) -> str:
+    """Original document a section-7 observation key belongs to (P-R4,
+    protocol section 6.3's document-level cluster: every anchor-set AND every
+    family of one document pools into one cluster) -- the (document,
+    anchor-set) chain from `_chain_of`, with its anchor-set suffix stripped."""
+    return _strip_anchor_suffix(_chain_of(key))
+
+
 def _section7_tests(a_by_key: dict[str, float], b_by_key: dict[str, float], label: str) -> dict[str, Any]:
     common = sorted(set(a_by_key) & set(b_by_key))
     a_values = [a_by_key[k] for k in common]
     b_values = [b_by_key[k] for k in common]
     chain_level = cluster_paired_sign_flip_test([_chain_of(k) for k in common], a_values, b_values)
     chain_level["method"] = f"{chain_level.get('method', 'cluster-level paired sign-flip test')}: {label}, clustered by (document, anchor-set) chain"
+    document_level = cluster_paired_sign_flip_test([_document_of(k) for k in common], a_values, b_values)
+    document_level["method"] = f"{document_level.get('method', 'cluster-level paired sign-flip test')}: {label}, clustered by original document (P-R4, protocol section 6.3)"
     observation_exact = paired_permutation_test_exact(a_values, b_values)
     observation_exact["method"] = f"{observation_exact.get('method', 'paired sign-flip permutation test')}: {label}, every observation its own unit"
-    for result in (chain_level, observation_exact):
+    for result in (chain_level, document_level, observation_exact):
         result["n_paired_observations"] = len(common)
         result["matched_observations"] = common
-    return {"chain_level": chain_level, "observation_level_exact": observation_exact}
+    return {"chain_level": chain_level, "document_level": document_level, "observation_level_exact": observation_exact}
 
 
 def _section7_primary_tests(
@@ -777,7 +794,7 @@ def _section7_primary_tests(
     the same pairing as `_paired_drop`/`_direct_arm_comparison`. With
     `baseline_by_arm_doc=None` only the direct comparison is computed (used
     for keep-survival, which has no baseline)."""
-    out: dict[str, dict[str, Any]] = {"chain_level": {}, "observation_level_exact": {}}
+    out: dict[str, dict[str, Any]] = {"chain_level": {}, "document_level": {}, "observation_level_exact": {}}
     tests: dict[str, dict[str, Any]] = {}
     if baseline_by_arm_doc is not None:
         for arm in ("control", "treatment"):
@@ -789,10 +806,85 @@ def _section7_primary_tests(
         cascade_by_arm_doc.get("control", {}), cascade_by_arm_doc.get("treatment", {}),
         "control vs treatment cascade outcome",
     )
+    return _flatten_section7_tests(out, tests)
+
+
+def _flatten_section7_tests(out: dict[str, dict[str, Any]], tests: dict[str, dict[str, Any]]) -> dict[str, dict[str, Any]]:
     for name, result in tests.items():
         for level in out:
             out[level][name] = result[level]
     return out
+
+
+def _difference_in_drops(
+    cascade_by_family_arm_doc: dict[str, dict[str, dict[str, float]]],
+    baseline_by_family_arm_doc: dict[str, dict[str, dict[str, float]]],
+    families: list[str],
+    *, doc_filter: set[str] | None = None,
+) -> dict[str, Any]:
+    """P-R4, protocol section 6.6 (the cascade-specific claim): for every
+    matched (document, anchor-set, family) with a control Phase-3, control
+    baseline, treatment Phase-3 and treatment baseline observation,
+    d = (control_baseline - control_phase3) - (treatment_baseline -
+    treatment_phase3), d in {-2..2} for 0/1 outcomes -- positive means
+    control dropped more than treatment. Tested against a null of zero via
+    cluster_paired_sign_flip_test(d, 0*d), at chain level (cluster =
+    (document, anchor-set)) and document level (cluster = original
+    document). `drop_difference_pp = 100 * mean(d)`, matching protocol
+    section 6.1's `drop_difference_pp = control_drop_pp - treatment_drop_pp`
+    exactly (same per-unit quantity, opposite of the two drops' own A-B sign
+    convention cancels out). Observations missing any of the four values are
+    left out of the test and counted. `doc_filter`, when given, restricts to
+    doc_labels whose original document is in the set (section 6.7)."""
+    d_by_key: dict[str, float] = {}
+    n_candidates = 0
+    n_missing = 0
+    for family in families:
+        cascade_f = cascade_by_family_arm_doc.get(family, {})
+        baseline_f = baseline_by_family_arm_doc.get(family, {})
+        control_cascade = cascade_f.get("control", {})
+        control_baseline = baseline_f.get("control", {})
+        treatment_cascade = cascade_f.get("treatment", {})
+        treatment_baseline = baseline_f.get("treatment", {})
+        doc_labels = set(control_cascade) | set(control_baseline) | set(treatment_cascade) | set(treatment_baseline)
+        for doc_label in doc_labels:
+            if doc_filter is not None and _strip_anchor_suffix(doc_label) not in doc_filter:
+                continue
+            n_candidates += 1
+            if (doc_label not in control_cascade or doc_label not in control_baseline
+                    or doc_label not in treatment_cascade or doc_label not in treatment_baseline):
+                n_missing += 1
+                continue
+            d = (control_baseline[doc_label] - control_cascade[doc_label]) - (treatment_baseline[doc_label] - treatment_cascade[doc_label])
+            d_by_key[f"{family}::{doc_label}"] = d
+
+    keys = sorted(d_by_key)
+    d_values = [d_by_key[k] for k in keys]
+    zeros = [0.0] * len(d_values)
+    chain_level = cluster_paired_sign_flip_test([_chain_of(k) for k in keys], d_values, zeros)
+    chain_level["method"] = "cluster-level paired sign-flip test: difference-in-drops d vs 0, clustered by (document, anchor-set) chain"
+    document_level = cluster_paired_sign_flip_test([_document_of(k) for k in keys], d_values, zeros)
+    document_level["method"] = "cluster-level paired sign-flip test: difference-in-drops d vs 0, clustered by original document (P-R4)"
+    for result in (chain_level, document_level):
+        result["n_paired_observations"] = len(keys)
+        result["matched_observations"] = keys
+    return {
+        "chain_level": chain_level,
+        "document_level": document_level,
+        "drop_difference_pp": 100.0 * (sum(d_values) / len(d_values)) if d_values else None,
+        "n_candidates": n_candidates,
+        "n_missing_any_of_four_values": n_missing,
+    }
+
+
+def _filter_to_documents(by_arm_doc: dict[str, dict[str, float]], allowed_documents: set[str]) -> dict[str, dict[str, float]]:
+    """Restrict a {arm: {key: value}} anchor-level dict to keys whose
+    original document is in `allowed_documents` (protocol section 6.7's
+    public-documents-only subset, P-R4)."""
+    return {
+        arm: {k: v for k, v in by_doc.items() if _document_of(k) in allowed_documents}
+        for arm, by_doc in by_arm_doc.items()
+    }
 
 
 def _frozen_chain_disclosure(cascade_chains: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -829,6 +921,7 @@ def compute_respec_cascade_tiers(
     frozen_chain_mode: str = DEFAULT_FROZEN_CHAIN_MODE,
     families: list[str] | None = None,
     blocked_policy: str = DEFAULT_BLOCKED_POLICY,
+    public_doc_labels: set[str] | None = None,
 ) -> dict[str, Any]:
     """`frozen_chain_mode`: see FROZEN_CHAIN_MODES ("exclude" reproduces the
     stored 2026-09-23 statistics; "fail" scores a frozen chain 0 at every
@@ -955,9 +1048,48 @@ def compute_respec_cascade_tiers(
     confirm_disconfirm["keep_survival_significance"] = keep_survival_direct_comparison
     keep_survival_primary = _section7_primary_tests(phase2_keep_survival_anchor_level, None)
     confirm_disconfirm["keep_survival_significance_chain_level"] = keep_survival_primary["chain_level"]["direct_control_vs_treatment_phase3"]
+    confirm_disconfirm["keep_survival_significance_document_level"] = keep_survival_primary["document_level"]["direct_control_vs_treatment_phase3"]
     confirm_disconfirm["keep_survival_significance_observation_level_exact"] = (
         keep_survival_primary["observation_level_exact"]["direct_control_vs_treatment_phase3"]
     )
+
+    # ---- P-R4: the difference-in-drops test (section 6.6, the cascade-
+    # specific claim -- C4) and the public-documents-only analysis (section
+    # 6.7 -- C6), pooled across families.
+    confirm_disconfirm["difference_in_drops"] = _difference_in_drops(
+        per_family_phase3_anchor_level, baseline_anchor_level, families,
+    )
+    if public_doc_labels:
+        pub_phase3 = _filter_to_documents(pooled_phase3_anchor_level, public_doc_labels)
+        pub_baseline = _filter_to_documents(pooled_baseline_anchor_level, public_doc_labels)
+        pub_keep_survival = _filter_to_documents(phase2_keep_survival_anchor_level, public_doc_labels)
+        pub_primary = _section7_primary_tests(pub_phase3, pub_baseline)
+        pub_keep_survival_primary = _section7_primary_tests(pub_keep_survival, None)
+        confirm_disconfirm["public_documents_only"] = {
+            "note": (
+                "protocol section 6.7: P1 (control_drop), P3 (direct), P4 (keep_survival) and the "
+                "difference in drops, at chain and document level, over the public documents only. "
+                "Condition C6 requires the same sign as the pooled analysis; significance is not required."
+            ),
+            "public_documents": sorted(public_doc_labels),
+            "n_public_documents": len(public_doc_labels),
+            "control_drop": _paired_drop(pub_phase3, pub_baseline, "control"),
+            "direct_control_vs_treatment_phase3": _direct_arm_comparison(pub_phase3),
+            "keep_survival_significance": _direct_arm_comparison(pub_keep_survival),
+            "chain_level": {
+                "control_drop": pub_primary["chain_level"]["control_drop"],
+                "direct_control_vs_treatment_phase3": pub_primary["chain_level"]["direct_control_vs_treatment_phase3"],
+                "keep_survival_significance": pub_keep_survival_primary["chain_level"]["direct_control_vs_treatment_phase3"],
+            },
+            "document_level": {
+                "control_drop": pub_primary["document_level"]["control_drop"],
+                "direct_control_vs_treatment_phase3": pub_primary["document_level"]["direct_control_vs_treatment_phase3"],
+                "keep_survival_significance": pub_keep_survival_primary["document_level"]["direct_control_vs_treatment_phase3"],
+            },
+            "difference_in_drops": _difference_in_drops(
+                per_family_phase3_anchor_level, baseline_anchor_level, families, doc_filter=public_doc_labels,
+            ),
+        }
 
     return {
         "schema": "paper-s23-respec-cascade-statistics-v1",
@@ -1024,15 +1156,32 @@ def main(argv: list[str] | None = None) -> int:
             "The S25 locked s25-statistics command passes 'fail'. Recorded in the output as blocked_policy."
         ),
     )
+    parser.add_argument(
+        "--documents-manifest", type=Path, default=None,
+        help=(
+            "P-R4, protocol section 6.7: the locked documents manifest (e.g. "
+            "manifests/s25-respec-documents-locked-v2.json), read only to find which doc_labels are public "
+            "(a 'source' field containing 'public') for the public-documents-only analysis. Omit to skip "
+            "section 6.7 entirely (confirm_disconfirm.public_documents_only absent from the output)."
+        ),
+    )
     args = parser.parse_args(argv)
 
     families = SIX_FAMILIES if args.six_family else FAMILIES
     cascade_chains = load_respec_cascade_chains(args.run_root)
     baseline_chains = load_baseline_chains(args.baseline_run_root, families)
 
+    public_doc_labels: set[str] | None = None
+    if args.documents_manifest is not None:
+        manifest = json.loads(args.documents_manifest.read_text(encoding="utf-8"))
+        public_doc_labels = {
+            d["doc_label"] for d in manifest.get("documents", [])
+            if "public" in str(d.get("source", "")).lower()
+        }
+
     report = compute_respec_cascade_tiers(
         cascade_chains, baseline_chains, frozen_chain_mode=args.frozen_chain_mode, families=families,
-        blocked_policy=args.blocked_policy,
+        blocked_policy=args.blocked_policy, public_doc_labels=public_doc_labels,
     )
     report["run_root"] = str(args.run_root)
     report["baseline_run_root"] = str(args.baseline_run_root)
@@ -1051,6 +1200,22 @@ def main(argv: list[str] | None = None) -> int:
     print(f"treatment_drop (cascade Phase-3 vs treatment's own fresh K=1 baseline), chain-level: {chain_level['treatment_drop']}")
     print(f"direct control-vs-treatment (cascade Phase-3 per-family outcome), chain-level:      {chain_level['direct_control_vs_treatment_phase3']}")
     print(f"keep_survival_significance (Checkpoint B, control vs treatment), chain-level:       {report['confirm_disconfirm']['keep_survival_significance_chain_level']}")
+    print("--- document_level exact tests (P-R4; co-requirement for CONFIRMING, protocol section 6.3) ---")
+    document_level = pooled["document_level"]
+    print(f"control_drop   document-level: {document_level['control_drop']}")
+    print(f"treatment_drop document-level: {document_level['treatment_drop']}")
+    print(f"direct         document-level: {document_level['direct_control_vs_treatment_phase3']}")
+    print(f"keep_survival_significance document-level: {report['confirm_disconfirm']['keep_survival_significance_document_level']}")
+    print("--- difference-in-drops (P-R4; the cascade-specific claim, C4, protocol section 6.6) ---")
+    dd = report["confirm_disconfirm"]["difference_in_drops"]
+    print(f"drop_difference_pp={dd['drop_difference_pp']}  chain_level={dd['chain_level']}  document_level={dd['document_level']}")
+    if "public_documents_only" in report["confirm_disconfirm"]:
+        pub = report["confirm_disconfirm"]["public_documents_only"]
+        print(f"--- public-documents-only (P-R4; C6, protocol section 6.7; n={pub['n_public_documents']}) ---")
+        print(f"control_drop_pp/direct_pp signs: control_drop={pub['control_drop']}  direct={pub['direct_control_vs_treatment_phase3']}")
+        print(f"chain_level={pub['chain_level']}")
+        print(f"document_level={pub['document_level']}")
+        print(f"difference_in_drops={pub['difference_in_drops']}")
     print("--- as-run observation-level Monte Carlo tests (continuity) ---")
     print(f"control_drop:   {pooled['control_drop']}")
     print(f"treatment_drop: {pooled['treatment_drop']}")
