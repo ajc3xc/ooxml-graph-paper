@@ -1,0 +1,189 @@
+{
+ "schema": "paper-s26-k4sr-replication-manifest-v2",
+ "derived_from": "manifests/s26-k4-documents-locked.json",
+ "derived_from_sha256": "bc611e046cf5ca9b5990062b054c00f5725f784d716d4554510d5c9125c56787",
+ "meridian_docs_pin_commit": "89c93fac6a9ee7a03d98baab34ba7043de983018",
+ "note": "Pod-path form: docx_path is where the runbook's provisioning step (section 3.3) copies the real file on the pod, not this machine's local path. s7_split is \"primary_holdout\" for every document -- one split covering all 60, locked verbatim by docs/paper-s26-k4-section-reorder-confirmatory-protocol-v1.md section 1.2 item 6 and the locked --split argument (section 10); there is no train/val/holdout design because this is a single confirmatory run, not one being debugged on this corpus. Eligibility at the pin: manifests/s26-k4-eligibility-at-pin-v1.json (all 60 eligible).",
+ "documents": [
+  {
+   "doc_label": "s26k4_792390797c191d68",
+   "docx_path": "/workspace/ooxml-graph-paper/corpus/s26k4_792390797c191d68.docx",
+   "sha256": "792390797c191d68571323d7366803781a964fceec8523b1a633462579922548",
+   "s7_split": "primary_holdout"
+  },
+  {
+   "doc_label": "s26k4_dbecbb89511f921f",
+   "docx_path": "/workspace/ooxml-graph-paper/corpus/s26k4_dbecbb89511f921f.docx",
+   "sha256": "dbecbb89511f921f59bb647a8c3a534c601ffd6ec76a68f6234caee461b5b5db",
+   "s7_split": "primary_holdout"
+  },
+  {
+   "doc_label": "s26k4_b608883eb8aedbb5",
+   "docx_path": "/workspace/ooxml-graph-paper/corpus/s26k4_b608883eb8aedbb5.docx",
+   "sha256": "b608883eb8aedbb53ac31f8e632be7a6410d9edd83a84faa3c0e62e175dcf53f",
+   "s7_split": "primary_holdout"
+  },
+  {
+   "doc_label": "s26k4_b9feac7246087871",
+   "docx_path": "/workspace/ooxml-graph-paper/corpus/s26k4_b9feac7246087871.docx",
+   "sha256": "b9feac724608787115407e7c7a967e0f2916f1bf967082783a759400480330d8",
+   "s7_split": "primary_holdout"
+  },
+  {
+   "doc_label": "s26k4_46e973802b5c6463",
+   "docx_path": "/workspace/ooxml-graph-paper/corpus/s26k4_46e973802b5c6463.docx",
+   "sha256": "46e973802b5c6463d59e9681e2e55bfc69c710610c962a27d39f4335a7908fe0",
+   "s7_split": "primary_holdout"
+  },
+  {
+   "doc_label": "s26k4_11105b6ef71bbcd1",
+   "docx_path": "/workspace/ooxml-graph-paper/corpus/s26k4_11105b6ef71bbcd1.docx",
+   "sha256": "11105b6ef71bbcd19e69e9cc67a5fcacc5092ccc43fee3f96cbb434de05eec18",
+   "s7_split": "primary_holdout"
+  },
+  {
+   "doc_label": "s26k4_96bcf35c0417433a",
+   "docx_path": "/workspace/ooxml-graph-paper/corpus/s26k4_96bcf35c0417433a.docx",
+   "sha256": "96bcf35c0417433afa40dba836505914f9b5d8915a80194cb38dc994c8839e1c",
+   "s7_split": "primary_holdout"
+  },
+  {
+   "doc_label": "s26k4_20696bfbaa645d60",
+   "docx_path": "/workspace/ooxml-graph-paper/corpus/s26k4_20696bfbaa645d60.docx",
+   "sha256": "20696bfbaa645d606275e3076fc0c64ae8817e450f99aacd7eabb50dee0d955b",
+   "s7_split": "primary_holdout"
+  },
+  {
+   "doc_label": "s26k4_47cc13c9e1bf0733",
+   "docx_path": "/workspace/ooxml-graph-paper/corpus/s26k4_47cc13c9e1bf0733.docx",
+   "sha256": "47cc13c9e1bf073308675d4d234cf835c3a57df0f88158ea44eb026886723270",
+   "s7_split": "primary_holdout"
+  },
+  {
+   "doc_label": "s26k4_ef19c16d35bb7289",
+   "docx_path": "/workspace/ooxml-graph-paper/corpus/s26k4_ef19c16d35bb7289.docx",
+   "sha256": "ef19c16d35bb7289f6877ab105ced29d484ab0e1001513479b7a7d76f50cd201",
+   "s7_split": "primary_holdout"
+  },
+  {
+   "doc_label": "s26k4_20aa529426b36353",
+   "docx_path": "/workspace/ooxml-graph-paper/corpus/s26k4_20aa529426b36353.docx",
+   "sha256": "20aa529426b363539c33920b7daddd4ca0590dc5e41a8ba7e9447314c4c5497a",
+   "s7_split": "primary_holdout"
+  },
+  {
+   "doc_label": "s26k4_5635d4c34559284e",
+   "docx_path": "/workspace/ooxml-graph-paper/corpus/s26k4_5635d4c34559284e.docx",
+   "sha256": "5635d4c34559284ec630c039216f1b3970451db1ba9af2a30475f9aa22f4d5ae",
+   "s7_split": "primary_holdout"
+  },
+  {
+   "doc_label": "s26k4_69a77e9d454c92cc",
+   "docx_path": "/workspace/ooxml-graph-paper/corpus/s26k4_69a77e9d454c92cc.docx",
+   "sha256": "69a77e9d454c92ccf68b136f0f4743e2bf85993e5ce535830db4aa6b103e288c",
+   "s7_split": "primary_holdout"
+  },
+  {
+   "doc_label": "s26k4_de4d18d39c6d680b",
+   "docx_path": "/workspace/ooxml-graph-paper/corpus/s26k4_de4d18d39c6d680b.docx",
+   "sha256": "de4d18d39c6d680bb0b79cd725a14b3ae64df37351ec56df4a83ef0844531ed9",
+   "s7_split": "primary_holdout"
+  },
+  {
+   "doc_label": "s26k4_88db066456718048",
+   "docx_path": "/workspace/ooxml-graph-paper/corpus/s26k4_88db066456718048.docx",
+   "sha256": "88db0664567180488c23ba290ed0182e856c46aeebcf069cea6b03f9b85bdadf",
+   "s7_split": "primary_holdout"
+  },
+  {
+   "doc_label": "s26k4_3fa6058324808789",
+   "docx_path": "/workspace/ooxml-graph-paper/corpus/s26k4_3fa6058324808789.docx",
+   "sha256": "3fa60583248087898cf13d969ef50e5d8ff1eb351049e4ec06a1ca6bff764a42",
+   "s7_split": "primary_holdout"
+  },
+  {
+   "doc_label": "s26k4_fa75239938fd8943",
+   "docx_path": "/workspace/ooxml-graph-paper/corpus/s26k4_fa75239938fd8943.docx",
+   "sha256": "fa75239938fd8943123910b73725fba61da41ac3b27b8279224faebb86d9ae3a",
+   "s7_split": "primary_holdout"
+  },
+  {
+   "doc_label": "s26k4_a2e265cd65168991",
+   "docx_path": "/workspace/ooxml-graph-paper/corpus/s26k4_a2e265cd65168991.docx",
+   "sha256": "a2e265cd6516899192fcc8c289d7acb18462c560952cf03743da901efe65cb88",
+   "s7_split": "primary_holdout"
+  },
+  {
+   "doc_label": "s26k4_ea56f333011352b1",
+   "docx_path": "/workspace/ooxml-graph-paper/corpus/s26k4_ea56f333011352b1.docx",
+   "sha256": "ea56f333011352b167a47ffc46c31492eea2c4e38213391ed290cb45f238619a",
+   "s7_split": "primary_holdout"
+  },
+  {
+   "doc_label": "s26k4_5649b13ada337a14",
+   "docx_path": "/workspace/ooxml-graph-paper/corpus/s26k4_5649b13ada337a14.docx",
+   "sha256": "5649b13ada337a14f11d81791dd9119fa443674da364771c2e340db6df0f8f2c",
+   "s7_split": "primary_holdout"
+  },
+  {
+   "doc_label": "s26k4_993cdb330cbef3c8",
+   "docx_path": "/workspace/ooxml-graph-paper/corpus/s26k4_993cdb330cbef3c8.docx",
+   "sha256": "993cdb330cbef3c805f355abac12747af2411968b48b6d07e89cc3d9a1a4a165",
+   "s7_split": "primary_holdout"
+  },
+  {
+   "doc_label": "s26k4_a128da741d39dd25",
+   "docx_path": "/workspace/ooxml-graph-paper/corpus/s26k4_a128da741d39dd25.docx",
+   "sha256": "a128da741d39dd259f3d305216a22363e7b8935319b5adc48831b5ba81370a5d",
+   "s7_split": "primary_holdout"
+  },
+  {
+   "doc_label": "s26k4_97deb633f1de728e",
+   "docx_path": "/workspace/ooxml-graph-paper/corpus/s26k4_97deb633f1de728e.docx",
+   "sha256": "97deb633f1de728e9384c4797418e579ae6f35fbc22cef2825bf630708ed37ec",
+   "s7_split": "primary_holdout"
+  },
+  {
+   "doc_label": "s26k4_a90f00ce7681e03d",
+   "docx_path": "/workspace/ooxml-graph-paper/corpus/s26k4_a90f00ce7681e03d.docx",
+   "sha256": "a90f00ce7681e03dce2cc5351eeb513d2509fd10bc55355db9b5e13651a15c34",
+   "s7_split": "primary_holdout"
+  },
+  {
+   "doc_label": "s26k4_4fd0da90108c0e2d",
+   "docx_path": "/workspace/ooxml-graph-paper/corpus/s26k4_4fd0da90108c0e2d.docx",
+   "sha256": "4fd0da90108c0e2d563fdf318d6a62955588bdf2bf13e7fed5c47a5e4e4e0ba2",
+   "s7_split": "primary_holdout"
+  },
+  {
+   "doc_label": "s26k4_2918c6e5693eda7d",
+   "docx_path": "/workspace/ooxml-graph-paper/corpus/s26k4_2918c6e5693eda7d.docx",
+   "sha256": "2918c6e5693eda7d86c311c9f0e2de01aa34da9b9a861a51a3ab57cddd73cf60",
+   "s7_split": "primary_holdout"
+  },
+  {
+   "doc_label": "s26k4_40c23e5cdbfc6387",
+   "docx_path": "/workspace/ooxml-graph-paper/corpus/s26k4_40c23e5cdbfc6387.docx",
+   "sha256": "40c23e5cdbfc638753a737a16602942740bb8e3763b6e6f7526ac4b4a57505a4",
+   "s7_split": "primary_holdout"
+  },
+  {
+   "doc_label": "s26k4_9abc93cd3e2ec7a2",
+   "docx_path": "/workspace/ooxml-graph-paper/corpus/s26k4_9abc93cd3e2ec7a2.docx",
+   "sha256": "9abc93cd3e2ec7a2b7fa4dd37c4cf3eb5401c993591ba1d33d41c77f44750e7b",
+   "s7_split": "primary_holdout"
+  },
+  {
+   "doc_label": "s26k4_f63205d0c11297fc",
+   "docx_path": "/workspace/ooxml-graph-paper/corpus/s26k4_f63205d0c11297fc.docx",
+   "sha256": "f63205d0c11297fc11d9e98f8b7e2db4030d8c4706b015209bd87fa3d8bb5c10",
+   "s7_split": "primary_holdout"
+  },
+  {
+   "doc_label": "s26k4_05d95d9aecfadd28",
+   "docx_path": "/workspace/ooxml-graph-paper/corpus/s26k4_05d95d9aecfadd28.docx",
+   "sha256": "05d95d9aecfadd28150bda3f948a365d655aa4eb4c7176b0785f2facfea34c3a",
+   "s7_split": "primary_holdout"
+  }
+ ]
+}

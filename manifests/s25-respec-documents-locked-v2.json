@@ -1,0 +1,31 @@
+{
+ "schema": "s25-respec-documents-locked-v2",
+ "decided": "2026-09-27, amendment: D reduced 8 -> 4 (3 fixed author-owned + top-1 public by the same existing hash rank, seed 20260925002) -- the author's own explicit, informed choice to cut cost after S25 v1 had already started on Sonnet 5 (~$17 spent, discarded, not reused for statistics); disclosed here as a real deviation from the v1 lock, not a silent one. Superseded run root: rr-respec-v1 (partial data kept for the record).",
+ "d": 4,
+ "documents": [
+  {
+   "doc_label": "jcshm-manuscript",
+   "source": "author-owned, D:\\MeridianData\\ooxml-graph-paper\\raw\\author-owned-personal\\jcshm-manuscript.docx",
+   "sha256": "ada276d4de9dd346b2f2b6be3cfac9e7637f6eca849e0aa2b516d7b70c294747",
+   "selection": "S25 section 1.1, fixed (used in the 2026-09-23 run)"
+  },
+  {
+   "doc_label": "jcshm-si",
+   "source": "author-owned, D:\\MeridianData\\ooxml-graph-paper\\raw\\author-owned-personal\\jcshm-si.docx",
+   "sha256": "8ccdf9dd53a1cb16def8fc6f22044c5902d553c47cd0781fec29677486495cb8",
+   "selection": "S25 section 1.1, fixed (used in the 2026-09-23 run)"
+  },
+  {
+   "doc_label": "masters-dissertation-defense",
+   "source": "author-owned, D:\\MeridianData\\ooxml-graph-paper\\raw\\author-owned-personal\\masters-dissertation-defense.docx",
+   "sha256": "b3336b9809dfb0bcac5d73e0f2e94ed4d899a98a93217f01fd6fca648ae0f332",
+   "selection": "S25 section 1.1, fixed (used in the 2026-09-23 run)"
+  },
+  {
+   "doc_label": "s25pub_d3ff0b3c3f2d72d3",
+   "source": "manifests/respec_public_review_queue.json rank 1 (seed 20260925002); docx-corpus batch-2-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "sha256": "d3ff0b3c3f2d72d3e1aa59de7ab04446b2e470ba21987ea66b0702d4b14fa968",
+   "selection": "hash rank 1 of 78 eligible, seed 20260925002"
+  }
+ ]
+}
