@@ -14,7 +14,7 @@ from pathlib import Path
 from typing import Any
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from graph_scorer import bootstrap_ci, paired_permutation_test  # noqa: E402
+from graph_scorer import bootstrap_ci, paired_permutation_test, paired_permutation_test_exact  # noqa: E402
 
 # A chain that stopped before finishing, by cause. "blocked" is every such
 # chain written before 2026-09-25 (cause not recorded); run_chain now writes
@@ -238,6 +238,14 @@ def compute_statistics(chains: list[dict[str, Any]],
         significance = (
             paired_permutation_test(paired_a, paired_b) if len(paired_docs) >= 2 else None
         )
+        # P-K1: the exact-enumeration counterpart the protocol's primary test
+        # requires (section 6.1: "the result's `exact` flag must be true").
+        # Kept alongside, not instead of, the as-run Monte Carlo field above --
+        # that field is what the published p continues from (section 6.3),
+        # this one is what k4_replication_verdict.py's confirmatory rule reads.
+        significance_exact = (
+            paired_permutation_test_exact(paired_a, paired_b) if len(paired_docs) >= 2 else None
+        )
 
         steady_arms = steady_state_by_group.get((family, k), {"control": {}, "treatment": {}})
         steady_control_values = list(steady_arms["control"].values())
@@ -266,6 +274,7 @@ def compute_statistics(chains: list[dict[str, Any]],
             "steady_state_pairs_1_plus": steady_state,
             "paired_n": len(paired_docs),
             "paired_control_vs_treatment_significance": significance,
+            "paired_control_vs_treatment_significance_exact": significance_exact,
         })
 
     stats: dict[str, Any] = {
