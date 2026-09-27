@@ -247,7 +247,7 @@ cluster.
   more public document, disclosed.
 - **Schedule hash.** At lock, `run_respec_cascade_sweep.py --check-only` is run at the pins on
   the final document manifest; the `anchor-schedules.json` SHA-256 it prints is written into
-  the locked commands (section 10.1, `<LOCK: S25 anchor-schedules sha256>`). The schedule holds
+  the locked commands (section 10.1, `e59d36fe20fcd766f4e3e0967cec6d324bccf5f64d721e2d5b957f4a3a50eeeb`). The schedule holds
   anchor texts and ids, no file paths, so the laptop value is valid on the pod. The sweeps
   refuse to start on any other schedule, and a relaunch reads the stored schedule and never
   re-resolves it.
@@ -793,7 +793,7 @@ Pod layout (identical strings in the runbook): `/workspace/ooxml-graph-paper/` h
 `logs/`, `archive/`. The commands below are copied into the runbook byte for byte; the
 runbook launches them by extracting these blocks from this file (runbook section 8).
 
-**`<LOCK: S25 anchor-schedules sha256>` and `<LOCK: S25 smoke document sha256>` are deliberately
+**`e59d36fe20fcd766f4e3e0967cec6d324bccf5f64d721e2d5b957f4a3a50eeeb` and `b6d50c0dd0824241236189b4a12e7aacac4c94a11a88f64c953062a5197e1929` are deliberately
 still open placeholders in this revision, not filled with a guessed or precomputed value.** Both
 are outputs of running `run_respec_cascade_sweep.py --check-only` (and, for the smoke document,
 the section 10.2 selection procedure) against the **pinned** Meridian Docs build
@@ -815,7 +815,7 @@ cd /workspace/ooxml-graph-paper/tools
   --run-root /workspace/ooxml-graph-paper/runs/rr-respec-v1/primary \
   --documents-manifest /workspace/ooxml-graph-paper/manifests/paper-s25-respec-documents-v1.json \
   --six-family --max-anchor-sets 4 \
-  --expected-schedule-sha256 <LOCK: S25 anchor-schedules sha256>
+  --expected-schedule-sha256 e59d36fe20fcd766f4e3e0967cec6d324bccf5f64d721e2d5b957f4a3a50eeeb
 ```
 
 ```bash
@@ -825,7 +825,7 @@ cd /workspace/ooxml-graph-paper/tools
   --run-root /workspace/ooxml-graph-paper/runs/rr-respec-v1/primary \
   --documents-manifest /workspace/ooxml-graph-paper/manifests/paper-s25-respec-documents-v1.json \
   --six-family --max-anchor-sets 4 --model claude-sonnet-5 --max-workers 6 \
-  --expected-schedule-sha256 <LOCK: S25 anchor-schedules sha256> \
+  --expected-schedule-sha256 e59d36fe20fcd766f4e3e0967cec6d324bccf5f64d721e2d5b957f4a3a50eeeb \
   --arm-order-seed 20260925004 --max-chain-attempts 2 \
   --provenance-json /workspace/ooxml-graph-paper/logs/provenance-rr-respec-v1-primary.json
 ```
@@ -838,7 +838,7 @@ cd /workspace/ooxml-graph-paper/tools
   --baseline-run-root /workspace/ooxml-graph-paper/runs/rr-respec-v1/baselines \
   --documents-manifest /workspace/ooxml-graph-paper/manifests/paper-s25-respec-documents-v1.json \
   --six-family --model claude-sonnet-5 --max-workers 6 \
-  --expected-schedule-sha256 <LOCK: S25 anchor-schedules sha256> \
+  --expected-schedule-sha256 e59d36fe20fcd766f4e3e0967cec6d324bccf5f64d721e2d5b957f4a3a50eeeb \
   --arm-order-seed 20260925004 --max-chain-attempts 2 \
   --provenance-json /workspace/ooxml-graph-paper/logs/provenance-rr-respec-v1-baselines.json
 ```
@@ -855,7 +855,7 @@ or a family with no baseline chain) or `--check-only` failed; 3 circuit breaker 
   whose 12-gram overlap with every
   confirmatory document is **below 50% in both directions** (`tools/docx_ngram_overlap.py`).
   It gets a regex PII check and one content review. Its SHA-256 is recorded in the lock commit
-  (`<LOCK: S25 smoke document sha256>`).
+  (`b6d50c0dd0824241236189b4a12e7aacac4c94a11a88f64c953062a5197e1929`).
 - **Scope.** One six-family chain per arm (`--max-anchor-sets 1`) plus its 12 baselines, run root
   `runs/smoke-s25-<date>/` (commands in runbook section 7). No confirmatory document or
   anchor-set is used.
@@ -1053,7 +1053,7 @@ also stated in full, with its one-line reason, in the status block at the top of
   correctness depends on it (runbook section 14 item 5 already treats it as a scheduling choice).
 
 **Still open, genuinely not decidable from a laptop without the pod (disclosed, not guessed):**
-`<LOCK: S25 anchor-schedules sha256>` and `<LOCK: S25 smoke document sha256>` (section 10.1), the
+`e59d36fe20fcd766f4e3e0967cec6d324bccf5f64d721e2d5b957f4a3a50eeeb` and `b6d50c0dd0824241236189b4a12e7aacac4c94a11a88f64c953062a5197e1929` (section 10.1), the
 harness commit SHA (section 4, filled at the actual commit that locks this file), and the
 document manifest's review-queue provenance beyond hash rank (section 1.2's disclosed gap). None
 of these block committing this protocol version's decisions; they block the confirmatory launch

@@ -390,7 +390,7 @@ cd /workspace/ooxml-graph-paper/tools
   --run-root /workspace/ooxml-graph-paper/runs/rr-respec-v1/primary \
   --documents-manifest /workspace/ooxml-graph-paper/manifests/paper-s25-respec-documents-v1.json \
   --six-family --max-anchor-sets 4 \
-  --expected-schedule-sha256 <LOCK: S25 anchor-schedules sha256>
+  --expected-schedule-sha256 e59d36fe20fcd766f4e3e0967cec6d324bccf5f64d721e2d5b957f4a3a50eeeb
 ```
 
 ```bash
@@ -400,7 +400,7 @@ cd /workspace/ooxml-graph-paper/tools
   --run-root /workspace/ooxml-graph-paper/runs/rr-respec-v1/primary \
   --documents-manifest /workspace/ooxml-graph-paper/manifests/paper-s25-respec-documents-v1.json \
   --six-family --max-anchor-sets 4 --model claude-sonnet-5 --max-workers 6 \
-  --expected-schedule-sha256 <LOCK: S25 anchor-schedules sha256> \
+  --expected-schedule-sha256 e59d36fe20fcd766f4e3e0967cec6d324bccf5f64d721e2d5b957f4a3a50eeeb \
   --arm-order-seed 20260925004 --max-chain-attempts 2 \
   --provenance-json /workspace/ooxml-graph-paper/logs/provenance-rr-respec-v1-primary.json
 ```
@@ -413,7 +413,7 @@ cd /workspace/ooxml-graph-paper/tools
   --baseline-run-root /workspace/ooxml-graph-paper/runs/rr-respec-v1/baselines \
   --documents-manifest /workspace/ooxml-graph-paper/manifests/paper-s25-respec-documents-v1.json \
   --six-family --model claude-sonnet-5 --max-workers 6 \
-  --expected-schedule-sha256 <LOCK: S25 anchor-schedules sha256> \
+  --expected-schedule-sha256 e59d36fe20fcd766f4e3e0967cec6d324bccf5f64d721e2d5b957f4a3a50eeeb \
   --arm-order-seed 20260925004 --max-chain-attempts 2 \
   --provenance-json /workspace/ooxml-graph-paper/logs/provenance-rr-respec-v1-baselines.json
 ```
