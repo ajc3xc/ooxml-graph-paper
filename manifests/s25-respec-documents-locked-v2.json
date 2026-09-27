@@ -2,6 +2,7 @@
  "schema": "s25-respec-documents-locked-v2",
  "decided": "2026-09-27, amendment: D reduced 8 -> 4 (3 fixed author-owned + top-1 public by the same existing hash rank, seed 20260925002) -- the author's own explicit, informed choice to cut cost after S25 v1 had already started on Sonnet 5 (~$17 spent, discarded, not reused for statistics); disclosed here as a real deviation from the v1 lock, not a silent one. Superseded run root: rr-respec-v1 (partial data kept for the record).",
  "d": 4,
+ "anchor_schedule_sha256": "5b1447e1398aab418a18eb97cf10922c8fcc00bb7209fe95daff7d613f3d7822",
  "documents": [
   {
    "doc_label": "jcshm-manuscript",
