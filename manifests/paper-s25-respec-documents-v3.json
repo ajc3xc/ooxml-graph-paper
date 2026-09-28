@@ -1,0 +1,59 @@
+{
+ "schema": "paper-s25-respec-documents-v3",
+ "derived_from": "manifests/s25-respec-documents-locked-v3.json",
+ "derived_from_sha256": "ff42df0d8b1b87fe37455d51e2a80c27f1ab33d974f37607bd7e11a6d256eea8",
+ "meridian_docs_pin_commit": "89c93fac6a9ee7a03d98baab34ba7043de983018",
+ "note": "Pod-path form: docx_path is where the pod's corpus/ directory holds the real file (see docs/paper-s25-respec-cascade-rerun-protocol-v1.md section 3.3 / runbook provisioning), not this machine's local path. D=10 per docs/paper-s25-respec-cascade-rerun-protocol-v1-amendment-1.md section 5: the 7 non-dissertation documents of manifests/paper-s25-respec-documents-v2.json's D=8 design (masters-dissertation-defense excluded per AD-1/AD-3) plus 3 new GOVDOCS1 documents, per manifests/s25-respec-documents-locked-v3.json.",
+ "documents": [
+  {
+   "doc_label": "jcshm-manuscript",
+   "docx_path": "/workspace/ooxml-graph-paper/corpus/jcshm-manuscript.docx",
+   "sha256": "ada276d4de9dd346b2f2b6be3cfac9e7637f6eca849e0aa2b516d7b70c294747"
+  },
+  {
+   "doc_label": "jcshm-si",
+   "docx_path": "/workspace/ooxml-graph-paper/corpus/jcshm-si.docx",
+   "sha256": "8ccdf9dd53a1cb16def8fc6f22044c5902d553c47cd0781fec29677486495cb8"
+  },
+  {
+   "doc_label": "s25pub_d3ff0b3c3f2d72d3",
+   "docx_path": "/workspace/ooxml-graph-paper/corpus/s25pub_d3ff0b3c3f2d72d3.docx",
+   "sha256": "d3ff0b3c3f2d72d3e1aa59de7ab04446b2e470ba21987ea66b0702d4b14fa968"
+  },
+  {
+   "doc_label": "s25pub_acd134313c175f4e",
+   "docx_path": "/workspace/ooxml-graph-paper/corpus/s25pub_acd134313c175f4e.docx",
+   "sha256": "acd134313c175f4e5d9ceb10f33454115c977153a91e83cdccad73303ed4a428"
+  },
+  {
+   "doc_label": "s25pub_c04412c3eeda841d",
+   "docx_path": "/workspace/ooxml-graph-paper/corpus/s25pub_c04412c3eeda841d.docx",
+   "sha256": "c04412c3eeda841d22fd345d3ca5ed3757ec528500d4cd542a82e29d1e5b18b5"
+  },
+  {
+   "doc_label": "s25pub_66157a47a2b464f1",
+   "docx_path": "/workspace/ooxml-graph-paper/corpus/s25pub_66157a47a2b464f1.docx",
+   "sha256": "66157a47a2b464f153124998c373a6336d75560439381c4e2df80c1b997732bd"
+  },
+  {
+   "doc_label": "s25pub_ede3e0981b844b40",
+   "docx_path": "/workspace/ooxml-graph-paper/corpus/s25pub_ede3e0981b844b40.docx",
+   "sha256": "ede3e0981b844b40238ef074e5c00b69de453a3292825d2a2a1a9598d179079f"
+  },
+  {
+   "doc_label": "s25pub_govdocs1_7683d6a936ccf70e",
+   "docx_path": "/workspace/ooxml-graph-paper/corpus/s25pub_govdocs1_7683d6a936ccf70e.docx",
+   "sha256": "7683d6a936ccf70e043b427dda7b84f8a4a06ccd4cf7fedde7a8b260e6f3ff07"
+  },
+  {
+   "doc_label": "s25pub_govdocs1_c9ab2c48fd61ae0a",
+   "docx_path": "/workspace/ooxml-graph-paper/corpus/s25pub_govdocs1_c9ab2c48fd61ae0a.docx",
+   "sha256": "c9ab2c48fd61ae0a540a75300919121660cbea55bc76fc32cfa8f0b51a159a8c"
+  },
+  {
+   "doc_label": "s25pub_govdocs1_856dd03f69609179",
+   "docx_path": "/workspace/ooxml-graph-paper/corpus/s25pub_govdocs1_856dd03f69609179.docx",
+   "sha256": "856dd03f69609179f0906ff8c1ae3dadb3fa7c0f3f539b3fd2fdb6866fcf846c"
+  }
+ ]
+}
