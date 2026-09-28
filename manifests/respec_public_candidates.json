@@ -265,6 +265,25 @@
    "prior_use": "none found"
   },
   {
+   "sha256": "a823c29a18818e8bf2ec9218c1f2001403fa597686be95360162cff7d715f77d",
+   "source": "docx-corpus govdocs1-batch-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\a823c29a18818e8bf2ec9218c1f2001403fa597686be95360162cff7d715f77d.docx",
+   "source_url": "https://docxcorp.us/documents/116733.docx",
+   "corpus_metadata": {
+    "type": null,
+    "topic": null,
+    "word_count": null
+   },
+   "headings": 172,
+   "omath": 0,
+   "tbl": 13,
+   "five_family_usable": 4,
+   "six_family_usable": 4,
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+   "license_status": "unknown_pending_review per file; dataset-level ODC-BY claim (same as S6 adjudication note)",
+   "prior_use": "none found"
+  },
+  {
    "sha256": "8825d1fbd427c9353ef59a999b3efb7eb641d85a494fc842d40bb2c7627959fb",
    "source": "docx-corpus batch-3-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
    "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-3-v1\\12c81f89e281ce848e59649c60d9c5f70cf5312e88d6b8b9953fc154f178a865.docx",
@@ -448,6 +467,25 @@
    "headings": 65,
    "omath": 0,
    "tbl": 0,
+   "five_family_usable": 4,
+   "six_family_usable": 4,
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+   "license_status": "unknown_pending_review per file; dataset-level ODC-BY claim (same as S6 adjudication note)",
+   "prior_use": "none found"
+  },
+  {
+   "sha256": "c9ab2c48fd61ae0a540a75300919121660cbea55bc76fc32cfa8f0b51a159a8c",
+   "source": "docx-corpus govdocs1-batch-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\c9ab2c48fd61ae0a540a75300919121660cbea55bc76fc32cfa8f0b51a159a8c.docx",
+   "source_url": "https://docxcorp.us/documents/223624.docx",
+   "corpus_metadata": {
+    "type": null,
+    "topic": null,
+    "word_count": null
+   },
+   "headings": 62,
+   "omath": 0,
+   "tbl": 1,
    "five_family_usable": 4,
    "six_family_usable": 4,
    "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
@@ -721,6 +759,25 @@
    "prior_use": "none found"
   },
   {
+   "sha256": "32893fd46ee9b4d9569acd389eb78cd072020bf5ee1a5aa50703deabe8e06bd9",
+   "source": "docx-corpus govdocs1-batch-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\32893fd46ee9b4d9569acd389eb78cd072020bf5ee1a5aa50703deabe8e06bd9.docx",
+   "source_url": "https://docxcorp.us/documents/406729.docx",
+   "corpus_metadata": {
+    "type": null,
+    "topic": null,
+    "word_count": null
+   },
+   "headings": 80,
+   "omath": 0,
+   "tbl": 44,
+   "five_family_usable": 4,
+   "six_family_usable": 4,
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+   "license_status": "unknown_pending_review per file; dataset-level ODC-BY claim (same as S6 adjudication note)",
+   "prior_use": "none found"
+  },
+  {
    "sha256": "acec7bb004df3b30e8982b066cdbff9352e0a5b742f577b3d07c32513596c55f",
    "source": "docx-corpus batch-500-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
    "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-500-v1\\4149bdb4a12581b0a18a0b599cb552bdf3f08b37fa1c98ddac7dd060692ade20.docx",
@@ -752,6 +809,44 @@
    "headings": 43,
    "omath": 0,
    "tbl": 27,
+   "five_family_usable": 4,
+   "six_family_usable": 4,
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+   "license_status": "unknown_pending_review per file; dataset-level ODC-BY claim (same as S6 adjudication note)",
+   "prior_use": "none found"
+  },
+  {
+   "sha256": "856dd03f69609179f0906ff8c1ae3dadb3fa7c0f3f539b3fd2fdb6866fcf846c",
+   "source": "docx-corpus govdocs1-batch-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\856dd03f69609179f0906ff8c1ae3dadb3fa7c0f3f539b3fd2fdb6866fcf846c.docx",
+   "source_url": "https://docxcorp.us/documents/448024.docx",
+   "corpus_metadata": {
+    "type": null,
+    "topic": null,
+    "word_count": null
+   },
+   "headings": 269,
+   "omath": 6,
+   "tbl": 15,
+   "five_family_usable": 4,
+   "six_family_usable": 4,
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+   "license_status": "unknown_pending_review per file; dataset-level ODC-BY claim (same as S6 adjudication note)",
+   "prior_use": "none found"
+  },
+  {
+   "sha256": "a29ba233d91ef4fe6b5a8d879bac2db0be7528abf7775d31ae74eec3cf4dfa96",
+   "source": "docx-corpus govdocs1-batch-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\a29ba233d91ef4fe6b5a8d879bac2db0be7528abf7775d31ae74eec3cf4dfa96.docx",
+   "source_url": "https://docxcorp.us/documents/470116.docx",
+   "corpus_metadata": {
+    "type": null,
+    "topic": null,
+    "word_count": null
+   },
+   "headings": 59,
+   "omath": 0,
+   "tbl": 44,
    "five_family_usable": 4,
    "six_family_usable": 4,
    "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
@@ -1210,6 +1305,25 @@
    "tbl": 0,
    "five_family_usable": 3,
    "six_family_usable": 3,
+   "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+   "license_status": "unknown_pending_review per file; dataset-level ODC-BY claim (same as S6 adjudication note)",
+   "prior_use": "none found"
+  },
+  {
+   "sha256": "7683d6a936ccf70e043b427dda7b84f8a4a06ccd4cf7fedde7a8b260e6f3ff07",
+   "source": "docx-corpus govdocs1-batch-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\7683d6a936ccf70e043b427dda7b84f8a4a06ccd4cf7fedde7a8b260e6f3ff07.docx",
+   "source_url": "https://docxcorp.us/documents/883596.docx",
+   "corpus_metadata": {
+    "type": null,
+    "topic": null,
+    "word_count": null
+   },
+   "headings": 87,
+   "omath": 0,
+   "tbl": 70,
+   "five_family_usable": 4,
+   "six_family_usable": 4,
    "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
    "license_status": "unknown_pending_review per file; dataset-level ODC-BY claim (same as S6 adjudication note)",
    "prior_use": "none found"

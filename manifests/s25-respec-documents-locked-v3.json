@@ -1,0 +1,117 @@
+{
+ "schema": "s25-respec-documents-locked-v3",
+ "decided": "2026-09-28, per docs/paper-s25-respec-cascade-rerun-protocol-v1-amendment-1.md (AD-1, AD-3, section 5). Revives the v1 D=8 design (docs/paper-s25-respec-cascade-rerun-protocol-v1.md section 1.3, manifests/s25-respec-documents-locked.json) minus masters-dissertation-defense -- AD-1: the dissertation defense copy is unpublished, self-authored committee-defense material, not representative of the target population a confirmatory claim generalizes to; AD-3: it is held out of the confirmatory statistic entirely, not merely de-headlined -- plus 3 newly-vetted GOVDOCS1 (Digital Corpora) documents as a second, independent public-document sourcing pipeline (amendment section 5), addressing the same source-concentration concern at the corpus level. This manifest only assembles and locks the candidate corpus; no confirmatory trial has been run under it. Per v1 section 1.5, eligibility and anchor schedules must still be recomputed at the Meridian Docs pin (89c93fac6a9ee7a03d98baab34ba7043de983018) before any confirmatory trial -- every eligibility number below was computed with the unpinned editable install, exactly like the rest of manifests/README.md's pipeline.",
+ "d": 10,
+ "selection_method": "Primary list: the 2 remaining author-owned documents (v1 section 1.1; masters-dissertation-defense excluded per AD-1/AD-3) + the same 5 public docx-corpus documents already locked in v1 and v2 (unchanged records, hash rank under seed 20260925002) + the top 3 of 6 eligible GOVDOCS1 documents by the same rank_key(seed, sha256) convention (seed 20260925002 reused, not re-seeded, for outcome-blind consistency with the rest of this project's selection method). GOVDOCS1 sourcing/eligibility pipeline run for this manifest: downloaded https://digitalcorpora.s3.amazonaws.com/corpora/files/govdocs1/by_type/docx.zip (29,033,269 bytes, verified by exact byte count) to a scratch location (never committed); extracted 163 members; sniffed every member for a real ZIP archive containing a word/document.xml part -- 162 genuine OOXML .docx survived (1 non-ZIP impostor discarded, 0 corrupt, 0 zip-but-no-document.xml), 157 unique by sha256; registered all 162 survivors into manifests/docx_corpus_pool_index.json as batch 'govdocs1-batch-v1' (bytes copied to D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\<sha256>.docx); ran tools/scan_fresh_docx_pool.py scoped to just the new batch (via its existing --pool/--touched-union/--out flags, since the tool's fresh set is defined by manifests/touched_union.json's fresh_indices rather than by scanning the whole pool index -- a discrepancy from the original task plan, worked around with the tool's own supported flags rather than by editing the shared touched_union.json; see notes below), then merged the result into manifests/fresh_pool_structure_pii_scan.json (162 new records: 30 plan_found, 111 pii_clean); ran tools/respec_eligibility.py fresh unmodified as a full re-run over the merged fresh pool (794 documents total, the 22 govdocs1 documents that were both plan_found and pii_clean among them); ran tools/build_rerun_candidates.py respec unmodified (its fresh branch requires >25 outline headings, kept disjoint from the K4SR 3-25 band by construction, and >=1 five-family-usable anchor-set) -- 6 of the 22 govdocs1 documents qualified, and all 6 reached the full five_family_usable==4 AND six_family_usable==4 (exceeding the >=1 five-family-usable minimum bar this task set). The top 3 of those 6 by hash rank are selected below; the other 3 equally-eligible documents (docx-corpus ids 406729, 470116, 116733; sha256 32893fd4..., a29ba233..., a823c29a...) are not selected at D=10 but remain in manifests/respec_public_candidates.json for a future larger D.",
+ "documents": [
+  {
+   "doc_label": "jcshm-manuscript",
+   "source": "author-owned, D:\\MeridianData\\ooxml-graph-paper\\raw\\author-owned-personal\\jcshm-manuscript.docx",
+   "sha256": "ada276d4de9dd346b2f2b6be3cfac9e7637f6eca849e0aa2b516d7b70c294747",
+   "selection": "S25 section 1.1, fixed (used in the 2026-09-23 run)"
+  },
+  {
+   "doc_label": "jcshm-si",
+   "source": "author-owned, D:\\MeridianData\\ooxml-graph-paper\\raw\\author-owned-personal\\jcshm-si.docx",
+   "sha256": "8ccdf9dd53a1cb16def8fc6f22044c5902d553c47cd0781fec29677486495cb8",
+   "selection": "S25 section 1.1, fixed (used in the 2026-09-23 run)"
+  },
+  {
+   "doc_label": "s25pub_d3ff0b3c3f2d72d3",
+   "source": "manifests/respec_public_review_queue.json rank 1 (seed 20260925002); docx-corpus batch-2-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "sha256": "d3ff0b3c3f2d72d3e1aa59de7ab04446b2e470ba21987ea66b0702d4b14fa968",
+   "selection": "hash rank 1 of 78 eligible, seed 20260925002"
+  },
+  {
+   "doc_label": "s25pub_acd134313c175f4e",
+   "source": "manifests/respec_public_review_queue.json rank 2 (seed 20260925002); docx-corpus batch-2-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "sha256": "acd134313c175f4e5d9ceb10f33454115c977153a91e83cdccad73303ed4a428",
+   "selection": "hash rank 2 of 78 eligible, seed 20260925002"
+  },
+  {
+   "doc_label": "s25pub_c04412c3eeda841d",
+   "source": "manifests/respec_public_review_queue.json rank 3 (seed 20260925002); docx-corpus batch-3-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "sha256": "c04412c3eeda841d22fd345d3ca5ed3757ec528500d4cd542a82e29d1e5b18b5",
+   "selection": "hash rank 3 of 78 eligible, seed 20260925002"
+  },
+  {
+   "doc_label": "s25pub_66157a47a2b464f1",
+   "source": "manifests/respec_public_review_queue.json rank 4 (seed 20260925002); docx-corpus batch-3-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "sha256": "66157a47a2b464f153124998c373a6336d75560439381c4e2df80c1b997732bd",
+   "selection": "hash rank 4 of 78 eligible, seed 20260925002"
+  },
+  {
+   "doc_label": "s25pub_ede3e0981b844b40",
+   "source": "manifests/respec_public_review_queue.json rank 5 (seed 20260925002); docx-corpus batch-3-v1 (fresh, never touched; >25 headings so outside the K=4 band)",
+   "sha256": "ede3e0981b844b40238ef074e5c00b69de453a3292825d2a2a1a9598d179079f",
+   "selection": "hash rank 5 of 78 eligible, seed 20260925002"
+  },
+  {
+   "doc_label": "s25pub_govdocs1_7683d6a936ccf70e",
+   "source": "GOVDOCS1 (Digital Corpora), by_type/docx.zip; public U.S. .gov-domain document, docx-corpus id 883596; disjoint second sourcing pipeline from this project's own docx-corpus pool (amendment-1 section 5)",
+   "govdocs1_filename": "883596.docx",
+   "sha256": "7683d6a936ccf70e043b427dda7b84f8a4a06ccd4cf7fedde7a8b260e6f3ff07",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\7683d6a936ccf70e043b427dda7b84f8a4a06ccd4cf7fedde7a8b260e6f3ff07.docx",
+   "eligibility": {
+    "outline_headings": 87,
+    "omath": 0,
+    "tbl": 70,
+    "five_family_usable": 4,
+    "six_family_usable": 4,
+    "resolver": "tools/respec_eligibility.py fresh, unpinned editable Meridian Docs install (b0d28a61); recompute at pin 89c93fac before any confirmatory trial (v1 section 1.5)",
+    "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+    "license_status": "GOVDOCS1: public-domain / freely redistributable for research (Garfinkel, Farrell, Roussev & Dinolt, DFRWS 2009), per-file provenance unverified beyond the corpus-level claim -- same disclosure standard as D-R7 for the existing docx-corpus pool"
+   },
+   "selection": "hash rank 1 of 6 eligible GOVDOCS1 candidates (all 6 reached five_family_usable==4 and six_family_usable==4), seed 20260925002 (existing project seed, reused, not re-seeded)"
+  },
+  {
+   "doc_label": "s25pub_govdocs1_c9ab2c48fd61ae0a",
+   "source": "GOVDOCS1 (Digital Corpora), by_type/docx.zip; public U.S. .gov-domain document, docx-corpus id 223624; disjoint second sourcing pipeline from this project's own docx-corpus pool (amendment-1 section 5)",
+   "govdocs1_filename": "223624.docx",
+   "sha256": "c9ab2c48fd61ae0a540a75300919121660cbea55bc76fc32cfa8f0b51a159a8c",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\c9ab2c48fd61ae0a540a75300919121660cbea55bc76fc32cfa8f0b51a159a8c.docx",
+   "eligibility": {
+    "outline_headings": 62,
+    "omath": 0,
+    "tbl": 1,
+    "five_family_usable": 4,
+    "six_family_usable": 4,
+    "resolver": "tools/respec_eligibility.py fresh, unpinned editable Meridian Docs install (b0d28a61); recompute at pin 89c93fac before any confirmatory trial (v1 section 1.5)",
+    "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+    "license_status": "GOVDOCS1: public-domain / freely redistributable for research (Garfinkel, Farrell, Roussev & Dinolt, DFRWS 2009), per-file provenance unverified beyond the corpus-level claim -- same disclosure standard as D-R7 for the existing docx-corpus pool"
+   },
+   "selection": "hash rank 2 of 6 eligible GOVDOCS1 candidates (all 6 reached five_family_usable==4 and six_family_usable==4), seed 20260925002 (existing project seed, reused, not re-seeded)"
+  },
+  {
+   "doc_label": "s25pub_govdocs1_856dd03f69609179",
+   "source": "GOVDOCS1 (Digital Corpora), by_type/docx.zip; public U.S. .gov-domain document, docx-corpus id 448024; disjoint second sourcing pipeline from this project's own docx-corpus pool (amendment-1 section 5)",
+   "govdocs1_filename": "448024.docx",
+   "sha256": "856dd03f69609179f0906ff8c1ae3dadb3fa7c0f3f539b3fd2fdb6866fcf846c",
+   "local_path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\856dd03f69609179f0906ff8c1ae3dadb3fa7c0f3f539b3fd2fdb6866fcf846c.docx",
+   "eligibility": {
+    "outline_headings": 269,
+    "omath": 6,
+    "tbl": 15,
+    "five_family_usable": 4,
+    "six_family_usable": 4,
+    "resolver": "tools/respec_eligibility.py fresh, unpinned editable Meridian Docs install (b0d28a61); recompute at pin 89c93fac before any confirmatory trial (v1 section 1.5)",
+    "pii_status": "tools/pii_pattern_scan clean (pattern scan only; no free-text review yet)",
+    "license_status": "GOVDOCS1: public-domain / freely redistributable for research (Garfinkel, Farrell, Roussev & Dinolt, DFRWS 2009), per-file provenance unverified beyond the corpus-level claim -- same disclosure standard as D-R7 for the existing docx-corpus pool"
+   },
+   "selection": "hash rank 3 of 6 eligible GOVDOCS1 candidates (all 6 reached five_family_usable==4 and six_family_usable==4), seed 20260925002 (existing project seed, reused, not re-seeded)"
+  }
+ ],
+ "sensitivity_check_only": [
+  {
+   "doc_label": "masters-dissertation-defense",
+   "source": "author-owned, D:\\MeridianData\\ooxml-graph-paper\\raw\\author-owned-personal\\masters-dissertation-defense.docx",
+   "sha256": "b3336b9809dfb0bcac5d73e0f2e94ed4d899a98a93217f01fd6fca648ae0f332",
+   "status": "NOT part of the primary confirmatory corpus. Excluded from the 'documents' list above per docs/paper-s25-respec-cascade-rerun-protocol-v1-amendment-1.md AD-1/AD-3 (2026-09-28): the dissertation defense copy is unpublished, self-authored committee-defense material, not a published or submitted manuscript, and not representative of the target population (published/submitted OOXML documents) the confirmatory claim generalizes to -- a construct-validity and source-concentration concern distinct from the pre-existing non-independence disclosure of v1 section 1.4. It does not enter the confirmatory statistic at all, at any level, under either the headline public_documents_only measure or the secondary pooled measure.",
+   "sanctioned_use": "The ONLY sanctioned way to examine this document's data going forward is the pre-existing cluster-merge mechanism of docs/paper-s25-respec-cascade-rerun-protocol-v1.md section 6.8, item 3 ('Document-level tests with every author document merged into one cluster (D_eff = D - 2, or D - 3 with D-R2), for P1-P5'), reused for this purpose by amendment-1 section 3: if a future disclosed sensitivity check re-admits this document's chains, they are merged into the same shared author-document cluster identity already assigned to jcshm-manuscript and jcshm-si in graph_scorer.cluster_paired_sign_flip_test's document-level clustering -- never given an independent document-level cluster id, and never reported as a standalone per_document entry. Such a check is a disclosed sensitivity check only: it never substitutes for, overrides, or is averaged into the headline public_documents_only result or the secondary pooled result, and no run may report a verdict that depends on this check passing or failing (amendment-1 section 3, final paragraph)."
+  }
+ ],
+ "notes": [
+  "STEP-3 tooling discrepancy, disclosed rather than silently worked around: tools/scan_fresh_docx_pool.py does not scan 'the whole pool index' by default (as the originating task instructions guessed it might if it lacked batch scoping); it scans exactly the pool indices listed in manifests/touched_union.json's 'fresh_indices', which is a snapshot computed before this GOVDOCS1 batch existed. Appending the 162 new pool records to manifests/docx_corpus_pool_index.json alone would NOT have made scan_fresh_docx_pool.py see them. Resolved by using the tool's own existing --pool/--touched-union/--out flags to run it scoped to a small ad-hoc pool file containing just the 162 new records (all trivially 'fresh' -- brand new, never referenced anywhere before), then merging that output into manifests/fresh_pool_structure_pii_scan.json by hand (append + re-sort by id, matching the tool's own write_json convention exactly: indent=0, CRLF, ensure_ascii=False). manifests/touched_union.json itself was left untouched, consistent with manifests/README.md's own description of it as 'the pre-selection record' and consistent with the task's file-claim list, which did not include it.",
+  "tools/respec_eligibility.py fresh and tools/build_rerun_candidates.py respec were both run exactly as documented, with no scoping flags, over the full merged fresh pool -- their normal, unmodified behavior already covers old and new records together in one pass."
+ ]
+}

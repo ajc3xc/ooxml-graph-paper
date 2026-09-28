@@ -670,6 +670,23 @@
 }
 },
 {
+"id": "014760",
+"sha256": "f538e934e60c77ff561cbf91876dc2a252da283d2fe83b5fe620268fe27dcce6",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\f538e934e60c77ff561cbf91876dc2a252da283d2fe83b5fe620268fe27dcce6.docx",
+"size": 39631,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
 "id": "014b42f2b871a56421fcacd3fab65aa3f69a6c5332eee715a5afa5396a851eff",
 "sha256": "f5a2874f019077dd8b6254f5e8c7d7263642cca9efc2341ee3e559f9d52a3102",
 "batch": "batch-3-v1",
@@ -730,6 +747,95 @@
 "batch": "batch-2-v1",
 "path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-2-v1\\015d7228f9b319f356096265484ead1cb4a71c44b2b8570ab0ad32d7893959bf.docx",
 "size": 465901,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "017091",
+"sha256": "6a41ce073ac8fa7f7a03e2d80224b7e34a5b53064733b937f14f43ba1314e368",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\6a41ce073ac8fa7f7a03e2d80224b7e34a5b53064733b937f14f43ba1314e368.docx",
+"size": 37440,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": false,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 6,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "017097",
+"sha256": "9d261a88188744a3006314966f6e5c45ce38c8235341854fb6ffca64fa2c565c",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\9d261a88188744a3006314966f6e5c45ce38c8235341854fb6ffca64fa2c565c.docx",
+"size": 64325,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": false,
+"pii_counts": {
+"email_matches_real_domain": 2,
+"phone_matches": 4,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "018367",
+"sha256": "fc72225c1f6185a1f62772e208c8e06827371c8ba1460013011017873a6f46ba",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\fc72225c1f6185a1f62772e208c8e06827371c8ba1460013011017873a6f46ba.docx",
+"size": 203043,
+"outline_heading_count": 1,
+"plan_found": false,
+"plan_reason": "only 1 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "018370",
+"sha256": "d41910fdcf5b395071c4403a595f4274af0bc3b5d31853ffcc8949633906e4b4",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\d41910fdcf5b395071c4403a595f4274af0bc3b5d31853ffcc8949633906e4b4.docx",
+"size": 30723,
+"outline_heading_count": 14,
+"plan_found": true,
+"plan_reason": null,
+"plan": {
+"section_id": "spcc3c34319ba8bd66",
+"heading_count": 14
+},
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "018371",
+"sha256": "84004cdfe4e109bf155e0dade4cad3c4cea80692096a9ebb31114bdc8b82d7be",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\84004cdfe4e109bf155e0dade4cad3c4cea80692096a9ebb31114bdc8b82d7be.docx",
+"size": 26036,
 "outline_heading_count": 0,
 "plan_found": false,
 "plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
@@ -1021,6 +1127,57 @@
 "pii_counts": {
 "email_matches_real_domain": 1,
 "phone_matches": 1,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "021524",
+"sha256": "a79cda38c7c0afa27e9a8338072526a7d7a5bba1074eca71613523854306ed1b",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\a79cda38c7c0afa27e9a8338072526a7d7a5bba1074eca71613523854306ed1b.docx",
+"size": 16028,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": false,
+"pii_counts": {
+"email_matches_real_domain": 3,
+"phone_matches": 4,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "021526",
+"sha256": "3f587f9a0e687749672d1e473765899ef2ad1baf53c11a442e5567ebfd3a9c57",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\3f587f9a0e687749672d1e473765899ef2ad1baf53c11a442e5567ebfd3a9c57.docx",
+"size": 15610,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "021528",
+"sha256": "c6a3317d74a5a4d849d55d59342c0462956e773b4c5dc9f0bcd6f2cc03599072",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\c6a3317d74a5a4d849d55d59342c0462956e773b4c5dc9f0bcd6f2cc03599072.docx",
+"size": 14407,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
 "ssn_pattern_matches": 0,
 "long_digit_run_matches": 0
 }
@@ -1805,6 +1962,40 @@
 }
 },
 {
+"id": "036269",
+"sha256": "629719d5110e7ba861fe76aec3f0b74802d4d4234cc993b3c36fc07cfd0b8be8",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\629719d5110e7ba861fe76aec3f0b74802d4d4234cc993b3c36fc07cfd0b8be8.docx",
+"size": 87806,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "036270",
+"sha256": "44580d651a0071bdac893fdc7e149a07815684ac023c7969d7abd9d4816c7939",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\44580d651a0071bdac893fdc7e149a07815684ac023c7969d7abd9d4816c7939.docx",
+"size": 15901,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
 "id": "036dc62efe840a288ad83b4f4146ec98c4f5f49d2bc17790a29d4987d5839526",
 "sha256": "cc42ef0728ba7c508bc3e683862440565984bdd36bdc48716f102c2839b4230c",
 "batch": "batch-3-v1",
@@ -1819,6 +2010,44 @@
 "phone_matches": 0,
 "ssn_pattern_matches": 0,
 "long_digit_run_matches": 0
+}
+},
+{
+"id": "037025",
+"sha256": "4473562871eace8234b04c066ef7142e718531be12352dc1cf55046fc05477cc",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\4473562871eace8234b04c066ef7142e718531be12352dc1cf55046fc05477cc.docx",
+"size": 95167,
+"outline_heading_count": 7,
+"plan_found": true,
+"plan_reason": null,
+"plan": {
+"section_id": "sp55196f5de63d9097",
+"heading_count": 7
+},
+"pii_clean": false,
+"pii_counts": {
+"email_matches_real_domain": 2,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "037824",
+"sha256": "e31d10fbc0049a64b4036b331152d607b918cf9b532051bb8f9bd3b9ace58759",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\e31d10fbc0049a64b4036b331152d607b918cf9b532051bb8f9bd3b9ace58759.docx",
+"size": 246717,
+"outline_heading_count": 2,
+"plan_found": false,
+"plan_reason": "only 2 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": false,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 1
 }
 },
 {
@@ -7794,6 +8023,44 @@
 }
 },
 {
+"id": "116733",
+"sha256": "a823c29a18818e8bf2ec9218c1f2001403fa597686be95360162cff7d715f77d",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\a823c29a18818e8bf2ec9218c1f2001403fa597686be95360162cff7d715f77d.docx",
+"size": 137132,
+"outline_heading_count": 172,
+"plan_found": true,
+"plan_reason": null,
+"plan": {
+"section_id": "sp622c95633b586524",
+"heading_count": 172
+},
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "116734",
+"sha256": "2ee144d87880332092f98a9c45769c7e1aff8f7a56ce02d12d75889c3b746a51",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\2ee144d87880332092f98a9c45769c7e1aff8f7a56ce02d12d75889c3b746a51.docx",
+"size": 528391,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
 "id": "11685969ef6de29807ccf7c8ffb50bd620627fb74c9e795a8aa136d42d6a00d7",
 "sha256": "91d1c037fac7267aa60099e05c9f1e495d2d8897f57759544e16202151ddef7a",
 "batch": "batch-500-v1",
@@ -8117,6 +8384,23 @@
 "batch": "batch-3-v1",
 "path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-3-v1\\127e0baee2678c6e61955ebb287fe9dc8e78c8eacc3166b2b19bc64fe712470b.docx",
 "size": 191272,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "128291",
+"sha256": "45c479098e0240094972746064e2e0c79c770133585e4f6c74332b39067d8ae0",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\45c479098e0240094972746064e2e0c79c770133585e4f6c74332b39067d8ae0.docx",
+"size": 50211,
 "outline_heading_count": 0,
 "plan_found": false,
 "plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
@@ -9633,6 +9917,23 @@
 }
 },
 {
+"id": "166104",
+"sha256": "891847001dadcad2d84e01a1cf6406fe8aff776d3a63c0dda03355ffdaf20ca8",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\891847001dadcad2d84e01a1cf6406fe8aff776d3a63c0dda03355ffdaf20ca8.docx",
+"size": 29013,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": false,
+"pii_counts": {
+"email_matches_real_domain": 2,
+"phone_matches": 2,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
 "id": "1677859662e5ddc66467992eb65a1035182ffb895ef6a885f5c552d37e19b335",
 "sha256": "e14b02b29f62effa724053226052e152ea44da7152489180fa1311d8389e9ed6",
 "batch": "batch-3-v1",
@@ -10422,6 +10723,23 @@
 "batch": "batch-2-v1",
 "path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-2-v1\\181fe518731b6da0a5c7df27a92518ea4ad27ced1f7b64809e828cd5da59b8ba.docx",
 "size": 2140413,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "182611",
+"sha256": "1b23b56e988717a5e6f9df1262a03c5e10ae1405ec8ca02d2d1ff7f8f9063464",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\1b23b56e988717a5e6f9df1262a03c5e10ae1405ec8ca02d2d1ff7f8f9063464.docx",
+"size": 21475,
 "outline_heading_count": 0,
 "plan_found": false,
 "plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
@@ -14992,6 +15310,23 @@
 }
 },
 {
+"id": "212648",
+"sha256": "a79cda38c7c0afa27e9a8338072526a7d7a5bba1074eca71613523854306ed1b",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\a79cda38c7c0afa27e9a8338072526a7d7a5bba1074eca71613523854306ed1b.docx",
+"size": 16028,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": false,
+"pii_counts": {
+"email_matches_real_domain": 3,
+"phone_matches": 4,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
 "id": "212de29afb1e9970f90c744fa63e8430e378a58028ae83360e1edc565c50081b",
 "sha256": "12348dfa51407fe2a1ce21bb6f831b30b401b6e8b2919744c9da23af74f9ded4",
 "batch": "batch-2-v1",
@@ -15009,11 +15344,113 @@
 }
 },
 {
+"id": "214825",
+"sha256": "7d2cea1329f7364696857a70c07820ab94a03e9bf8fd3669d90b73cb7c4ee0a9",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\7d2cea1329f7364696857a70c07820ab94a03e9bf8fd3669d90b73cb7c4ee0a9.docx",
+"size": 14193,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "214826",
+"sha256": "d33e6d069c441df8f41ad148f169711870853a98efccd6cd9f07a77857c602a4",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\d33e6d069c441df8f41ad148f169711870853a98efccd6cd9f07a77857c602a4.docx",
+"size": 14779,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "215384",
+"sha256": "bca2ddbf5505d604e655246d53d3109064f3206c6081377276513ac9e02abaf3",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\bca2ddbf5505d604e655246d53d3109064f3206c6081377276513ac9e02abaf3.docx",
+"size": 146116,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": false,
+"pii_counts": {
+"email_matches_real_domain": 2,
+"phone_matches": 4,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "216688",
+"sha256": "dc19b383ba8649ea679e7c155fabc7c2d724c221a5fa7f26369c5324bdb80832",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\dc19b383ba8649ea679e7c155fabc7c2d724c221a5fa7f26369c5324bdb80832.docx",
+"size": 26990,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "216689",
+"sha256": "ebfb758627faf685655841929460b89b71fba75668dad6885910f6c76ef4e8f5",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\ebfb758627faf685655841929460b89b71fba75668dad6885910f6c76ef4e8f5.docx",
+"size": 67370,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
 "id": "217ceb02f0be9a4e7c1dea7ff3b428752ec3f7c50e6855e851f41e5f34ef2e1d",
 "sha256": "6cec4766e234ae0f5757ff4fd0607199285d8578e17a4f27e09632dd1a32ebd7",
 "batch": "batch-500-v1",
 "path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-500-v1\\217ceb02f0be9a4e7c1dea7ff3b428752ec3f7c50e6855e851f41e5f34ef2e1d.docx",
 "size": 19834,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "218978",
+"sha256": "92838963c0ef3ca7146b9d8f4c7176188ebe814024e52f9f65d3b2ea813b019d",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\92838963c0ef3ca7146b9d8f4c7176188ebe814024e52f9f65d3b2ea813b019d.docx",
+"size": 79337,
 "outline_heading_count": 0,
 "plan_found": false,
 "plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
@@ -15344,6 +15781,90 @@
 }
 },
 {
+"id": "223624",
+"sha256": "c9ab2c48fd61ae0a540a75300919121660cbea55bc76fc32cfa8f0b51a159a8c",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\c9ab2c48fd61ae0a540a75300919121660cbea55bc76fc32cfa8f0b51a159a8c.docx",
+"size": 2013673,
+"outline_heading_count": 62,
+"plan_found": true,
+"plan_reason": null,
+"plan": {
+"section_id": "sp7b446de06870dddd",
+"heading_count": 62
+},
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "224039",
+"sha256": "2bdfeea80fa7f37f308ecc99d36f349bfa4230c18a92a1332f648b02a5323966",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\2bdfeea80fa7f37f308ecc99d36f349bfa4230c18a92a1332f648b02a5323966.docx",
+"size": 26993,
+"outline_heading_count": 4,
+"plan_found": true,
+"plan_reason": null,
+"plan": {
+"section_id": "spf14141e94b326bcf",
+"heading_count": 4
+},
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "224041",
+"sha256": "bee40bd8f95f0af74d88c2ca3dbc7ff3dcd8b968c4f6e5758194ae3c4c537bb8",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\bee40bd8f95f0af74d88c2ca3dbc7ff3dcd8b968c4f6e5758194ae3c4c537bb8.docx",
+"size": 141344,
+"outline_heading_count": 11,
+"plan_found": true,
+"plan_reason": null,
+"plan": {
+"section_id": "sp5e15052a86356159",
+"heading_count": 11
+},
+"pii_clean": false,
+"pii_counts": {
+"email_matches_real_domain": 2,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "224363",
+"sha256": "c610594b88aaf4cf23fa1d72c78c0ef908f98f423d28e20dfde0fbc47ec72cb9",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\c610594b88aaf4cf23fa1d72c78c0ef908f98f423d28e20dfde0fbc47ec72cb9.docx",
+"size": 31435,
+"outline_heading_count": 74,
+"plan_found": true,
+"plan_reason": null,
+"plan": {
+"section_id": "sp1cce5bbd035e0d80",
+"heading_count": 74
+},
+"pii_clean": false,
+"pii_counts": {
+"email_matches_real_domain": 2,
+"phone_matches": 2,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
 "id": "2243de8bd5c1640bf1ee70ecdee863e47e796cbe9ccff4f69db74d018fe4ac7f",
 "sha256": "25eddb4e835371d325d37fe7acb6e89d45a388d574a2c9f274d02da65cde983d",
 "batch": "batch-2-v1",
@@ -15373,6 +15894,40 @@
 "pii_counts": {
 "email_matches_real_domain": 0,
 "phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "224939",
+"sha256": "dffcb8f301f0c0d2177cefc618932797a2c5d26d56e00f4a2ad3727cb7b1c2f6",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\dffcb8f301f0c0d2177cefc618932797a2c5d26d56e00f4a2ad3727cb7b1c2f6.docx",
+"size": 122629,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": false,
+"pii_counts": {
+"email_matches_real_domain": 1,
+"phone_matches": 3,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "224940",
+"sha256": "b02052e08a3b6ea28f52ed9cb0a8631d1c9249c73859660ad964a5d5b58bda52",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\b02052e08a3b6ea28f52ed9cb0a8631d1c9249c73859660ad964a5d5b58bda52.docx",
+"size": 95272,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": false,
+"pii_counts": {
+"email_matches_real_domain": 2,
+"phone_matches": 2,
 "ssn_pattern_matches": 0,
 "long_digit_run_matches": 0
 }
@@ -15755,6 +16310,23 @@
 }
 },
 {
+"id": "236054",
+"sha256": "b78aab1ed0f286123e074afe4c1fb07b1af829e1dd34357a2a47ea81fd784921",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\b78aab1ed0f286123e074afe4c1fb07b1af829e1dd34357a2a47ea81fd784921.docx",
+"size": 36190,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
 "id": "236d04794164ce172cfe97f65999eda6e6e8437dd5638cbbe9ab5e0cdb72b2cc",
 "sha256": "0990da3ba8e93b135d8daa0174f129a6a0f61943602b315fbb80bef45bcf8e2d",
 "batch": "batch-3-v1",
@@ -16115,6 +16687,40 @@
 "outline_heading_count": 0,
 "plan_found": false,
 "plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "241202",
+"sha256": "95ea6cab32520cf920f4117865e6f8520cf94806e81ffd916cc12126aa19eb69",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\95ea6cab32520cf920f4117865e6f8520cf94806e81ffd916cc12126aa19eb69.docx",
+"size": 175252,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "241638",
+"sha256": "f9e7feb25da34daaee54009e6b7ca21ec8c14442bc6fd34d86ee1dc92a8c95fd",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\f9e7feb25da34daaee54009e6b7ca21ec8c14442bc6fd34d86ee1dc92a8c95fd.docx",
+"size": 214964,
+"outline_heading_count": 1,
+"plan_found": false,
+"plan_reason": "only 1 heading(s); need at least 3 to pick a safely-bounded middle section",
 "pii_clean": true,
 "pii_counts": {
 "email_matches_real_domain": 0,
@@ -16636,6 +17242,23 @@
 }
 },
 {
+"id": "257125",
+"sha256": "6b6b9af705ffbdbe66af2acdbde4c5856449f1c87fe4c4f3257a3fc3857231f7",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\6b6b9af705ffbdbe66af2acdbde4c5856449f1c87fe4c4f3257a3fc3857231f7.docx",
+"size": 16684,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
 "id": "2574039d4d01df377853f05d47e9fe6053b841ac3d1a491c4b7ae20c3a26b067",
 "sha256": "d7f05ed3d837319e006a07c9d611fcdee3feb96dc465b2d1de34a1772b59217d",
 "batch": "batch-3-v1",
@@ -16728,6 +17351,23 @@
 "pii_counts": {
 "email_matches_real_domain": 0,
 "phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "259445",
+"sha256": "7423fd7f1284a667934a429d358dc24ca9b00c19e0f9be25c1513ebab9809960",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\7423fd7f1284a667934a429d358dc24ca9b00c19e0f9be25c1513ebab9809960.docx",
+"size": 100513,
+"outline_heading_count": 2,
+"plan_found": false,
+"plan_reason": "only 2 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": false,
+"pii_counts": {
+"email_matches_real_domain": 1,
+"phone_matches": 1,
 "ssn_pattern_matches": 0,
 "long_digit_run_matches": 0
 }
@@ -16920,6 +17560,23 @@
 }
 },
 {
+"id": "261383",
+"sha256": "9db994d6dfea3003d42060c64e4c86d9645a4fddfb0e7729ac2ecc6e83604bde",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\9db994d6dfea3003d42060c64e4c86d9645a4fddfb0e7729ac2ecc6e83604bde.docx",
+"size": 15257,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": false,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 1,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
 "id": "262a76586073040199b9a7b798452990a850e219761329ae5dab2c5f7e70cc9c",
 "sha256": "667346b52447a73b6d9145008598b3e625c46a2974fa6fd2b47b11381261548d",
 "batch": "batch-3-v1",
@@ -17010,6 +17667,61 @@
 "phone_matches": 0,
 "ssn_pattern_matches": 0,
 "long_digit_run_matches": 0
+}
+},
+{
+"id": "265532",
+"sha256": "b5877928586dfba7c5fa0b906341f46c016a9b09a4bdf416abee51bc9b3dc42b",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\b5877928586dfba7c5fa0b906341f46c016a9b09a4bdf416abee51bc9b3dc42b.docx",
+"size": 79433,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "265803",
+"sha256": "91f93442431d9f3210df83e369a050fb0189b421a1633a0f9565632189b76b97",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\91f93442431d9f3210df83e369a050fb0189b421a1633a0f9565632189b76b97.docx",
+"size": 3462131,
+"outline_heading_count": 13,
+"plan_found": true,
+"plan_reason": null,
+"plan": {
+"section_id": "sp24ae5ff1509b0afc",
+"heading_count": 13
+},
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "266907",
+"sha256": "c2d336e0337f4de9d450dfdcc4fd626ed4853093c5ce814b16c0afb71899cf49",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\c2d336e0337f4de9d450dfdcc4fd626ed4853093c5ce814b16c0afb71899cf49.docx",
+"size": 218613,
+"outline_heading_count": 1,
+"plan_found": false,
+"plan_reason": "only 1 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": false,
+"pii_counts": {
+"email_matches_real_domain": 2,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 1
 }
 },
 {
@@ -17225,6 +17937,23 @@
 }
 },
 {
+"id": "271644",
+"sha256": "30d1fdf4a2d101e49b381cc0217b34aa98efa4eb1b2c321b52428d15fb474db9",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\30d1fdf4a2d101e49b381cc0217b34aa98efa4eb1b2c321b52428d15fb474db9.docx",
+"size": 21150,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
 "id": "2717a350dfababf44000b54217d30f7658fb5466772531394aeff165d88f661d",
 "sha256": "195e42575055d9fbea2cbdfcb4a875d72a085b90e28a24bcea59b01c4cbe9b08",
 "batch": "batch-3-v1",
@@ -17373,6 +18102,57 @@
 }
 },
 {
+"id": "274493",
+"sha256": "1784ee8ac8fcb0420ad17e8dc4b0b4d0298bcd58bfb79c7c05fb7cbbd44c4648",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\1784ee8ac8fcb0420ad17e8dc4b0b4d0298bcd58bfb79c7c05fb7cbbd44c4648.docx",
+"size": 258644,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "274759",
+"sha256": "42e669fd574fba7f9ae1bdc2c9f4d55c4cbb699a488fd1f7331bc0c1df8161e4",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\42e669fd574fba7f9ae1bdc2c9f4d55c4cbb699a488fd1f7331bc0c1df8161e4.docx",
+"size": 17247,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "275128",
+"sha256": "80af659d46109dc0fe6781bc478a3a80ca2432bbd648db9e99560e40de8bc9bf",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\80af659d46109dc0fe6781bc478a3a80ca2432bbd648db9e99560e40de8bc9bf.docx",
+"size": 16845,
+"outline_heading_count": 1,
+"plan_found": false,
+"plan_reason": "only 1 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
 "id": "2753a502b020fbbdab9a15d70345372773946ef4b9ea8e69067b682e6190ea2e",
 "sha256": "257ef961164c0327cf67f350fe86bdebbaaa0cb963d0d35b51cf683cb79ac3b9",
 "batch": "batch-2-v1",
@@ -17458,6 +18238,23 @@
 }
 },
 {
+"id": "276367",
+"sha256": "41f61ad80ab5be9005eeb3eea2f382ed159cb8995bfd4bdeebbc205d67b59f90",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\41f61ad80ab5be9005eeb3eea2f382ed159cb8995bfd4bdeebbc205d67b59f90.docx",
+"size": 21578,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
 "id": "27675425bec616621db76a0a8fb8a36bd652c45a483f217cf9193d0b2e556b03",
 "sha256": "9d6a06bf25c3ec655a5f772b71fdc253894a94b828315d08870b21750888890d",
 "batch": "batch-2-v1",
@@ -17521,6 +18318,40 @@
 "pii_counts": {
 "email_matches_real_domain": 0,
 "phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "278190",
+"sha256": "932f37c0181b3d686d2ba3c645b4b5d518ed3f0792a59009c8d15779ce122175",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\932f37c0181b3d686d2ba3c645b4b5d518ed3f0792a59009c8d15779ce122175.docx",
+"size": 37027,
+"outline_heading_count": 1,
+"plan_found": false,
+"plan_reason": "only 1 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": false,
+"pii_counts": {
+"email_matches_real_domain": 1,
+"phone_matches": 2,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "278266",
+"sha256": "e61b1b0419369081ffe252a679fb20c8d9b311c24fe0d79f3be08092005b8218",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\e61b1b0419369081ffe252a679fb20c8d9b311c24fe0d79f3be08092005b8218.docx",
+"size": 98413,
+"outline_heading_count": 1,
+"plan_found": false,
+"plan_reason": "only 1 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": false,
+"pii_counts": {
+"email_matches_real_domain": 1,
+"phone_matches": 12,
 "ssn_pattern_matches": 0,
 "long_digit_run_matches": 0
 }
@@ -17822,6 +18653,23 @@
 "section_id": "5F38F4DD",
 "heading_count": 15
 },
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "280856",
+"sha256": "3e3fbd1c298d843f8dec486b251bcc3707018aa8f0a734458be5c471b23be93f",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\3e3fbd1c298d843f8dec486b251bcc3707018aa8f0a734458be5c471b23be93f.docx",
+"size": 31081,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
 "pii_clean": true,
 "pii_counts": {
 "email_matches_real_domain": 0,
@@ -18349,6 +19197,23 @@
 }
 },
 {
+"id": "295148",
+"sha256": "8fdcabbe0509bd80c0fa150e1f0a02ee0c27021f16ba8608e51c287c22301e8a",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\8fdcabbe0509bd80c0fa150e1f0a02ee0c27021f16ba8608e51c287c22301e8a.docx",
+"size": 27503,
+"outline_heading_count": 2,
+"plan_found": false,
+"plan_reason": "only 2 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": false,
+"pii_counts": {
+"email_matches_real_domain": 2,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
 "id": "295da9819d0a47fb5ef24166b7256202a30f4650694624d8c949c1a07b724620",
 "sha256": "f77a2fc23b0306a8c908c952aa59c39dd5a788e0274ed2e25097fb65d9838c94",
 "batch": "batch-2-v1",
@@ -18612,6 +19477,23 @@
 "batch": "batch-3-v1",
 "path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-3-v1\\29967bb5b53e02b16835519e3f8a934b5a0bb28b8f128ae4cddd91661a76980a.docx",
 "size": 640821,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "299759",
+"sha256": "d7532d0a09f3aa1fd506abd318da78a69d9689df1d7c575633aec8e7a35ee5d0",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\d7532d0a09f3aa1fd506abd318da78a69d9689df1d7c575633aec8e7a35ee5d0.docx",
+"size": 53048,
 "outline_heading_count": 0,
 "plan_found": false,
 "plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
@@ -21562,6 +22444,40 @@
 }
 },
 {
+"id": "304086",
+"sha256": "58aa1c73266b9d684b1bc305648bbc1ab9517a1ceacdea6e4d99f842d5a3deea",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\58aa1c73266b9d684b1bc305648bbc1ab9517a1ceacdea6e4d99f842d5a3deea.docx",
+"size": 572700,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "304089",
+"sha256": "6465bd87140b1f955b6d4dff551a12be5bbf43f040480713a1b2c70e778fbc85",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\6465bd87140b1f955b6d4dff551a12be5bbf43f040480713a1b2c70e778fbc85.docx",
+"size": 18851,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
 "id": "3045512a7ab7e41873ea9f54cee448b8186cd526e9d37e42f87aab78c7f2157f",
 "sha256": "f21c478241410512408e6bc7b6eda8903019d0ebb61dd5ec12d4aa025c672165",
 "batch": "batch-3-v1",
@@ -21918,6 +22834,27 @@
 }
 },
 {
+"id": "313486",
+"sha256": "f0354d4a3d3dedfadfc18b98345c4e1c01a7628282600b39ae648cd7c2e281ff",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\f0354d4a3d3dedfadfc18b98345c4e1c01a7628282600b39ae648cd7c2e281ff.docx",
+"size": 9494595,
+"outline_heading_count": 200,
+"plan_found": true,
+"plan_reason": null,
+"plan": {
+"section_id": "spd77fbd0a8105bf18",
+"heading_count": 200
+},
+"pii_clean": false,
+"pii_counts": {
+"email_matches_real_domain": 4,
+"phone_matches": 4,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
 "id": "31367b768f8548932d5a9eb739257a28dda36e22a9186e6778deec0c00bdafea",
 "sha256": "99e1818d29cae2f25835cfaa78b333378db4aa05a614a4da376771b4430c1c65",
 "batch": "batch-3-v1",
@@ -22035,6 +22972,40 @@
 "pii_clean": false,
 "pii_counts": {
 "email_matches_real_domain": 1,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "318865",
+"sha256": "08d90c36a4e671912818fab16f44946da64bcdbcfc0fcf490d6e87db1c2cc842",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\08d90c36a4e671912818fab16f44946da64bcdbcfc0fcf490d6e87db1c2cc842.docx",
+"size": 15930,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "318866",
+"sha256": "44580d651a0071bdac893fdc7e149a07815684ac023c7969d7abd9d4816c7939",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\44580d651a0071bdac893fdc7e149a07815684ac023c7969d7abd9d4816c7939.docx",
+"size": 15901,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
 "phone_matches": 0,
 "ssn_pattern_matches": 0,
 "long_digit_run_matches": 0
@@ -22330,6 +23301,23 @@
 "batch": "batch-3-v1",
 "path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-3-v1\\320446b298f64428ee7644b53f81a5553082b7629b4c1b73edeeea262aa9df28.docx",
 "size": 8821,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "320492",
+"sha256": "ee971befe8ae06c778614a5992eb03ad011a10363339dd7bc8b52d6f234e871a",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\ee971befe8ae06c778614a5992eb03ad011a10363339dd7bc8b52d6f234e871a.docx",
+"size": 22137,
 "outline_heading_count": 0,
 "plan_found": false,
 "plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
@@ -22842,6 +23830,23 @@
 }
 },
 {
+"id": "335899",
+"sha256": "57f462aaaa69ab39a3315f5ed51b1a1a17421b19049e6abfea561c93006ada5c",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\57f462aaaa69ab39a3315f5ed51b1a1a17421b19049e6abfea561c93006ada5c.docx",
+"size": 12368,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
 "id": "335b04d8c1f1e0436fb55056b950d7fbe6b4a85218c73ec1dcaf0a6d3733e959",
 "sha256": "8500c6e689c24c4465cfee3b19571d104460907fb2cf25a2704a4354b090279c",
 "batch": "batch-2-v1",
@@ -22892,6 +23897,23 @@
 "pii_counts": {
 "email_matches_real_domain": 0,
 "phone_matches": 18,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "337861",
+"sha256": "86a64f09447e04b1c7d719822f56519f41a292d1a3033f7305f7bc7cafa4a786",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\86a64f09447e04b1c7d719822f56519f41a292d1a3033f7305f7bc7cafa4a786.docx",
+"size": 11686,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
 "ssn_pattern_matches": 0,
 "long_digit_run_matches": 0
 }
@@ -23137,6 +24159,23 @@
 "pii_clean": false,
 "pii_counts": {
 "email_matches_real_domain": 1,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "343986",
+"sha256": "ce9dadf1fdcc344226303fdd33d0cfbb948ee9fee15420801b5ab106de4f0caa",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\ce9dadf1fdcc344226303fdd33d0cfbb948ee9fee15420801b5ab106de4f0caa.docx",
+"size": 11983,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
 "phone_matches": 0,
 "ssn_pattern_matches": 0,
 "long_digit_run_matches": 0
@@ -23600,6 +24639,23 @@
 }
 },
 {
+"id": "350647",
+"sha256": "c60edd08ec6a44f264048dd7836967a4ab676af487c67e7344ed258840eaaa30",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\c60edd08ec6a44f264048dd7836967a4ab676af487c67e7344ed258840eaaa30.docx",
+"size": 14113,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
 "id": "350ce161a2cf0c356be159bf6e2bced7028bd8b3493ff2be4a841414e1a96138",
 "sha256": "ab4bf524dfd98843bbf7ea2728ada6f1725152547a408ff9bb9ee830f4eb4561",
 "batch": "batch-2-v1",
@@ -23622,6 +24678,23 @@
 "batch": "batch-2-v1",
 "path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-2-v1\\35104a5dc46efe6ee3a38c8b1adf5b7a9d911c2bedc58cec51b7c83b1723deb6.docx",
 "size": 14364,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "351216",
+"sha256": "2a187c13271023f13cc109199d7e7f94973b1462acf8f53266e7f4a1ec091509",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\2a187c13271023f13cc109199d7e7f94973b1462acf8f53266e7f4a1ec091509.docx",
+"size": 28847,
 "outline_heading_count": 0,
 "plan_found": false,
 "plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
@@ -24092,6 +25165,27 @@
 }
 },
 {
+"id": "362612",
+"sha256": "398e133808fab7d3dedd5db2092ea59512b2e858ad17231285181aef05e9a51e",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\398e133808fab7d3dedd5db2092ea59512b2e858ad17231285181aef05e9a51e.docx",
+"size": 110208,
+"outline_heading_count": 26,
+"plan_found": true,
+"plan_reason": null,
+"plan": {
+"section_id": "spea33360cc76b9fd4",
+"heading_count": 26
+},
+"pii_clean": false,
+"pii_counts": {
+"email_matches_real_domain": 1,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
 "id": "3635e21800da86c8a531522dd725041410a54111cae7a5be9f6249e0411534d4",
 "sha256": "20254b5fbd757778bb1c4780c22488f333c7184e67d164d3e93f0bf5436a2f65",
 "batch": "batch-2-v1",
@@ -24422,6 +25516,27 @@
 "outline_heading_count": 1,
 "plan_found": false,
 "plan_reason": "only 1 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "372437",
+"sha256": "6d026688066e39fe2f7466a92f7179cf245004299b71a6137a7d2221e38e00db",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\6d026688066e39fe2f7466a92f7179cf245004299b71a6137a7d2221e38e00db.docx",
+"size": 764550,
+"outline_heading_count": 6,
+"plan_found": true,
+"plan_reason": null,
+"plan": {
+"section_id": "sp40542ae78c67c807",
+"heading_count": 6
+},
 "pii_clean": true,
 "pii_counts": {
 "email_matches_real_domain": 0,
@@ -24910,6 +26025,27 @@
 }
 },
 {
+"id": "380433",
+"sha256": "f889dc30dd463ccaf9fd79a03fe39f98fecf50636d8b101a998074020972b4ea",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\f889dc30dd463ccaf9fd79a03fe39f98fecf50636d8b101a998074020972b4ea.docx",
+"size": 216615,
+"outline_heading_count": 23,
+"plan_found": true,
+"plan_reason": null,
+"plan": {
+"section_id": "spa076dfc95a44d2f5",
+"heading_count": 23
+},
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
 "id": "380778f8d3a52738b54d43eba5b3109e842d6bde045c17fabd7ecbf56f41f7dd",
 "sha256": "6f6d53dfc23232713c11c7713805d9d05d6f475de1b0bd6cb807e56cf3108336",
 "batch": "batch-3-v1",
@@ -24990,6 +26126,23 @@
 "outline_heading_count": 0,
 "plan_found": false,
 "plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "382440",
+"sha256": "d814bb1a5f42c4589e3956c7f74f96f3f8bcaeea4e4258208959c5a1e56b2096",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\d814bb1a5f42c4589e3956c7f74f96f3f8bcaeea4e4258208959c5a1e56b2096.docx",
+"size": 161452,
+"outline_heading_count": 2,
+"plan_found": false,
+"plan_reason": "only 2 heading(s); need at least 3 to pick a safely-bounded middle section",
 "pii_clean": true,
 "pii_counts": {
 "email_matches_real_domain": 0,
@@ -25562,6 +26715,23 @@
 }
 },
 {
+"id": "393391",
+"sha256": "c554ca43a1ae288b7d0e0918d8932f7ef40e181e2095c1cdd674e70d9b232bd6",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\c554ca43a1ae288b7d0e0918d8932f7ef40e181e2095c1cdd674e70d9b232bd6.docx",
+"size": 38111,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
 "id": "3934af99621e4f14ac012c2a68828bb2933f8e39d20e787af89520a6995f23bb",
 "sha256": "124d2cff22e5dbd49ee905b5966bc2467884e33bede8da7e61f2d8e7b060ed52",
 "batch": "batch-2-v1",
@@ -25679,6 +26849,23 @@
 "pii_clean": false,
 "pii_counts": {
 "email_matches_real_domain": 2,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "396614",
+"sha256": "c27cbd8a94868adfa9120ca2a829464b5337c91a3fa35fd54aeb7209a7143aab",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\c27cbd8a94868adfa9120ca2a829464b5337c91a3fa35fd54aeb7209a7143aab.docx",
+"size": 300227,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
 "phone_matches": 0,
 "ssn_pattern_matches": 0,
 "long_digit_run_matches": 0
@@ -28654,6 +29841,23 @@
 }
 },
 {
+"id": "404064",
+"sha256": "a272b80f8071d71cda38d9ba01882c86d656db13a02961b23bd5383a63926265",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\a272b80f8071d71cda38d9ba01882c86d656db13a02961b23bd5383a63926265.docx",
+"size": 80411,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
 "id": "40580bef00a7c94a29053c61d2bef60ea49f25b6d622537dc6388ab7910f5980",
 "sha256": "9291ad9bf35b0d2702e9d3449872ab81cd904acd25749293b51d04e3f93737b5",
 "batch": "batch-2-v1",
@@ -28705,6 +29909,27 @@
 }
 },
 {
+"id": "406729",
+"sha256": "32893fd46ee9b4d9569acd389eb78cd072020bf5ee1a5aa50703deabe8e06bd9",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\32893fd46ee9b4d9569acd389eb78cd072020bf5ee1a5aa50703deabe8e06bd9.docx",
+"size": 162597,
+"outline_heading_count": 80,
+"plan_found": true,
+"plan_reason": null,
+"plan": {
+"section_id": "spfae3efa22b581186",
+"heading_count": 80
+},
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
 "id": "407a09d00234240db14aeef3cbda56b86a140dfd9a29cf6057fcf5749a6720ee",
 "sha256": "7b5cf28848556a5bc143810880aa17697a4e65c56c4c21f7e57fb7d19a2a9414",
 "batch": "batch-3-v1",
@@ -28727,6 +29952,23 @@
 "batch": "batch-2-v1",
 "path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-2-v1\\408e1ba64c33c5c5ae65305f0fff0126a8e11ef11e00ede620fd9a9662375182.docx",
 "size": 38934,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "409409",
+"sha256": "2ec8cb33e77255525be85b4806e69a98d4d2ff166b80cb806624c313d62a34b2",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\2ec8cb33e77255525be85b4806e69a98d4d2ff166b80cb806624c313d62a34b2.docx",
+"size": 20982,
 "outline_heading_count": 0,
 "plan_found": false,
 "plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
@@ -29257,6 +30499,23 @@
 }
 },
 {
+"id": "420596",
+"sha256": "c43a06ba58c922d32d999e3b692437f54fd7a59e86273b05e32479645b41526b",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\c43a06ba58c922d32d999e3b692437f54fd7a59e86273b05e32479645b41526b.docx",
+"size": 29690,
+"outline_heading_count": 1,
+"plan_found": false,
+"plan_reason": "only 1 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": false,
+"pii_counts": {
+"email_matches_real_domain": 1,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
 "id": "420a5dc2a76d54d9a8cac28a78e444ff201e428b3feb3ce82fcd5c29d108686e",
 "sha256": "2d4560d6b64d5f3089e2edf5b43bd9920ad8c24ac1e25cc1d05f1999534657fc",
 "batch": "batch-2-v1",
@@ -29350,6 +30609,40 @@
 }
 },
 {
+"id": "424034",
+"sha256": "8a21f66cd61ff72e573a06b429d460c4ae7b3e46c1cf033effecaba7786b97a8",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\8a21f66cd61ff72e573a06b429d460c4ae7b3e46c1cf033effecaba7786b97a8.docx",
+"size": 2529330,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "424654",
+"sha256": "6280fab445fcd29f3ee48ba98f7c8609f8464a534b0de32b1a29393aea98a1f7",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\6280fab445fcd29f3ee48ba98f7c8609f8464a534b0de32b1a29393aea98a1f7.docx",
+"size": 30318,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": false,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 4,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
 "id": "42486af340d07687edbe8f2624ad5a0ecdd9a377afe488c4aaa79dbcbfb2826a",
 "sha256": "4bafcca24644b5f94cf945db2f13c68654b329f57eb989603bb23d775a5ce7da",
 "batch": "batch-3-v1",
@@ -29418,6 +30711,44 @@
 }
 },
 {
+"id": "426080",
+"sha256": "46c166c88ee5d6c5097cd903a76e1aa3b67050d6e48fb37f98e91e191658535f",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\46c166c88ee5d6c5097cd903a76e1aa3b67050d6e48fb37f98e91e191658535f.docx",
+"size": 814810,
+"outline_heading_count": 4,
+"plan_found": true,
+"plan_reason": null,
+"plan": {
+"section_id": "spa3483047045e766f",
+"heading_count": 4
+},
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "426839",
+"sha256": "59adaca9f371417c2dc6f308404c1b743785bd5d6bd5c01e8406f66a0473d1a6",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\59adaca9f371417c2dc6f308404c1b743785bd5d6bd5c01e8406f66a0473d1a6.docx",
+"size": 158041,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": false,
+"pii_counts": {
+"email_matches_real_domain": 1,
+"phone_matches": 2,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
 "id": "426a6820a49b03d6df3839f17bf98ff6db455daf30124c3479ee6061d2a2c97d",
 "sha256": "04dfaedb74d82453f6c72dc3bb45dbc462ec6db6149c74dcc8e319f800bb06b7",
 "batch": "batch-2-v1",
@@ -29440,6 +30771,23 @@
 "batch": "batch-2-v1",
 "path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-2-v1\\4270d9e28866d403c4fac962d42d8e5d345a1a48fcb2089f4047f76f3ba9bd59.docx",
 "size": 35119,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "427949",
+"sha256": "08d90c36a4e671912818fab16f44946da64bcdbcfc0fcf490d6e87db1c2cc842",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\08d90c36a4e671912818fab16f44946da64bcdbcfc0fcf490d6e87db1c2cc842.docx",
+"size": 15930,
 "outline_heading_count": 0,
 "plan_found": false,
 "plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
@@ -29753,6 +31101,27 @@
 }
 },
 {
+"id": "432556",
+"sha256": "bace82b1f1a9ca65cfb83e7d4c82907234578eddd0c36e017315fad5876e721e",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\bace82b1f1a9ca65cfb83e7d4c82907234578eddd0c36e017315fad5876e721e.docx",
+"size": 24998,
+"outline_heading_count": 16,
+"plan_found": true,
+"plan_reason": null,
+"plan": {
+"section_id": "sp9254cb051dbee04c",
+"heading_count": 16
+},
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
 "id": "432611273dffdece88d2ee9c72f270efa5530374af6d5993cf4e63a705199d8d",
 "sha256": "de4446f21225ffcec863d24522cb62bfe2d9355d0a7c7750550bf0c438736a6a",
 "batch": "batch-2-v1",
@@ -29769,6 +31138,61 @@
 "pii_counts": {
 "email_matches_real_domain": 0,
 "phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "433177",
+"sha256": "6a41ce073ac8fa7f7a03e2d80224b7e34a5b53064733b937f14f43ba1314e368",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\6a41ce073ac8fa7f7a03e2d80224b7e34a5b53064733b937f14f43ba1314e368.docx",
+"size": 37440,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": false,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 6,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "435413",
+"sha256": "f103e5362dbcacf475249a0774552d349b60565eb1a6b69800dc2e6c2ed2cb36",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\f103e5362dbcacf475249a0774552d349b60565eb1a6b69800dc2e6c2ed2cb36.docx",
+"size": 176603,
+"outline_heading_count": 10,
+"plan_found": true,
+"plan_reason": null,
+"plan": {
+"section_id": "spda2d3ac13e2fcde4",
+"heading_count": 10
+},
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "436784",
+"sha256": "8800e16e8a8c759c755e91481dd49f06f6d6ec4bdfb80f72b7470d55da43bf9f",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\8800e16e8a8c759c755e91481dd49f06f6d6ec4bdfb80f72b7470d55da43bf9f.docx",
+"size": 77399,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": false,
+"pii_counts": {
+"email_matches_real_domain": 1,
+"phone_matches": 1,
 "ssn_pattern_matches": 0,
 "long_digit_run_matches": 0
 }
@@ -29825,6 +31249,23 @@
 }
 },
 {
+"id": "439210",
+"sha256": "ecbb93eb56ffc43614cbb70d91c8c6b821c0cc3b6c872bfdd7388ef771d97bf1",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\ecbb93eb56ffc43614cbb70d91c8c6b821c0cc3b6c872bfdd7388ef771d97bf1.docx",
+"size": 71318,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
 "id": "43928521839e3a3c8ebe6196817cddd46e11706a2684b875b380370f4349b3c9",
 "sha256": "3b68d682c13e44cbc16b2ef2071305f07cf71d35333f573f75865aa733134d01",
 "batch": "batch-3-v1",
@@ -29850,6 +31291,23 @@
 "outline_heading_count": 0,
 "plan_found": false,
 "plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "439737",
+"sha256": "242173463065e8e719cd17c9c3696633e167bb043d009549c5c88d42d76854f1",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\242173463065e8e719cd17c9c3696633e167bb043d009549c5c88d42d76854f1.docx",
+"size": 13365,
+"outline_heading_count": 1,
+"plan_found": false,
+"plan_reason": "only 1 heading(s); need at least 3 to pick a safely-bounded middle section",
 "pii_clean": true,
 "pii_counts": {
 "email_matches_real_domain": 0,
@@ -30258,6 +31716,44 @@
 }
 },
 {
+"id": "448024",
+"sha256": "856dd03f69609179f0906ff8c1ae3dadb3fa7c0f3f539b3fd2fdb6866fcf846c",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\856dd03f69609179f0906ff8c1ae3dadb3fa7c0f3f539b3fd2fdb6866fcf846c.docx",
+"size": 2328039,
+"outline_heading_count": 269,
+"plan_found": true,
+"plan_reason": null,
+"plan": {
+"section_id": "spcff583bae3e2fb0c",
+"heading_count": 269
+},
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "448890",
+"sha256": "70052b583537c1c88cad99fe50cc9cbb363b99df881c56b46811ad620ee919e9",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\70052b583537c1c88cad99fe50cc9cbb363b99df881c56b46811ad620ee919e9.docx",
+"size": 13364,
+"outline_heading_count": 2,
+"plan_found": false,
+"plan_reason": "only 2 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
 "id": "448a588a6b779bea7bc8eb251b74ac30f2f2830c920d7f078153e2eac70a85ae",
 "sha256": "79234bb150aea379bfc3f31dfde607d8b279509d562d9370bc87e2ca11ef756b",
 "batch": "batch-2-v1",
@@ -30571,6 +32067,23 @@
 "pii_counts": {
 "email_matches_real_domain": 1,
 "phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "454393",
+"sha256": "2b744da57e1da6a7598143fbb227e4dfb4f2dd61ffdf27d13a19001c1172c08a",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\2b744da57e1da6a7598143fbb227e4dfb4f2dd61ffdf27d13a19001c1172c08a.docx",
+"size": 100923,
+"outline_heading_count": 2,
+"plan_found": false,
+"plan_reason": "only 2 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": false,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 1,
 "ssn_pattern_matches": 0,
 "long_digit_run_matches": 0
 }
@@ -31547,6 +33060,27 @@
 }
 },
 {
+"id": "470116",
+"sha256": "a29ba233d91ef4fe6b5a8d879bac2db0be7528abf7775d31ae74eec3cf4dfa96",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\a29ba233d91ef4fe6b5a8d879bac2db0be7528abf7775d31ae74eec3cf4dfa96.docx",
+"size": 287030,
+"outline_heading_count": 59,
+"plan_found": true,
+"plan_reason": null,
+"plan": {
+"section_id": "sp73dac67c43dbbdfa",
+"heading_count": 59
+},
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
 "id": "4701224e788ce8b65c8714b4c86ed4e5a784638ebb90bacc9b6d8f08b3b36ddd",
 "sha256": "b8e0a335ffa7e72d34d51a2c5fd7751148e1d012c0264ad144ea7b8cc817790e",
 "batch": "batch-2-v1",
@@ -32326,6 +33860,27 @@
 }
 },
 {
+"id": "485509",
+"sha256": "49fe1b989595a96577690ea8688d4d502aee08989bee5c0d6f5caa7b89d2fb44",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\49fe1b989595a96577690ea8688d4d502aee08989bee5c0d6f5caa7b89d2fb44.docx",
+"size": 31638,
+"outline_heading_count": 7,
+"plan_found": true,
+"plan_reason": null,
+"plan": {
+"section_id": "sp6f02b02548027d18",
+"heading_count": 7
+},
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
 "id": "48596a73eae44b042133821427f209b0d38914eee26cf3777919ef55d36485b6",
 "sha256": "b953a4beb507c9f5d6afdb9154ff5669c496e9a88f1b6636b7fafbb4e34bc07c",
 "batch": "batch-2-v1",
@@ -32511,6 +34066,23 @@
 "pii_counts": {
 "email_matches_real_domain": 0,
 "phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "489061",
+"sha256": "329adf5067f11594811fef8ddd218043f8c1cdbd9fb64312629f4781549783db",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\329adf5067f11594811fef8ddd218043f8c1cdbd9fb64312629f4781549783db.docx",
+"size": 19580,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": false,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 7,
 "ssn_pattern_matches": 0,
 "long_digit_run_matches": 0
 }
@@ -32787,6 +34359,40 @@
 "pii_counts": {
 "email_matches_real_domain": 0,
 "phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "499269",
+"sha256": "b813c3e69d93b6768c56f344a3bb138a0dd51ccab15a62a383d21e1ed1c625c6",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\b813c3e69d93b6768c56f344a3bb138a0dd51ccab15a62a383d21e1ed1c625c6.docx",
+"size": 60809,
+"outline_heading_count": 4,
+"plan_found": false,
+"plan_reason": "no sibling-level heading available after the chosen section to move into",
+"pii_clean": false,
+"pii_counts": {
+"email_matches_real_domain": 1,
+"phone_matches": 2,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "499840",
+"sha256": "f2bc0b06512880567650bc4a3eabf9351de0e4af7089417ce3b2685fb5b976e2",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\f2bc0b06512880567650bc4a3eabf9351de0e4af7089417ce3b2685fb5b976e2.docx",
+"size": 12660,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": false,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 2,
 "ssn_pattern_matches": 0,
 "long_digit_run_matches": 0
 }
@@ -35814,6 +37420,27 @@
 }
 },
 {
+"id": "502911",
+"sha256": "0760f43c83b5100589106e4c570476ca7091ed0682d5a138eb832cd6cd284ea0",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\0760f43c83b5100589106e4c570476ca7091ed0682d5a138eb832cd6cd284ea0.docx",
+"size": 31922,
+"outline_heading_count": 64,
+"plan_found": true,
+"plan_reason": null,
+"plan": {
+"section_id": "spc5d8b4030ed4a369",
+"heading_count": 64
+},
+"pii_clean": false,
+"pii_counts": {
+"email_matches_real_domain": 1,
+"phone_matches": 1,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
 "id": "503c9b327f8eeb0e2f27b02fcf48fcbde2c67650fcf7f0c37e1947dcba2449c8",
 "sha256": "0a77e437da38fd20c33fd9a2ccdb2355e5720ead8e7b7da3739f86b154d2b31c",
 "batch": "batch-3-v1",
@@ -35916,6 +37543,40 @@
 }
 },
 {
+"id": "505495",
+"sha256": "255f5362d780ad2da6b11d48abeaffb32e2bf8dec88fed67cc0577d5b4d5792f",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\255f5362d780ad2da6b11d48abeaffb32e2bf8dec88fed67cc0577d5b4d5792f.docx",
+"size": 525432,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "507345",
+"sha256": "1f83baccd8c7ce6af650ee6985d396591d3f89f98e83ce77432ccd22ab43b470",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\1f83baccd8c7ce6af650ee6985d396591d3f89f98e83ce77432ccd22ab43b470.docx",
+"size": 17322,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
 "id": "5074ede163cfda8f8d4212ec62de4046ac00b34ca45895c647316de403c0d76b",
 "sha256": "ae5538f16b132b77719eb701e933997a7eb916da3dd44b8b531100536d2afc28",
 "batch": "batch-3-v1",
@@ -36012,6 +37673,27 @@
 "plan": {
 "section_id": "7C199E9A",
 "heading_count": 12
+},
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "509883",
+"sha256": "7eac834496014f75a45907553915fd2dd3fad8b57cec42407f2fc22e8400cc73",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\7eac834496014f75a45907553915fd2dd3fad8b57cec42407f2fc22e8400cc73.docx",
+"size": 221858,
+"outline_heading_count": 16,
+"plan_found": true,
+"plan_reason": null,
+"plan": {
+"section_id": "spaed83b50a8fec27a",
+"heading_count": 16
 },
 "pii_clean": true,
 "pii_counts": {
@@ -36242,6 +37924,23 @@
 }
 },
 {
+"id": "510523",
+"sha256": "a83dc9a1d24f76d27efc025f265ee4a9e8a9ab18575104684e1c8bd8660e49d4",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\a83dc9a1d24f76d27efc025f265ee4a9e8a9ab18575104684e1c8bd8660e49d4.docx",
+"size": 32589,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": false,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 1,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
 "id": "51073af81af9521c8b7e4fba90c7646fe52279a1cfb97b378dd4e529d10639de",
 "sha256": "1823c134ec4679a98f8ad93cd8200459a50f800ae50ef7ac2ea37379c8f24a27",
 "batch": "batch-500-v1",
@@ -36356,6 +38055,27 @@
 "outline_heading_count": 0,
 "plan_found": false,
 "plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "516411",
+"sha256": "a76957e04560eeb002a1e9b774dda1f8972aebe538611b2931b80688e2934d5b",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\a76957e04560eeb002a1e9b774dda1f8972aebe538611b2931b80688e2934d5b.docx",
+"size": 25736,
+"outline_heading_count": 19,
+"plan_found": true,
+"plan_reason": null,
+"plan": {
+"section_id": "speb40d15397cf7409",
+"heading_count": 19
+},
 "pii_clean": true,
 "pii_counts": {
 "email_matches_real_domain": 0,
@@ -36704,6 +38424,23 @@
 }
 },
 {
+"id": "523860",
+"sha256": "ea7f6248acf03174bb1babcae9115ae52b891243ab6378198d18f11715794763",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\ea7f6248acf03174bb1babcae9115ae52b891243ab6378198d18f11715794763.docx",
+"size": 25046,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": false,
+"pii_counts": {
+"email_matches_real_domain": 2,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
 "id": "523a6e9df21807496d9a0662881383c1dfeaecd43fa726bf3c7f5246c35b9e98",
 "sha256": "7713989f55bf1c095f314a4a8f2db6f6d838b1cb6426e6e79b81186fb9d57b6e",
 "batch": "batch-2-v1",
@@ -37031,6 +38768,23 @@
 }
 },
 {
+"id": "531177",
+"sha256": "26bebc1c2933b330dafb28ea242314497dac513cb6212cab034f6a8bf768e9d9",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\26bebc1c2933b330dafb28ea242314497dac513cb6212cab034f6a8bf768e9d9.docx",
+"size": 13914,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
 "id": "53214ab931ec16f2a89eab0af1be7d74acb4303480321e06cf0d6e5f4c5b98a5",
 "sha256": "3c951beaea76d4673407552b1b314a94ccdd3e994aaede68272e3d7a96e941e5",
 "batch": "batch-500-v1",
@@ -37076,6 +38830,23 @@
 "pii_clean": false,
 "pii_counts": {
 "email_matches_real_domain": 1,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "532877",
+"sha256": "3a30db601928e9916b7a964fa9e52c30b85c2101b152a5c09ec27d9e5bcf7655",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\3a30db601928e9916b7a964fa9e52c30b85c2101b152a5c09ec27d9e5bcf7655.docx",
+"size": 17365,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
 "phone_matches": 0,
 "ssn_pattern_matches": 0,
 "long_digit_run_matches": 0
@@ -37144,6 +38915,27 @@
 "plan": {
 "section_id": "43EB4D3F",
 "heading_count": 16
+},
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "533917",
+"sha256": "ab86956bc510f721e19e65b6aac3eb2c87aa50fff2d81c704fffc8edf6f1cca7",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\ab86956bc510f721e19e65b6aac3eb2c87aa50fff2d81c704fffc8edf6f1cca7.docx",
+"size": 35044,
+"outline_heading_count": 11,
+"plan_found": true,
+"plan_reason": null,
+"plan": {
+"section_id": "spf9fddc7dd0f24e67",
+"heading_count": 11
 },
 "pii_clean": true,
 "pii_counts": {
@@ -37289,6 +39081,23 @@
 "pii_counts": {
 "email_matches_real_domain": 0,
 "phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "538734",
+"sha256": "54041b068edead9c2ad79ce9a8cb41ef66838bd74aa6ed8b3dae76b569b57b64",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\54041b068edead9c2ad79ce9a8cb41ef66838bd74aa6ed8b3dae76b569b57b64.docx",
+"size": 62088,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": false,
+"pii_counts": {
+"email_matches_real_domain": 1,
+"phone_matches": 1,
 "ssn_pattern_matches": 0,
 "long_digit_run_matches": 0
 }
@@ -37547,6 +39356,23 @@
 "pii_clean": true,
 "pii_counts": {
 "email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "544281",
+"sha256": "69a432645d6ce41967cc7c234d70df99be04cdf411f8644b056ee24ba151322a",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\69a432645d6ce41967cc7c234d70df99be04cdf411f8644b056ee24ba151322a.docx",
+"size": 20807,
+"outline_heading_count": 3,
+"plan_found": false,
+"plan_reason": "no sibling-level heading available after the chosen section to move into",
+"pii_clean": false,
+"pii_counts": {
+"email_matches_real_domain": 1,
 "phone_matches": 0,
 "ssn_pattern_matches": 0,
 "long_digit_run_matches": 0
@@ -38036,6 +39862,27 @@
 "outline_heading_count": 0,
 "plan_found": false,
 "plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "554301",
+"sha256": "bd2959a8da8ec4017c61b45c0998875405447a121a75def6b91d4daf447a5f13",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\bd2959a8da8ec4017c61b45c0998875405447a121a75def6b91d4daf447a5f13.docx",
+"size": 204456,
+"outline_heading_count": 4,
+"plan_found": true,
+"plan_reason": null,
+"plan": {
+"section_id": "sp2690948c31e910aa",
+"heading_count": 4
+},
 "pii_clean": true,
 "pii_counts": {
 "email_matches_real_domain": 0,
@@ -39487,11 +41334,96 @@
 }
 },
 {
+"id": "595353",
+"sha256": "501c4199d216529c08f87226960ac7769c646fae262ec73d9d620e8b6e932674",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\501c4199d216529c08f87226960ac7769c646fae262ec73d9d620e8b6e932674.docx",
+"size": 11536,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
 "id": "59547edf1b675433e378d99dcedc2cb15e809dafbc2ffe8eb27ba721199fac0f",
 "sha256": "d8596b15ea473cb67bb8562ffd39faabed0ea7cbae7cf37b72905d3cd59d0c7d",
 "batch": "batch-500-v1",
 "path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-500-v1\\59547edf1b675433e378d99dcedc2cb15e809dafbc2ffe8eb27ba721199fac0f.docx",
 "size": 17688,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "596206",
+"sha256": "d48ec01b3f5b474fb82fd03d6ee4dc2d700a4e22dda2560814aec1a6048e6679",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\d48ec01b3f5b474fb82fd03d6ee4dc2d700a4e22dda2560814aec1a6048e6679.docx",
+"size": 80244,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": false,
+"pii_counts": {
+"email_matches_real_domain": 1,
+"phone_matches": 14,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "596392",
+"sha256": "46f484d13a5fe858ca92b26f9c5ca32180692d7cb1925acb620b5f98e98628e1",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\46f484d13a5fe858ca92b26f9c5ca32180692d7cb1925acb620b5f98e98628e1.docx",
+"size": 22769,
+"outline_heading_count": 3,
+"plan_found": false,
+"plan_reason": "no sibling-level heading available after the chosen section to move into",
+"pii_clean": false,
+"pii_counts": {
+"email_matches_real_domain": 1,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "596393",
+"sha256": "08ba5b7475d3a5ffa3890eed16ca6d6b06e7cb1422c14875566350b8bd03ed1c",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\08ba5b7475d3a5ffa3890eed16ca6d6b06e7cb1422c14875566350b8bd03ed1c.docx",
+"size": 12138,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "596394",
+"sha256": "48fc635f09e516f1665fbdff52b5fc8a410fec3493dbf09e6bae10bbfe975744",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\48fc635f09e516f1665fbdff52b5fc8a410fec3493dbf09e6bae10bbfe975744.docx",
+"size": 28886,
 "outline_heading_count": 0,
 "plan_found": false,
 "plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
@@ -39555,11 +41487,96 @@
 }
 },
 {
+"id": "598298",
+"sha256": "9e21a7e800b3e7f984b3a4c90acfa6c235880f1d2b66450f531804001fa56c70",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\9e21a7e800b3e7f984b3a4c90acfa6c235880f1d2b66450f531804001fa56c70.docx",
+"size": 15789,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "598299",
+"sha256": "0a31f5ed9cb8e9db69e07d188cd8f7308d81784c89832badf08b7d5516986443",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\0a31f5ed9cb8e9db69e07d188cd8f7308d81784c89832badf08b7d5516986443.docx",
+"size": 100186,
+"outline_heading_count": 2,
+"plan_found": false,
+"plan_reason": "only 2 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "598496",
+"sha256": "9e19c4e54627e1ed1df5b8c2da630075994552de675e21ed232daa1eb6009fa5",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\9e19c4e54627e1ed1df5b8c2da630075994552de675e21ed232daa1eb6009fa5.docx",
+"size": 20233,
+"outline_heading_count": 2,
+"plan_found": false,
+"plan_reason": "only 2 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": false,
+"pii_counts": {
+"email_matches_real_domain": 1,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
 "id": "5987de1792f795cacc48b55501f706ac6bb16cd0ba7231c11b334bdd32032272",
 "sha256": "82675c47c242ef2cb5593646a48ac75b5f6c2fabcea79d69eedbceb965cd38cd",
 "batch": "batch-2-v1",
 "path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-2-v1\\5987de1792f795cacc48b55501f706ac6bb16cd0ba7231c11b334bdd32032272.docx",
 "size": 18595,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "598938",
+"sha256": "2a6cc571fe34081bc75bea469c56d900acca9d51c212d93144ffd74e6c14c509",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\2a6cc571fe34081bc75bea469c56d900acca9d51c212d93144ffd74e6c14c509.docx",
+"size": 11097,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "598939",
+"sha256": "9d7f29299f8c2bc99dc5a3c7016b3e59f363ce9193b42f48af9ec96152a0ad52",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\9d7f29299f8c2bc99dc5a3c7016b3e59f363ce9193b42f48af9ec96152a0ad52.docx",
+"size": 16040,
 "outline_heading_count": 0,
 "plan_found": false,
 "plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
@@ -42446,6 +44463,40 @@
 }
 },
 {
+"id": "601015",
+"sha256": "abc11b48e6363d3859660294074829a405c037c6fb0aa6a952f7c7aedd53c980",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\abc11b48e6363d3859660294074829a405c037c6fb0aa6a952f7c7aedd53c980.docx",
+"size": 11293,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "601720",
+"sha256": "5b8d28144320880d61d8ad8644e6d6926e75dafc8a332f5b68b534947ecda887",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\5b8d28144320880d61d8ad8644e6d6926e75dafc8a332f5b68b534947ecda887.docx",
+"size": 17742,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
 "id": "6019b40cea03378062fd0d8d0043fa2270ab03978e877467a12e5a7fc32da18d",
 "sha256": "013278239c30412b2d73deee013c163084515b015a4481a44a1d7dc653439e77",
 "batch": "batch-3-v1",
@@ -42457,6 +44508,23 @@
 "pii_clean": true,
 "pii_counts": {
 "email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "603435",
+"sha256": "790777526f26d347ce41ed3b01f9cc975cf2278c4c0db07703bf732e6aff4aaa",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\790777526f26d347ce41ed3b01f9cc975cf2278c4c0db07703bf732e6aff4aaa.docx",
+"size": 14356,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": false,
+"pii_counts": {
+"email_matches_real_domain": 1,
 "phone_matches": 0,
 "ssn_pattern_matches": 0,
 "long_digit_run_matches": 0
@@ -42485,6 +44553,57 @@
 "batch": "batch-2-v1",
 "path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-2-v1\\603d402c480e3a0477e6d2a989a7d6dac24c2191f0bac97067a0576ae087229b.docx",
 "size": 17958,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "604743",
+"sha256": "4328b26b46d41411207b79d3268cd2a71da563cddb303b0c7b6379c8473d1c89",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\4328b26b46d41411207b79d3268cd2a71da563cddb303b0c7b6379c8473d1c89.docx",
+"size": 11396,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "605377",
+"sha256": "876192c5a314f561911261efb7479a19a8ba351dfda1e47685f7353cb1a8d9d1",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\876192c5a314f561911261efb7479a19a8ba351dfda1e47685f7353cb1a8d9d1.docx",
+"size": 10229,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "605378",
+"sha256": "4b7b189ececd74317dc190b37d14fa96637c3dfbb90a041e497ec10e096fbb4f",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\4b7b189ececd74317dc190b37d14fa96637c3dfbb90a041e497ec10e096fbb4f.docx",
+"size": 14095,
 "outline_heading_count": 0,
 "plan_found": false,
 "plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
@@ -42832,6 +44951,44 @@
 }
 },
 {
+"id": "610679",
+"sha256": "7b51c70dec7f4bcbf3fede9073515d255e25ee238ffc8da94e5bc91b54ea20de",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\7b51c70dec7f4bcbf3fede9073515d255e25ee238ffc8da94e5bc91b54ea20de.docx",
+"size": 20958,
+"outline_heading_count": 5,
+"plan_found": true,
+"plan_reason": null,
+"plan": {
+"section_id": "spb995216a1da2f14b",
+"heading_count": 5
+},
+"pii_clean": false,
+"pii_counts": {
+"email_matches_real_domain": 1,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "610786",
+"sha256": "2b883cb98bb5d6891904c85abb230196baae74c6281c9f562ce6cd96d8be7a9a",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\2b883cb98bb5d6891904c85abb230196baae74c6281c9f562ce6cd96d8be7a9a.docx",
+"size": 15458,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": false,
+"pii_counts": {
+"email_matches_real_domain": 1,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
 "id": "610b3dbcdad5de84fbed81fd3584059d1f5a758df570e9866c564f123f675e5b",
 "sha256": "899672954c098a709ce7cc6fb0c966e9f6b077c2b6055208101dca78b0efe540",
 "batch": "batch-2-v1",
@@ -42917,6 +45074,27 @@
 }
 },
 {
+"id": "612851",
+"sha256": "f16960333fec062381311c19bbdf0830afe52375fbf906e3a3ad17f13e5cc64d",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\f16960333fec062381311c19bbdf0830afe52375fbf906e3a3ad17f13e5cc64d.docx",
+"size": 53353,
+"outline_heading_count": 9,
+"plan_found": true,
+"plan_reason": null,
+"plan": {
+"section_id": "spe075fa0d4841e9e6",
+"heading_count": 9
+},
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
 "id": "6135051475812a8554e001a4bee4dc65ee82b1e65045e0931ac43e378668e89c",
 "sha256": "2d0a6b5ce4643a1705d6e372369391658b27f91ce3925fb29b28aaeb22c6de0f",
 "batch": "batch-2-v1",
@@ -42949,6 +45127,23 @@
 "pii_clean": false,
 "pii_counts": {
 "email_matches_real_domain": 1,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "615326",
+"sha256": "93feeff276f977088c92d1acc6f768ccd83bbbc641e4f67f792deae66ef64521",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\93feeff276f977088c92d1acc6f768ccd83bbbc641e4f67f792deae66ef64521.docx",
+"size": 19599,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
 "phone_matches": 0,
 "ssn_pattern_matches": 0,
 "long_digit_run_matches": 0
@@ -42989,6 +45184,40 @@
 }
 },
 {
+"id": "616100",
+"sha256": "7a95f062f1ee9b5966ff8dbebe32440067220936645717a94ae4cd4b9184bda9",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\7a95f062f1ee9b5966ff8dbebe32440067220936645717a94ae4cd4b9184bda9.docx",
+"size": 10873,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "616486",
+"sha256": "97aba5740b3bd61afbfe2204e57bf2207b9071783f9a352fe15708d740e018fd",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\97aba5740b3bd61afbfe2204e57bf2207b9071783f9a352fe15708d740e018fd.docx",
+"size": 18603,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
 "id": "616972542b4ea8b695b10e870cc794cd4fd90eb4972408bd51863c157b22e912",
 "sha256": "b5ea444380fcd99b6089b1bcddda26db1997b7dace5e0adea9b5cd3d65129745",
 "batch": "batch-3-v1",
@@ -43001,6 +45230,27 @@
 "pii_counts": {
 "email_matches_real_domain": 0,
 "phone_matches": 5,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "617794",
+"sha256": "add877c9b4e5724c5f67b578584867638868953f2720d64101bab329994a554e",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\add877c9b4e5724c5f67b578584867638868953f2720d64101bab329994a554e.docx",
+"size": 132318,
+"outline_heading_count": 6,
+"plan_found": true,
+"plan_reason": null,
+"plan": {
+"section_id": "spf91b76a320f3367a",
+"heading_count": 6
+},
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
 "ssn_pattern_matches": 0,
 "long_digit_run_matches": 0
 }
@@ -43023,6 +45273,40 @@
 }
 },
 {
+"id": "619163",
+"sha256": "9ab3775bb9b88a099628844fae9654fd4f8f04f362127d651355588332d148fd",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\9ab3775bb9b88a099628844fae9654fd4f8f04f362127d651355588332d148fd.docx",
+"size": 12894,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "619202",
+"sha256": "777b0707d8a52980b942af4067f832a974dc930ed9a8a6606b77f323e57003c2",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\777b0707d8a52980b942af4067f832a974dc930ed9a8a6606b77f323e57003c2.docx",
+"size": 13753,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
 "id": "6195c4748b12d7d6eed279c8eb21c9e1d49d924e1134c2a4c639170b379a59b8",
 "sha256": "38a7ee1dc52967ef32efde54b60fa7d0977604b314cd49cc6a9fff80e0e80a52",
 "batch": "batch-2-v1",
@@ -43035,6 +45319,23 @@
 "section_id": "295643E2",
 "heading_count": 5
 },
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "619629",
+"sha256": "c4e928845b08269ff7adb7653fc9571a4fea9abc14907e4e22d1f691c889832c",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\c4e928845b08269ff7adb7653fc9571a4fea9abc14907e4e22d1f691c889832c.docx",
+"size": 12534,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
 "pii_clean": true,
 "pii_counts": {
 "email_matches_real_domain": 0,
@@ -43303,6 +45604,23 @@
 }
 },
 {
+"id": "622477",
+"sha256": "825e2845f3a4189c0c4c256749cf621abcd9ca1a1104c5b928ab77352cb48ad7",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\825e2845f3a4189c0c4c256749cf621abcd9ca1a1104c5b928ab77352cb48ad7.docx",
+"size": 366249,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
 "id": "62248812e168b77f0107971fbd51469ae00a6fff90fe4bc12d39f5ae07523d6f",
 "sha256": "5885480143dc2a3fa5b9bea1ff8e285f7c71601437e03336111da4b922ca89d7",
 "batch": "batch-3-v1",
@@ -43318,6 +45636,40 @@
 "pii_clean": true,
 "pii_counts": {
 "email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "622706",
+"sha256": "8b37eb93abf1182aad5967a7ff2dc4e23a78e9fda84a4f4da88836f6888e58be",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\8b37eb93abf1182aad5967a7ff2dc4e23a78e9fda84a4f4da88836f6888e58be.docx",
+"size": 12639,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "623902",
+"sha256": "2709b73e0337f0df069c23becf62f2bed1cb83448723a749dd94921e45edc980",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\2709b73e0337f0df069c23becf62f2bed1cb83448723a749dd94921e45edc980.docx",
+"size": 27040,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": false,
+"pii_counts": {
+"email_matches_real_domain": 2,
 "phone_matches": 0,
 "ssn_pattern_matches": 0,
 "long_digit_run_matches": 0
@@ -43374,6 +45726,40 @@
 "pii_counts": {
 "email_matches_real_domain": 1,
 "phone_matches": 1,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "624667",
+"sha256": "add3ae51f922e26127f24b3331ff53c89c8898d5d5ac8d51f9ee8d71ac83bcae",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\add3ae51f922e26127f24b3331ff53c89c8898d5d5ac8d51f9ee8d71ac83bcae.docx",
+"size": 38665,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": false,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 2,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "624702",
+"sha256": "54592af61b673a2f13c0651c3622e12143428832ea9a7277cfeda4953a8428be",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\54592af61b673a2f13c0651c3622e12143428832ea9a7277cfeda4953a8428be.docx",
+"size": 13281,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
 "ssn_pattern_matches": 0,
 "long_digit_run_matches": 0
 }
@@ -43483,6 +45869,23 @@
 "pii_clean": false,
 "pii_counts": {
 "email_matches_real_domain": 3,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "629327",
+"sha256": "93aedbde44c45ab96a94680722769398761e0a835477dc867fe926c4ff4b1213",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\93aedbde44c45ab96a94680722769398761e0a835477dc867fe926c4ff4b1213.docx",
+"size": 222092,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
 "phone_matches": 0,
 "ssn_pattern_matches": 0,
 "long_digit_run_matches": 0
@@ -43667,6 +46070,40 @@
 }
 },
 {
+"id": "630008",
+"sha256": "a016dfb3d109ba68bf23909ed58afb19654cf50964471c3ce749ef9157f1ce4a",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\a016dfb3d109ba68bf23909ed58afb19654cf50964471c3ce749ef9157f1ce4a.docx",
+"size": 16924,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "632014",
+"sha256": "20d7c19203dce3a9da4092dc82e462743e44401fb4e1a8880c99348c7bec4546",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\20d7c19203dce3a9da4092dc82e462743e44401fb4e1a8880c99348c7bec4546.docx",
+"size": 20154,
+"outline_heading_count": 3,
+"plan_found": false,
+"plan_reason": "no sibling-level heading available after the chosen section to move into",
+"pii_clean": false,
+"pii_counts": {
+"email_matches_real_domain": 3,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
 "id": "63202b0ba8a57933ad356207bd8a4ec2026b9a811407b03e38e581a72de34441",
 "sha256": "afb79c96b1881805e6d00893254102c7e889ddb35e9a47e56edc077d495ae9d5",
 "batch": "batch-2-v1",
@@ -43722,6 +46159,40 @@
 }
 },
 {
+"id": "633494",
+"sha256": "bf2c599ffd8bd32f6cb725d498fcb7fce7391572e40f91cec4c6fd13844cef30",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\bf2c599ffd8bd32f6cb725d498fcb7fce7391572e40f91cec4c6fd13844cef30.docx",
+"size": 25323,
+"outline_heading_count": 2,
+"plan_found": false,
+"plan_reason": "only 2 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "633495",
+"sha256": "d3ebcf7a32ceeea6240b4ace408fd9f402004f896db67fd18582e813f82dc162",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\d3ebcf7a32ceeea6240b4ace408fd9f402004f896db67fd18582e813f82dc162.docx",
+"size": 50095,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": false,
+"pii_counts": {
+"email_matches_real_domain": 5,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
 "id": "6335b2f0e191fc38e1bf8f1c6741e6095c33c197a05f9acf0e0b64d4fc369b59",
 "sha256": "71f5c77b27ee5c1883b1986cb08cbd7830f40647821cdefc1c952be19ef6bea4",
 "batch": "batch-3-v1",
@@ -43733,6 +46204,23 @@
 "pii_clean": true,
 "pii_counts": {
 "email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "634957",
+"sha256": "e2f8103db4fe98e47a82e8a4ba21c99ae0221db90254384cd69db6878e9e6d02",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\e2f8103db4fe98e47a82e8a4ba21c99ae0221db90254384cd69db6878e9e6d02.docx",
+"size": 22913,
+"outline_heading_count": 1,
+"plan_found": false,
+"plan_reason": "only 1 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": false,
+"pii_counts": {
+"email_matches_real_domain": 1,
 "phone_matches": 0,
 "ssn_pattern_matches": 0,
 "long_digit_run_matches": 0
@@ -43765,6 +46253,40 @@
 "batch": "batch-2-v1",
 "path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-2-v1\\635492460014e49e18b4b1f9855c685a49d3604e7746d6e04257dbf7504d9e3e.docx",
 "size": 8723,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "635707",
+"sha256": "2443be0274b29cc00ceba2c36193402546dc1b5fb878b4b452d40494ddfd69af",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\2443be0274b29cc00ceba2c36193402546dc1b5fb878b4b452d40494ddfd69af.docx",
+"size": 32379,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "635928",
+"sha256": "cfa8d1ae4afdab2c7317245197c99361ab3f36a52e5bc248df3959c79ea11e1d",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\cfa8d1ae4afdab2c7317245197c99361ab3f36a52e5bc248df3959c79ea11e1d.docx",
+"size": 807589,
 "outline_heading_count": 0,
 "plan_found": false,
 "plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
@@ -44180,6 +46702,23 @@
 }
 },
 {
+"id": "646102",
+"sha256": "52c1426812aa1b5097ea403e84e7feeca74070aeb89d7fc6520c23aaca67a1da",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\52c1426812aa1b5097ea403e84e7feeca74070aeb89d7fc6520c23aaca67a1da.docx",
+"size": 14843,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
 "id": "646f723fbd32692e3ffef379698a25e06ce6c9e17fe62e9c43f4d7c8381b5b3d",
 "sha256": "8d1bef831dc28ac0e086d982c470a1773be5b60e362a740b544529f332e8622d",
 "batch": "batch-2-v1",
@@ -44290,11 +46829,49 @@
 }
 },
 {
+"id": "648893",
+"sha256": "a505a7118cf339507b9368262d430d1cb849ee925ada31d362ce068ebbaa60b8",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\a505a7118cf339507b9368262d430d1cb849ee925ada31d362ce068ebbaa60b8.docx",
+"size": 26742,
+"outline_heading_count": 5,
+"plan_found": true,
+"plan_reason": null,
+"plan": {
+"section_id": "sp37ab8bfb1fc878a0",
+"heading_count": 5
+},
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
 "id": "649035fc14d1299e9ac148972e99850a8785a73b3fd49a5915ae34f8e557ea43",
 "sha256": "241dc6736e53a428330d670cc51c429fc4be49d96c03d2651781deceb674c310",
 "batch": "batch-2-v1",
 "path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-2-v1\\649035fc14d1299e9ac148972e99850a8785a73b3fd49a5915ae34f8e557ea43.docx",
 "size": 88601,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "649344",
+"sha256": "f51d2812086a03cf4e111fe82395370d4ae15c512f1f698c4c9afe3305d41ee5",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\f51d2812086a03cf4e111fe82395370d4ae15c512f1f698c4c9afe3305d41ee5.docx",
+"size": 21369,
 "outline_heading_count": 0,
 "plan_found": false,
 "plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
@@ -44527,6 +47104,40 @@
 }
 },
 {
+"id": "651923",
+"sha256": "1049b3ec99b91fdde3e217c388e8ec29d0cbb84b4f1008593aeaa0be778a6fa6",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\1049b3ec99b91fdde3e217c388e8ec29d0cbb84b4f1008593aeaa0be778a6fa6.docx",
+"size": 110539,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "651924",
+"sha256": "920a995df807f98c27fb65f575e68b3feb6474bafd29f8e69e52d958ea935801",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\920a995df807f98c27fb65f575e68b3feb6474bafd29f8e69e52d958ea935801.docx",
+"size": 12131,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
 "id": "651dad1cff1f13dc7bac06671e74c162dcf0162219dac5c22e6cf90ce0d48f63",
 "sha256": "67aa4d60ec0f8b30ed1a4cfb732fbfbfc0ebd450538a2652be0f15f8f6175378",
 "batch": "batch-500-v1",
@@ -44552,6 +47163,23 @@
 "outline_heading_count": 1,
 "plan_found": false,
 "plan_reason": "only 1 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "653159",
+"sha256": "416e4223b5b5ed5903742954618f983adb21ad304b56261b97d493b44d5ac104",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\416e4223b5b5ed5903742954618f983adb21ad304b56261b97d493b44d5ac104.docx",
+"size": 16090,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
 "pii_clean": true,
 "pii_counts": {
 "email_matches_real_domain": 0,
@@ -44886,6 +47514,23 @@
 "batch": "batch-3-v1",
 "path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-3-v1\\664384920aadf404cf8f78c821242c70bccccd696301f4c953033489091b425c.docx",
 "size": 15529,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "664545",
+"sha256": "9781709d24711be5307518959a7c9d97b56587acadfd35f9abf62ed2b4ced8d9",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\9781709d24711be5307518959a7c9d97b56587acadfd35f9abf62ed2b4ced8d9.docx",
+"size": 11857,
 "outline_heading_count": 0,
 "plan_found": false,
 "plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
@@ -45876,6 +48521,23 @@
 }
 },
 {
+"id": "681047",
+"sha256": "6e25920a471c1903d9a76cf059669fcb0300bc32980d55853d17ff2d1ce7955f",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\6e25920a471c1903d9a76cf059669fcb0300bc32980d55853d17ff2d1ce7955f.docx",
+"size": 129321,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
 "id": "681066cc30ff0f89028f135e85786558a2f2217e1fb78bb6f6dcef512f864415",
 "sha256": "98bc9c96b49be32e5413a3b954386726c4001f6be1ad42c11fa3a07dec57903b",
 "batch": "batch-2-v1",
@@ -45922,6 +48584,23 @@
 "pii_counts": {
 "email_matches_real_domain": 0,
 "phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "682995",
+"sha256": "8641e7ccff756ffe116f0917e32927c45c29b5eaefe91d1f676ecb61f7815345",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\8641e7ccff756ffe116f0917e32927c45c29b5eaefe91d1f676ecb61f7815345.docx",
+"size": 20933,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": false,
+"pii_counts": {
+"email_matches_real_domain": 1,
+"phone_matches": 2,
 "ssn_pattern_matches": 0,
 "long_digit_run_matches": 0
 }
@@ -50903,6 +53582,40 @@
 }
 },
 {
+"id": "732704",
+"sha256": "fa9d653e9f5120709292082593ee20074641e5332733b4b59bd5dc9ac71e1659",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\fa9d653e9f5120709292082593ee20074641e5332733b4b59bd5dc9ac71e1659.docx",
+"size": 33428,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": false,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 1,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "732705",
+"sha256": "de46380653d17b26fc3f383a46beddf8abe4dfe1bc2f312f359df66b98cd5211",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\de46380653d17b26fc3f383a46beddf8abe4dfe1bc2f312f359df66b98cd5211.docx",
+"size": 31744,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": false,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 1,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
 "id": "7330b7de6ab648f34f2966336021ff9cdae377225dfabe86fad6a3e863878fe4",
 "sha256": "efcf01c39762ae78f196b05da97970d072b3830bf950a1e197509e381b4a8c16",
 "batch": "batch-3-v1",
@@ -51000,6 +53713,23 @@
 "outline_heading_count": 0,
 "plan_found": false,
 "plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "737350",
+"sha256": "e22162eac07167f94da660b8f581846a13db423dbb4b47d458e6193e98278de1",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\e22162eac07167f94da660b8f581846a13db423dbb4b47d458e6193e98278de1.docx",
+"size": 24844,
+"outline_heading_count": 2,
+"plan_found": false,
+"plan_reason": "only 2 heading(s); need at least 3 to pick a safely-bounded middle section",
 "pii_clean": true,
 "pii_counts": {
 "email_matches_real_domain": 0,
@@ -51932,6 +54662,23 @@
 "pii_counts": {
 "email_matches_real_domain": 0,
 "phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "758999",
+"sha256": "cdf07bb072e31b7390aceee085b55e2fe797da2f375c65cd80503fbcbebcc096",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\cdf07bb072e31b7390aceee085b55e2fe797da2f375c65cd80503fbcbebcc096.docx",
+"size": 38465,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": false,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 2,
 "ssn_pattern_matches": 0,
 "long_digit_run_matches": 0
 }
@@ -53399,6 +56146,23 @@
 }
 },
 {
+"id": "787396",
+"sha256": "22cbf5f4c18841ce01d610c04129cb854328711df107ed1b0ac3a4eb766ef1c9",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\22cbf5f4c18841ce01d610c04129cb854328711df107ed1b0ac3a4eb766ef1c9.docx",
+"size": 349354,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
 "id": "787712d1485bf8e911d4b85e39ea96dded3666555a30e61b58b96fc30d3b4654",
 "sha256": "3d618cb9e8f7b4992c16ed32fd15844ca0ac5280240e359f6e4980560c585199",
 "batch": "batch-2-v1",
@@ -53688,6 +56452,23 @@
 "batch": "batch-2-v1",
 "path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\batch-2-v1\\795083128e653f32a769aa6e383643ccccc4edb0c2e7daf67fdca81db31a51ae.docx",
 "size": 81138,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "795716",
+"sha256": "a0df3eeab89ff636a81f9e1ecbb22eb2ec0aaacddd7ecf83d4a5f847c0a6c539",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\a0df3eeab89ff636a81f9e1ecbb22eb2ec0aaacddd7ecf83d4a5f847c0a6c539.docx",
+"size": 132572,
 "outline_heading_count": 0,
 "plan_found": false,
 "plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
@@ -59477,6 +62258,23 @@
 }
 },
 {
+"id": "873263",
+"sha256": "e6db5634f6a541cc209eea397b61e0824c17e7f556d3e1bff5167ab0248369dd",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\e6db5634f6a541cc209eea397b61e0824c17e7f556d3e1bff5167ab0248369dd.docx",
+"size": 39320,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": false,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 2,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
 "id": "8735ae5ebe5cd47349a3150b21bd89c82d8e8caa44857178cf2a70fccc4ef2ad",
 "sha256": "02b882de8a32ec701dcb2427cb5b45426ea7cb580cc855c38d85551df0221258",
 "batch": "batch-2-v1",
@@ -59918,6 +62716,27 @@
 "outline_heading_count": 0,
 "plan_found": false,
 "plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "883596",
+"sha256": "7683d6a936ccf70e043b427dda7b84f8a4a06ccd4cf7fedde7a8b260e6f3ff07",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\7683d6a936ccf70e043b427dda7b84f8a4a06ccd4cf7fedde7a8b260e6f3ff07.docx",
+"size": 255885,
+"outline_heading_count": 87,
+"plan_found": true,
+"plan_reason": null,
+"plan": {
+"section_id": "sp5dbe98cb5bc6f580",
+"heading_count": 87
+},
 "pii_clean": true,
 "pii_counts": {
 "email_matches_real_domain": 0,
@@ -64108,6 +66927,27 @@
 }
 },
 {
+"id": "919819",
+"sha256": "4fd347d4a5af061266c85efe6be5245a128531de4983f8249c109ae4e4ce1075",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\4fd347d4a5af061266c85efe6be5245a128531de4983f8249c109ae4e4ce1075.docx",
+"size": 27508,
+"outline_heading_count": 42,
+"plan_found": true,
+"plan_reason": null,
+"plan": {
+"section_id": "sp9a4246e0598b2807",
+"heading_count": 42
+},
+"pii_clean": false,
+"pii_counts": {
+"email_matches_real_domain": 2,
+"phone_matches": 1,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
 "id": "919a1e20412c8cb28a0edc6e3534f04546718912b81a41bd72cc46f4fdbdf5bf",
 "sha256": "ca0865add4097ec453f71ab8f03e3655d53336cfbae0a2c3bd20dc75f292f9b1",
 "batch": "batch-3-v1",
@@ -65168,6 +68008,23 @@
 }
 },
 {
+"id": "941261",
+"sha256": "1049b3ec99b91fdde3e217c388e8ec29d0cbb84b4f1008593aeaa0be778a6fa6",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\1049b3ec99b91fdde3e217c388e8ec29d0cbb84b4f1008593aeaa0be778a6fa6.docx",
+"size": 110539,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
 "id": "942701f1f7ef5fa50103aa4687d6446e9819afc5d90026df3b3a2b474e566bd6",
 "sha256": "6fddaae14d914edac055298d05a79038e457d186e3f501056048af47fc037159",
 "batch": "batch-3-v1",
@@ -65752,6 +68609,23 @@
 "section_id": "189CDC17",
 "heading_count": 8
 },
+"pii_clean": true,
+"pii_counts": {
+"email_matches_real_domain": 0,
+"phone_matches": 0,
+"ssn_pattern_matches": 0,
+"long_digit_run_matches": 0
+}
+},
+{
+"id": "956803",
+"sha256": "766139e3dd0cb07850fe9f937ec34e4036e2d34bff0a68bb06a015095490006b",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\766139e3dd0cb07850fe9f937ec34e4036e2d34bff0a68bb06a015095490006b.docx",
+"size": 548313,
+"outline_heading_count": 0,
+"plan_found": false,
+"plan_reason": "only 0 heading(s); need at least 3 to pick a safely-bounded middle section",
 "pii_clean": true,
 "pii_counts": {
 "email_matches_real_domain": 0,

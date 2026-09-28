@@ -38,6 +38,21 @@ This module does not reimplement any statistical primitive: every p-value
 and point estimate is read as-is from the statistics JSON that
 `tools/graph_scorer.py` (via `compute_respec_cascade_statistics.py`)
 produced.
+
+**Amendment 1** (`docs/paper-s25-respec-cascade-rerun-protocol-v1-amendment-1.md`,
+section 2, AD-2, for the next confirmatory run only -- does not touch the
+already-reported D=4 INCONCLUSIVE verdict of record, v1 section 11 item 1):
+once a statistics file's `confirm_disconfirm.public_documents_only` carries
+the `chain_level`/`document_level` shape `compute_respec_cascade_
+statistics.py` emits for a run given `--documents-manifest`, that becomes
+the headline basis for C1-C4 instead of `confirm_disconfirm.pooled`, C6
+inverts into a non-gating pooled-vs-headline same-sign robustness note, and
+the full pooled analysis is reported in full as a secondary/sensitivity
+block (`numbers.secondary_pooled_analysis`). Absent that shape -- as in
+every statistics file produced before prerequisite P-R4 added it, including
+the D=4 run's -- this module's behavior is exactly what it was before this
+amendment. See `evaluate()`, `_evaluate_pooled_basis()` and
+`_evaluate_headline_basis()`.
 """
 from __future__ import annotations
 
@@ -262,6 +277,112 @@ def _extract_public_only(stats: dict[str, Any], ctx: str) -> dict[str, Any]:
     }
 
 
+def _headline_public_only_node(stats: dict[str, Any]) -> dict[str, Any] | None:
+    """Amendment 1 (`docs/paper-s25-respec-cascade-rerun-protocol-v1-amendment-1.md`,
+    section 2, AD-2): `confirm_disconfirm.public_documents_only` becomes the
+    headline basis for conditions C1-C4 once it carries the
+    `chain_level`/`document_level` shape that `compute_respec_cascade_
+    statistics.py` emits for a run invoked with `--documents-manifest` (see
+    that file's `compute_respec_cascade_tiers`, the `if public_doc_labels:`
+    block). A `public_documents_only` dict that lacks that shape -- absent
+    entirely, or present only with the older flat `control_drop`/
+    `direct_control_vs_treatment_phase3` fields `_extract_public_only` reads
+    for the pre-amendment C6 sign check -- is treated as NOT carrying the
+    amendment's headline shape, so the verdict falls back to the pooled
+    basis exactly as before. This is what keeps the D=4 statistics files
+    (produced before P-R4 added this shape) and this module's originally
+    committed tests verifying/printing unchanged."""
+    cd = stats.get("confirm_disconfirm")
+    node = cd.get("public_documents_only") if isinstance(cd, dict) else None
+    if not isinstance(node, dict):
+        return None
+    if not isinstance(node.get("chain_level"), dict) or not isinstance(node.get("document_level"), dict):
+        return None
+    return node
+
+
+def _headline_level(pub_node: dict[str, Any], level: str, measure_key: str, ctx: str) -> dict[str, Any]:
+    level_node = pub_node.get(level)
+    if not isinstance(level_node, dict) or measure_key not in level_node:
+        raise VerdictInputError(
+            f"{ctx}: confirm_disconfirm.public_documents_only.{level}.{measure_key} missing"
+        )
+    return _require_p(
+        level_node[measure_key], ctx, f"confirm_disconfirm.public_documents_only.{level}.{measure_key}"
+    )
+
+
+def _extract_headline_measure(pub_node: dict[str, Any], measure_key: str, ctx: str, pp_sign: float) -> dict[str, Any]:
+    """Amendment section 2: the same shape `_extract_pooled_measure` reads
+    from `confirm_disconfirm.pooled`, read instead from
+    `confirm_disconfirm.public_documents_only.{chain_level,document_level}`."""
+    chain = _headline_level(pub_node, "chain_level", measure_key, ctx)
+    document = _headline_level(pub_node, "document_level", measure_key, ctx)
+    return {
+        "pp": pp_sign * 100.0 * chain["observed_mean_diff"],
+        "chain_level_p": chain["p_value"],
+        "chain_level_exact": chain.get("exact"),
+        "chain_level_observed_mean_diff": chain["observed_mean_diff"],
+        "chain_level_n_clusters": chain.get("n_clusters"),
+        "document_level_p": document["p_value"],
+        "document_level_exact": document.get("exact"),
+        "document_level_observed_mean_diff": document.get("observed_mean_diff"),
+        "document_level_n_clusters": document.get("n_clusters"),
+    }
+
+
+def _extract_headline_drop_difference(pub_node: dict[str, Any], ctx: str) -> dict[str, Any]:
+    """Amendment section 2's C4 row: `public_documents_only.difference_in_drops`
+    in place of `confirm_disconfirm.difference_in_drops` (same shape --
+    `compute_respec_cascade_statistics.py`'s `_difference_in_drops` builds
+    both the pooled and the public-only entry with `doc_filter`)."""
+    node = pub_node.get("difference_in_drops")
+    if not isinstance(node, dict) or "chain_level" not in node or "document_level" not in node:
+        raise VerdictInputError(
+            f"{ctx}: confirm_disconfirm.public_documents_only.difference_in_drops missing chain_level/document_level"
+        )
+    chain = _require_p(
+        node["chain_level"], ctx, "confirm_disconfirm.public_documents_only.difference_in_drops.chain_level"
+    )
+    document = _require_p(
+        node["document_level"], ctx, "confirm_disconfirm.public_documents_only.difference_in_drops.document_level"
+    )
+    return {
+        "pp": 100.0 * chain["observed_mean_diff"],
+        "chain_level_p": chain["p_value"],
+        "chain_level_exact": chain.get("exact"),
+        "document_level_p": document["p_value"],
+        "document_level_exact": document.get("exact"),
+    }
+
+
+def _c1_to_c4(
+    control_drop: dict[str, Any], direct: dict[str, Any], keep_survival: dict[str, Any], drop_difference: dict[str, Any]
+) -> tuple[bool, bool, bool, bool]:
+    """Section 7's C1-C4, parameterized over whichever basis (pooled or,
+    per amendment section 2, public_documents_only) supplied the four
+    measure dicts -- the condition arithmetic itself does not change."""
+    c1 = control_drop["pp"] >= 10 and control_drop["chain_level_p"] < ALPHA and control_drop["document_level_p"] < ALPHA
+    c2 = direct["pp"] > 0 and direct["chain_level_p"] < ALPHA and direct["document_level_p"] < ALPHA
+    c3 = keep_survival["pp"] > 0 and keep_survival["chain_level_p"] < ALPHA and keep_survival["document_level_p"] < ALPHA
+    c4 = (
+        drop_difference["pp"] >= 10
+        and drop_difference["chain_level_p"] < ALPHA
+        and drop_difference["document_level_p"] < ALPHA
+    )
+    return c1, c2, c3, c4
+
+
+def _exactness_deviations(entries: list[tuple[str, Any]]) -> list[str]:
+    """Section 6.4: "every primary p is expected to be exact ... a non-exact
+    primary p is reported as a deviation" -- reported, never a hard failure."""
+    return [
+        f"{name} p-value is not exact (Monte Carlo fallback) -- protocol section 6.4 deviation"
+        for name, exact_flag in entries
+        if exact_flag is False
+    ]
+
+
 def _evaluate_c5(stats: dict[str, Any], ctx: str) -> dict[str, Any]:
     """Section 7 C5: only a conditional requirement. If no render-gate
     timeout occurred and no grader-exception stub is disclosed as
@@ -301,10 +422,14 @@ def _evaluate_c5(stats: dict[str, Any], ctx: str) -> dict[str, Any]:
 # The decision rule itself (protocol section 7)
 # ---------------------------------------------------------------------------
 
-def evaluate(stats_by_mode: dict[str, dict[str, Any]], mode: str) -> dict[str, Any]:
-    stats = stats_by_mode[mode]
-    ctx = f"frozen-chain-mode={mode}"
-
+def _evaluate_pooled_basis(stats: dict[str, Any], ctx: str) -> dict[str, Any]:
+    """Section 7 evaluated entirely on `confirm_disconfirm.pooled` (plus the
+    pre-amendment flat `public_documents_only` sign check for C6) -- v1 as
+    locked, byte-for-byte. This is either the module's only result (no
+    amendment-1 headline shape present -- the D=4 statistics files) or, once
+    that shape is present, amendment 1's full-rigor secondary/sensitivity
+    analysis (section 2, AD-2: "retained at full statistical rigor ...
+    reported with the same completeness as before")."""
     control_drop = _extract_pooled_measure(stats, "control_drop", ctx, _DROP_AND_DIRECT_SIGN)
     treatment_drop = _extract_pooled_measure(stats, "treatment_drop", ctx, _DROP_AND_DIRECT_SIGN)
     direct = _extract_pooled_measure(stats, "direct_control_vs_treatment_phase3", ctx, _DROP_AND_DIRECT_SIGN)
@@ -332,14 +457,7 @@ def evaluate(stats_by_mode: dict[str, dict[str, Any]], mode: str) -> dict[str, A
     # --- Step 2: CONFIRMING (only meaningful if not disconfirming, but every
     # condition is computed regardless so the robustness check (which reuses
     # this function under a different mode) always has C1-C6 available). ---
-    c1 = control_drop["pp"] >= 10 and control_drop["chain_level_p"] < ALPHA and control_drop["document_level_p"] < ALPHA
-    c2 = direct["pp"] > 0 and direct["chain_level_p"] < ALPHA and direct["document_level_p"] < ALPHA
-    c3 = keep_survival["pp"] > 0 and keep_survival["chain_level_p"] < ALPHA and keep_survival["document_level_p"] < ALPHA
-    c4 = (
-        drop_difference["pp"] >= 10
-        and drop_difference["chain_level_p"] < ALPHA
-        and drop_difference["document_level_p"] < ALPHA
-    )
+    c1, c2, c3, c4 = _c1_to_c4(control_drop, direct, keep_survival, drop_difference)
     c5_ok = c5["held"]
     c6 = public_only["control_drop_pp"] > 0 and public_only["direct_pp"] > 0
 
@@ -352,10 +470,7 @@ def evaluate(stats_by_mode: dict[str, dict[str, Any]], mode: str) -> dict[str, A
     else:
         verdict = "INCONCLUSIVE"
 
-    # Section 6.4: "every primary p is expected to be exact ... a non-exact
-    # primary p is reported as a deviation" -- reported, never a hard failure.
-    deviations = []
-    for name, exact_flag in (
+    deviations = _exactness_deviations([
         ("control_drop.chain_level", control_drop["chain_level_exact"]),
         ("control_drop.document_level", control_drop["document_level_exact"]),
         ("treatment_drop.chain_level", treatment_drop["chain_level_exact"]),
@@ -366,9 +481,7 @@ def evaluate(stats_by_mode: dict[str, dict[str, Any]], mode: str) -> dict[str, A
         ("keep_survival.document_level", keep_survival["document_level_exact"]),
         ("drop_difference.chain_level", drop_difference["chain_level_exact"]),
         ("drop_difference.document_level", drop_difference["document_level_exact"]),
-    ):
-        if exact_flag is False:
-            deviations.append(f"{name} p-value is not exact (Monte Carlo fallback) -- protocol section 6.4 deviation")
+    ])
 
     return {
         "verdict": verdict,
@@ -383,6 +496,7 @@ def evaluate(stats_by_mode: dict[str, dict[str, Any]], mode: str) -> dict[str, A
             "C4_drop_difference": c4,
             "C5_grader_and_render_gate_bounds": c5_ok,
             "C6_public_documents_only": c6,
+            "C6_is_hard_gate": True,
         },
         "numbers": {
             "d_documents_at_document_level": d_documents,
@@ -396,6 +510,169 @@ def evaluate(stats_by_mode: dict[str, dict[str, Any]], mode: str) -> dict[str, A
         },
         "deviations": deviations,
     }
+
+
+def _evaluate_headline_basis(stats: dict[str, Any], pub_node: dict[str, Any], ctx: str, pooled: dict[str, Any]) -> dict[str, Any]:
+    """Amendment 1, section 2 (AD-2)'s amended section 7 mapping table: C1-C4
+    evaluated on `confirm_disconfirm.public_documents_only.{chain_level,
+    document_level}` instead of `confirm_disconfirm.pooled`.
+
+    D1-D3 (DISCONFIRMING) are **not** switched, even though the amendment's
+    own mapping table lists them as moving to `public_documents_only`
+    alongside C1-C4: `compute_respec_cascade_statistics.py`'s
+    `public_documents_only` dict (verified directly, see
+    `_headline_public_only_node`) carries `control_drop`,
+    `direct_control_vs_treatment_phase3`, `keep_survival_significance` and
+    `difference_in_drops` only -- there is no `treatment_drop` entry at any
+    level. D2 ("both drops null") and D3 ("treatment_drop at least
+    control_drop") are defined in terms of `treatment_drop` and cannot be
+    computed against the public-only subset at all. Rather than guess a
+    `treatment_drop` value the statistics file does not provide, D1-D3 stay
+    on the pooled basis here; this is a disclosed discrepancy between the
+    amendment's table and the statistics shape the amendment itself verifies
+    in the same section, not an implementation shortcut.
+
+    C5 is unchanged (protocol table: "applied to whichever analysis is
+    primary"). C6 inverts (amendment table): the secondary pooled analysis
+    is checked for the same sign as this headline result and reported as a
+    robustness note, not a hard gate -- it does not enter `confirming`.
+    """
+    control_drop = _extract_headline_measure(pub_node, "control_drop", ctx, _DROP_AND_DIRECT_SIGN)
+    direct = _extract_headline_measure(pub_node, "direct_control_vs_treatment_phase3", ctx, _DROP_AND_DIRECT_SIGN)
+    keep_survival = _extract_headline_measure(pub_node, "keep_survival_significance", ctx, _DROP_AND_DIRECT_SIGN)
+    drop_difference = _extract_headline_drop_difference(pub_node, ctx)
+    c5 = _evaluate_c5(stats, ctx)
+
+    pooled_numbers = pooled["numbers"]
+    pooled_control_drop = pooled_numbers["control_drop"]
+    pooled_treatment_drop = pooled_numbers["treatment_drop"]
+    pooled_direct = pooled_numbers["direct"]
+
+    # --- Step 1: DISCONFIRMING -- pooled basis, per the docstring above. ---
+    d1 = pooled_direct["chain_level_p"] >= ALPHA or pooled_direct["pp"] <= 0
+    d2 = (
+        (pooled_control_drop["chain_level_p"] > 0.10 and pooled_treatment_drop["chain_level_p"] > 0.10)
+        or (pooled_control_drop["pp"] < 10 and pooled_treatment_drop["pp"] < 10)
+    )
+    d3 = pooled_treatment_drop["pp"] >= pooled_control_drop["pp"]
+    disconfirming = d1 or d2 or d3
+
+    sub_label = None
+    if disconfirming:
+        contrary = pooled_direct["pp"] <= 0 or pooled_control_drop["pp"] <= 0 or d3
+        sub_label = "contrary" if contrary else f"not_detected_at_D={pooled_direct.get('document_level_n_clusters')}"
+
+    # --- Step 2: CONFIRMING -- headline (public_documents_only) basis. -----
+    c1, c2, c3, c4 = _c1_to_c4(control_drop, direct, keep_survival, drop_difference)
+    c5_ok = c5["held"]
+
+    # C6 inversion: same sign, pooled (secondary) vs headline (primary).
+    control_drop_same_sign = (pooled_control_drop["pp"] > 0) == (control_drop["pp"] > 0)
+    direct_same_sign = (pooled_direct["pp"] > 0) == (direct["pp"] > 0)
+    c6_same_sign_overall = control_drop_same_sign and direct_same_sign
+
+    confirming = (not disconfirming) and c1 and c2 and c3 and c4 and c5_ok
+
+    if disconfirming:
+        verdict = "DISCONFIRMING"
+    elif confirming:
+        verdict = "CONFIRMING"
+    else:
+        verdict = "INCONCLUSIVE"
+
+    deviations = _exactness_deviations([
+        ("public_documents_only.control_drop.chain_level", control_drop["chain_level_exact"]),
+        ("public_documents_only.control_drop.document_level", control_drop["document_level_exact"]),
+        ("public_documents_only.direct.chain_level", direct["chain_level_exact"]),
+        ("public_documents_only.direct.document_level", direct["document_level_exact"]),
+        ("public_documents_only.keep_survival.chain_level", keep_survival["chain_level_exact"]),
+        ("public_documents_only.keep_survival.document_level", keep_survival["document_level_exact"]),
+        ("public_documents_only.drop_difference.chain_level", drop_difference["chain_level_exact"]),
+        ("public_documents_only.drop_difference.document_level", drop_difference["document_level_exact"]),
+    ])
+
+    return {
+        "verdict": verdict,
+        "sub_label": sub_label,
+        "conditions": {
+            "D1_direct_not_significant_or_non_positive": d1,
+            "D2_both_drops_null": d2,
+            "D3_treatment_drop_at_least_control_drop": d3,
+            "C1_control_drop": c1,
+            "C2_direct": c2,
+            "C3_keep_survival": c3,
+            "C4_drop_difference": c4,
+            "C5_grader_and_render_gate_bounds": c5_ok,
+            "C6_public_documents_only": c6_same_sign_overall,
+            "C6_is_hard_gate": False,
+        },
+        "robustness_note": {
+            "description": (
+                "Amendment 1 section 2, C6 row: public_documents_only is the headline basis, so C6 "
+                "inverts -- the secondary pooled analysis (not the headline) is checked for the same "
+                "sign as the headline result. Informational only: does not affect the verdict."
+            ),
+            "control_drop_same_sign": control_drop_same_sign,
+            "direct_same_sign": direct_same_sign,
+            "same_sign_overall": c6_same_sign_overall,
+            "pooled_control_drop_pp": pooled_control_drop["pp"],
+            "pooled_direct_pp": pooled_direct["pp"],
+            "headline_control_drop_pp": control_drop["pp"],
+            "headline_direct_pp": direct["pp"],
+        },
+        "numbers": {
+            "d_documents_at_document_level": pooled_direct.get("document_level_n_clusters"),
+            "n_public_documents_at_document_level": direct.get("document_level_n_clusters"),
+            "control_drop": control_drop,
+            "direct": direct,
+            "keep_survival": keep_survival,
+            "drop_difference": drop_difference,
+            "c5_detail": c5,
+        },
+        "deviations": deviations,
+    }
+
+
+def evaluate(stats_by_mode: dict[str, dict[str, Any]], mode: str) -> dict[str, Any]:
+    """Amendment 1 (section 2, AD-2) dispatcher: use
+    `confirm_disconfirm.public_documents_only` as the headline basis for
+    C1-C4 when that field carries the amendment's chain_level/document_level
+    shape; otherwise fall back to `confirm_disconfirm.pooled` exactly as
+    before (backward compatible with the D=4 statistics files and this
+    module's pre-amendment tests). The full pooled analysis is always
+    computed -- either as the sole result, or, once the headline shape is
+    present, nested under `numbers.secondary_pooled_analysis` at full
+    completeness (section 2: "reported with the same completeness as
+    before ... as a secondary/sensitivity analysis")."""
+    stats = stats_by_mode[mode]
+    ctx = f"frozen-chain-mode={mode}"
+
+    pooled = _evaluate_pooled_basis(stats, ctx)
+    pub_node = _headline_public_only_node(stats)
+
+    if pub_node is None:
+        result = dict(pooled)
+        result["headline_basis"] = "pooled"
+        result["numbers"] = dict(pooled["numbers"])
+        result["numbers"]["secondary_pooled_analysis"] = None
+        return result
+
+    headline = _evaluate_headline_basis(stats, pub_node, ctx, pooled)
+    headline["headline_basis"] = "public_documents_only"
+    headline["numbers"] = dict(headline["numbers"])
+    headline["numbers"]["secondary_pooled_analysis"] = {
+        "description": (
+            "Amendment 1 section 2 (AD-2): the full pooled confirm_disconfirm analysis, retained at "
+            "full statistical rigor and reported with the same completeness as before, but as a "
+            "secondary/sensitivity analysis -- it governs nothing about the verdict on its own."
+        ),
+        "verdict": pooled["verdict"],
+        "sub_label": pooled["sub_label"],
+        "conditions": pooled["conditions"],
+        "numbers": pooled["numbers"],
+        "deviations": pooled["deviations"],
+    }
+    return headline
 
 
 def robustness_label(stats_by_mode: dict[str, dict[str, Any]], primary_verdict: str) -> tuple[str, dict[str, Any] | None]:
@@ -412,8 +689,14 @@ def robustness_label(stats_by_mode: dict[str, dict[str, Any]], primary_verdict: 
     # protocol's "C1-C4" is a contiguous numeric range that includes C3).
     robust = (
         conds["C1_control_drop"] and conds["C2_direct"] and conds["C3_keep_survival"]
-        and conds["C4_drop_difference"] and conds["C6_public_documents_only"]
+        and conds["C4_drop_difference"]
     )
+    # Amendment 1, section 2's C6 inversion: once public_documents_only is
+    # the headline basis, C6 is a non-gating robustness note (see
+    # `_evaluate_headline_basis`), so it is dropped from this label too --
+    # unchanged (still required) when C6 is still v1's hard gate.
+    if conds.get("C6_is_hard_gate", True):
+        robust = robust and conds["C6_public_documents_only"]
     label = "robust_to_freeze_scoring" if robust else "dependent_on_freeze_scoring"
     return label, alt
 
@@ -439,7 +722,12 @@ def main(argv: list[str] | None = None) -> int:
         "verdict": primary["verdict"],
         "sub_label": primary["sub_label"],
         "freeze_scoring_robustness_label": label,
+        # Amendment 1, section 2 (AD-2): which analysis supplied C1-C4 for
+        # this run -- "public_documents_only" (headline) or "pooled"
+        # (fallback, v1 as locked / the D=4 statistics files).
+        "headline_basis": primary.get("headline_basis"),
         "conditions": primary["conditions"],
+        "robustness_note": primary.get("robustness_note"),
         "numbers": primary["numbers"],
         "deviations": primary["deviations"],
         "robustness_alt_mode_conditions": alt["conditions"] if alt else None,

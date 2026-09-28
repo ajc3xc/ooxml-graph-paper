@@ -41,6 +41,58 @@ def _measure(chain_diff, chain_p, doc_diff, doc_p, exact=True):
     }
 
 
+def _public_documents_only_headline(
+    *,
+    control_drop=None,
+    direct=None,
+    keep_survival=None,
+    drop_difference=None,
+    public_documents=("s25pub_aaa000", "s25pub_bbb111"),
+):
+    """Amendment 1 (`docs/paper-s25-respec-cascade-rerun-protocol-v1-amendment-1.md`,
+    section 2, AD-2)'s shape for `confirm_disconfirm.public_documents_only`,
+    verified there against `compute_respec_cascade_statistics.py`'s
+    `compute_respec_cascade_tiers` (the `if public_doc_labels:` block): flat
+    `control_drop`/`direct_control_vs_treatment_phase3`/
+    `keep_survival_significance` (as-run Monte Carlo, kept for continuity --
+    what pre-amendment `_extract_public_only` reads) PLUS `chain_level` and
+    `document_level` siblings, each holding all three measures, PLUS
+    `difference_in_drops` in the same `{chain_level, document_level,
+    drop_difference_pp}` shape as the pooled `confirm_disconfirm.
+    difference_in_drops`. Defaults are confirming-shaped and agree in sign
+    and (deliberately) exact value with `_full_stats`'s own defaults, so a
+    test that uses both untouched exercises "headline present, same
+    everything" cleanly; individual tests override just the piece(s) they
+    need."""
+    control_drop = control_drop if control_drop is not None else _measure(-0.15, 0.01, -0.15, 0.02)
+    direct = direct if direct is not None else _measure(-0.20, 0.01, -0.20, 0.02)
+    keep_survival = keep_survival if keep_survival is not None else _measure(-0.10, 0.01, -0.10, 0.02)
+    drop_difference = drop_difference if drop_difference is not None else _measure(0.13, 0.01, 0.13, 0.02)
+    return {
+        "note": "protocol section 6.7; amendment 1 section 2 (AD-2)",
+        "public_documents": list(public_documents),
+        "n_public_documents": len(public_documents),
+        "control_drop": {"observed_mean_diff": control_drop["chain_level"]["observed_mean_diff"]},
+        "direct_control_vs_treatment_phase3": {"observed_mean_diff": direct["chain_level"]["observed_mean_diff"]},
+        "keep_survival_significance": {"observed_mean_diff": keep_survival["chain_level"]["observed_mean_diff"]},
+        "chain_level": {
+            "control_drop": control_drop["chain_level"],
+            "direct_control_vs_treatment_phase3": direct["chain_level"],
+            "keep_survival_significance": keep_survival["chain_level"],
+        },
+        "document_level": {
+            "control_drop": control_drop["document_level"],
+            "direct_control_vs_treatment_phase3": direct["document_level"],
+            "keep_survival_significance": keep_survival["document_level"],
+        },
+        "difference_in_drops": {
+            "chain_level": drop_difference["chain_level"],
+            "document_level": drop_difference["document_level"],
+            "drop_difference_pp": 100.0 * drop_difference["chain_level"]["observed_mean_diff"],
+        },
+    }
+
+
 def _full_stats(
     mode,
     *,
@@ -53,6 +105,7 @@ def _full_stats(
     keep_survival_document=None,
     public_control_drop_diff=-0.05,
     public_direct_diff=-0.05,
+    public_documents_only_override=None,
     render_gate_timeouts=None,
     unregradable=None,
 ):
@@ -88,10 +141,14 @@ def _full_stats(
             },
             "keep_survival_significance_chain_level": keep_survival_chain,
             "keep_survival_significance_document_level": keep_survival_document,
-            "public_documents_only": {
-                "control_drop": {"observed_mean_diff": public_control_drop_diff},
-                "direct_control_vs_treatment_phase3": {"observed_mean_diff": public_direct_diff},
-            },
+            "public_documents_only": (
+                public_documents_only_override
+                if public_documents_only_override is not None
+                else {
+                    "control_drop": {"observed_mean_diff": public_control_drop_diff},
+                    "direct_control_vs_treatment_phase3": {"observed_mean_diff": public_direct_diff},
+                }
+            ),
         },
     }
     if unregradable is not None:
@@ -335,6 +392,138 @@ def test_non_exact_p_value_is_reported_as_a_deviation_not_a_failure(tmp_path):
     report = json.loads(out.read_text(encoding="utf-8"))
     assert report["verdict"] == "CONFIRMING"
     assert any("control_drop" in d for d in report["deviations"])
+
+
+# ---------------------------------------------------------------------------
+# Amendment 1 (docs/paper-s25-respec-cascade-rerun-protocol-v1-amendment-1.md,
+# section 2, AD-2): confirm_disconfirm.public_documents_only becomes the
+# headline basis for C1-C4 once it carries the chain_level/document_level
+# shape; falls back to the pooled basis otherwise; C6 inverts into a
+# non-gating robustness note; the pooled analysis is reported in full as a
+# secondary/sensitivity block.
+# ---------------------------------------------------------------------------
+
+def test_pooled_basis_used_and_no_secondary_block_when_headline_shape_absent(tmp_path):
+    """Backward compatibility (item 2 of the amendment task): a statistics
+    file whose public_documents_only lacks the chain_level/document_level
+    shape -- exactly today's other fixtures in this file, and the real D=4
+    statistics files, which predate prerequisite P-R4 -- must verify/print
+    exactly as before this amendment: pooled basis, no secondary block, C6
+    still a hard gate."""
+    stats_dir = tmp_path / "statistics"
+    stats_dir.mkdir()
+    primary = _full_stats("fail_graded_prefreeze")  # legacy flat public_documents_only (no chain_level/document_level)
+    _write_all_modes(stats_dir, primary, _full_stats("exclude"))
+    out = tmp_path / "verdict.json"
+
+    assert v.main(["--statistics-dir", str(stats_dir), "--out", str(out)]) == 0
+
+    report = json.loads(out.read_text(encoding="utf-8"))
+    assert report["headline_basis"] == "pooled"
+    assert report["numbers"]["secondary_pooled_analysis"] is None
+    assert report["robustness_note"] is None
+    assert report["verdict"] == "CONFIRMING"
+    assert report["conditions"]["C6_public_documents_only"] is True
+    assert report["conditions"]["C6_is_hard_gate"] is True
+
+
+def test_headline_public_documents_only_governs_verdict_when_present(tmp_path):
+    """Amendment section 2: once public_documents_only carries the
+    chain_level/document_level shape, C1-C4 come from it, not from
+    confirm_disconfirm.pooled -- even when the pooled numbers alone (still
+    fully computed and reported as the secondary/sensitivity analysis) would
+    themselves be CONFIRMING. Here the headline's control_drop_pp (3pp) is
+    too small for C1, while the pooled control_drop_pp (15pp, _full_stats's
+    default) is not."""
+    stats_dir = tmp_path / "statistics"
+    stats_dir.mkdir()
+    headline = _public_documents_only_headline(control_drop=_measure(-0.03, 0.01, -0.03, 0.02))
+    primary = _full_stats("fail_graded_prefreeze", public_documents_only_override=headline)
+    _write_all_modes(stats_dir, primary)
+    out = tmp_path / "verdict.json"
+
+    assert v.main(["--statistics-dir", str(stats_dir), "--out", str(out)]) == 0
+
+    report = json.loads(out.read_text(encoding="utf-8"))
+    assert report["headline_basis"] == "public_documents_only"
+    assert report["verdict"] == "INCONCLUSIVE"
+    assert report["conditions"]["C1_control_drop"] is False
+    assert report["numbers"]["control_drop"]["pp"] == pytest.approx(3.0)
+
+    secondary = report["numbers"]["secondary_pooled_analysis"]
+    assert secondary is not None
+    assert secondary["verdict"] == "CONFIRMING"
+    assert secondary["conditions"]["C1_control_drop"] is True
+    assert secondary["numbers"]["control_drop"]["pp"] == pytest.approx(15.0)
+
+
+def test_c6_robustness_note_same_sign_when_pooled_and_headline_agree(tmp_path):
+    stats_dir = tmp_path / "statistics"
+    stats_dir.mkdir()
+    # Defaults agree in sign (and value) between pooled and headline.
+    headline = _public_documents_only_headline()
+    primary = _full_stats("fail_graded_prefreeze", public_documents_only_override=headline)
+    exclude = _full_stats("exclude", public_documents_only_override=headline)  # also CONFIRMING-shaped
+    _write_all_modes(stats_dir, primary, exclude)
+    out = tmp_path / "verdict.json"
+
+    assert v.main(["--statistics-dir", str(stats_dir), "--out", str(out)]) == 0
+
+    report = json.loads(out.read_text(encoding="utf-8"))
+    assert report["headline_basis"] == "public_documents_only"
+    assert report["verdict"] == "CONFIRMING"
+    note = report["robustness_note"]
+    assert note["control_drop_same_sign"] is True
+    assert note["direct_same_sign"] is True
+    assert note["same_sign_overall"] is True
+    assert report["conditions"]["C6_is_hard_gate"] is False
+
+
+def test_c6_robustness_note_flags_opposite_sign_between_pooled_and_headline(tmp_path):
+    stats_dir = tmp_path / "statistics"
+    stats_dir.mkdir()
+    # Headline (public-only) direct effect points the confirming way, but
+    # the pooled secondary analysis's direct effect points the opposite way
+    # (observed_mean_diff positive -> direct_pp <= 0).
+    headline = _public_documents_only_headline()
+    primary = _full_stats(
+        "fail_graded_prefreeze",
+        direct=_measure(0.10, 0.01, 0.10, 0.02),
+        public_documents_only_override=headline,
+    )
+    _write_all_modes(stats_dir, primary)
+    out = tmp_path / "verdict.json"
+
+    assert v.main(["--statistics-dir", str(stats_dir), "--out", str(out)]) == 0
+
+    report = json.loads(out.read_text(encoding="utf-8"))
+    assert report["headline_basis"] == "public_documents_only"
+    note = report["robustness_note"]
+    assert note["direct_same_sign"] is False
+    assert note["same_sign_overall"] is False
+    # A contrary pooled signal still drives the pooled-gated D1-D3 verdict.
+    assert report["verdict"] == "DISCONFIRMING"
+    assert report["sub_label"] == "contrary"
+
+
+def test_freeze_scoring_robustness_label_ignores_c6_in_headline_mode(tmp_path):
+    """robustness_label() must not treat C6 as a gate once it has been
+    demoted to a robustness note (amendment section 2) -- otherwise a
+    CONFIRMING, fully robust run would be mislabelled dependent_on_freeze_
+    scoring merely because C6 is no longer a plain boolean gate."""
+    stats_dir = tmp_path / "statistics"
+    stats_dir.mkdir()
+    headline = _public_documents_only_headline()
+    primary = _full_stats("fail_graded_prefreeze", public_documents_only_override=headline)
+    exclude = _full_stats("exclude", public_documents_only_override=headline)  # also satisfies C1-C4
+    _write_all_modes(stats_dir, primary, exclude)
+    out = tmp_path / "verdict.json"
+
+    assert v.main(["--statistics-dir", str(stats_dir), "--out", str(out)]) == 0
+
+    report = json.loads(out.read_text(encoding="utf-8"))
+    assert report["verdict"] == "CONFIRMING"
+    assert report["freeze_scoring_robustness_label"] == "robust_to_freeze_scoring"
 
 
 if __name__ == "__main__":

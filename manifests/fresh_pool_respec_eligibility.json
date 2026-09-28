@@ -154,6 +154,28 @@
 "single_section_reorder_reason": null
 },
 {
+"id": "018370",
+"sha256": "d41910fdcf5b395071c4403a595f4274af0bc3b5d31853ffcc8949633906e4b4",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\d41910fdcf5b395071c4403a595f4274af0bc3b5d31853ffcc8949633906e4b4.docx",
+"size": 30723,
+"paragraphs": 102,
+"headings": 14,
+"omath": 0,
+"tbl": 0,
+"pool_sizes": {
+"citation": 4,
+"equation": 4,
+"caption": 4,
+"table": 4
+},
+"attempted_anchor_sets": 3,
+"five_family_usable": 2,
+"six_family_usable": 2,
+"single_section_reorder_plan_found": true,
+"single_section_reorder_reason": null
+},
+{
 "id": "01e6bdde7a87bc18bd8a84b9d837b1faab9ea39d0f054fa2223ac0343e4bf1d0",
 "sha256": "797a7c03efd72d262e2b4f691ea7d9122056614f51ed90112f00717220bea2a2",
 "batch": "batch-2-v1",
@@ -1021,6 +1043,28 @@
 "headings": 34,
 "omath": 0,
 "tbl": 0,
+"pool_sizes": {
+"citation": 4,
+"equation": 4,
+"caption": 4,
+"table": 4
+},
+"attempted_anchor_sets": 4,
+"five_family_usable": 4,
+"six_family_usable": 4,
+"single_section_reorder_plan_found": true,
+"single_section_reorder_reason": null
+},
+{
+"id": "116733",
+"sha256": "a823c29a18818e8bf2ec9218c1f2001403fa597686be95360162cff7d715f77d",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\a823c29a18818e8bf2ec9218c1f2001403fa597686be95360162cff7d715f77d.docx",
+"size": 137132,
+"paragraphs": 2338,
+"headings": 172,
+"omath": 0,
+"tbl": 13,
 "pool_sizes": {
 "citation": 4,
 "equation": 4,
@@ -2244,6 +2288,50 @@
 "single_section_reorder_reason": null
 },
 {
+"id": "223624",
+"sha256": "c9ab2c48fd61ae0a540a75300919121660cbea55bc76fc32cfa8f0b51a159a8c",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\c9ab2c48fd61ae0a540a75300919121660cbea55bc76fc32cfa8f0b51a159a8c.docx",
+"size": 2013673,
+"paragraphs": 648,
+"headings": 62,
+"omath": 0,
+"tbl": 1,
+"pool_sizes": {
+"citation": 4,
+"equation": 4,
+"caption": 4,
+"table": 4
+},
+"attempted_anchor_sets": 4,
+"five_family_usable": 4,
+"six_family_usable": 4,
+"single_section_reorder_plan_found": true,
+"single_section_reorder_reason": null
+},
+{
+"id": "224039",
+"sha256": "2bdfeea80fa7f37f308ecc99d36f349bfa4230c18a92a1332f648b02a5323966",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\2bdfeea80fa7f37f308ecc99d36f349bfa4230c18a92a1332f648b02a5323966.docx",
+"size": 26993,
+"paragraphs": 39,
+"headings": 4,
+"omath": 0,
+"tbl": 1,
+"pool_sizes": {
+"citation": 4,
+"equation": 4,
+"caption": 4,
+"table": 4
+},
+"attempted_anchor_sets": 1,
+"five_family_usable": 0,
+"six_family_usable": 0,
+"single_section_reorder_plan_found": true,
+"single_section_reorder_reason": null
+},
+{
 "id": "2255be1506b9191160a8251ecfbcf0f91906e734b5b301daa9b70deeb9569c15",
 "sha256": "dee5edf770cc07600e7c0645375b022ff6474a4bfaf8f32fa5bf34fb68ee768b",
 "batch": "batch-2-v1",
@@ -2592,6 +2680,28 @@
 "attempted_anchor_sets": 0,
 "five_family_usable": 0,
 "six_family_usable": 0,
+"single_section_reorder_plan_found": true,
+"single_section_reorder_reason": null
+},
+{
+"id": "265803",
+"sha256": "91f93442431d9f3210df83e369a050fb0189b421a1633a0f9565632189b76b97",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\91f93442431d9f3210df83e369a050fb0189b421a1633a0f9565632189b76b97.docx",
+"size": 3462131,
+"paragraphs": 132,
+"headings": 13,
+"omath": 0,
+"tbl": 0,
+"pool_sizes": {
+"citation": 4,
+"equation": 4,
+"caption": 4,
+"table": 4
+},
+"attempted_anchor_sets": 3,
+"five_family_usable": 3,
+"six_family_usable": 3,
 "single_section_reorder_plan_found": true,
 "single_section_reorder_reason": null
 },
@@ -3740,6 +3850,28 @@
 "single_section_reorder_reason": null
 },
 {
+"id": "372437",
+"sha256": "6d026688066e39fe2f7466a92f7179cf245004299b71a6137a7d2221e38e00db",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\6d026688066e39fe2f7466a92f7179cf245004299b71a6137a7d2221e38e00db.docx",
+"size": 764550,
+"paragraphs": 248,
+"headings": 6,
+"omath": 0,
+"tbl": 3,
+"pool_sizes": {
+"citation": 4,
+"equation": 4,
+"caption": 4,
+"table": 4
+},
+"attempted_anchor_sets": 2,
+"five_family_usable": 2,
+"six_family_usable": 2,
+"single_section_reorder_plan_found": true,
+"single_section_reorder_reason": null
+},
+{
 "id": "372914701bfd9289abf3eb4296145ec311aab904d549cece12e964c8d44600f2",
 "sha256": "64dc5febe115b62c2c9c952647e559c26f778fc600a0475d594448039481b1d5",
 "batch": "batch-3-v1",
@@ -3824,6 +3956,28 @@
 "attempted_anchor_sets": 2,
 "five_family_usable": 2,
 "six_family_usable": 2,
+"single_section_reorder_plan_found": true,
+"single_section_reorder_reason": null
+},
+{
+"id": "380433",
+"sha256": "f889dc30dd463ccaf9fd79a03fe39f98fecf50636d8b101a998074020972b4ea",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\f889dc30dd463ccaf9fd79a03fe39f98fecf50636d8b101a998074020972b4ea.docx",
+"size": 216615,
+"paragraphs": 351,
+"headings": 23,
+"omath": 0,
+"tbl": 3,
+"pool_sizes": {
+"citation": 4,
+"equation": 4,
+"caption": 4,
+"table": 4
+},
+"attempted_anchor_sets": 4,
+"five_family_usable": 4,
+"six_family_usable": 4,
 "single_section_reorder_plan_found": true,
 "single_section_reorder_reason": null
 },
@@ -4246,6 +4400,28 @@
 "single_section_reorder_reason": null
 },
 {
+"id": "406729",
+"sha256": "32893fd46ee9b4d9569acd389eb78cd072020bf5ee1a5aa50703deabe8e06bd9",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\32893fd46ee9b4d9569acd389eb78cd072020bf5ee1a5aa50703deabe8e06bd9.docx",
+"size": 162597,
+"paragraphs": 241,
+"headings": 80,
+"omath": 0,
+"tbl": 44,
+"pool_sizes": {
+"citation": 4,
+"equation": 4,
+"caption": 4,
+"table": 4
+},
+"attempted_anchor_sets": 4,
+"five_family_usable": 4,
+"six_family_usable": 4,
+"single_section_reorder_plan_found": true,
+"single_section_reorder_reason": null
+},
+{
 "id": "4149bdb4a12581b0a18a0b599cb552bdf3f08b37fa1c98ddac7dd060692ade20",
 "sha256": "acec7bb004df3b30e8982b066cdbff9352e0a5b742f577b3d07c32513596c55f",
 "batch": "batch-500-v1",
@@ -4282,6 +4458,28 @@
 "equation": 4,
 "caption": 4,
 "table": 2
+},
+"attempted_anchor_sets": 1,
+"five_family_usable": 0,
+"six_family_usable": 0,
+"single_section_reorder_plan_found": true,
+"single_section_reorder_reason": null
+},
+{
+"id": "426080",
+"sha256": "46c166c88ee5d6c5097cd903a76e1aa3b67050d6e48fb37f98e91e191658535f",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\46c166c88ee5d6c5097cd903a76e1aa3b67050d6e48fb37f98e91e191658535f.docx",
+"size": 814810,
+"paragraphs": 105,
+"headings": 4,
+"omath": 0,
+"tbl": 0,
+"pool_sizes": {
+"citation": 4,
+"equation": 4,
+"caption": 4,
+"table": 4
 },
 "attempted_anchor_sets": 1,
 "five_family_usable": 0,
@@ -4356,6 +4554,28 @@
 "single_section_reorder_reason": null
 },
 {
+"id": "432556",
+"sha256": "bace82b1f1a9ca65cfb83e7d4c82907234578eddd0c36e017315fad5876e721e",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\bace82b1f1a9ca65cfb83e7d4c82907234578eddd0c36e017315fad5876e721e.docx",
+"size": 24998,
+"paragraphs": 118,
+"headings": 16,
+"omath": 0,
+"tbl": 0,
+"pool_sizes": {
+"citation": 4,
+"equation": 4,
+"caption": 4,
+"table": 4
+},
+"attempted_anchor_sets": 4,
+"five_family_usable": 4,
+"six_family_usable": 4,
+"single_section_reorder_plan_found": true,
+"single_section_reorder_reason": null
+},
+{
 "id": "432611273dffdece88d2ee9c72f270efa5530374af6d5993cf4e63a705199d8d",
 "sha256": "de4446f21225ffcec863d24522cb62bfe2d9355d0a7c7750550bf0c438736a6a",
 "batch": "batch-2-v1",
@@ -4365,6 +4585,28 @@
 "headings": 8,
 "omath": 0,
 "tbl": 0,
+"pool_sizes": {
+"citation": 4,
+"equation": 4,
+"caption": 4,
+"table": 4
+},
+"attempted_anchor_sets": 2,
+"five_family_usable": 2,
+"six_family_usable": 2,
+"single_section_reorder_plan_found": true,
+"single_section_reorder_reason": null
+},
+{
+"id": "435413",
+"sha256": "f103e5362dbcacf475249a0774552d349b60565eb1a6b69800dc2e6c2ed2cb36",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\f103e5362dbcacf475249a0774552d349b60565eb1a6b69800dc2e6c2ed2cb36.docx",
+"size": 176603,
+"paragraphs": 42,
+"headings": 10,
+"omath": 0,
+"tbl": 1,
 "pool_sizes": {
 "citation": 4,
 "equation": 4,
@@ -4418,6 +4660,28 @@
 "attempted_anchor_sets": 3,
 "five_family_usable": 3,
 "six_family_usable": 3,
+"single_section_reorder_plan_found": true,
+"single_section_reorder_reason": null
+},
+{
+"id": "448024",
+"sha256": "856dd03f69609179f0906ff8c1ae3dadb3fa7c0f3f539b3fd2fdb6866fcf846c",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\856dd03f69609179f0906ff8c1ae3dadb3fa7c0f3f539b3fd2fdb6866fcf846c.docx",
+"size": 2328039,
+"paragraphs": 1639,
+"headings": 269,
+"omath": 6,
+"tbl": 15,
+"pool_sizes": {
+"citation": 4,
+"equation": 4,
+"caption": 4,
+"table": 4
+},
+"attempted_anchor_sets": 4,
+"five_family_usable": 4,
+"six_family_usable": 4,
 "single_section_reorder_plan_found": true,
 "single_section_reorder_reason": null
 },
@@ -4594,6 +4858,28 @@
 "attempted_anchor_sets": 0,
 "five_family_usable": 0,
 "six_family_usable": 0,
+"single_section_reorder_plan_found": true,
+"single_section_reorder_reason": null
+},
+{
+"id": "470116",
+"sha256": "a29ba233d91ef4fe6b5a8d879bac2db0be7528abf7775d31ae74eec3cf4dfa96",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\a29ba233d91ef4fe6b5a8d879bac2db0be7528abf7775d31ae74eec3cf4dfa96.docx",
+"size": 287030,
+"paragraphs": 1425,
+"headings": 59,
+"omath": 0,
+"tbl": 44,
+"pool_sizes": {
+"citation": 4,
+"equation": 4,
+"caption": 4,
+"table": 4
+},
+"attempted_anchor_sets": 4,
+"five_family_usable": 4,
+"six_family_usable": 4,
 "single_section_reorder_plan_found": true,
 "single_section_reorder_reason": null
 },
@@ -4781,6 +5067,28 @@
 "size": 10394,
 "paragraphs": 26,
 "headings": 6,
+"omath": 0,
+"tbl": 0,
+"pool_sizes": {
+"citation": 4,
+"equation": 4,
+"caption": 4,
+"table": 4
+},
+"attempted_anchor_sets": 2,
+"five_family_usable": 2,
+"six_family_usable": 2,
+"single_section_reorder_plan_found": true,
+"single_section_reorder_reason": null
+},
+{
+"id": "485509",
+"sha256": "49fe1b989595a96577690ea8688d4d502aee08989bee5c0d6f5caa7b89d2fb44",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\49fe1b989595a96577690ea8688d4d502aee08989bee5c0d6f5caa7b89d2fb44.docx",
+"size": 31638,
+"paragraphs": 60,
+"headings": 7,
 "omath": 0,
 "tbl": 0,
 "pool_sizes": {
@@ -5412,6 +5720,28 @@
 "single_section_reorder_reason": null
 },
 {
+"id": "509883",
+"sha256": "7eac834496014f75a45907553915fd2dd3fad8b57cec42407f2fc22e8400cc73",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\7eac834496014f75a45907553915fd2dd3fad8b57cec42407f2fc22e8400cc73.docx",
+"size": 221858,
+"paragraphs": 287,
+"headings": 16,
+"omath": 0,
+"tbl": 4,
+"pool_sizes": {
+"citation": 4,
+"equation": 4,
+"caption": 4,
+"table": 4
+},
+"attempted_anchor_sets": 4,
+"five_family_usable": 3,
+"six_family_usable": 3,
+"single_section_reorder_plan_found": true,
+"single_section_reorder_reason": null
+},
+{
 "id": "509d3cf42a2f83c5ce52b4e1e9e8a6146b4d3f954a57a2cf7e66015cbe973609",
 "sha256": "57ecb4a65a495e7f69e48480304385782c4518bb22714f0b876645623957834d",
 "batch": "batch-2-v1",
@@ -5474,6 +5804,28 @@
 "attempted_anchor_sets": 4,
 "five_family_usable": 3,
 "six_family_usable": 3,
+"single_section_reorder_plan_found": true,
+"single_section_reorder_reason": null
+},
+{
+"id": "516411",
+"sha256": "a76957e04560eeb002a1e9b774dda1f8972aebe538611b2931b80688e2934d5b",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\a76957e04560eeb002a1e9b774dda1f8972aebe538611b2931b80688e2934d5b.docx",
+"size": 25736,
+"paragraphs": 51,
+"headings": 19,
+"omath": 0,
+"tbl": 0,
+"pool_sizes": {
+"citation": 4,
+"equation": 4,
+"caption": 4,
+"table": 4
+},
+"attempted_anchor_sets": 4,
+"five_family_usable": 4,
+"six_family_usable": 4,
 "single_section_reorder_plan_found": true,
 "single_section_reorder_reason": null
 },
@@ -5544,6 +5896,28 @@
 "single_section_reorder_reason": null
 },
 {
+"id": "533917",
+"sha256": "ab86956bc510f721e19e65b6aac3eb2c87aa50fff2d81c704fffc8edf6f1cca7",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\ab86956bc510f721e19e65b6aac3eb2c87aa50fff2d81c704fffc8edf6f1cca7.docx",
+"size": 35044,
+"paragraphs": 45,
+"headings": 11,
+"omath": 3,
+"tbl": 0,
+"pool_sizes": {
+"citation": 4,
+"equation": 4,
+"caption": 4,
+"table": 4
+},
+"attempted_anchor_sets": 3,
+"five_family_usable": 3,
+"six_family_usable": 3,
+"single_section_reorder_plan_found": true,
+"single_section_reorder_reason": null
+},
+{
 "id": "537e1e92cb78c131d025d1d94b62d4b310f47a44497ea1b862639553aa6118e2",
 "sha256": "bcfc87c64739cd2060a50950ebf765da19965547617a21a7e098f5cc9b8965d5",
 "batch": "batch-2-v1",
@@ -5606,6 +5980,28 @@
 "attempted_anchor_sets": 2,
 "five_family_usable": 2,
 "six_family_usable": 2,
+"single_section_reorder_plan_found": true,
+"single_section_reorder_reason": null
+},
+{
+"id": "554301",
+"sha256": "bd2959a8da8ec4017c61b45c0998875405447a121a75def6b91d4daf447a5f13",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\bd2959a8da8ec4017c61b45c0998875405447a121a75def6b91d4daf447a5f13.docx",
+"size": 204456,
+"paragraphs": 1179,
+"headings": 4,
+"omath": 0,
+"tbl": 0,
+"pool_sizes": {
+"citation": 4,
+"equation": 4,
+"caption": 4,
+"table": 4
+},
+"attempted_anchor_sets": 1,
+"five_family_usable": 1,
+"six_family_usable": 1,
 "single_section_reorder_plan_found": true,
 "single_section_reorder_reason": null
 },
@@ -6270,6 +6666,50 @@
 "single_section_reorder_reason": null
 },
 {
+"id": "612851",
+"sha256": "f16960333fec062381311c19bbdf0830afe52375fbf906e3a3ad17f13e5cc64d",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\f16960333fec062381311c19bbdf0830afe52375fbf906e3a3ad17f13e5cc64d.docx",
+"size": 53353,
+"paragraphs": 298,
+"headings": 9,
+"omath": 0,
+"tbl": 4,
+"pool_sizes": {
+"citation": 4,
+"equation": 4,
+"caption": 4,
+"table": 4
+},
+"attempted_anchor_sets": 2,
+"five_family_usable": 2,
+"six_family_usable": 2,
+"single_section_reorder_plan_found": true,
+"single_section_reorder_reason": null
+},
+{
+"id": "617794",
+"sha256": "add877c9b4e5724c5f67b578584867638868953f2720d64101bab329994a554e",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\add877c9b4e5724c5f67b578584867638868953f2720d64101bab329994a554e.docx",
+"size": 132318,
+"paragraphs": 79,
+"headings": 6,
+"omath": 0,
+"tbl": 6,
+"pool_sizes": {
+"citation": 4,
+"equation": 4,
+"caption": 4,
+"table": 4
+},
+"attempted_anchor_sets": 2,
+"five_family_usable": 2,
+"six_family_usable": 2,
+"single_section_reorder_plan_found": true,
+"single_section_reorder_reason": null
+},
+{
 "id": "6195c4748b12d7d6eed279c8eb21c9e1d49d924e1134c2a4c639170b379a59b8",
 "sha256": "38a7ee1dc52967ef32efde54b60fa7d0977604b314cd49cc6a9fff80e0e80a52",
 "batch": "batch-2-v1",
@@ -6464,6 +6904,28 @@
 "attempted_anchor_sets": 4,
 "five_family_usable": 4,
 "six_family_usable": 4,
+"single_section_reorder_plan_found": true,
+"single_section_reorder_reason": null
+},
+{
+"id": "648893",
+"sha256": "a505a7118cf339507b9368262d430d1cb849ee925ada31d362ce068ebbaa60b8",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\a505a7118cf339507b9368262d430d1cb849ee925ada31d362ce068ebbaa60b8.docx",
+"size": 26742,
+"paragraphs": 15,
+"headings": 5,
+"omath": 0,
+"tbl": 0,
+"pool_sizes": {
+"citation": 4,
+"equation": 4,
+"caption": 0,
+"table": 0
+},
+"attempted_anchor_sets": 0,
+"five_family_usable": 0,
+"six_family_usable": 0,
 "single_section_reorder_plan_found": true,
 "single_section_reorder_reason": null
 },
@@ -9060,6 +9522,28 @@
 "attempted_anchor_sets": 2,
 "five_family_usable": 2,
 "six_family_usable": 2,
+"single_section_reorder_plan_found": true,
+"single_section_reorder_reason": null
+},
+{
+"id": "883596",
+"sha256": "7683d6a936ccf70e043b427dda7b84f8a4a06ccd4cf7fedde7a8b260e6f3ff07",
+"batch": "govdocs1-batch-v1",
+"path": "D:\\MeridianData\\ooxml-graph-paper\\raw\\docx-corpus\\govdocs1-batch-v1\\7683d6a936ccf70e043b427dda7b84f8a4a06ccd4cf7fedde7a8b260e6f3ff07.docx",
+"size": 255885,
+"paragraphs": 346,
+"headings": 87,
+"omath": 0,
+"tbl": 70,
+"pool_sizes": {
+"citation": 4,
+"equation": 4,
+"caption": 4,
+"table": 4
+},
+"attempted_anchor_sets": 4,
+"five_family_usable": 4,
+"six_family_usable": 4,
 "single_section_reorder_plan_found": true,
 "single_section_reorder_reason": null
 },
